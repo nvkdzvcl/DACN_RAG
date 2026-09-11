@@ -14,5 +14,6 @@
 - [x] Xây RAG query có citation và từ chối khi thiếu bằng chứng.
 - [x] Phân tích cảm xúc tối thiểu và tự động tạo handoff ticket.
 - [x] Order Tool có kiểm tra quyền truy cập theo khách hàng.
+- [x] Dữ liệu demo đơn hàng và endpoint seed/reset tối thiểu.
 - [ ] Xây order tool và handoff.
 - [ ] Xây widget và inbox.
