@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.models.support import Conversation, Customer, Message, Order, Ticket
 from app.schemas.conversation import ConversationCreate, ConversationResponse, MessageCreate
 from app.services.handoff_service import classify_message
+from app.services.order_service import extract_order_id, lookup_order
 
 router = APIRouter(prefix="/api/v1")
 
@@ -22,13 +23,19 @@ def add_message(conversation_id: str, payload: MessageCreate, db: Session = Depe
         raise HTTPException(status_code=404, detail="Conversation not found")
     message = Message(id=str(uuid4()), conversation_id=conversation_id, sender_type="customer", content=payload.content, external_message_id=payload.external_message_id)
     sentiment, needs_handoff = classify_message(payload.content)
+    order_id = extract_order_id(payload.content)
+    order_result = None
+    if order_id:
+        order_result = lookup_order(db, order_id, conversation.customer_id)
+        if not order_result["found"]:
+            needs_handoff = True
     db.add(message)
     if needs_handoff:
         conversation.status = "handoff_requested"
         conversation.priority = "high"
         db.add(Ticket(id=str(uuid4()), conversation_id=conversation_id, priority="high", summary="Tự động chuyển nhân viên: " + payload.content[:500]))
     db.commit()
-    return {"message_id": message.id, "conversation_id": conversation_id, "status": "handoff_requested" if needs_handoff else "received", "sentiment": sentiment, "needs_handoff": needs_handoff}
+    return {"message_id": message.id, "conversation_id": conversation_id, "status": "handoff_requested" if needs_handoff else "received", "sentiment": sentiment, "needs_handoff": needs_handoff, "order_lookup": order_result}
 
 @router.post("/conversations/{conversation_id}/tickets")
 def create_ticket(conversation_id: str, db: Session = Depends(get_db)):

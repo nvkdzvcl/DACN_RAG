@@ -1,5 +1,12 @@
 from sqlalchemy.orm import Session
 from app.models.support import Order
+import re
+
+ORDER_PATTERN = re.compile(r"\b(?:DH|ORD)[-_]?[A-Z0-9]{4,}\b", re.IGNORECASE)
+
+def extract_order_id(content: str) -> str | None:
+    match = ORDER_PATTERN.search(content)
+    return match.group(0).upper() if match else None
 
 def lookup_order(db: Session, order_id: str, customer_id: str) -> dict:
     order = db.get(Order, order_id)
