@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.api.inbox import conversation_detail, list_conversations
+from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, AgentMessageCreate
 from app.db.session import Base
 from app.models.support import Conversation, Customer, Message, Ticket
 
@@ -50,6 +50,16 @@ class InboxTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             conversation_detail('missing', self.db)
         self.assertEqual(error.exception.status_code, 404)
+
+    def test_accept_and_agent_reply(self):
+        accepted = accept_conversation('first', 'agent-1', self.db)
+        self.assertEqual(accepted['status'], 'assigned')
+        self.assertEqual(accepted['ticket_ids'], ['ticket'])
+        reply = add_agent_message('first', AgentMessageCreate(content='Đã kiểm tra, tôi sẽ hỗ trợ ngay.', agent_id='agent-1'), self.db)
+        self.assertEqual(reply['sender_type'], 'agent')
+        with self.assertRaises(HTTPException) as error:
+            add_agent_message('second', AgentMessageCreate(content='Không được gửi trước khi nhận.', agent_id='agent-1'), self.db)
+        self.assertEqual(error.exception.status_code, 409)
 
 
 if __name__ == '__main__':

@@ -27,7 +27,10 @@
 - [x] Lọc trạng thái/ưu tiên, tìm khách hàng/kênh và làm mới danh sách.
 - [x] Trạng thái tải/lỗi/rỗng và thử lại; hủy request cũ khi chuyển hội thoại; bỏ dữ liệu mẫu tự động.
 - [x] Proxy Vite cho backend local; sửa HTTP 404; kiểm tra backend và giao diện desktop/mobile.
-- [ ] Tiếp theo: xác thực/phân quyền nhân viên, tiếp nhận ticket và gửi tin nhắn nhân viên; AI dừng khi người thật tiếp quản.
+- [x] API tiếp nhận conversation: đổi trạng thái handoff sang `assigned`, cập nhật ticket mở sang `assigned`.
+- [x] API trả lời nhân viên: chỉ cho gửi khi conversation đã `assigned`; lưu `sender_type=agent`.
+- [x] Test luồng tiếp nhận, trả lời và chặn trả lời trước khi tiếp nhận.
+- [ ] Tiếp theo: nối hai thao tác này vào frontend; AI dừng khi người thật tiếp quản.
 - [ ] Sau khi hoàn thành luồng tiếp nhận và trả lời xuyên suốt: cập nhật mốc Unified Inbox/handoff trong DeCuong.md và báo cáo Word.
 
 Inbox hiện chỉ đọc. Chưa nghiệm thu toàn bộ mốc widget/inbox; chưa có số liệu SLA, đơn hàng hoặc nhân viên đăng nhập để hiển thị như dữ liệu thật.
