@@ -30,7 +30,10 @@
 - [x] API tiếp nhận conversation: đổi trạng thái handoff sang `assigned`, cập nhật ticket mở sang `assigned`.
 - [x] API trả lời nhân viên: chỉ cho gửi khi conversation đã `assigned`; lưu `sender_type=agent`.
 - [x] Test luồng tiếp nhận, trả lời và chặn trả lời trước khi tiếp nhận.
-- [ ] Tiếp theo: nối hai thao tác này vào frontend; AI dừng khi người thật tiếp quản.
+- [x] Nối nút `Tiếp nhận`, ô trả lời và nút `Gửi` vào API; khóa ô trả lời trước khi conversation được nhận.
+- [x] Sau thao tác thành công, tải lại danh sách/chi tiết để phản ánh trạng thái và tin nhắn mới.
+- [x] Hiển thị lỗi thao tác và giới hạn nội dung gửi 4.000 ký tự.
+- [ ] Tiếp theo: xác thực/phân quyền nhân viên thật; thay `agent-demo` bằng ID từ phiên đăng nhập; bổ sung realtime/widget.
 - [ ] Sau khi hoàn thành luồng tiếp nhận và trả lời xuyên suốt: cập nhật mốc Unified Inbox/handoff trong DeCuong.md và báo cáo Word.
 
 Inbox hiện chỉ đọc. Chưa nghiệm thu toàn bộ mốc widget/inbox; chưa có số liệu SLA, đơn hàng hoặc nhân viên đăng nhập để hiển thị như dữ liệu thật.

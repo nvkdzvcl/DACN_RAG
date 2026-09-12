@@ -35,6 +35,9 @@ function App() {
   const [detailError, setDetailError] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [detailRetry, setDetailRetry] = useState(0);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const [draft, setDraft] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -77,6 +80,23 @@ function App() {
 
   // Ignore previous customer's detail before effect cleanup runs.
   const current = detail?.conversation_id === activeId ? detail : null;
+  async function postAction(path, body) {
+    setActionLoading(true); setActionError('');
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/inbox/conversations/${encodeURIComponent(activeId)}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || `Thao tác thất bại (HTTP ${response.status}).`);
+      setDetailRetry(n => n + 1); setRefresh(n => n + 1); return data;
+    } catch (error) { setActionError(error.message || 'Không thể thực hiện thao tác.'); return null; }
+    finally { setActionLoading(false); }
+  }
+  async function acceptConversation() { await postAction(`/accept?agent_id=${encodeURIComponent('agent-demo')}`, undefined); }
+  async function sendReply(event) {
+    event.preventDefault();
+    const content = draft.trim();
+    if (!content || !activeId || current?.status !== 'assigned') return;
+    if (await postAction('/messages', { content, agent_id: 'agent-demo' })) setDraft('');
+  }
   const counts = [visibleChats.length, visibleChats.filter(c => c.status === 'open').length, visibleChats.filter(c => c.status === 'handoff_requested').length, visibleChats.filter(c => ['high', 'urgent'].includes(c.priority)).length];
   return <div className="shell">
     <aside aria-label="Điều hướng chính">
@@ -96,7 +116,7 @@ function App() {
             <button key={c.conversation_id} aria-pressed={activeId === c.conversation_id} onClick={() => setSelectedId(c.conversation_id)} className={`chat ${activeId === c.conversation_id ? 'selected' : ''}`}><span className="avatar">{initials(nameOf(c))}</span><span className="chatText"><b>{nameOf(c)}</b><small>{c.channel} · {statuses[c.status] || c.status}</small><i>{priorities[c.priority] || c.priority}</i><small>{timeOf(c.created_at)}</small></span></button>)}
         </div>
         <div className="conversation" aria-label="Chi tiết hội thoại" aria-busy={detailLoading}>
-          {selected && <div className="convHead"><div className="avatar big">{initials(nameOf(selected))}</div><div><b>{nameOf(selected)}</b><small>{selected.channel} · {statuses[selected.status] || selected.status}</small></div></div>}
+          {selected && <div className="convHead"><div className="avatar big">{initials(nameOf(selected))}</div><div><b>{nameOf(selected)}</b><small>{selected.channel} · {statuses[selected.status] || selected.status}</small></div>{selected.status === 'handoff_requested' && <button onClick={acceptConversation} disabled={actionLoading}>Tiếp nhận</button>}</div>}
           <div className="messages">
             {!selected ? <p className="state">Chọn hội thoại để xem nội dung.</p> : detailError ? <div className="state" role="alert"><p>{detailError}</p><button onClick={() => setDetailRetry(n => n + 1)}>Thử lại</button></div> : !current ? <p className="state" role="status">Đang tải hội thoại...</p> : <>
               {!current.messages.length && <p className="state">Hội thoại chưa có tin nhắn.</p>}
@@ -104,7 +124,7 @@ function App() {
               <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary || 'Chưa có tóm tắt.'}</p><small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section>
             </>}
           </div>
-          {current && <div className="composer"><p>Chế độ xem hội thoại</p></div>}
+          {current && <form className="composer" onSubmit={sendReply}><input aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDraft(e.target.value)} disabled={current.status !== 'assigned' || actionLoading} placeholder={current.status === 'assigned' ? 'Nhập phản hồi cho khách hàng...' : 'Tiếp nhận hội thoại để trả lời'} maxLength={4000} /><button type="submit" disabled={current.status !== 'assigned' || !draft.trim() || actionLoading}>Gửi</button>{actionError && <small role="alert">{actionError}</small>}</form>}
         </div>
         <div className="profile"><h3>Thông tin khách hàng</h3>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><div><b>{nameOf(current)}</b><small>{current.customer_id}</small></div></div><p>{current.customer_email || 'Chưa có email'}</p><hr /><h4>Hội thoại</h4><p>Kênh: {current.channel}</p><p>Trạng thái: {statuses[current.status] || current.status}</p><p>Ưu tiên: {priorities[current.priority] || current.priority}</p><h4>Ticket hỗ trợ</h4><p>{current.tickets.length} ticket</p></> : <p>Thông tin xuất hiện khi tải xong hội thoại.</p>}</div>
       </section>
