@@ -57,7 +57,7 @@ Phân tích nghiệp vụ và vai trò admin/nhân viên/khách hàng; thiết k
 
 **6. Phương pháp nghiên cứu**
 
-Phát triển lặp theo các mốc có kiểm chứng. Dùng kiểm thử API, kiểm thử quyền và tranh chấp tiếp nhận, kiểm tra giao diện desktop/mobile; xây bộ câu hỏi có nguồn để đo Recall@k, độ đúng trích dẫn, khả năng từ chối và độ trễ p50/p95. Thử bước kiểm định đáp án bằng LLM sau kiểm tra trích dẫn nguyên văn, đo đồng thời lỗi còn lọt, từ chối sai và chi phí độ trễ. Tách tập phát triển với tập đánh giá; tập test đã xem lỗi chỉ dùng làm regression. Kiểm định bằng cùng model không thay nhãn và đánh giá của người duyệt.
+Phát triển lặp theo các mốc có kiểm chứng. Dùng kiểm thử API, kiểm thử quyền và tranh chấp tiếp nhận, kiểm tra giao diện desktop/mobile; xây bộ câu hỏi có nguồn để đo Recall@k, độ đúng trích dẫn, khả năng từ chối và độ trễ p50/p95. So sánh sinh đáp án tự do với chọn câu nguồn bằng ID và trích nguyên văn, kết hợp kiểm định bằng LLM; đo lỗi còn lọt, từ chối sai và chi phí độ trễ khi đổi model/chế độ suy luận local. Trích đúng câu nguồn chưa bảo đảm trả lời đúng câu hỏi hoặc giữ đủ điều kiện. Tách tập phát triển với tập đánh giá; tập test đã xem lỗi chỉ dùng làm regression. Kiểm định bằng cùng model không thay nhãn và đánh giá của người duyệt.
 
 **7. Giả thuyết khoa học/Những đóng góp mới của đề tài**
 

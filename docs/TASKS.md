@@ -87,3 +87,17 @@ Phạm vi hiện tại: một API worker, SQLite + Qdrant embedded; ingestion đ
 - [x] Cập nhật đề cương, roadmap, quyết định, báo cáo Markdown/Word và bảng so sánh mọi lượt thử. Báo cáo Word bốn trang đã xuất PDF bằng Word và kiểm tra đủ bốn ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
 
 Task tiếp theo: xử lý câu mơ hồ, suy diễn hoặc mâu thuẫn còn lọt và giảm từ chối sai ở câu phủ định/hỏi nối tiếp/quote đổi dấu. Cần người duyệt nhãn/đáp án, thêm bộ câu chưa xem và tài liệu PDF/DOCX trước nghiệm thu M3. Sau đó widget có phiên khách riêng và Inbox realtime.
+
+## Trích câu nguồn và so model local M3 - 13/09/2026
+
+- [x] So qwen3:1.7b bật suy luận, chọn câu nguyên văn và qwen3:4b; giữ các lượt thử bị loại, không ghi đè corpus/nhãn/kết quả cũ.
+- [x] Model chỉ chọn source_id/sentence_id; backend xác thực ID, loại trùng và ghép tối đa ba câu nguyên văn. Giữ chấm phẩy, số và vị trí nguồn; tiếp tục kiểm định toàn bộ nguồn đã cấp.
+- [x] Transport phân biệt hết giới hạn sinh, chưa hoàn tất và nội dung rỗng; không đưa trường thinking vào câu trả lời hoặc lịch sử. Lỗi provider giữ tin khách.
+- [x] Chọn bản 4B không suy luận, kiểm định giải thích ngắn theo dev: 22/24 quyết định đúng và proxy, từ chối đúng 9/9, từ chối sai 2/15; p50/p95 14,627/15,597 giây. Giữ nguyên cấu hình trước regression.
+- [x] 33 unittest và Vite build đạt. Kiểm tra giữ số/điều kiện/citation, từ chối ID không hợp lệ, nguồn đổi sau kiểm định và AI muộn sau handoff/tin mới.
+- [x] Regression 48 ca: quyết định đúng 40/48 (trước 35/48), từ chối đúng 14/16 (trước 10/16), từ chối sai 6/32 (trước 7/32); proxy 40/48, p50/p95 14,096/14,739 giây, không lỗi provider. Cả bốn ca mâu thuẫn và hai yêu cầu bịa trực tiếp bị chặn.
+- [x] Lưu sáu lượt dev và một lượt regression mới: 192 lượt đầy đủ, hai lỗi hết token ở cấu hình 1,7B bị loại. Hai ca policy hợp lệ cạnh injection test-045/046 hồi quy; test-036/038 còn trả lời sai yêu cầu.
+- [x] Smoke Ollama thật 4/4 ca đạt trên DB/vector tạm (13,61 / 13,58 / 3,74 / 14,66 giây). Cập nhật model mặc định và `.env` sang qwen3:4b; backend đang chạy cần khởi động lại để nạp biến môi trường mới.
+- [x] Đề cương giữ 10 mục; báo cáo Markdown/Word giữ bảy chương, cập nhật kết quả và giới hạn. Word năm trang đã xuất PDF bằng Word và kiểm tra đủ năm ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows. Hash snapshot/corpus/retrieval đã kiểm chứng, mã dev/test cuối khớp nhau.
+
+Giới hạn: đáp án trích nguyên văn theo ngôn ngữ nguồn, tối đa ba câu từ năm nguồn bị giới hạn độ dài; chưa xử lý đầy đủ viết tắt/điều kiện ngoài đoạn hoặc tổng hợp tự do. Kiểm định cùng model vẫn có thể từ chối nhầm hoặc chấp nhận sai. Cần duyệt nhãn/đáp án và thêm tài liệu PDF/DOCX, câu hỏi chưa xem trước nghiệm thu M3.

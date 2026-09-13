@@ -14,7 +14,7 @@ Không sửa câu hỏi/nhãn của một baseline đã chạy. Nếu cần sử
 
 ## Chạy
 
-Từ thư mục gốc dự án, cài `requirements-dev.txt` và khởi động Ollama có `qwen3:1.7b` cùng `embeddinggemma:300m`:
+Từ thư mục gốc dự án, cài `requirements-dev.txt` và khởi động Ollama có `qwen3:4b` cùng `embeddinggemma:300m` (các baseline cũ dùng `qwen3:1.7b`):
 
 ```powershell
 python -m unittest app.tests.test_evaluate_rag -v
@@ -30,7 +30,9 @@ Mỗi lần chạy tạo SQL DB và Qdrant trong thư mục tạm; đóng/mở k
 
 `manifest.json` lưu commit nền, SHA-256 corpus/cases/mã Python thực chạy (kể cả thay đổi chưa commit), digest model, tham số và phiên bản thư viện. `results.jsonl` lưu từng đáp án, kết quả truy xuất, citation, completion thô, thời gian và điểm. `summary.json` tổng hợp cả tập và từng loại câu. `human-review.jsonl` là phiếu chấm để trống; số ca được người duyệt hiện là 0.
 
-Luồng có kiểm định gọi chat tối đa hai lần: sinh đáp án, rồi kiểm định nếu đáp án vượt kiểm tra citation. `raw_completions` lưu đúng thứ tự gọi, kể cả kết quả kiểm định từ chối; thời gian tính cả hai lượt. Manifest ghi luồng thực chạy; snapshot `answer_service.py.txt` lưu prompt/schema của từng thử nghiệm. Kết quả model kiểm định là quyết định nội bộ ứng dụng, không phải nhãn người chấm hoặc thước đo entailment độc lập.
+Luồng hiện tại gọi chat tối đa hai lần: chọn câu nguồn bằng ID, rồi kiểm định đáp án do backend ghép nguyên văn nếu lựa chọn hợp lệ. Baseline cũ dùng sinh đáp án tự do. `raw_completions` lưu đúng thứ tự gọi, kể cả kết quả kiểm định từ chối; thời gian tính cả hai lượt. Manifest ghi luồng thực chạy; snapshot `answer_service.py.txt` lưu prompt/schema của từng thử nghiệm. Kết quả model kiểm định là quyết định nội bộ ứng dụng, không phải nhãn người chấm hoặc thước đo entailment độc lập.
+
+Lượt bật suy luận còn lưu `ollama.py.txt`; manifest lấy `think`, `temperature`, `num_ctx` và `num_predict` trực tiếp từ cấu hình transport đang chạy. Giới hạn sinh tính cả token suy luận và câu trả lời. Phản hồi bị cắt do hết giới hạn (`done_reason=length`), chưa hoàn tất hoặc không có nội dung cuối được tính là lỗi provider, không tính là từ chối đúng. `raw_completions` chỉ chứa nội dung cuối; không xuất trường suy luận nội bộ của Ollama vào câu trả lời, citation hoặc lịch sử hội thoại.
 
 | Chỉ số | Cách tính và giới hạn |
 |---|---|

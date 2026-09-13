@@ -5,8 +5,9 @@ from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 
-CHAT_THINK = False
-CHAT_OPTIONS = {"temperature": 0, "num_ctx": 8192, "num_predict": 700}
+CHAT_THINK = True
+# ponytail: bounded local reasoning; revisit this cap using latency and truncation measurements.
+CHAT_OPTIONS = {"temperature": 0, "num_ctx": 8192, "num_predict": 2048}
 
 
 class ProviderError(RuntimeError):
@@ -18,7 +19,7 @@ def embedding_model():
 
 
 def chat_model():
-    return os.getenv("LLM_MODEL", "qwen3:4b")
+    return os.getenv("LLM_MODEL", "qwen3:1.7b")
 
 
 def call(path, payload=None):

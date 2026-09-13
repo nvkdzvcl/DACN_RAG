@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.db.migrations import migrate
 from app.rag.answer_service import answer_question
-from app.rag.ollama import call, chat, chat_model, embedding_model
+from app.rag.ollama import CHAT_OPTIONS, CHAT_THINK, call, chat, chat_model, embedding_model
 from app.rag.vector_store import VectorStore
 from app.services.document_service import CHUNK_OVERLAP, CHUNK_SIZE, save_document
 
@@ -140,15 +140,16 @@ def run(split, output):
         "sha256": {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
         "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
         "chunk_words": CHUNK_SIZE, "overlap_words": CHUNK_OVERLAP,
-        "temperature": 0, "num_ctx": 8192, "num_predict": 700, "keep_alive": 0,
-        "answer_pipeline": "generate, exact citation validation, same-model review, source-version recheck",
-        "chat_calls_per_question": "0-2; review only for candidates with valid citations; completions saved in call order",
+        **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": 0,
+        "answer_pipeline": "select sentence IDs, extract verbatim answer/citations, same-model review, source-version recheck",
+        "chat_calls_per_question": "0-2; review only for valid selections; completions saved in call order",
         "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx")},
         "label_status": "synthetic_agent_authored_pending_human_review",
         "timing": "Sequential end-to-end calls; includes query embedding and model load/unload, excludes ingestion. No deliberate warmup.",
     }
     write_json(output / "manifest.json", manifest)
-    (output / "answer_service.py.txt").write_bytes((ROOT / "app/rag/answer_service.py").read_bytes())
+    for filename in ("answer_service.py", "ollama.py"):
+        (output / (filename + ".txt")).write_bytes((ROOT / "app/rag" / filename).read_bytes())
     rows = []
     try:
         with tempfile.TemporaryDirectory(prefix="rag-eval-") as directory:
