@@ -27,6 +27,8 @@ Recall tính trên các quote tham chiếu, không phải số chunk vật lý d
 
 Lượt `frozen4b-test` dừng ở log ingestion trước khi hỏi câu nào vì lỗi serialize datetime; manifest ghi incomplete, completed_cases=0. Đã sửa log và thêm kiểm thử, chạy vào `frozen4b-v2-test`; không ghi đè dấu vết lỗi.
 
+Lượt `bounded-ids-test` chạy hồi quy với schema ID câu được giới hạn theo từng nguồn, sau khi chốt bản sửa trên dev TXT. Giữ nhãn, corpus, model, retrieval và prompt kiểm định. Lỗi `doc-005` chọn ID vượt phạm vi trong baseline được dùng để nhận diện lỗi cấu trúc; bộ này đã xem lỗi nên không phải bằng chứng đánh giá độc lập cho bản sửa. Kết quả trước/sau và giới hạn nằm trong `../../docs/RAG_EVALUATION.md`.
+
 ## Người duyệt
 
 Mở PDF/DOCX gốc và đối chiếu `cases.jsonl` trước khi xem câu trả lời. Trong bản sao `human-review.jsonl`, ghi reviewer, duyệt gold label rồi chấm answer_correct, all_claims_supported, citation_entailment_correct và abstention_correct khi áp dụng; không tự điền true từ điểm model/regex. Giữ null khi chưa chấm, ghi lý do nếu sửa nhãn và tạo dataset phiên bản mới.

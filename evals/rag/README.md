@@ -47,6 +47,8 @@ Lượt bật suy luận còn lưu `ollama.py.txt`; manifest lấy `think`, `tem
 | Fact-pattern pass | Câu có đáp án: grounded, đủ mẫu dữ kiện, có nguồn gold, không có chuỗi cấm. Câu phải từ chối: abstain không lỗi/chuỗi cấm. Chỉ là proxy tự động, có thể bỏ sót sai nghĩa, phủ định hoặc thông tin thừa. |
 | p50/p95 | Nội suy tuyến tính trên thời gian end-to-end từng câu thành công, gồm embedding truy vấn và tải/gỡ model, không gồm ingestion. Lưu số mẫu; lỗi/timed out tách riêng. Chưa phải SLA hay tải đồng thời. |
 
+Các lượt `bounded-ids-dev` và `bounded-ids-test` dùng JSON Schema giới hạn ID câu riêng cho từng nguồn. Backend vẫn kiểm tra phạm vi và ID trùng; không thêm lượt model hay đổi prompt kiểm định. Bản schema được chọn theo dev trước khi chạy hồi quy. Điểm và phân tích trước/sau nằm trong `../../docs/RAG_EVALUATION.md`; không suy ID hợp lệ thành đáp án đúng ngữ nghĩa.
+
 ## Duyệt bằng người
 
 Đối chiếu từng dòng `results.jsonl` với corpus gốc, không chỉ nhìn `grounded` hoặc điểm tự động. Trong `human-review.jsonl`, ghi người duyệt và ghi chú, duyệt nhãn trước rồi chấm: đáp án đúng câu hỏi, mọi mệnh đề có bằng chứng, citation chứng minh mệnh đề và quyết định từ chối phù hợp. Trường không áp dụng giữ null. Kết quả tự động không tự cập nhật thành điểm người chấm.

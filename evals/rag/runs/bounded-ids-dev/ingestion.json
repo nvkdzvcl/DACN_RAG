@@ -1,0 +1,26 @@
+[
+  {
+    "source": "dev-conflict-a.txt",
+    "sha256": "0eb6db2ff1f52d0137aeccace671213178837cfb95541532c4093a3a6d97365b",
+    "seconds": 3.483,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  },
+  {
+    "source": "dev-conflict-b.txt",
+    "sha256": "9c275b82d70dd6ae6262e333d59237575d20ef44cc5045b146de4302fdc2355a",
+    "seconds": 3.434,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  },
+  {
+    "source": "dev-policy.txt",
+    "sha256": "79ded36285fb555e193b2b38a094b7a46c4a701acae0bc20b1dd7918e730cc29",
+    "seconds": 3.907,
+    "status": "indexed",
+    "chunks": 7,
+    "error_message": null
+  }
+]

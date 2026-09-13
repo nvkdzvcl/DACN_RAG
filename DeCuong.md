@@ -61,7 +61,7 @@ Phát triển lặp theo các mốc có kiểm chứng. Dùng kiểm thử API, 
 
 **7. Giả thuyết khoa học/Những đóng góp mới của đề tài**
 
-Giả thuyết cần kiểm chứng: kết hợp truy hồi bằng chứng, công cụ nghiệp vụ và chuyển giao có trạng thái giúp hỗ trợ CSKH đáng tin cậy hơn luồng trả lời không kiểm soát. Đóng góp dự kiến là tích hợp các thành phần vào quy trình đa kênh và xây bộ đánh giá phù hợp; chưa tuyên bố có thuật toán mới hoặc kết quả cải thiện định lượng.
+Giả thuyết cần kiểm chứng: kết hợp truy hồi bằng chứng, công cụ nghiệp vụ và chuyển giao có trạng thái giúp hỗ trợ CSKH đáng tin cậy hơn luồng trả lời không kiểm soát. Ràng buộc ID câu theo từng nguồn trong JSON Schema và kiểm tra lại ở backend bảo vệ miền giá trị; hiệu quả trả lời đúng vẫn phải được đánh giá riêng bằng hồi quy và người duyệt. Đóng góp dự kiến là tích hợp các thành phần vào quy trình đa kênh và xây bộ đánh giá phù hợp; chưa tuyên bố có thuật toán mới hoặc kết quả cải thiện định lượng.
 
 **8. Dự kiến kế hoạch nghiên cứu (tuần/thực hiện công việc gì ?)**
 

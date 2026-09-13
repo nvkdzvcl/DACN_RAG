@@ -46,6 +46,8 @@ Qdrant embedded chỉ dùng **một API worker**; không mở hai tiến trình 
 
 Kiểm chứng mô hình thật, DB/vector tạm: `python -m app.tests.smoke_ollama`. Lượt đầu tải model có thể mất hơn một phút. Giữ ngưỡng score 0.35 sau chẩn đoán trên dev. Model chọn tối đa ba cặp source_id/sentence_id; backend xác thực ID rồi lấy nguyên văn, chỉ chuẩn hóa khoảng trắng. Đáp án giữ ngôn ngữ nguồn; chưa dịch hoặc tổng hợp tự do. Tách câu bằng dấu chấm/chấm hỏi/chấm than theo sau bởi khoảng trắng, giữ chấm phẩy cùng điều kiện; chưa xử lý đầy đủ chữ viết tắt hoặc nguồn dài bị cắt.
 
+JSON Schema gửi Ollama chỉ cho chọn ID câu thực có của từng nguồn, dùng một nhánh `oneOf` cho mỗi nguồn. Backend vẫn kiểm tra ID/trùng sau phản hồi nếu provider bỏ qua schema; ràng buộc không bảo đảm chọn đúng nội dung và không thêm lượt gọi model.
+
 Một lượt Ollama riêng kiểm định đáp án với câu hỏi/lịch sử và toàn bộ nguồn đã cấp cho LLM. Chỉ trả lời khi đủ ngữ cảnh, nguồn nhất quán và dữ kiện có căn cứ; JSON kiểm định lỗi dẫn đến từ chối. Provider chưa hoàn tất, hết giới hạn sinh hoặc không có nội dung cuối được báo lỗi dịch vụ và giữ tin khách. Cấu hình chat: think=false, context 8192, tối đa 700 token, giải phóng model sau mỗi gọi. Kiểm định dùng cùng model nên vẫn có thể sai, tăng độ trễ và không thay người duyệt. Backend kiểm tra lại phiên bản mọi nguồn đã kiểm định trước khi lưu AI.
 
 ## Đánh giá RAG

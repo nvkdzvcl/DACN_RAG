@@ -240,3 +240,28 @@ Recall tính trên quote tham chiếu; hai quote mâu thuẫn có thể cùng m�
 
 - Dữ liệu, cách chạy và hướng dẫn người duyệt: [rag-documents](../evals/rag-documents/README.md).
 - Kết quả đầy đủ: [frozen4b-v2-test](../evals/rag-documents/runs/frozen4b-v2-test/summary.json).
+
+## Ràng buộc ID theo nguồn trong JSON Schema
+
+Mỗi nhánh oneOf chứa source_id cố định và enum sentence_id thực có của nguồn đó. Dùng grammar của Ollama hiện có, giữ prompt, model, retrieval và kiểm định; không thêm retry hoặc lượt model. Backend vẫn chặn ID sai/trùng khi provider bỏ qua schema. Chọn cấu hình theo dev trước khi chạy regression; không sửa tiếp từ kết quả test. Đây là sửa miền giá trị, không chứng minh model chọn đủ câu hoặc hiểu đúng chính sách.
+
+| Tập | Phiên bản | Quyết định đúng | Từ chối đúng | Từ chối sai | Proxy | p50/p95 giây | Lỗi |
+|---|---|---:|---:|---:|---:|---:|---:|
+| TXT dev | Trước | 22/24 | 9/9 | 2/15 | 22/24 | 14.627/15.597 | 0 |
+| TXT dev | Ràng buộc ID | 22/24 | 9/9 | 2/15 | 22/24 | 13.287/14.022 | 0 |
+| PDF/DOCX regression | Trước | 21/24 | 9/10 | 2/14 | 21/24 | 14.031/15.727 | 0 |
+| PDF/DOCX regression | Ràng buộc ID | 21/24 | 9/10 | 2/14 | 21/24 | 14.154/14.939 | 0 |
+| TXT regression | Trước | 40/48 | 14/16 | 6/32 | 40/48 | 14.096/14.739 | 0 |
+| TXT regression | Ràng buộc ID | 40/48 | 14/16 | 6/32 | 40/48 | 13.484/15.081 | 0 |
+
+Ba lượt mới gồm 96 ca: 24 dev, 24 PDF/DOCX regression và 48 TXT regression. Mọi nhãn/corpus cũ giữ nguyên, manifest và snapshot ghi mã thực chạy. Kiểm tra lại các cặp ID trong completion theo đúng tập nguồn đã cấp; số ca vượt miền: 0. Không suy zero ID lỗi thành zero lỗi ngữ nghĩa. 38 unittest và Vite build đạt.
+
+Bộ test đã được xem lỗi nên chỉ là regression; nhãn vẫn chờ người duyệt. Đặc biệt câu trả lời chỉ nêu phạm vi dịch vụ khi thiếu địa chỉ cần thống nhất tiêu chí, không tự sửa nhãn để tăng điểm. Chi tiết từng ca và source quote giữ trong results.jsonl.
+
+- [TXT dev](../evals/rag/runs/bounded-ids-dev/summary.json): số đo, completion, snapshot, hash và phiếu người duyệt.
+- [PDF/DOCX regression](../evals/rag-documents/runs/bounded-ids-test/summary.json): số đo, completion, snapshot, hash và phiếu người duyệt.
+- [TXT regression](../evals/rag/runs/bounded-ids-test/summary.json): số đo, completion, snapshot, hash và phiếu người duyệt.
+
+Điểm từng ca của cả ba lượt giữ nguyên so baseline tương ứng. Các ca không đạt proxy vẫn là dev-004/013; doc-005/013/019; test-021/025/026/029/036/038/045/046. doc-005 hiện chọn các cặp hợp lệ (1,1), (1,2), (2,9): có câu chứa mốc 18 giờ nhưng thêm mảnh câu từ ranh giới chunk và câu hóa đơn ngoài yêu cầu. Kiểm định vẫn từ chối, nên sửa ID chưa giúp ca này trả lời thành công. doc-013 vẫn đánh cờ từ chối dù giải thích đúng chính sách phủ định; doc-019 vẫn chờ thống nhất tiêu chí. Cả bốn ca mâu thuẫn và hai yêu cầu bịa trực tiếp TXT tiếp tục bị chặn, hai ca chính sách hợp lệ cạnh injection vẫn bị từ chối sai. Không sửa prompt/nhãn tiếp từ kết quả hồi quy này.
+
+Recall và chỉ số citation giữ nguyên theo từng ca. p50/p95 thay đổi theo lượt đo, chưa có thí nghiệm lặp để quy chênh lệch cho schema. Đây là sửa lỗi cấu trúc ID, không phải cải thiện điểm ngữ nghĩa; M3 vẫn chưa nghiệm thu.

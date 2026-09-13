@@ -113,3 +113,14 @@ Giới hạn: đáp án trích nguyên văn theo ngôn ngữ nguồn, tối đa 
 - [ ] Người duyệt chấm cả tập; ưu tiên doc-005 chọn ID sai, doc-013 phủ định nối tiếp, doc-019 nêu phạm vi dịch vụ khi thiếu địa chỉ. Không tự sửa nhãn doc-019 để tăng điểm.
 
 Task tiếp theo: xác nhận quy tắc trả lời nêu điều kiện so với hỏi làm rõ, có người duyệt nhãn/đáp án; sau đó xử lý ID câu không hợp lệ và kiểm định phủ định bằng dev riêng. PDF/DOCX mới vẫn giả lập, chưa gồm OCR/bảng PDF/nhiều cột/ô gộp; cần nguồn và câu hỏi do người khác cung cấp trước nghiệm thu M3. Widget/phiên khách và realtime vẫn là mốc sau.
+
+## Ràng buộc ID câu theo nguồn M3 - 13/09/2026
+
+- [x] Schema oneOf gắn từng nguồn với các ID câu thực có; giữ xác thực kiểu, phạm vi và trùng ở backend khi provider bỏ qua grammar. Không thêm dependency, retry hoặc lượt model.
+- [x] 38 unittest và Vite build đạt; kiểm thử hai nguồn có số câu khác nhau, lựa chọn hợp lệ và cặp ID chéo nguồn không hợp lệ.
+- [x] Chọn bản schema theo dev: giữ 22/24 quyết định khớp nhãn/proxy, từ chối đúng 9/9, từ chối sai 2/15; không lỗi provider. Đóng băng bản này trước hồi quy, giữ model, prompt, retrieval và nhãn.
+- [x] PDF/DOCX regression giữ 21/24 quyết định khớp nhãn/proxy, từ chối đúng 9/10, từ chối sai 2/14; p50/p95 14,154/14,939 giây, không lỗi provider. doc-005 hết ID sai nhưng vẫn bị kiểm định từ chối; doc-013 và doc-019 chưa được giải quyết.
+- [x] TXT regression giữ 40/48 quyết định khớp nhãn/proxy, từ chối đúng 14/16, từ chối sai 6/32; p50/p95 13,484/15,081 giây. Điểm từng ca của cả ba lượt giữ nguyên so baseline tương ứng; 96 lượt mới không lỗi provider và không cặp ID vượt phạm vi. Hash xác nhận mã/corpus thực chạy, cấu hình model/retrieval không đổi.
+- [x] Cập nhật đề cương 10 mục, roadmap, quyết định và báo cáo Markdown/Word bảy chương. Word sáu trang khớp Markdown, đã xuất bằng Word và kiểm tra đủ sáu ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
+
+Task tiếp theo: người duyệt xác nhận nhãn và cách trả lời nêu điều kiện ở doc-019; giảm chọn câu thừa/thiếu ngữ cảnh và kiểm định sai phủ định qua dev riêng. Không coi sửa ID là cải thiện điểm ngữ nghĩa hay hoàn thành M3. Widget/phiên khách và realtime vẫn chưa triển khai.
