@@ -1,0 +1,34 @@
+{
+  "source_run": "baseline-dev",
+  "note": "Offline retrieval gate diagnostic; not regenerated answer quality. Decision: retain 0.35.",
+  "rows": [
+    {
+      "threshold": 0.25,
+      "answerable_any_gold_survives": 15,
+      "answerable_n": 15,
+      "negative_all_hits_blocked": 0,
+      "negative_n": 9
+    },
+    {
+      "threshold": 0.35,
+      "answerable_any_gold_survives": 15,
+      "answerable_n": 15,
+      "negative_all_hits_blocked": 3,
+      "negative_n": 9
+    },
+    {
+      "threshold": 0.45,
+      "answerable_any_gold_survives": 14,
+      "answerable_n": 15,
+      "negative_all_hits_blocked": 5,
+      "negative_n": 9
+    },
+    {
+      "threshold": 0.55,
+      "answerable_any_gold_survives": 12,
+      "answerable_n": 15,
+      "negative_all_hits_blocked": 7,
+      "negative_n": 9
+    }
+  ]
+}

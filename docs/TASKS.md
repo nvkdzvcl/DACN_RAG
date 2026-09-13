@@ -62,6 +62,17 @@
 - [x] 22 unittest đạt; Vite build đạt. Kiểm tra trình duyệt DB tạm: đăng nhập, tải/lập chỉ mục, nội dung, hỏi thật, mở nguồn, lập chỉ mục lại và hủy xác nhận xóa; bố cục mobile 390px. Báo cáo Word ba trang đã xuất PDF bằng Word và kiểm tra đủ ba ảnh trang bằng Poppler (renderer đóng gói thiếu LibreOffice).
 - [x] Smoke test Ollama thật đạt 4 ca: câu có nguồn, hỏi nối tiếp, không có dữ kiện, yêu cầu bịa; vector được đóng/mở trước khi hỏi. Lần chạy cuối: 9,64 / 9,69 / 4,67 / 8,77 giây; đây là số đo từng ca, không phải p50/p95 hay đánh giá tổng thể.
 
-Phạm vi hiện tại: một API worker, SQLite + Qdrant embedded; ingestion đồng bộ trong threadpool, chưa có job queue/OCR. M3 đã có chức năng RAG thật nhưng chưa nghiệm thu chất lượng: thiếu bộ 60-100 câu có đáp án/nguồn và baseline. Citation hợp lệ không chứng minh entailment của toàn bộ câu trả lời. Chưa có widget/phiên khách, realtime, SLA hoặc kênh xã hội thật. Tóm tắt handoff vẫn trích đoạn, chưa dùng LLM tool calling.
+Phạm vi hiện tại: một API worker, SQLite + Qdrant embedded; ingestion đồng bộ trong threadpool, chưa có job queue/OCR. M3 đã có chức năng RAG thật và baseline 72 câu, nhưng chưa nghiệm thu chất lượng: nhãn chưa được người dùng duyệt, còn lỗi thiếu bằng chứng/mâu thuẫn/injection. Citation hợp lệ không chứng minh entailment của toàn bộ câu trả lời. Chưa có widget/phiên khách, realtime, SLA hoặc kênh xã hội thật. Tóm tắt handoff vẫn trích đoạn, chưa dùng LLM tool calling.
 
-Task tiếp theo: xây bộ câu hỏi đánh giá RAG tiếng Việt và baseline Recall@k, độ đúng nguồn/từ chối/độ trễ; hiệu chỉnh chunking/ngưỡng retrieval theo kết quả. Sau baseline: widget có phiên khách riêng và cập nhật Inbox realtime.
+## Bộ đánh giá và baseline M3 - 13/09/2026
+
+- [x] Bộ 72 câu tiếng Việt trên corpus giả lập, 24 dev + 48 test; câu có đáp án, nối tiếp, thiếu dữ kiện, mơ hồ, mâu thuẫn, injection. Nguồn/vị trí/quote và đáp án tham chiếu được lưu; mọi nhãn pending_human_review.
+- [x] CLI python -m app.evaluate_rag: DB/vector tạm, hash dữ liệu/mã, digest model, raw completion, lỗi và thời gian từng câu; không ghi đè baseline cũ, không tính lỗi provider là từ chối đúng.
+- [x] Đo Recall@1/3/5, source citation precision/coverage, quyết định trả lời/từ chối, proxy dữ kiện và p50/p95; có mẫu số/công thức và phiếu người duyệt.
+- [x] Chạy 24 dev gốc + 24 dev thử prompt + 48 test gốc trên Ollama thật; 96 lượt, 0 lỗi vận hành. Bản prompt thử bị loại trước test vì không tăng quyết định đúng và hồi quy injection; giữ model/ngưỡng/prompt ứng dụng.
+- [x] Test gốc: Recall@5 100% trên 36 câu có gold; quyết định đúng 34/48 (70,83%); từ chối đúng 7/16 (43,75%); từ chối sai 5/32; proxy dữ kiện 31/48 (64,58%); p50 7,669s, p95 8,292s. Không gọi proxy là độ đúng do người xác nhận.
+- [x] 27 unittest đạt; Vite build đạt. Báo cáo chi tiết tại docs/RAG_EVALUATION.md, dữ liệu từng lượt trong evals/rag/runs/. Báo cáo Word bốn trang đã xuất PDF bằng Word và kiểm tra đủ bốn ảnh trang (renderer đóng gói thiếu LibreOffice).
+- [ ] Người dùng duyệt nhãn và chấm mức đúng/có căn cứ; hiện 0 câu được người duyệt.
+- [ ] Sửa đáp án không được citation chứng minh, câu mơ hồ và nguồn mâu thuẫn. Hai yêu cầu injection phải từ chối ở test vẫn thất bại; M3 chưa đạt chất lượng.
+
+Task tiếp theo: kiểm chứng từng mệnh đề với nguồn và xử lý từ chối/làm rõ; dùng tập dev để thử thay đổi, tập test đã xem làm regression. Bổ sung tập chưa xem sau khi chốt hướng sửa. Sau đó widget có phiên khách riêng và Inbox realtime.

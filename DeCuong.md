@@ -65,7 +65,7 @@ Giả thuyết cần kiểm chứng: kết hợp truy hồi bằng chứng, côn
 
 **8. Dự kiến kế hoạch nghiên cứu (tuần/thực hiện công việc gì ?)**
 
-Ưu tiên theo công việc: nền tảng dữ liệu và xác thực; RAG dùng mô hình thật; widget/realtime/SLA; Agentic RAG và handoff; kênh thứ hai; kiểm thử, triển khai và hồ sơ. Chi tiết mốc ở ROADMAP.md, trạng thái kỹ thuật ở docs/TASKS.md. Phần đã kiểm chứng của xác thực, handoff và RAG local dùng Ollama/Qdrant được trình bày trong Chương 5-6 báo cáo; không coi các mục còn dự kiến là kết quả hoàn thành.
+Ưu tiên theo công việc: nền tảng dữ liệu và xác thực; RAG dùng mô hình thật; widget/realtime/SLA; Agentic RAG và handoff; kênh thứ hai; kiểm thử, triển khai và hồ sơ. Chi tiết mốc ở ROADMAP.md, trạng thái kỹ thuật ở docs/TASKS.md. Phần đã kiểm chứng của xác thực, handoff, RAG local dùng Ollama/Qdrant và baseline trên bộ câu hỏi giả lập được trình bày trong Chương 5-6 báo cáo; không coi các mục còn dự kiến là kết quả hoàn thành.
 
 **9. Dự kiến nội dung của tiểu luận**
 

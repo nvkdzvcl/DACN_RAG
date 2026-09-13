@@ -27,3 +27,11 @@ Qdrant embedded tại data/vectors, một worker; SQLite tiếp tục giữ meta
 Ingestion chạy đồng bộ trong threadpool, khóa một tác vụ sửa kho tri thức mỗi lúc và có retry thủ công. Khởi động lại đánh dấu processing bị gián đoạn thành failed. Chưa có durable job queue/OCR; thêm worker nền khi dung lượng hoặc nhu cầu hosting tăng. Network call nằm ngoài SQL transaction; final check ngăn AI muộn sau handoff/tin khách mới/nguồn thay đổi.
 
 LLM trả JSON có supported, answer và nguồn kèm quote. Backend kiểm tra schema, source ID, quote nguyên văn và phiên bản tài liệu. Ngưỡng retrieval ban đầu 0.35; chưa có reranker hay bộ kiểm chứng entailment. Cần bộ 60-100 câu đánh giá trước nghiệm thu chất lượng M3.
+
+## Quyết định sau baseline dev
+
+Bộ đầu tiên gồm 72 câu do trợ lý soạn trên cửa hàng giả lập: 24 dev và 48 test, tách nhóm nội dung cùng nguồn theo tập; mọi nhãn chờ người dùng duyệt. Chỉ số tự động là proxy, không gọi là độ đúng được người xác nhận. Lỗi provider tính riêng, không cộng vào từ chối đúng. Kết quả lưu model digest, hash dữ liệu/mã nguồn và từng completion để kiểm toán.
+
+Giữ ngưỡng 0,35 và prompt hiện tại. Dev có Recall@5 = 100% trên 17 câu có gold nhưng quyết định đúng 17/24; tăng ngưỡng lên 0,45 loại nguồn đúng ở một câu có đáp án. Bản prompt v2 thử trên cùng dev không tăng decision accuracy và giảm từ chối đúng từ 6/9 xuống 5/9, xuất hiện câu bịa mã FREE80 với citation thuộc chính sách khác. Bản này bị loại trước khi chạy test, được lưu nguyên trong evals/rag/runs/prompt-v2-dev. Không nới kiểm tra quote hay thêm reranker khi chưa có bằng chứng retrieval là điểm nghẽn.
+
+Mốc tiếp theo cần kiểm chứng câu trả lời thực sự được nguồn hỗ trợ, phân biệt thiếu thông tin với trả lời phủ định và xử lý nguồn mâu thuẫn. Sau khi xem tập test này, các thay đổi dùng nó làm regression; thêm một tập chưa xem nếu muốn đánh giá khả năng tổng quát hóa. Xem docs/RAG_EVALUATION.md cho kết quả cuối.

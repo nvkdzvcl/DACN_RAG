@@ -45,3 +45,7 @@ Máy mới: cài Ollama từ https://ollama.com/download/windows rồi chạy `o
 Qdrant embedded chỉ dùng **một API worker**; không mở hai tiến trình cùng `QDRANT_PATH`. Chuyển sang Qdrant server trước khi chạy nhiều worker. Sao lưu cùng SQL DB, `data/knowledge_base` và `data/vectors` khi API đã dừng. Model và runtime tải lại được. Đổi embedding model phải lập chỉ mục lại.
 
 Kiểm chứng mô hình thật, DB/vector tạm: `python -m app.tests.smoke_ollama`. Lượt đầu tải model có thể mất hơn một phút. Ngưỡng score 0.35 là cấu hình khởi đầu, chưa hiệu chỉnh bằng bộ đánh giá. Citation kiểm tra nguồn và câu trích nguyên văn, chưa chứng minh mọi mệnh đề trong câu trả lời đều được nguồn hỗ trợ.
+
+## Đánh giá RAG
+
+Bộ 72 câu tiếng Việt và chính sách giả lập nằm trong `evals/rag/`; nhãn đang chờ người dùng duyệt. Chạy `python -m app.evaluate_rag --split dev --output evals/rag/runs/my-dev-run`, rồi dùng `--split test` và thư mục mới cho tập kiểm tra. Trình chạy dùng SQL/vector tạm, ghi từng đáp án/lỗi và tổng hợp Recall@k, citation, từ chối, p50/p95; không sửa dữ liệu ứng dụng. Xem `evals/rag/README.md` để hiểu mẫu số và giới hạn từng chỉ số, `docs/RAG_EVALUATION.md` để xem kết quả baseline và ca cần sửa.
