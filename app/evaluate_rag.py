@@ -20,7 +20,7 @@ from app.db.migrations import migrate
 from app.rag.answer_service import answer_question
 from app.rag.ollama import CHAT_OPTIONS, CHAT_THINK, call, chat, chat_model, embedding_model
 from app.rag.vector_store import VectorStore
-from app.services.document_service import CHUNK_OVERLAP, CHUNK_SIZE, save_document
+from app.services.document_service import ALLOWED_EXTENSIONS, CHUNK_OVERLAP, CHUNK_SIZE, chunk_text, extract_sections, save_document
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET = ROOT / "evals/rag"
@@ -32,7 +32,7 @@ def normalize(value):
 
 def load_cases(path=DATASET / "cases.jsonl"):
     cases = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    ids, groups, queries = set(), {}, set()
+    ids, groups, queries, sections = set(), {}, set(), {}
     for case in cases:
         if case["id"] in ids or case["split"] not in {"dev", "test"} or not case["query"].strip():
             raise ValueError("Duplicate case ID, invalid split or blank query")
@@ -52,11 +52,18 @@ def load_cases(path=DATASET / "cases.jsonl"):
             re.compile(pattern)
         for evidence in case["evidence"]:
             name = evidence["source"]
-            if Path(name).name != name or not name.startswith(case["split"] + "-"):
+            source = path.parent / "corpus" / name
+            if (Path(name).name != name or any(c in name for c in "\\/:") or
+                    not name.startswith(case["split"] + "-") or source.suffix.lower() not in ALLOWED_EXTENSIONS or
+                    source.resolve().parent != (path.parent / "corpus").resolve()):
                 raise ValueError("Evidence must stay in its split corpus")
-            lines = (path.parent / "corpus" / name).read_text(encoding="utf-8").splitlines()
-            line = int(evidence["location"].removeprefix("Dòng "))
-            if line < 1 or line > len(lines) or evidence["quote"] != lines[line - 1]:
+            if name not in sections:
+                sections[name] = list(extract_sections(source))
+            quote = evidence["quote"]
+            if not quote.strip() or not any(
+                    location == evidence["location"] and ("page" not in evidence or page == evidence["page"]) and
+                    any(normalize(quote) in normalize(chunk) for chunk in chunk_text(text))
+                    for text, page, location in sections[name]):
                 raise ValueError("Gold evidence does not match corpus location")
     return cases
 
@@ -82,7 +89,8 @@ def score_case(case, answer, error=None):
     grounded = bool(answer and answer.get("grounded"))
     valid_run = error is None and answer is not None
     def same_source(item, evidence):
-        return item.get("source") == evidence["source"] and item.get("location") == evidence["location"]
+        return (item.get("source") == evidence["source"] and item.get("location") == evidence["location"] and
+                ("page" not in evidence or item.get("page") == evidence["page"]))
     recalls = {str(k): ratio(sum(any(same_source(h, e) and normalize(e["quote"]) in normalize(h.get("content", ""))
                                          for h in hits[:k]) for e in gold), len(gold)) for k in (1, 3, 5)}
     valid_citations = sum(any(same_source(c, e) and normalize(c.get("quote", "")) and
@@ -126,16 +134,25 @@ def write_json(path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def run(split, output):
-    cases = [c for c in load_cases() if c["split"] == split]
+def run(split, output, dataset=DATASET):
+    dataset = dataset.resolve()
+    if not dataset.is_relative_to(ROOT):
+        raise ValueError("Dataset must be inside the repository for reproducible manifests")
+    cases = [c for c in load_cases(dataset / "cases.jsonl") if c["split"] == split]
+    corpus = sorted(p for p in (dataset / "corpus").iterdir() if p.is_file() and p.suffix.lower() in ALLOWED_EXTENSIONS)
+    if not cases or not any(p.name.startswith(split + "-") for p in corpus):
+        raise ValueError("Split must contain cases and corpus files")
+    if any(p.resolve().parent != (dataset / "corpus").resolve() for p in corpus):
+        raise ValueError("Corpus files must stay in the dataset")
     output.mkdir(parents=True, exist_ok=False)  # Never overwrite a previous baseline.
-    files = [DATASET / "cases.jsonl", *sorted((DATASET / "corpus").glob("*.txt")), *sorted((ROOT / "app").rglob("*.py"))]
+    files = [dataset / "cases.jsonl", *corpus, *sorted((ROOT / "app").rglob("*.py"))]
     models = call("/api/tags").get("models", [])
     selected_models = {m["name"]: m["digest"] for m in models if m["name"] in {chat_model(), embedding_model()}}
     if len(selected_models) != len({chat_model(), embedding_model()}):
         raise RuntimeError("Configured Ollama models must be downloaded before evaluation")
     manifest = {
         "started_at_utc": datetime.now(timezone.utc).isoformat(), "status": "running", "split": split,
+        "dataset": dataset.relative_to(ROOT).as_posix(),
         "case_ids": [c["id"] for c in cases], "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "sha256": {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
         "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
@@ -143,7 +160,7 @@ def run(split, output):
         **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": 0,
         "answer_pipeline": "select sentence IDs, extract verbatim answer/citations, same-model review, source-version recheck",
         "chat_calls_per_question": "0-2; review only for valid selections; completions saved in call order",
-        "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx")},
+        "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx", "pypdf", "python-docx")},
         "label_status": "synthetic_agent_authored_pending_human_review",
         "timing": "Sequential end-to-end calls; includes query embedding and model load/unload, excludes ingestion. No deliberate warmup.",
     }
@@ -159,8 +176,14 @@ def run(split, output):
             try:
                 migrate(engine)
                 with patch("app.services.document_service.vector_store", store), patch("app.rag.answer_service.vector_store", store), Session(engine) as db:
-                    for path in sorted((DATASET / "corpus").glob(split + "-*.txt")):
+                    ingestion = []
+                    for path in (p for p in corpus if p.name.startswith(split + "-")):
+                        started = time.perf_counter()
                         result = save_document(db, path.name, path.read_bytes(), root / "files")
+                        ingestion.append({"source": path.name, "sha256": manifest["sha256"][path.relative_to(ROOT).as_posix()],
+                                          "seconds": round(time.perf_counter() - started, 3),
+                                          **{k: result[k] for k in ("status", "chunks", "error_message")}})
+                        write_json(output / "ingestion.json", ingestion)
                         if result["status"] != "indexed":
                             raise RuntimeError(f"Ingestion failed: {path.name}: {result['error_message']}")
                     store.close()
@@ -210,8 +233,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--split", required=True, choices=["dev", "test"])
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--dataset", type=Path, default=DATASET, help="Dataset directory inside the repository")
     args = parser.parse_args()
-    summary = run(args.split, args.output)
+    summary = run(args.split, args.output, args.dataset)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 1 if summary["errors"] else 0
 

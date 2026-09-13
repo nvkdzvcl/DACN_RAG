@@ -24,6 +24,8 @@ python -m app.evaluate_rag --split test --output evals/rag/runs/my-test-run
 
 Trình chạy đọc biến môi trường hiện tại, không tự nạp `.env`. Mặc định model/ngưỡng giống ứng dụng. Muốn so cấu hình khác, đặt `LLM_MODEL`, `EMBEDDING_MODEL`, `RAG_MIN_SCORE` trong terminal chạy benchmark. Chạy tuần tự, tránh hỏi AI hoặc upload tài liệu ở ứng dụng trong lúc đo để giảm tranh chấp GPU. Không cần dừng ứng dụng.
 
+Tùy chọn `--dataset` chọn thư mục bộ dữ liệu khác trong repo; mặc định giữ bộ TXT này. Bộ PDF/DOCX bổ sung ở `../rag-documents/`, chạy với `--dataset evals/rag-documents --split test`. CLI hỗ trợ các định dạng ingestion hiện có; gold được đối chiếu vị trí bằng cùng parser/chunker, phải nằm trọn trong một chunk. Với gold có `page`, chấm cả page và location. Các lượt mới có `ingestion.json` ghi thời gian/trạng thái/số chunk và hash mỗi file; corpus/nhãn và kết quả TXT cũ giữ nguyên.
+
 Mỗi lần chạy tạo SQL DB và Qdrant trong thư mục tạm; đóng/mở kho vector sau ingestion trước khi hỏi. Thư mục kết quả bắt buộc chưa tồn tại để tránh ghi đè. Khi lỗi provider, ghi lỗi và tiếp tục; lỗi không được tính là từ chối đúng. Mã thoát khác 0 nếu có lỗi vận hành; chất lượng thấp vẫn xuất báo cáo đầy đủ, chưa có ngưỡng nghiệm thu tự động.
 
 ## Kết quả và thước đo

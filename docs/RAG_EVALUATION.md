@@ -203,3 +203,40 @@ Bộ 72 câu đã được xem lỗi, tập test là regression. Các nhãn chư
 - [model4b-extractive-dev](../evals/rag/runs/model4b-extractive-dev/summary.json): manifest, model digest, snapshot, raw completion, lỗi và phiếu người duyệt.
 - [model4b-extractive-short-dev](../evals/rag/runs/model4b-extractive-short-dev/summary.json): manifest, model digest, snapshot, raw completion, lỗi và phiếu người duyệt.
 - [model4b-extractive-short-test](../evals/rag/runs/model4b-extractive-short-test/summary.json): manifest, model digest, snapshot, raw completion, lỗi và phiếu người duyệt.
+
+## Đánh giá bổ sung trên PDF và DOCX
+
+Giữ nguyên model qwen3:4b, prompt, ngưỡng và chunker của commit 78e50f9. Bộ mới do trợ lý soạn sau khi đã xem lỗi TXT, đóng băng trước lượt hỏi; 14 câu có đáp án, 10 câu cần từ chối. Đây không phải bộ độc lập do bên ngoài soạn. Sau lượt đo này, bộ trở thành regression; không gộp với TXT để tuyên bố tăng chất lượng.
+
+Lượt PDF/DOCX gồm 24 câu đạt 21/24 quyết định đúng và 21/24 proxy dữ kiện; từ chối đúng 9/10, từ chối sai 2/14. Recall@1/3/5 là 93.75%/100.00%/100.00% trên 16 câu có gold; citation khớp gold 63.16%. p50/p95 14.031/15.727 giây trên 24 ca thành công; 0 lỗi provider.
+
+| Tài liệu | Số chunk | Ingestion giây | Trạng thái |
+|---|---:|---:|---|
+| test-dich-vu.docx | 10 | 3.852 | indexed |
+| test-nhan-hang-lap-dat.pdf | 6 | 3.699 | indexed |
+
+PDF ba trang có trang dài 355 từ; DOCX một trang gồm sáu đoạn và bảng bốn hàng. Đã kiểm tra trực quan đủ bốn trang nguồn. Trình nạp dùng parser/chunker ứng dụng để kiểm tra gold ở đúng trang/đoạn/bảng, log hash file nhị phân, trạng thái và thời gian ingestion. SQL/vector tạm được đóng/mở trước khi hỏi. Lượt đầu dừng ở log datetime trước câu hỏi (incomplete, 0 ca); đã sửa log, thêm kiểm thử và giữ lượt lỗi riêng.
+
+| Nhóm | Số ca | Quyết định đúng | Proxy |
+|---|---:|---:|---:|
+| ambiguous | 3 | 66.67% | 66.67% |
+| answerable | 9 | 88.89% | 88.89% |
+| conflict | 2 | 100.00% | 100.00% |
+| followup | 3 | 66.67% | 66.67% |
+| injection | 4 | 100.00% | 100.00% |
+| unanswerable | 3 | 100.00% | 100.00% |
+
+### Các ca cần duyệt
+
+| ID | Câu hỏi | Đáp án |
+|---|---|---|
+| doc-005 | Tôi phải báo đổi lịch lắp kệ Sen trước mốc nào? | Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên. |
+| doc-013 | Tôi đổi sang khắc hộp kim loại được không? | Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên. |
+| doc-019 | Chỗ tôi có được lắp kệ Sen không? | Dịch vụ lắp đặt kệ Sen Phạm vi dịch vụ lắp đặt kệ Sen là tầng trệt tại quận 7.  Nhân viên không tự mở rộng phạm vi khi khách chỉ cung cấp tên đường mà thiếu quận hoặc tầng. |
+
+doc-005: retrieval có toàn bộ gold trong top-3 và phần cấp cho LLM, nhưng model chọn sentence_id=9 không tồn tại trong nguồn 1; backend từ chối trước kiểm định. doc-013: kiểm định diễn giải đúng chính sách không khắc kim loại nhưng đánh cả ba cờ false. doc-019: khách thiếu địa chỉ, đáp án chỉ liệt kê phạm vi tầng trệt quận 7 và yêu cầu đủ địa chỉ; không khớp nhãn phải từ chối nhưng chưa khẳng định khách đủ điều kiện. Cần người duyệt xem câu trả lời nêu phạm vi có chấp nhận được hay phải hỏi làm rõ, không tự đổi nhãn để tăng điểm. Một số câu đạt proxy trả thêm câu nguồn ngoài gold, làm citation precision giảm; không suy chỉ số này thành tỷ lệ câu bịa.
+
+Recall tính trên quote tham chiếu; hai quote mâu thuẫn có thể cùng một chunk. Chưa có người chấm đúng ngữ nghĩa hoặc entailment. Chưa thử PDF scan/OCR, bảng PDF, nhiều cột hay DOCX gộp ô; nguồn vẫn giả lập, không đại diện khách thật. 37 unittest đạt; chấm lại 408 ca TXT đã lưu cho điểm từng ca/tổng hợp không đổi. M3 chưa nghiệm thu.
+
+- Dữ liệu, cách chạy và hướng dẫn người duyệt: [rag-documents](../evals/rag-documents/README.md).
+- Kết quả đầy đủ: [frozen4b-v2-test](../evals/rag-documents/runs/frozen4b-v2-test/summary.json).

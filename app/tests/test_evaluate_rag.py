@@ -1,7 +1,12 @@
 import copy
+from datetime import datetime
+import json
+from pathlib import Path
+import tempfile
 import unittest
+from unittest.mock import patch
 
-from app.evaluate_rag import load_cases, percentile, score_case, summarize
+from app.evaluate_rag import ROOT, chat_model, embedding_model, load_cases, percentile, run, score_case, summarize
 
 
 class EvaluationTests(unittest.TestCase):
@@ -62,6 +67,68 @@ class EvaluationTests(unittest.TestCase):
         answer = self.answer | {'answer': '7 ngày. FREE100 giảm 100%.'}
         self.assertFalse(score_case(case, answer)['fact_pattern_pass'])
         self.assertTrue(score_case(case, answer)['forbidden_text'])
+
+    def test_document_fixtures_have_real_pages_paragraphs_and_table_rows(self):
+        cases = load_cases(ROOT / 'evals/rag-documents/cases.jsonl')
+        self.assertEqual(len(cases), 24)
+        self.assertEqual(sum(c['should_answer'] for c in cases), 14)
+        evidence = [e for c in cases for e in c['evidence']]
+        self.assertEqual({e['page'] for e in evidence if e['source'].endswith('.pdf')}, {1, 2, 3})
+        self.assertTrue(any(e['location'].startswith('Đoạn ') for e in evidence))
+        self.assertTrue(any(e['location'].startswith('Bảng ') for e in evidence))
+        self.assertTrue(all(c['review_status'] == 'pending_human_review' for c in cases))
+
+    def test_pdf_scoring_requires_matching_page_even_if_location_matches(self):
+        case = load_cases(ROOT / 'evals/rag-documents/cases.jsonl')[0]
+        evidence = case['evidence'][0]
+        answer = {'answer': evidence['quote'], 'grounded': True, 'citations': [evidence],
+                  'results': [evidence | {'content': evidence['quote']}]}
+        self.assertTrue(score_case(case, answer)['fact_pattern_pass'])
+        wrong = copy.deepcopy(answer)
+        wrong['citations'][0]['page'] = 2
+        wrong['results'][0]['page'] = 2
+        score = score_case(case, wrong)
+        self.assertEqual(score['recall']['5'], 0)
+        self.assertEqual(score['gold_citation_count'], 0)
+
+    def test_gold_validation_rejects_wrong_location_or_escaping_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'corpus').mkdir()
+            (root / 'corpus/test-source.txt').write_text('Policy 36 hours.', encoding='utf-8')
+            case = copy.deepcopy(self.case)
+            case['split'] = 'test'
+            case['evidence'] = [{'source': 'test-source.txt', 'location': 'Dòng 1', 'quote': 'Policy 36 hours.'}]
+            def load(evidence):
+                (root / 'cases.jsonl').write_text(json.dumps(case | {'evidence': [evidence]}), encoding='utf-8')
+                return load_cases(root / 'cases.jsonl')
+            gold = case['evidence'][0]
+            self.assertEqual(len(load(gold)), 1)
+            for bad in [gold | {'location': 'Dòng 2'}, gold | {'quote': 'Policy 72 hours.'}, gold | {'page': 9}]:
+                with self.subTest(evidence=bad), self.assertRaises(ValueError):
+                    load(bad)
+            for name in ['../test-source.txt', 'test-dir/source.txt', 'test-dir\\source.txt', 'test-source.txt:stream']:
+                with self.subTest(source=name), patch('app.evaluate_rag.extract_sections') as extract, self.assertRaises(ValueError):
+                    load(gold | {'source': name})
+                extract.assert_not_called()
+
+    def test_run_imports_binary_corpus_and_records_serializable_ingestion(self):
+        case = load_cases(ROOT / 'evals/rag-documents/cases.jsonl')[0]
+        models = {'models': [{'name': name, 'digest': 'mock-digest'} for name in (chat_model(), embedding_model())]}
+        with tempfile.TemporaryDirectory() as directory, patch('app.evaluate_rag.load_cases', return_value=[case]), patch(
+                'app.evaluate_rag.call', return_value=models), patch('app.evaluate_rag.VectorStore'), patch(
+                'app.evaluate_rag.save_document', return_value={'created_at': datetime.now(), 'status': 'indexed',
+                'chunks': 3, 'error_message': None}) as save, patch('app.evaluate_rag.answer_question', return_value={
+                'grounded': False, 'answer': 'No evidence', 'citations': [], 'results': []}):
+            output = Path(directory) / 'run'
+            self.assertEqual(run('test', output, ROOT / 'evals/rag-documents')['cases'], 1)
+            self.assertEqual({Path(c.args[1]).suffix for c in save.call_args_list}, {'.pdf', '.docx'})
+            ingestion = json.loads((output / 'ingestion.json').read_text())
+            self.assertEqual(len(ingestion), 2)
+            self.assertTrue(all(row['status'] == 'indexed' and row['chunks'] == 3 for row in ingestion))
+            self.assertEqual(json.loads((output / 'manifest.json').read_text())['status'], 'complete')
+            with self.assertRaises(FileExistsError):
+                run('test', output, ROOT / 'evals/rag-documents')
 
 
 if __name__ == '__main__':

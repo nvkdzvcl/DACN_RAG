@@ -101,3 +101,15 @@ Task tiếp theo: xử lý câu mơ hồ, suy diễn hoặc mâu thuẫn còn l�
 - [x] Đề cương giữ 10 mục; báo cáo Markdown/Word giữ bảy chương, cập nhật kết quả và giới hạn. Word năm trang đã xuất PDF bằng Word và kiểm tra đủ năm ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows. Hash snapshot/corpus/retrieval đã kiểm chứng, mã dev/test cuối khớp nhau.
 
 Giới hạn: đáp án trích nguyên văn theo ngôn ngữ nguồn, tối đa ba câu từ năm nguồn bị giới hạn độ dài; chưa xử lý đầy đủ viết tắt/điều kiện ngoài đoạn hoặc tổng hợp tự do. Kiểm định cùng model vẫn có thể từ chối nhầm hoặc chấp nhận sai. Cần duyệt nhãn/đáp án và thêm tài liệu PDF/DOCX, câu hỏi chưa xem trước nghiệm thu M3.
+
+## Đánh giá PDF và DOCX M3 - 13/09/2026
+
+- [x] CLI nhận `--dataset` trong repo; nạp định dạng ingestion hiện có, kiểm tra gold bằng parser/chunker theo trang/đoạn/hàng bảng và chặn nguồn vượt thư mục. Ghi hash nhị phân, phiên bản parser, log trạng thái/thời gian/số chunk từng file.
+- [x] Bộ 24 câu mới, 14 có đáp án/10 cần từ chối, trên PDF ba trang và DOCX một trang có bảng; kiểm tra trực quan đủ bốn trang. PDF lập 6 chunk, DOCX 10 chunk. Giữ nhãn pending_human_review và cấu hình RAG commit 78e50f9 trước lượt đo.
+- [x] Lượt `frozen4b-test` dừng trước câu hỏi do serialize datetime trong log; sửa và thêm test, giữ manifest incomplete với 0 ca. Lượt `frozen4b-v2-test` hoàn tất 24 ca, không lỗi provider.
+- [x] Quyết định khớp nhãn/proxy 21/24; từ chối đúng 9/10, từ chối sai 2/14; Recall@5 100% trên 16 câu có gold, citation khớp gold 63,16%; p50/p95 14,031/15,727 giây. Citation ngoài gold không tự đồng nghĩa bịa dữ kiện.
+- [x] 37 unittest đạt; phát lại chấm 408 ca TXT đã lưu cho điểm từng ca và tổng hợp không đổi. Hash xác nhận model/prompt/retrieval không đổi, corpus và nhãn mới giữ nguyên giữa đầu/cuối lượt đo.
+- [x] Vite build đạt. Báo cáo Word năm trang khớp Markdown, giữ bảy chương; đã xuất bằng Word và kiểm tra đủ năm ảnh trang. Corpus PDF/DOCX cũng được render và kiểm tra đủ trang; renderer đóng gói thiếu LibreOffice nên dùng Word/Poppler trên Windows.
+- [ ] Người duyệt chấm cả tập; ưu tiên doc-005 chọn ID sai, doc-013 phủ định nối tiếp, doc-019 nêu phạm vi dịch vụ khi thiếu địa chỉ. Không tự sửa nhãn doc-019 để tăng điểm.
+
+Task tiếp theo: xác nhận quy tắc trả lời nêu điều kiện so với hỏi làm rõ, có người duyệt nhãn/đáp án; sau đó xử lý ID câu không hợp lệ và kiểm định phủ định bằng dev riêng. PDF/DOCX mới vẫn giả lập, chưa gồm OCR/bảng PDF/nhiều cột/ô gộp; cần nguồn và câu hỏi do người khác cung cấp trước nghiệm thu M3. Widget/phiên khách và realtime vẫn là mốc sau.
