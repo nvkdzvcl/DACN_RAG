@@ -30,6 +30,8 @@ Mỗi lần chạy tạo SQL DB và Qdrant trong thư mục tạm; đóng/mở k
 
 `manifest.json` lưu commit nền, SHA-256 corpus/cases/mã Python thực chạy (kể cả thay đổi chưa commit), digest model, tham số và phiên bản thư viện. `results.jsonl` lưu từng đáp án, kết quả truy xuất, citation, completion thô, thời gian và điểm. `summary.json` tổng hợp cả tập và từng loại câu. `human-review.jsonl` là phiếu chấm để trống; số ca được người duyệt hiện là 0.
 
+Luồng có kiểm định gọi chat tối đa hai lần: sinh đáp án, rồi kiểm định nếu đáp án vượt kiểm tra citation. `raw_completions` lưu đúng thứ tự gọi, kể cả kết quả kiểm định từ chối; thời gian tính cả hai lượt. Manifest ghi luồng thực chạy; snapshot `answer_service.py.txt` lưu prompt/schema của từng thử nghiệm. Kết quả model kiểm định là quyết định nội bộ ứng dụng, không phải nhãn người chấm hoặc thước đo entailment độc lập.
+
 | Chỉ số | Cách tính và giới hạn |
 |---|---|
 | Recall@1/3/5 | Trung bình số đoạn gold có trong top-k chia tổng đoạn gold của từng câu; chỉ câu có gold, bao gồm câu nguồn mâu thuẫn. So filename, vị trí và quote. Lỗi vận hành có recall 0. Đây là kết quả truy xuất trước ngưỡng score lọc cho LLM. |

@@ -77,7 +77,7 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
             db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
             db.refresh(conversation)
             current = conversation.status == "open" and conversation.last_customer_message_id == message_id
-            valid_sources = not rag or not rag.get("grounded") or sources_current(db, rag["citations"])
+            valid_sources = not rag or not rag.get("grounded") or sources_current(db, rag.get("reviewed_sources", rag["citations"]))
             if answer and current and valid_sources:
                 ai_message_id = str(uuid4())
                 db.add(Message(id=ai_message_id, conversation_id=conversation_id, sender_type="ai", content=answer,

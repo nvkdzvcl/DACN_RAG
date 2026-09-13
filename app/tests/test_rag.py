@@ -25,6 +25,10 @@ from app.services.document_service import extract_sections, save_document
 from app.services.message_service import process_message
 
 
+ACCEPT_REVIEW = {'reason': 'The cited policy supports the complete answer.', 'question_resolved': True,
+                 'sources_consistent': True, 'claims_supported': True}
+
+
 class RagTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -120,11 +124,13 @@ class RagTests(unittest.TestCase):
         self.upload()
         valid = {'supported': True, 'answer': 'You can return items within 7 days.', 'citations': [{'source_id': 1, 'quote': 'Returns accepted within 7 days.'}]}
         history = [{'role': 'user', 'content': 'Tell me about returns'}]
-        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch('app.rag.answer_service.chat', return_value=json.dumps(valid)) as chat:
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch('app.rag.answer_service.chat', side_effect=[json.dumps(valid), json.dumps(ACCEPT_REVIEW)]) as chat:
             result = answer_question('How many days?', history=history, db=db)
             self.assertTrue(result['grounded'])
             self.assertIn('Tell me about returns', chat.call_args.args[0][-1]['content'])
             self.assertEqual(result['citations'][0]['location'], 'Dòng 1')
+            self.assertEqual(chat.call_count, 2)
+            chat.side_effect = None
             for response in ['not JSON', json.dumps(valid | {'citations': [{'source_id': 9, 'quote': 'Returns accepted within 7 days.'}]}),
                              json.dumps(valid | {'citations': [{'source_id': 1, 'quote': 'Invented source text.'}]}),
                              json.dumps(valid | {'supported': False})]:
@@ -136,17 +142,92 @@ class RagTests(unittest.TestCase):
             self.assertFalse(answer_question('Unrelated?', db=db)['grounded'])
             chat.assert_not_called()
 
-    def test_deleted_source_during_generation_is_not_returned(self):
+    def test_deleted_source_during_review_is_not_returned(self):
         document_id = self.upload()
-        def generate(*args):
+        def generate(messages, schema):
+            self.assertFalse(db.in_transaction(), 'Model calls must not hold a SQL transaction')
+            if schema['title'] == 'GroundedAnswer':
+                return json.dumps({'supported': True, 'answer': '7 days', 'citations': [{'source_id': 1, 'quote': 'Returns accepted within 7 days.'}]})
             with Session(self.engine) as other:
                 other.get(KnowledgeDocument, document_id).status = 'deleting'
                 other.commit()
-            return json.dumps({'supported': True, 'answer': '7 days', 'citations': [{'source_id': 1, 'quote': 'Returns accepted within 7 days.'}]})
+            return json.dumps(ACCEPT_REVIEW)
         with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch('app.rag.answer_service.chat', side_effect=generate):
             result = answer_question('Returns?', db=db)
         self.assertFalse(result['grounded'])
         self.assertEqual(result['results'], [])
+
+    def test_valid_quote_does_not_bypass_review_and_review_sees_uncited_sources(self):
+        self.upload()
+        self.upload(b'Returns accepted within 14 days.', 'conflict.txt')
+        candidate = {'supported': True, 'answer': 'You can return items within 90 days.',
+                     'citations': [{'source_id': 1, 'quote': 'Returns accepted within 7 days.'}]}
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]):
+            # Use actual retrieval metadata, with stable ordering for the deliberately wrong candidate.
+            hits = sorted(self.store.search('Returns?', db=db), key=lambda h: h['source'] != 'policy.txt')
+            for review in [ACCEPT_REVIEW | {'claims_supported': False}, ACCEPT_REVIEW | {'question_resolved': False},
+                           ACCEPT_REVIEW | {'sources_consistent': False}, ACCEPT_REVIEW | {'claims_supported': 'true'},
+                           {'claims_supported': True}, 'not JSON']:
+                with self.subTest(review=review), patch.object(self.store, 'search', return_value=hits), patch(
+                        'app.rag.answer_service.chat', side_effect=[json.dumps(candidate), json.dumps(review)]) as chat:
+                    result = answer_question('Returns?', db=db)
+                    self.assertFalse(result['grounded'])
+                    self.assertEqual(result['citations'], [])
+                    self.assertEqual(chat.call_count, 2)
+                    payload = json.loads(chat.call_args.args[0][-1]['content'])
+                    self.assertEqual(len(payload['SOURCES']), 2)
+                    self.assertIn('14 days', payload['SOURCES'][1]['text'])
+                    self.assertEqual(payload['CANDIDATE'], candidate)
+
+    def test_grounded_negative_answer_can_pass_review(self):
+        self.upload(b'Installment payments are not supported.')
+        candidate = {'supported': True, 'answer': 'Installment payments are not supported.',
+                     'citations': [{'source_id': 1, 'quote': 'Installment payments are not supported.'}]}
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                'app.rag.answer_service.chat', side_effect=[json.dumps(candidate), json.dumps(ACCEPT_REVIEW)]):
+            self.assertTrue(answer_question('Do you accept installment payments?', db=db)['grounded'])
+
+    def test_uncited_source_change_after_review_suppresses_ai(self):
+        self.upload()
+        other_id = self.upload(b'Customers must keep their receipt.', 'conditions.txt')
+        with Session(self.engine) as db:
+            db.add(Customer(id='customer', display_name='Test'))
+            db.flush(); db.add(Conversation(id='chat', customer_id='customer')); db.commit()
+            with patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]):
+                hits = sorted(self.store.search('Returns?', db=db), key=lambda h: h['source'] != 'policy.txt')
+            candidate = {'supported': True, 'answer': '7 days',
+                         'citations': [{'source_id': 1, 'quote': 'Returns accepted within 7 days.'}]}
+            def change_after_review(*args, **kwargs):
+                result = answer_question(*args, **kwargs)
+                self.assertTrue(result['grounded'])
+                self.assertEqual(len(result['reviewed_sources']), 2)
+                self.assertNotIn(other_id, [c['document_id'] for c in result['citations']])
+                with Session(self.engine) as other:
+                    other.get(KnowledgeDocument, other_id).index_version = 'reindexed'
+                    other.commit()
+                return result
+            with patch.object(self.store, 'search', return_value=hits), patch(
+                    'app.rag.answer_service.chat', side_effect=[json.dumps(candidate), json.dumps(ACCEPT_REVIEW)]), patch(
+                    'app.services.message_service.answer_question', side_effect=change_after_review):
+                result = process_message(db, db.get(Conversation, 'chat'), 'How long for returns?')
+            self.assertIsNone(result['ai_message_id'])
+            self.assertEqual(db.query(Message).filter_by(sender_type='customer').count(), 1)
+            self.assertEqual(db.query(Message).filter_by(sender_type='ai').count(), 0)
+
+    def test_review_provider_error_preserves_inbound_without_unverified_ai(self):
+        self.upload()
+        with Session(self.engine) as db:
+            db.add(Customer(id='customer', display_name='Test'))
+            db.flush(); db.add(Conversation(id='chat', customer_id='customer')); db.commit()
+            candidate = {'supported': True, 'answer': '7 days',
+                         'citations': [{'source_id': 1, 'quote': 'Returns accepted within 7 days.'}]}
+            with patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                    'app.rag.answer_service.chat', side_effect=[json.dumps(candidate), ProviderError('Review offline')]):
+                result = process_message(db, db.get(Conversation, 'chat'), 'How many days for returns?')
+            self.assertEqual(result['ai_error'], 'Review offline')
+            self.assertIsNone(result['ai_message_id'])
+            self.assertEqual(db.query(Message).filter_by(sender_type='customer').count(), 1)
+            self.assertEqual(db.query(Message).filter_by(sender_type='ai').count(), 0)
 
     def test_provider_error_preserves_customer_and_newer_message_suppresses_stale_ai(self):
         with Session(self.engine) as db:

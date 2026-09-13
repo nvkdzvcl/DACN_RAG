@@ -44,7 +44,7 @@ Máy mới: cài Ollama từ https://ollama.com/download/windows rồi chạy `o
 
 Qdrant embedded chỉ dùng **một API worker**; không mở hai tiến trình cùng `QDRANT_PATH`. Chuyển sang Qdrant server trước khi chạy nhiều worker. Sao lưu cùng SQL DB, `data/knowledge_base` và `data/vectors` khi API đã dừng. Model và runtime tải lại được. Đổi embedding model phải lập chỉ mục lại.
 
-Kiểm chứng mô hình thật, DB/vector tạm: `python -m app.tests.smoke_ollama`. Lượt đầu tải model có thể mất hơn một phút. Ngưỡng score 0.35 là cấu hình khởi đầu, chưa hiệu chỉnh bằng bộ đánh giá. Citation kiểm tra nguồn và câu trích nguyên văn, chưa chứng minh mọi mệnh đề trong câu trả lời đều được nguồn hỗ trợ.
+Kiểm chứng mô hình thật, DB/vector tạm: `python -m app.tests.smoke_ollama`. Lượt đầu tải model có thể mất hơn một phút. Giữ ngưỡng score 0.35 sau chẩn đoán trên dev. Sau kiểm tra quote nguyên văn, một lượt Ollama riêng kiểm định đáp án với câu hỏi/lịch sử và toàn bộ nguồn đã cấp cho LLM: thiếu ngữ cảnh, nguồn mâu thuẫn, dữ kiện thiếu căn cứ hoặc chỉ dẫn độc hại đều dẫn đến từ chối. JSON kiểm định lỗi cũng từ chối; provider lỗi trả lỗi dịch vụ và giữ tin khách. Kiểm định dùng cùng model nên vẫn có thể sai, tăng độ trễ và không thay người duyệt. Backend kiểm tra lại phiên bản mọi nguồn đã kiểm định trước khi lưu AI.
 
 ## Đánh giá RAG
 

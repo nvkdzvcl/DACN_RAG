@@ -73,6 +73,17 @@ Phạm vi hiện tại: một API worker, SQLite + Qdrant embedded; ingestion đ
 - [x] Test gốc: Recall@5 100% trên 36 câu có gold; quyết định đúng 34/48 (70,83%); từ chối đúng 7/16 (43,75%); từ chối sai 5/32; proxy dữ kiện 31/48 (64,58%); p50 7,669s, p95 8,292s. Không gọi proxy là độ đúng do người xác nhận.
 - [x] 27 unittest đạt; Vite build đạt. Báo cáo chi tiết tại docs/RAG_EVALUATION.md, dữ liệu từng lượt trong evals/rag/runs/. Báo cáo Word bốn trang đã xuất PDF bằng Word và kiểm tra đủ bốn ảnh trang (renderer đóng gói thiếu LibreOffice).
 - [ ] Người dùng duyệt nhãn và chấm mức đúng/có căn cứ; hiện 0 câu được người duyệt.
-- [ ] Sửa đáp án không được citation chứng minh, câu mơ hồ và nguồn mâu thuẫn. Hai yêu cầu injection phải từ chối ở test vẫn thất bại; M3 chưa đạt chất lượng.
+- [x] Bổ sung bước kiểm định đáp án với nguồn và ngữ cảnh sau sinh; số liệu từng phiên bản ở mục tiếp theo. Đây là cải tiến bộ lọc, chưa nghiệm thu chất lượng M3.
 
-Task tiếp theo: kiểm chứng từng mệnh đề với nguồn và xử lý từ chối/làm rõ; dùng tập dev để thử thay đổi, tập test đã xem làm regression. Bổ sung tập chưa xem sau khi chốt hướng sửa. Sau đó widget có phiên khách riêng và Inbox realtime.
+## Kiểm định đáp án và regression M3 - 13/09/2026
+
+- [x] Một lần gọi Ollama kiểm định sau kiểm tra quote; đủ ngữ cảnh, nguồn nhất quán, dữ kiện có căn cứ phải cùng đúng. Từ chối khi JSON kiểm định sai; provider lỗi giữ tin khách và không phát đáp án chưa kiểm định.
+- [x] Kiểm định thấy cả nguồn không được trích dẫn trong tập nguồn đã cấp cho LLM. Kiểm tra lại phiên bản mọi nguồn đã xét; giữ guard handoff/tin khách mới và không giữ SQL transaction khi gọi model.
+- [x] 31 unittest và Vite build đạt; thêm kiểm tra đáp án sai có quote đúng, JSON kiểm định sai, câu phủ định có nguồn, nguồn bị đổi trong/sau kiểm định và lỗi provider giữ tin khách.
+- [x] Ba lượt dev mới, mỗi lượt 24 câu, không lỗi vận hành. Loại bản bốn cờ (16/24 quyết định đúng, từ chối sai 8/15) và một nhãn (18/24, bỏ sót hai ca mâu thuẫn).
+- [x] Chọn bản ba điều kiện theo dev: 20/24 quyết định đúng, từ chối đúng 9/9, từ chối sai 4/15 không tăng so baseline; p50/p95 11,735/13,145 giây. Giữ model/ngưỡng/prompt sinh và dữ liệu cũ.
+- [x] Regression 48 câu: quyết định đúng 35/48 (gốc 34/48), từ chối đúng 10/16 (gốc 7/16), từ chối sai 7/32 (gốc 5/32); proxy dữ kiện 33/48, p50/p95 12,695/13,220 giây. 120 lượt hỏi mới, 0 lỗi vận hành.
+- [x] Chặn test-044, test-047 và test-048; thêm từ chối sai ở test-013 và test-029. Hai yêu cầu bịa trực tiếp bị chặn, nhưng ba ca mơ hồ, một ca đảo nghĩa chính sách và hai ca mâu thuẫn vẫn lọt. Giữ bước kiểm định trong local MVP; không coi là giải quyết hết grounding/injection.
+- [x] Cập nhật đề cương, roadmap, quyết định, báo cáo Markdown/Word và bảng so sánh mọi lượt thử. Báo cáo Word bốn trang đã xuất PDF bằng Word và kiểm tra đủ bốn ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
+
+Task tiếp theo: xử lý câu mơ hồ, suy diễn hoặc mâu thuẫn còn lọt và giảm từ chối sai ở câu phủ định/hỏi nối tiếp/quote đổi dấu. Cần người duyệt nhãn/đáp án, thêm bộ câu chưa xem và tài liệu PDF/DOCX trước nghiệm thu M3. Sau đó widget có phiên khách riêng và Inbox realtime.
