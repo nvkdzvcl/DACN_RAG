@@ -1,9 +1,24 @@
 from datetime import datetime, timezone
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 def now_utc() -> datetime: return datetime.now(timezone.utc)
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True)
+    display_name: Mapped[str] = mapped_column(String(160))
+    password_hash: Mapped[str] = mapped_column(String(255))
+    role: Mapped[str] = mapped_column(String(16), default="agent")
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    expires_at: Mapped[int]
 
 class Customer(Base):
     __tablename__ = "customers"
@@ -18,6 +33,7 @@ class Conversation(Base):
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"))
     channel: Mapped[str] = mapped_column(String(32), default="website")
     status: Mapped[str] = mapped_column(String(32), default="open")
+    assigned_agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     customer: Mapped[Customer] = relationship(back_populates="conversations")
@@ -30,6 +46,8 @@ class Message(Base):
     sender_type: Mapped[str] = mapped_column(String(16))
     content: Mapped[str] = mapped_column(Text)
     external_message_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    citations: Mapped[list | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     conversation: Mapped[Conversation] = relationship(back_populates="messages")
 

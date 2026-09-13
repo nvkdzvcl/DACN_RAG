@@ -15,7 +15,7 @@
 
 **Đề cương tiểu luận học phần Đồ án chuyên ngành**
 
-**<<TÊN ĐỒ ÁN>>**
+**NỀN TẢNG TRỢ LÝ AI HỖ TRỢ KHÁCH HÀNG ĐA KÊNH DỰA TRÊN KIẾN TRÚC RAG**
 
 `	`**NHÓM 5B**
 
@@ -37,19 +37,35 @@
 
 **1. Lý do chọn đề tài/tính cấp thiết của vấn đề nghiên cứu.**
 
+Nhân viên chăm sóc khách hàng phải xử lý nhiều câu hỏi lặp lại về chính sách và trạng thái đơn hàng. Đề tài xây dựng hệ thống truy xuất tài liệu nội bộ để hỗ trợ trả lời có nguồn, đồng thời chuyển hội thoại cho nhân viên khi khách hàng yêu cầu hoặc xuất hiện khiếu nại. Việc quản lý tập trung giúp giữ lịch sử trao đổi và người chịu trách nhiệm xử lý.
+
 **2. Lịch sử nghiên cứu vấn đề/ tổng quan**
+
+Nội dung cần bổ sung: tổng quan RAG, truy hồi ngữ nghĩa, tool calling và human-in-the-loop; so sánh với chatbot hỏi đáp tài liệu thông thường. Chưa hoàn thành khảo cứu và danh mục tài liệu học thuật, không xem phần này là tổng quan đã nghiệm thu.
 
 **3. Mục đích nghiên cứu**
 
+Xây dựng nền tảng CSKH cho cửa hàng bán lẻ trực tuyến giả lập, có Website Chat và một kênh xã hội thật, trả lời từ PDF/DOCX có dẫn nguồn, tra cứu đơn hàng có kiểm soát quyền và chuyển nhân viên kèm ngữ cảnh. Đánh giá mức độ có căn cứ của câu trả lời và độ đúng của luồng chuyển giao; không đặt giả định tuyệt đối không có hallucination.
+
 **4. Nhiệm vụ nghiên cứu**
+
+Phân tích nghiệp vụ và vai trò admin/nhân viên/khách hàng; thiết kế dữ liệu, API và giao diện; xây ingestion và RAG; tích hợp công cụ đơn hàng; xây ticket/SLA và handoff; phát triển widget và kênh thứ hai; kiểm thử, triển khai và hoàn thiện báo cáo. Nhân viên phải được xác thực, chỉ người phụ trách được trả lời, AI phải dừng khi cuộc hội thoại chuyển sang người thật.
 
 **5. Đối tượng nghiên cứu và phạm vi nghiên cứu**
 
+Đối tượng là hội thoại CSKH tiếng Việt, tài liệu chính sách PDF/DOCX và dữ liệu đơn hàng giả lập. Phạm vi bắt buộc gồm Website và kênh thứ hai (đề xuất Telegram, cần thống nhất với GVHD). Phát triển trực tiếp trên Windows; Zalo, OCR nâng cao và Self-RAG là hướng mở rộng. Không dùng dữ liệu giả lập để khẳng định đã tích hợp kênh thật.
+
 **6. Phương pháp nghiên cứu**
+
+Phát triển lặp theo các mốc có kiểm chứng. Dùng kiểm thử API, kiểm thử quyền và tranh chấp tiếp nhận, kiểm tra giao diện desktop/mobile; xây bộ câu hỏi có nguồn để đo Recall@k, độ đúng trích dẫn, khả năng từ chối và độ trễ p50/p95. Tách tập phát triển với tập đánh giá, ghi nhận giới hạn của từng thành phần.
 
 **7. Giả thuyết khoa học/Những đóng góp mới của đề tài**
 
+Giả thuyết cần kiểm chứng: kết hợp truy hồi bằng chứng, công cụ nghiệp vụ và chuyển giao có trạng thái giúp hỗ trợ CSKH đáng tin cậy hơn luồng trả lời không kiểm soát. Đóng góp dự kiến là tích hợp các thành phần vào quy trình đa kênh và xây bộ đánh giá phù hợp; chưa tuyên bố có thuật toán mới hoặc kết quả cải thiện định lượng.
+
 **8. Dự kiến kế hoạch nghiên cứu (tuần/thực hiện công việc gì ?)**
+
+Ưu tiên theo công việc: nền tảng dữ liệu và xác thực; RAG dùng mô hình thật; widget/realtime/SLA; Agentic RAG và handoff; kênh thứ hai; kiểm thử, triển khai và hồ sơ. Chi tiết mốc ở ROADMAP.md, trạng thái kỹ thuật ở docs/TASKS.md. Phần đã kiểm chứng của xác thực và handoff được trình bày trong Chương 5-6 báo cáo; không coi các mục còn dự kiến là kết quả hoàn thành.
 
 **9. Dự kiến nội dung của tiểu luận**
 

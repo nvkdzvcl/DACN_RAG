@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, AgentMessageCreate
 from app.db.session import Base
-from app.models.support import Conversation, Customer, Message, Ticket
+from app.models.support import Conversation, Customer, Message, Ticket, User
 
 
 class InboxTests(unittest.TestCase):
@@ -18,6 +18,8 @@ class InboxTests(unittest.TestCase):
         self.addCleanup(self.engine.dispose)
         self.addCleanup(self.db.close)
         self.db.add_all([Customer(id='a', display_name='Customer A', email='a@example.test'), Customer(id='b', display_name='Customer B')])
+        self.user = User(id='agent-1', username='agent-1', display_name='Agent One', password_hash='unused', role='agent')
+        self.db.add(self.user)
         self.db.flush()
         self.db.add_all([Conversation(id='first', customer_id='a', status='handoff_requested', priority='high'), Conversation(id='second', customer_id='b')])
         self.db.flush()
@@ -52,13 +54,13 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(error.exception.status_code, 404)
 
     def test_accept_and_agent_reply(self):
-        accepted = accept_conversation('first', 'agent-1', self.db)
+        accepted = accept_conversation('first', self.db, self.user)
         self.assertEqual(accepted['status'], 'assigned')
         self.assertEqual(accepted['ticket_ids'], ['ticket'])
-        reply = add_agent_message('first', AgentMessageCreate(content='Đã kiểm tra, tôi sẽ hỗ trợ ngay.', agent_id='agent-1'), self.db)
+        reply = add_agent_message('first', AgentMessageCreate(content='Đã kiểm tra, tôi sẽ hỗ trợ ngay.'), self.db, self.user)
         self.assertEqual(reply['sender_type'], 'agent')
         with self.assertRaises(HTTPException) as error:
-            add_agent_message('second', AgentMessageCreate(content='Không được gửi trước khi nhận.', agent_id='agent-1'), self.db)
+            add_agent_message('second', AgentMessageCreate(content='Không được gửi trước khi nhận.'), self.db, self.user)
         self.assertEqual(error.exception.status_code, 409)
 
 

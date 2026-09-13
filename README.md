@@ -20,4 +20,16 @@
 
 ## Trạng thái
 
-Khung dự án đang được khởi tạo. Các quyết định và công việc được ghi trong `docs/DECISIONS.md` và `docs/TASKS.md`.
+Đã có Unified Inbox với đăng nhập nhân viên, tiếp nhận và trả lời theo người phụ trách; AI dừng khi handoff. Backend chạy FastAPI/SQLite, frontend React/Vite. RAG hiện là bản local với hash embedding và câu trả lời trích đoạn, chưa dùng LLM thật hoặc vector DB lưu bền.
+
+Chạy lần đầu tại root repo:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m app.create_user admin --role admin
+python -m uvicorn app.main:app --reload
+```
+
+CLI yêu cầu nhập mật khẩu riêng (12-128 ký tự), không có tài khoản mặc định. Terminal thứ hai: `cd frontend`, rồi `npm run dev`. Xem `docs/DEMO.md` để tạo nhân viên và thử luồng handoff. API nội bộ hiện yêu cầu phiên nhân viên; phiên khách/widget triển khai ở mốc sau.
+
+Kiểm tra: `python -m unittest discover -s app/tests -v`; frontend: `npm --prefix frontend run build`. Tiến độ thực tế trong `docs/TASKS.md`, kế hoạch trong `ROADMAP.md`.

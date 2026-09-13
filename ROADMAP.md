@@ -1,6 +1,6 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
-Ngày lập: 11/09/2026. Trạng thái: kế hoạch đề xuất; chưa có mốc triển khai nào được nghiệm thu.
+Ngày lập: 11/09/2026. Cập nhật: 13/09/2026. Đã kiểm chứng mốc con xác thực và handoff trong MVP local; các mốc M0-M8 chưa nghiệm thu toàn bộ.
 
 ## Mục tiêu và phạm vi
 
@@ -61,4 +61,8 @@ Theo dõi định kỳ chỉ cập nhật khi có mốc mới hoặc thay đổi
 
 ## Nhật ký nghiệm thu
 
-Chưa có mốc được nghiệm thu. Lộ trình này là kế hoạch, không phải báo cáo kết quả.
+13/09/2026: kiểm chứng mốc con xác thực nhân viên, tiếp nhận và trả lời trong Inbox; bảo vệ API, lưu người phụ trách, chặn nhận tranh chấp, dừng AI khi handoff, lưu lịch sử và citation. Có kiểm thử tự động trong app/tests và kiểm tra trình duyệt desktop/mobile trên DB thử riêng.
+
+M2 mới hoàn thành phần nền tảng auth và migration cộng thêm cột; thiết kế đầy đủ, PostgreSQL và thử kênh thứ hai còn thiếu. M3 vẫn là prototype hash embedding/in-memory/extractive answer. M4 thiếu widget/realtime/SLA; M5 thiếu tool calling bằng LLM và đánh giá sentiment/tóm tắt. Không dùng mốc con này để tuyên bố hoàn thành M2-M5.
+
+Stack đang chạy: FastAPI + SQLAlchemy/SQLite + React/Vite; Next.js/PostgreSQL/Qdrant trong bảng là phương án ban đầu, chưa phải cấu hình đã triển khai.
