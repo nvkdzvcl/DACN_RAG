@@ -34,6 +34,7 @@ class Conversation(Base):
     channel: Mapped[str] = mapped_column(String(32), default="website")
     status: Mapped[str] = mapped_column(String(32), default="open")
     assigned_agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    last_customer_message_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     customer: Mapped[Customer] = relationship(back_populates="conversations")
@@ -73,6 +74,9 @@ class KnowledgeDocument(Base):
     filename: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(32), default="uploaded")
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    file_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    index_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    embedding_model: Mapped[str | None] = mapped_column(String(160), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
 class DocumentChunk(Base):
@@ -82,3 +86,5 @@ class DocumentChunk(Base):
     chunk_index: Mapped[int]
     content: Mapped[str] = mapped_column(Text)
     source: Mapped[str] = mapped_column(String(255))
+    page: Mapped[int | None] = mapped_column(nullable=True)
+    location: Mapped[str | None] = mapped_column(String(160), nullable=True)

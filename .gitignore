@@ -6,3 +6,6 @@ data/*.db
 .env.*
 !.env.example
 frontend/node_modules/.vite/
+data/runtime/
+data/vectors/
+data/knowledge_base/

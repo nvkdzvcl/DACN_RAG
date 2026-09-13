@@ -180,7 +180,7 @@ class AuthHandoffTests(unittest.TestCase):
 
     def test_inflight_message_then_handoff_remains_silent(self):
         entered, release = Event(), Event()
-        def answer(_):
+        def answer(_, **kwargs):
             entered.set()
             self.assertTrue(release.wait(5))
             return {'answer': 'Earlier answer', 'citations': []}
@@ -192,11 +192,20 @@ class AuthHandoffTests(unittest.TestCase):
                 first = pool.submit(process, 'Question')
                 self.assertTrue(entered.wait(5))
                 handoff = pool.submit(process, 'gặp nhân viên')
-                release.set()
-                first.result(timeout=10)
-                self.assertEqual(handoff.result(timeout=10)['status'], 'handoff_requested')
+                try:
+                    self.assertEqual(handoff.result(timeout=3)['status'], 'handoff_requested')
+                    with Session(self.engine) as db:
+                        accept_conversation('chat', db, db.get(User, 'one'))
+                finally:
+                    release.set()
+                result = first.result(timeout=10)
+                self.assertEqual(result['status'], 'assigned')
+                self.assertIsNone(result['rag'])
+                self.assertIsNone(result['ai_message_id'])
             self.assertIsNone(process('Another question')['rag'])
             self.assertEqual(rag.call_count, 1)
+        with Session(self.engine) as db:
+            self.assertEqual(db.query(Message).filter_by(sender_type='ai').count(), 0)
 
     def test_migration_preserves_legacy_records_and_is_repeatable(self):
         legacy = create_engine('sqlite://')
@@ -211,7 +220,7 @@ class AuthHandoffTests(unittest.TestCase):
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
             self.assertEqual(connection.execute(text('SELECT content FROM messages')).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 1)
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 2)
 
 
 if __name__ == '__main__':

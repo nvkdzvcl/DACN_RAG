@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot } from 'lucide-react';
 import './styles.css';
+import KnowledgeBase, { Citations } from './KnowledgeBase';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
@@ -16,10 +17,10 @@ function timeOf(value) {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE}/api/v1${path}`, { ...options, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF-Protection': '1', ...options.headers } });
+  const response = await fetch(`${API_BASE}/api/v1${path}`, { ...options, credentials: 'same-origin', headers: { ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), 'X-CSRF-Protection': '1', ...options.headers } });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(response.status === 401 ? 'Phiên đăng nhập hết hạn hoặc thông tin đăng nhập không đúng.' : response.status === 409 ? 'Hội thoại đã đổi trạng thái hoặc thuộc nhân viên khác. Hãy làm mới.' : response.status === 403 ? 'Tài khoản không có quyền thực hiện thao tác.' : response.status === 429 ? 'Thử đăng nhập quá nhiều lần. Chờ một phút rồi thử lại.' : typeof data.detail === 'string' ? data.detail : `Yêu cầu thất bại (HTTP ${response.status}).`);
+    const error = new Error(response.status === 401 ? 'Phiên đăng nhập hết hạn hoặc thông tin đăng nhập không đúng.' : response.status === 403 ? 'Tài khoản không có quyền thực hiện thao tác.' : response.status === 429 ? 'Thử đăng nhập quá nhiều lần. Chờ một phút rồi thử lại.' : typeof data.detail === 'string' ? data.detail : `Yêu cầu thất bại (HTTP ${response.status}).`);
     error.status = response.status;
     throw error;
   }
@@ -70,6 +71,7 @@ function SessionGate() {
 }
 
 function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
+  const [page, setPage] = useState('inbox');
   const [conversations, setConversations] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -148,12 +150,14 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     <aside aria-label="Điều hướng chính">
       <div className="brand"><span className="brandLogo"><Bot aria-hidden="true" /></span><b>RAG</b><small>Support Hub</small></div>
       {[[Inbox, 'Tổng quan'], [Inbox, 'Hội thoại'], [UserRound, 'Khách hàng'], [Package, 'Đơn hàng'], [BookOpen, 'Kho tri thức'], [BarChart3, 'Phân tích'], [Settings, 'Cài đặt']].map(([Icon, label], i) =>
-        <button key={label} className={`nav ${i === 1 ? 'active' : ''}`} disabled={i !== 1} aria-current={i === 1 ? 'page' : undefined}><Icon size={17} />{label}{i === 1 && <em>{listLoading || listError ? '—' : conversations.length}</em>}</button>)}
+        <button key={label} className={`nav ${(i === 1 && page === 'inbox') || (i === 4 && page === 'knowledge') ? 'active' : ''}`} disabled={i !== 1 && i !== 4} onClick={() => setPage(i === 4 ? 'knowledge' : 'inbox')} aria-current={(i === 1 && page === 'inbox') || (i === 4 && page === 'knowledge') ? 'page' : undefined}><Icon size={17} />{label}{i === 1 && <em>{listLoading || listError ? '—' : conversations.length}</em>}</button>)}
       <div className="agent"><div className="avatar"><UserRound size={18} /></div><div><b>{user.display_name}</b><small>{user.role === 'admin' ? 'Quản trị viên' : 'Nhân viên hỗ trợ'}</small></div></div>
     </aside>
     <main>
       <div className="sessionBar"><span>{user.display_name}</span><button onClick={onLogout} disabled={logoutBusy}>{logoutBusy ? 'Đang đăng xuất...' : 'Đăng xuất'}</button></div>
       {sessionError && <p role="alert">{sessionError}</p>}
+      <nav className="mobileNav" aria-label="Điều hướng"><button aria-pressed={page === 'inbox'} onClick={() => setPage('inbox')}>Hội thoại</button><button aria-pressed={page === 'knowledge'} onClick={() => setPage('knowledge')}>Kho tri thức</button></nav>
+      {page === 'knowledge' ? <KnowledgeBase user={user} request={request} onExpired={onExpired} /> : <>
       <header><div><h1>Hộp thư đa kênh</h1><p>Quản lý hội thoại, tin nhắn và yêu cầu hỗ trợ tập trung</p></div><label className="search"><Search size={16} /><input aria-label="Tìm kiếm hội thoại" placeholder="Tìm khách hàng, kênh..." value={search} onChange={e => setSearch(e.target.value)} /></label></header>
       <div className="stats">{['Hội thoại trong bộ lọc', 'Đang mở', 'Chờ nhân viên', 'Ưu tiên cao / khẩn cấp'].map((label, i) => <div key={label}><b>{listLoading || listError ? '—' : counts[i]}</b><small>{label}</small></div>)}</div>
       <section className="workspace">
@@ -169,7 +173,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
           <div className="messages">
             {!selected ? <p className="state">Chọn hội thoại để xem nội dung.</p> : detailError ? <div className="state" role="alert"><p>{detailError}</p><button onClick={() => setDetailRetry(n => n + 1)}>Thử lại</button></div> : !current ? <p className="state" role="status">Đang tải hội thoại...</p> : <>
               {!current.messages.length && <p className="state">Hội thoại chưa có tin nhắn.</p>}
-              {current.messages.map(m => <div key={m.id} className={`bubble ${m.sender_type === 'customer' ? 'customer' : m.sender_type === 'agent' ? 'staff' : 'ai'}`}><b>{senders[m.sender_type] || m.sender_type}</b><div className="messageContent">{m.content}</div>{m.citations?.length > 0 && <small>Nguồn: {m.citations.map(c => c.source).join(', ')}</small>}<time>{timeOf(m.created_at)}</time></div>)}
+              {current.messages.map(m => <div key={m.id} className={`bubble ${m.sender_type === 'customer' ? 'customer' : m.sender_type === 'agent' ? 'staff' : 'ai'}`}><b>{senders[m.sender_type] || m.sender_type}</b><div className="messageContent">{m.content}</div>{m.citations?.length > 0 && <Citations citations={m.citations} request={request} />}<time>{timeOf(m.created_at)}</time></div>)}
               <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary || 'Chưa có tóm tắt.'}</p><small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section>
             </>}
           </div>
@@ -178,6 +182,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
         </div>
         <div className="profile"><h3>Thông tin khách hàng</h3>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><div><b>{nameOf(current)}</b><small>{current.customer_id}</small></div></div><p>{current.customer_email || 'Chưa có email'}</p><hr /><h4>Hội thoại</h4><p>Kênh: {current.channel}</p><p>Trạng thái: {statuses[current.status] || current.status}</p><p>Ưu tiên: {priorities[current.priority] || current.priority}</p><h4>Ticket hỗ trợ</h4><p>{current.tickets.length} ticket</p></> : <p>Thông tin xuất hiện khi tải xong hội thoại.</p>}</div>
       </section>
+      </>}
     </main>
   </div>;
 }

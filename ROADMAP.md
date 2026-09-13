@@ -63,6 +63,8 @@ Theo dõi định kỳ chỉ cập nhật khi có mốc mới hoặc thay đổi
 
 13/09/2026: kiểm chứng mốc con xác thực nhân viên, tiếp nhận và trả lời trong Inbox; bảo vệ API, lưu người phụ trách, chặn nhận tranh chấp, dừng AI khi handoff, lưu lịch sử và citation. Có kiểm thử tự động trong app/tests và kiểm tra trình duyệt desktop/mobile trên DB thử riêng.
 
-M2 mới hoàn thành phần nền tảng auth và migration cộng thêm cột; thiết kế đầy đủ, PostgreSQL và thử kênh thứ hai còn thiếu. M3 vẫn là prototype hash embedding/in-memory/extractive answer. M4 thiếu widget/realtime/SLA; M5 thiếu tool calling bằng LLM và đánh giá sentiment/tóm tắt. Không dùng mốc con này để tuyên bố hoàn thành M2-M5.
+M2 mới hoàn thành phần nền tảng auth và migration cộng thêm cột; thiết kế đầy đủ, PostgreSQL và thử kênh thứ hai còn thiếu. M3 đã có Ollama thật và Qdrant embedded lưu bền, quản lý tài liệu/citation; chưa nghiệm thu chất lượng vì thiếu tập đánh giá và baseline. M4 thiếu widget/realtime/SLA; M5 thiếu tool calling bằng LLM và đánh giá sentiment/tóm tắt. Không dùng mốc con này để tuyên bố hoàn thành M2-M5.
 
-Stack đang chạy: FastAPI + SQLAlchemy/SQLite + React/Vite; Next.js/PostgreSQL/Qdrant trong bảng là phương án ban đầu, chưa phải cấu hình đã triển khai.
+Stack đang chạy: FastAPI + SQLAlchemy/SQLite + React/Vite; Qdrant embedded đã triển khai; Next.js/PostgreSQL trong bảng vẫn là phương án ban đầu.
+
+13/09/2026 (mốc con M3): Ollama local theo lựa chọn người dùng, embeddinggemma:300m + qwen3:1.7b, Qdrant lưu đĩa, metadata trang/đoạn, CRUD tri thức và câu trả lời có quote kiểm tra được. 22 unittest, build frontend và QA desktop/mobile đạt; 4 ca smoke với model thật đạt. LLM chạy ngoài SQL transaction; kiểm thử handoff/tiếp nhận hoàn tất khi LLM đang chờ và chặn AI muộn. M3 tiếp theo cần bộ 60-100 câu tiếng Việt và baseline; chưa có Recall@k, p50/p95 hay tỷ lệ hallucination được đo trên tập cố định.

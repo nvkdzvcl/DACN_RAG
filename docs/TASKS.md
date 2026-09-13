@@ -49,6 +49,19 @@
 - [x] Kiểm tra trình duyệt: đăng nhập, tiếp nhận/gửi, giữ bản nháp, tải lại phiên, đăng xuất; desktop và mobile 390px.
 - [x] 15 kiểm thử unittest đạt; frontend build đạt. Báo cáo Word ba trang đã xuất PDF bằng Word và kiểm tra ảnh bằng Poppler (renderer đóng gói thiếu LibreOffice trên Windows).
 
-Phạm vi hiện tại: MVP local một API worker, SQLite; API khách hàng tạm là API nội bộ có xác thực, chờ widget có phiên khách riêng. Embedding vẫn là hash 256 chiều trong RAM; chưa có LLM thật, vector DB bền, SLA hay kênh xã hội thật. Tóm tắt handoff là trích đoạn, chưa phải tóm tắt bằng LLM.
+## RAG Ollama và quản lý tri thức - 13/09/2026
 
-Task tiếp theo: embedding ngữ nghĩa + vector DB lưu bền + LLM có trích dẫn; trước khi gọi LLM qua mạng cần tách xử lý chậm khỏi transaction và kiểm tra lại trạng thái trước khi lưu/gửi AI.
+- [x] Ollama portable Windows, qwen3:1.7b và embeddinggemma:300m; kết nối local, timeout, lỗi rõ ràng, không fallback sang hash/stub.
+- [x] Qdrant embedded lưu bền; lọc đúng tài liệu indexed/model/phiên bản; kiểm tra đóng/mở lại vector store.
+- [x] Migration v2 cộng metadata/hash/phiên bản nguồn và last_customer_message_id, không mất dữ liệu cũ.
+- [x] Ingestion giới hạn file/ký tự/số đoạn; PDF giữ trang, DOCX giữ đoạn và bảng, TXT/Markdown giữ dòng; chống trùng nội dung.
+- [x] API danh sách, trạng thái, đọc đoạn nguồn, lập chỉ mục lại và xóa; phân quyền admin/agent; retry sau lỗi và xử lý bị gián đoạn.
+- [x] LLM có lịch sử ngắn cho câu nối tiếp; JSON schema, source ID/quote nguyên văn, kiểm tra nguồn còn hiệu lực; từ chối khi thiếu bằng chứng.
+- [x] Lưu tin khách trước LLM; không giữ SQL transaction trong lời gọi model; bỏ AI muộn khi handoff, tin mới hoặc nguồn thay đổi; lỗi model không làm mất tin khách.
+- [x] Kho tri thức desktop/mobile: tải/xem/lập chỉ mục lại/xóa có xác nhận/hỏi thử/citation xem nguồn; điều hướng mobile.
+- [x] 22 unittest đạt; Vite build đạt. Kiểm tra trình duyệt DB tạm: đăng nhập, tải/lập chỉ mục, nội dung, hỏi thật, mở nguồn, lập chỉ mục lại và hủy xác nhận xóa; bố cục mobile 390px. Báo cáo Word ba trang đã xuất PDF bằng Word và kiểm tra đủ ba ảnh trang bằng Poppler (renderer đóng gói thiếu LibreOffice).
+- [x] Smoke test Ollama thật đạt 4 ca: câu có nguồn, hỏi nối tiếp, không có dữ kiện, yêu cầu bịa; vector được đóng/mở trước khi hỏi. Lần chạy cuối: 9,64 / 9,69 / 4,67 / 8,77 giây; đây là số đo từng ca, không phải p50/p95 hay đánh giá tổng thể.
+
+Phạm vi hiện tại: một API worker, SQLite + Qdrant embedded; ingestion đồng bộ trong threadpool, chưa có job queue/OCR. M3 đã có chức năng RAG thật nhưng chưa nghiệm thu chất lượng: thiếu bộ 60-100 câu có đáp án/nguồn và baseline. Citation hợp lệ không chứng minh entailment của toàn bộ câu trả lời. Chưa có widget/phiên khách, realtime, SLA hoặc kênh xã hội thật. Tóm tắt handoff vẫn trích đoạn, chưa dùng LLM tool calling.
+
+Task tiếp theo: xây bộ câu hỏi đánh giá RAG tiếng Việt và baseline Recall@k, độ đúng nguồn/từ chối/độ trễ; hiệu chỉnh chunking/ngưỡng retrieval theo kết quả. Sau baseline: widget có phiên khách riêng và cập nhật Inbox realtime.

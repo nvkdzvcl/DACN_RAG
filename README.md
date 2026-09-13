@@ -20,7 +20,7 @@
 
 ## Trạng thái
 
-Đã có Unified Inbox với đăng nhập nhân viên, tiếp nhận và trả lời theo người phụ trách; AI dừng khi handoff. Backend chạy FastAPI/SQLite, frontend React/Vite. RAG hiện là bản local với hash embedding và câu trả lời trích đoạn, chưa dùng LLM thật hoặc vector DB lưu bền.
+Đã có Unified Inbox với đăng nhập nhân viên, tiếp nhận và trả lời theo người phụ trách; AI dừng khi handoff. Backend chạy FastAPI/SQLite, frontend React/Vite. RAG chạy Ollama local (qwen3:1.7b + embeddinggemma:300m), Qdrant embedded lưu bền, có trích nguồn và giao diện Kho tri thức. Tin khách được lưu trước khi gọi LLM; kiểm tra lại handoff/tin mới/phiên bản nguồn trước khi lưu AI.
 
 Chạy lần đầu tại root repo:
 
@@ -33,3 +33,15 @@ python -m uvicorn app.main:app --reload
 CLI yêu cầu nhập mật khẩu riêng (12-128 ký tự), không có tài khoản mặc định. Terminal thứ hai: `cd frontend`, rồi `npm run dev`. Xem `docs/DEMO.md` để tạo nhân viên và thử luồng handoff. API nội bộ hiện yêu cầu phiên nhân viên; phiên khách/widget triển khai ở mốc sau.
 
 Kiểm tra: `python -m unittest discover -s app/tests -v`; frontend: `npm --prefix frontend run build`. Tiến độ thực tế trong `docs/TASKS.md`, kế hoạch trong `ROADMAP.md`.
+
+## RAG local với Ollama
+
+Máy hiện tại đã có Ollama portable và hai model tại `data/runtime/` (không đưa lên Git). Sau khi khởi động lại máy, chạy `powershell -File scripts/start-ollama.ps1` trong terminal riêng; giữ terminal mở. Dịch vụ chỉ nghe 127.0.0.1:11434. Không cần API key.
+
+Máy mới: cài Ollama từ https://ollama.com/download/windows rồi chạy `ollama pull embeddinggemma:300m` và `ollama pull qwen3:1.7b`. Sao chép `.env.example` thành `.env` nếu chưa có, rồi chạy `python -m uvicorn app.main:app --reload --env-file .env`. Không ghi đè `.env` đang có. Cài dependencies bằng `python -m pip install -r requirements-dev.txt`.
+
+Đăng nhập admin, chọn **Kho tri thức**, tải PDF/DOCX/TXT/Markdown tối đa 10 MB. File cũ từ prototype cần **Lập chỉ mục lại**. Nhân viên được xem tài liệu và hỏi thử; chỉ admin được tải/xóa/lập chỉ mục lại. PDF giữ số trang; DOCX giữ đoạn/bảng; TXT giữ dòng. PDF scan cần OCR bên ngoài.
+
+Qdrant embedded chỉ dùng **một API worker**; không mở hai tiến trình cùng `QDRANT_PATH`. Chuyển sang Qdrant server trước khi chạy nhiều worker. Sao lưu cùng SQL DB, `data/knowledge_base` và `data/vectors` khi API đã dừng. Model và runtime tải lại được. Đổi embedding model phải lập chỉ mục lại.
+
+Kiểm chứng mô hình thật, DB/vector tạm: `python -m app.tests.smoke_ollama`. Lượt đầu tải model có thể mất hơn một phút. Ngưỡng score 0.35 là cấu hình khởi đầu, chưa hiệu chỉnh bằng bộ đánh giá. Citation kiểm tra nguồn và câu trích nguyên văn, chưa chứng minh mọi mệnh đề trong câu trả lời đều được nguồn hỗ trợ.

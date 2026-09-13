@@ -76,3 +76,14 @@ Invoke-RestMethod -Method Post "$api/conversations/$($chat.conversation_id)/proc
 ```
 
 Mở Inbox, Làm mới, Tiếp nhận rồi Gửi. Gửi thêm một tin qua `/process` hoặc `/messages`: tin khách được lưu nhưng không sinh trả lời AI, trạng thái vẫn `assigned`. Dùng tài khoản thứ hai thử trả lời để kiểm tra chặn quyền. Endpoint seed chỉ thêm đơn còn thiếu, không có reset.
+
+## Demo RAG Ollama và Kho tri thức
+
+1. Chạy `powershell -File scripts/start-ollama.ps1` nếu Ollama chưa chạy. Backend một worker: `python -m uvicorn app.main:app --reload --env-file .env`; frontend `npm --prefix frontend run dev`.
+2. Đăng nhập admin, vào Kho tri thức. Kiểm tra thông báo kết nối Ollama và đã tải đủ model.
+3. Tải tài liệu chính sách. Chờ trạng thái Đã lập chỉ mục; mở Xem nội dung để đối chiếu trang/dòng. File trùng bị từ chối; file failed có thể Lập chỉ mục lại.
+4. Hỏi câu có đáp án, mở citation rồi Xem đoạn nguồn. Hỏi câu ngoài tài liệu: mong đợi Chưa đủ bằng chứng. Không coi thông báo Có trích nguồn là đảm bảo tuyệt đối câu trả lời đúng.
+5. Đăng nhập agent: xem/hỏi được, không có nút sửa tài liệu. Mobile có thanh chuyển Hội thoại/Kho tri thức.
+6. Trên tài liệu thử, lập chỉ mục lại rồi xóa có xác nhận. Sau xóa không còn retrieval; citation cũ trong lịch sử vẫn lưu quote nhưng không mở được nguồn đã xóa.
+
+Kiểm thử model thật: `python -m app.tests.smoke_ollama` tự dùng thư mục tạm, kiểm tra vector sau đóng/mở, hai câu có nguồn, thiếu dữ kiện và yêu cầu bịa dữ liệu. Kiểm thử tranh chấp: `python -m unittest discover -s app/tests -v` xác nhận handoff và tiếp nhận hoàn tất khi LLM còn chờ, không lưu/gửi AI muộn.
