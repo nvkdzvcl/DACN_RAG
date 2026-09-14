@@ -134,3 +134,16 @@ Task tiếp theo: người duyệt xác nhận nhãn và cách trả lời nêu 
 - [x] Cập nhật đề cương 10 mục, roadmap, quyết định và hướng dẫn chấm. Báo cáo Word sáu trang khớp Markdown, giữ bảy chương; xuất bằng Word và kiểm tra đủ sáu ảnh trang bằng Poppler vì renderer đóng gói thiếu LibreOffice trên Windows.
 
 Task tiếp theo: người duyệt chấm bản sao phiếu trên lượt bounded-ids-test, đối chiếu nguồn và thống nhất câu nêu điều kiện; tổng hợp bằng CLI mới. M3 chưa nghiệm thu, lỗi phủ định/nối tiếp chưa được giải quyết; cần dữ liệu độc lập trước đợt cải thiện tiếp. Widget/phiên khách/realtime vẫn là phần chức năng kế tiếp.
+
+## Widget và phiên khách M4 - 14/09/2026
+
+- [x] Migration v3 tạo phiên khách gắn một hội thoại; cookie HttpOnly/SameSite Strict, hạn 24 giờ, DB chỉ lưu hash và tự cấp Customer ID. Không nhận ID khách/hội thoại/người gửi từ payload.
+- [x] API công khai tạo/khôi phục/gửi/handoff/kết thúc; chỉ trả lịch sử phiên và trích dẫn đã lưu. Tên trùng không cấp quyền đơn hàng; API nhân viên vẫn được bảo vệ.
+- [x] UUID chống gửi trùng và chặn cùng ID khác nội dung; giữ tin khi provider lỗi; kiểm tra lại phiên sau model, chặn AI muộn khi handoff/kết thúc. Giới hạn IP và một lượt AI widget, handoff không chờ model.
+- [x] Trang /chat, script /widget.js và demo nhúng cùng origin; giữ bản nháp/ID khi thử lại, polling 3 giây, thông báo trạng thái, nguồn và kết thúc có xác nhận. Viewport mobile, nhãn nhập liệu, Escape trả focus và chống phản hồi cũ ghi đè phiên.
+- [x] 46 unittest và Vite build đạt. QA Edge trên DB/vector riêng: một câu qua Ollama thật có quote, tải lại giữ phiên, handoff, staff reply qua API và polling, mất mạng giữ draft/UUID, phục hồi polling, kết thúc thu hồi phiên; desktop/mobile 390px không tràn ngang.
+- [x] Cập nhật README, demo, quyết định, roadmap, đề cương 10 mục và báo cáo Markdown/Word bảy chương. Word bảy trang khớp Markdown, đã xuất bằng Word và kiểm tra đủ bảy ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
+
+Giới hạn: cùng origin, một API worker, bộ đếm IP trong bộ nhớ, 200 tin gần nhất, UUID retry giữ trong trang hiện tại; chưa xác minh chủ đơn và chưa điều phối chung AI với API nhân viên. Đóng khung giữ phiên; Kết thúc đóng hội thoại/ticket nhưng không xóa lịch sử DB. Polling widget không phải realtime Inbox hay SLA. M3 vẫn chờ người duyệt, không chạy lại benchmark vì không đổi RAG.
+
+Task tiếp theo: tự cập nhật Inbox và trạng thái hội thoại, sau đó SLA cơ bản với hạn phản hồi và quá hạn. Song song cần người duyệt chấm phiếu M3 và cung cấp tài liệu/câu hỏi độc lập; các kết quả widget không thay nghiệm thu chất lượng.

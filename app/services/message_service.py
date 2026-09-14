@@ -25,6 +25,8 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
         if external_message_id:
             previous = db.query(Message).filter_by(conversation_id=conversation_id, external_message_id=external_message_id).first()
             if previous:
+                if previous.sender_type != "customer" or previous.content != content:
+                    raise HTTPException(409, "Message ID was already used for different content")
                 response = {"message_id": previous.id, "status": conversation.status, "duplicate": True}
                 db.commit()
                 return response

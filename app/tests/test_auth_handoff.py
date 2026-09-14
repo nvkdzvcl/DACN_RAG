@@ -220,7 +220,7 @@ class AuthHandoffTests(unittest.TestCase):
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
             self.assertEqual(connection.execute(text('SELECT content FROM messages')).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 2)
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 3)
 
 
 if __name__ == '__main__':

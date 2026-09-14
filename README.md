@@ -30,9 +30,23 @@ python -m app.create_user admin --role admin
 python -m uvicorn app.main:app --reload
 ```
 
-CLI yêu cầu nhập mật khẩu riêng (12-128 ký tự), không có tài khoản mặc định. Terminal thứ hai: `cd frontend`, rồi `npm run dev`. Xem `docs/DEMO.md` để tạo nhân viên và thử luồng handoff. API nội bộ hiện yêu cầu phiên nhân viên; phiên khách/widget triển khai ở mốc sau.
+CLI yêu cầu nhập mật khẩu riêng (12-128 ký tự), không có tài khoản mặc định. Terminal thứ hai: `cd frontend`, rồi `npm run dev`. Xem `docs/DEMO.md` để tạo nhân viên và thử luồng handoff. API nội bộ yêu cầu phiên nhân viên; khách dùng `/chat` hoặc `/widget-demo.html` với phiên riêng, không cần tài khoản nhân viên.
 
 Kiểm tra: `python -m unittest discover -s app/tests -v`; frontend: `npm --prefix frontend run build`. Tiến độ thực tế trong `docs/TASKS.md`, kế hoạch trong `ROADMAP.md`.
+
+## Website chat widget
+
+Mở `http://localhost:5173/widget-demo.html`, chọn Hỗ trợ và nhập tên; `/chat` là trang chat trực tiếp. Widget gọi RAG hiện có, hiển thị trích dẫn đã lưu, cho phép Gặp nhân viên và nhận phản hồi qua polling mỗi 3 giây khi tab hiển thị, không có thao tác đang chờ. Inbox nhân viên vẫn dùng nút Làm mới.
+
+Nhúng trên website cùng origin đã phục vụ frontend và proxy `/api` tới FastAPI:
+
+```html
+<script src="/widget.js" defer></script>
+```
+
+Giữ đường dẫn `/chat` trả về frontend SPA khi phục vụ bản build. Origin gồm scheme, hostname và port; không trộn `localhost` với `127.0.0.1`. Chưa hỗ trợ nhúng khác origin. Ngoài development cần HTTPS để cookie Secure hoạt động; chạy một API worker.
+
+Cookie HttpOnly riêng có hạn cố định 24 giờ, DB chỉ lưu hash token; server tạo danh tính khách và gắn phiên với một hội thoại. Tên tự nhập không xác minh chủ đơn hàng: tra mã đơn không thuộc khách này chuyển nhân viên, không lộ thông tin đơn. Đóng khung chat giữ phiên; Kết thúc thu hồi phiên, đóng hội thoại/ticket và giữ lịch sử cho nhân viên. Widget hiển thị tối đa 200 tin gần nhất, giữ ID khi thử gửi lại trong cùng trang. Giới hạn mỗi IP/phút: 6 yêu cầu tạo phiên, 10 gửi tin, 6 chuyển nhân viên; chỉ một lượt AI từ widget được xử lý cùng lúc, lượt bận trả 429 trước khi lưu. Handoff vẫn hoạt động trong lúc AI chờ; giới hạn này chưa điều phối các lời gọi RAG nội bộ của nhân viên.
 
 ## RAG local với Ollama
 

@@ -36,3 +36,5 @@ def migrate(engine):
         connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS uq_document_hash ON knowledge_documents (file_hash)"))
         if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 2")).first():
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (2)"))
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 3")).first():
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (3)"))

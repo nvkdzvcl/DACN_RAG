@@ -101,3 +101,11 @@ Bản review-semantics-v3-dev vẫn lọt dev-017 và từ chối sai dev-013: 2
 Bản review-flags-first-dev chỉ đạt 14/24, từ chối đúng 9/9 nhưng từ chối sai 10/15; p50/p95 15,276/15,963 giây. Loại cả ba thử nghiệm trước test, đưa answer_service.py về đúng bản 0180479. Giữ 72 ca dev và snapshot; không chạy lại test khi RAG ứng dụng không đổi. Không dùng điểm tổng của bản 23/24 để che hồi quy ở câu ngoài nguồn.
 
 Ưu tiên hoàn thiện vòng người duyệt thay vì tiếp tục thử prompt trên tập cũ. CLI app.review_rag dùng stdlib, đọc phiếu riêng và kết quả bất biến, xác thực ID/kiểu/người chấm/phạm vi áp dụng rồi xuất tỷ lệ theo mẫu số thực được chấm. Nhãn bị bác bỏ và phần chưa chấm không thành điểm âm/dương; lỗi provider tách riêng. Không tự sửa nhãn, gọi model chấm thay người hoặc thêm UI/dependency khi quy trình JSONL đã có. Hash đầu vào và mã giúp đối chiếu báo cáo; danh tính người chấm vẫn tự khai.
+
+## Phiên khách và widget cùng origin 14/09/2026
+
+Triển khai phần widget của M4 trong lúc M3 chờ người duyệt, giữ nguyên model/prompt/retrieval và nhãn. Website dùng cookie HttpOnly riêng, thời hạn cố định 24 giờ, SameSite Strict, Secure ngoài development và đường dẫn chỉ trong API widget. Server tự tạo Customer/Conversation; token chỉ lưu hash. Không nhận danh tính khách/hội thoại từ payload và không đồng nhất tên tự nhập với khách mua hàng đã có.
+
+Tái sử dụng process_message, kiểm tra quyền ở route và ràng buộc trạng thái tại DB. UUID cho phép thử lại cùng tin mà không sinh trùng; cùng ID khác nội dung trả 409. Snapshot công khai chỉ chứa lịch sử của phiên cùng quote/vị trí đã lưu, không chứa retrieval thô hoặc ticket nội bộ. Kết thúc đóng hội thoại/ticket và thu hồi token; phản hồi sau model kiểm tra lại phiên. Handoff không chờ AI và kết quả AI muộn không được lưu khi trạng thái đã đổi.
+
+Chọn iframe cùng origin và polling 3 giây để có luồng website hoàn chỉnh với phần nền tảng hiện tại; chưa thêm CORS, cookie bên thứ ba, WebSocket/SSE hoặc dependency. Giới hạn 200 tin, rate limit theo IP trong bộ nhớ một worker và một lượt AI widget giúp giới hạn tài nguyên local; cần phân trang, bộ giới hạn dùng chung và điều phối toàn bộ lời gọi model trước mở rộng. Không coi đây là SLA, chống lạm dụng đầy đủ hay nghiệm thu M4. Inbox realtime và SLA là task chức năng tiếp theo; đánh giá bằng người và dữ liệu độc lập vẫn cần cho M3.

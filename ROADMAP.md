@@ -1,6 +1,6 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
-Ngày lập: 11/09/2026. Cập nhật: 13/09/2026. Đã kiểm chứng mốc con xác thực và handoff trong MVP local; các mốc M0-M8 chưa nghiệm thu toàn bộ.
+Ngày lập: 11/09/2026. Cập nhật: 14/09/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local và widget có phiên khách; các mốc M0-M8 chưa nghiệm thu toàn bộ.
 
 ## Mục tiêu và phạm vi
 
@@ -84,3 +84,5 @@ Regression trích xuất 4B: 40/48 quyết định đúng, 14/16 từ chối đ�
 13/09/2026 (ràng buộc ID câu M3): schema oneOf giới hạn ID câu theo nguồn thực có, backend vẫn chặn ID sai/trùng; 38 unittest và Vite build đạt. Chốt theo dev 22/24 rồi giữ nguyên trước hồi quy: PDF/DOCX 21/24, TXT 40/48 quyết định khớp nhãn/proxy, điểm từng ca không đổi. 96 lượt mới không lỗi provider hoặc cặp ID vượt phạm vi. doc-005 hết ID sai nhưng vẫn bị kiểm định từ chối; chưa cải thiện ngữ nghĩa. M3 còn chờ người duyệt, tiêu chí trả lời nêu điều kiện và xử lý chọn câu/kiểm định sai qua dev riêng; không chỉnh tiếp trên regression trong đợt này.
 
 14/09/2026 (vòng người duyệt M3): loại ba thử nghiệm kiểm định sau 72 ca dev vì giảm từ chối đúng hoặc tăng từ chối sai; giữ nguyên RAG bản 0180479, không chạy test cho bản bị loại. Bổ sung CLI app.review_rag tổng hợp phiếu người duyệt với ID/kiểu hợp lệ, tên người chấm, nhãn được duyệt và mẫu số riêng; không tính null/lỗi provider thành đánh giá, không ghi đè dữ liệu. 40 unittest và Vite build đạt. 48 phiếu trống vẫn cho 0 câu chấm; M3 chờ người duyệt thực tế và dữ liệu độc lập, chưa giải quyết hết phủ định/nối tiếp.
+
+14/09/2026 (mốc con M4): triển khai widget nhúng cùng origin, phiên khách 24 giờ, lịch sử/trích dẫn, chống gửi trùng, handoff và nhận phản hồi nhân viên bằng polling 3 giây. Migration v3 cộng bảng phiên; 46 unittest, Vite build và QA Edge desktop/mobile 390px trên DB/vector tạm đạt. Một câu hỏi qua Ollama thật có đáp án/quote, khôi phục phiên và xử lý mất mạng/kết thúc đã kiểm tra. M4 chưa nghiệm thu vì thiếu Inbox realtime và SLA; chưa có nhúng khác origin hay xác minh chủ đơn cho khách ẩn danh. M3 giữ nguyên cấu hình, tiếp tục chờ người duyệt và dữ liệu độc lập.

@@ -40,6 +40,12 @@ class Conversation(Base):
     customer: Mapped[Customer] = relationship(back_populates="conversations")
     messages: Mapped[list["Message"]] = relationship(back_populates="conversation", cascade="all, delete-orphan")
 
+class WidgetSession(Base):
+    __tablename__ = "widget_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), unique=True)
+    expires_at: Mapped[int] = mapped_column(index=True)
+
 class Message(Base):
     __tablename__ = "messages"
     id: Mapped[str] = mapped_column(String(64), primary_key=True)

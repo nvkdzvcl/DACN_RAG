@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot } from 'lucide-react';
 import './styles.css';
 import KnowledgeBase, { Citations } from './KnowledgeBase';
+import Widget from './Widget';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
@@ -187,4 +188,4 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   </div>;
 }
 
-createRoot(document.getElementById('root')).render(<SessionGate />);
+createRoot(document.getElementById('root')).render(window.location.pathname === '/chat' ? <Widget /> : <SessionGate />);

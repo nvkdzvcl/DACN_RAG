@@ -13,6 +13,7 @@ from app.api.seed import router as seed_router
 from app.api.process import router as process_router
 from app.api.inbox import router as inbox_router
 from app.api.auth import router as auth_router
+from app.api.widget import router as widget_router
 from app.core.auth import require_admin, require_staff
 from app.db.migrations import migrate
 from app.rag.ollama import ProviderError
@@ -30,6 +31,7 @@ async def lifespan(app):
 
 app = FastAPI(title="AI Customer Support Platform", version="0.1.0", lifespan=lifespan)
 app.include_router(auth_router)
+app.include_router(widget_router)
 for staff_router in (router, document_router, chunks_router, search_router, answer_router, orders_router, process_router, inbox_router):
     app.include_router(staff_router, dependencies=[Depends(require_staff)])
 for admin_router in (seed_router,):
