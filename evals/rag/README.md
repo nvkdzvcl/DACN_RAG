@@ -54,3 +54,23 @@ Các lượt `bounded-ids-dev` và `bounded-ids-test` dùng JSON Schema giới h
 Đối chiếu từng dòng `results.jsonl` với corpus gốc, không chỉ nhìn `grounded` hoặc điểm tự động. Trong `human-review.jsonl`, ghi người duyệt và ghi chú, duyệt nhãn trước rồi chấm: đáp án đúng câu hỏi, mọi mệnh đề có bằng chứng, citation chứng minh mệnh đề và quyết định từ chối phù hợp. Trường không áp dụng giữ null. Kết quả tự động không tự cập nhật thành điểm người chấm.
 
 Ưu tiên duyệt mọi ca không đạt proxy, mọi câu mơ hồ/mâu thuẫn/injection và một mẫu câu đạt. Muốn công bố tỷ lệ đúng hoặc có căn cứ bằng người, cần chấm đủ tập hoặc nêu rõ cách lấy mẫu và mẫu số. Chưa dùng model tự chấm làm ground truth; chưa có dữ liệu người dùng thật hay kiểm tra PDF/OCR chất lượng cao trong benchmark TXT này.
+
+## Tổng hợp phiếu người duyệt
+
+CLI `python -m app.review_rag` chỉ đọc kết quả và bản sao phiếu chấm, xuất JSON mới; không gọi Ollama, không sửa corpus/nhãn hoặc ghi đè kết quả. Ví dụ với lượt đang được giữ cho ứng dụng:
+
+```powershell
+if (-not (Test-Path -LiteralPath data/runtime/rag-human-review.jsonl)) {
+    Copy-Item -LiteralPath evals/rag/runs/bounded-ids-test/human-review.jsonl -Destination data/runtime/rag-human-review.jsonl
+}
+# Chấm bản sao sau khi đối chiếu results.jsonl và corpus, rồi chạy:
+python -m app.review_rag --run evals/rag/runs/bounded-ids-test --reviews data/runtime/rag-human-review.jsonl --output data/runtime/rag-human-summary.json
+```
+
+Mỗi dòng giữ nguyên `id`. Ghi tên người chấm ở `reviewer`, duyệt nhãn ở `gold_label_approved` trước khi chấm đáp án; nhãn bị bác bỏ phải có lý do trong `notes` và cần dataset phiên bản mới nếu sửa. JSON dùng `true`, `false`, `null`, không dùng chuỗi hoặc 0/1. Cho phép phiếu thiếu một số ca hoặc chấm dở; giữ `null` ở phần chưa chấm.
+
+Với kết quả `grounded=true`, chấm `answer_correct`, `all_claims_supported`, `citation_entailment_correct`; giữ `abstention_correct=null`. Với kết quả từ chối (`grounded=false`, không lỗi), chấm `abstention_correct`, giữ ba trường còn lại `null`. Ca lỗi provider không có đáp án để chấm, giữ cả bốn trường `null`; vẫn có thể duyệt nhãn nguồn. Câu trả lời phủ định có nguồn thuộc nhóm grounded, không phải abstention.
+
+Chỉ rating có người chấm và nhãn được duyệt mới vào tỷ lệ. Mỗi chỉ số xuất `correct`, `rated`, `rate`; chưa có mẫu thì `rate=null`. Báo cáo tách số câu chấm đủ, ca chưa chấm, nhãn bị bác bỏ và lỗi provider; không coi dòng phiếu trống là đã duyệt. Điểm từ một phần tập không đại diện toàn bộ tập. Tên người duyệt là thông tin tự khai; công cụ không xác thực danh tính hoặc chất lượng nhận xét.
+
+CLI yêu cầu lượt benchmark hoàn tất và ID khớp manifest; từ chối ID lạ/trùng, trường lạ, kiểu sai hoặc rating không áp dụng. Hash ghi đúng bytes kết quả/phiếu/manifest/mã chấm đã đọc. Đầu ra phải chưa tồn tại; mỗi lần chấm lại dùng tên mới. Áp dụng tương tự cho PDF/DOCX với `--run evals/rag-documents/runs/bounded-ids-test` và phiếu tương ứng, không trộn ID hai bộ.

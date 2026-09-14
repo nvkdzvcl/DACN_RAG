@@ -1,0 +1,66 @@
+"""Local Ollama transport. Provider failures never fall back to mock answers."""
+import math
+import os
+from urllib.parse import urlsplit, urlunsplit
+
+import httpx
+
+CHAT_THINK = False
+CHAT_OPTIONS = {"temperature": 0, "num_ctx": 8192, "num_predict": 700}
+
+
+class ProviderError(RuntimeError):
+    pass
+
+
+def embedding_model():
+    return os.getenv("EMBEDDING_MODEL", "embeddinggemma:300m")
+
+
+def chat_model():
+    return os.getenv("LLM_MODEL", "qwen3:4b")
+
+
+def call(path, payload=None):
+    host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+    if "://" not in host:
+        host = "http://" + host
+    parsed = urlsplit(host)
+    if parsed.hostname in {"0.0.0.0", "::"}:
+        host = urlunsplit(parsed._replace(netloc=f"127.0.0.1:{parsed.port or 11434}"))
+    try:
+        with httpx.Client(timeout=httpx.Timeout(180, connect=5), trust_env=False) as client:
+            response = client.get(host + path) if payload is None else client.post(host + path, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            if not isinstance(result, dict) or result.get("error"):
+                raise ValueError("Invalid Ollama response")
+            return result
+    except (httpx.HTTPError, ValueError) as exc:
+        raise ProviderError("Ollama chưa sẵn sàng. Kiểm tra dịch vụ, model đã tải và RAM trống.") from exc
+
+
+def embed(texts: list[str]) -> list[list[float]]:
+    result = call("/api/embed", {"model": embedding_model(), "input": texts, "truncate": False, "keep_alive": 0})
+    vectors = result.get("embeddings")
+    if not isinstance(vectors, list) or len(vectors) != len(texts):
+        raise ProviderError("Ollama trả embedding không hợp lệ.")
+    size = len(vectors[0]) if vectors and isinstance(vectors[0], list) else 0
+    if not size or any(not isinstance(v, list) or len(v) != size or
+                       any(type(x) not in (int, float) or not math.isfinite(x) for x in v) or
+                       not any(v) for v in vectors):
+        raise ProviderError("Ollama trả embedding không hợp lệ.")
+    return vectors
+
+
+def chat(messages, schema):
+    result = call("/api/chat", {"model": chat_model(), "messages": messages, "format": schema,
+                              "stream": False, "think": CHAT_THINK, "keep_alive": 0,
+                              "options": CHAT_OPTIONS})
+    message = result.get("message")
+    content = message.get("content") if isinstance(message, dict) else None
+    if result.get("done_reason") == "length":
+        raise ProviderError("Ollama chưa hoàn tất câu trả lời trong giới hạn suy luận. Hãy thử lại với câu hỏi ngắn hơn.")
+    if result.get("done") is not True or not isinstance(content, str) or not content.strip():
+        raise ProviderError("Ollama trả câu trả lời không hợp lệ.")
+    return content

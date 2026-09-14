@@ -265,3 +265,26 @@ Bộ test đã được xem lỗi nên chỉ là regression; nhãn vẫn chờ n
 Điểm từng ca của cả ba lượt giữ nguyên so baseline tương ứng. Các ca không đạt proxy vẫn là dev-004/013; doc-005/013/019; test-021/025/026/029/036/038/045/046. doc-005 hiện chọn các cặp hợp lệ (1,1), (1,2), (2,9): có câu chứa mốc 18 giờ nhưng thêm mảnh câu từ ranh giới chunk và câu hóa đơn ngoài yêu cầu. Kiểm định vẫn từ chối, nên sửa ID chưa giúp ca này trả lời thành công. doc-013 vẫn đánh cờ từ chối dù giải thích đúng chính sách phủ định; doc-019 vẫn chờ thống nhất tiêu chí. Cả bốn ca mâu thuẫn và hai yêu cầu bịa trực tiếp TXT tiếp tục bị chặn, hai ca chính sách hợp lệ cạnh injection vẫn bị từ chối sai. Không sửa prompt/nhãn tiếp từ kết quả hồi quy này.
 
 Recall và chỉ số citation giữ nguyên theo từng ca. p50/p95 thay đổi theo lượt đo, chưa có thí nghiệm lặp để quy chênh lệch cho schema. Đây là sửa lỗi cấu trúc ID, không phải cải thiện điểm ngữ nghĩa; M3 vẫn chưa nghiệm thu.
+
+## Thử giảm từ chối sai và bổ sung chấm bằng người
+
+Thử ba cách trên dev, mỗi cách 24 câu; tiêu chí chọn yêu cầu tăng quyết định khớp nhãn/proxy và giữ từ chối đúng 9/9. Cả ba không đạt nên bị loại trước test. Ứng dụng giữ nguyên prompt/schema/model của commit 0180479; không chạy lại hồi quy vì luồng RAG không đổi. Corpus và nhãn không bị sửa.
+
+| Bản dev | Quyết định khớp nhãn | Từ chối đúng | Từ chối sai | Proxy | p50/p95 giây | Lỗi |
+|---|---:|---:|---:|---:|---:|---:|
+| bounded-ids-dev | 22/24 | 9/9 | 2/15 | 22/24 | 13.287/14.022 | 0 |
+| review-semantics-v2-dev | 23/24 | 8/9 | 0/15 | 23/24 | 14.219/15.016 | 0 |
+| review-semantics-v3-dev | 22/24 | 8/9 | 1/15 | 22/24 | 15.323/16.34 | 0 |
+| review-flags-first-dev | 14/24 | 9/9 | 10/15 | 14/24 | 15.276/15.963 | 0 |
+
+Bản review-semantics-v2-dev thêm hướng dẫn đọc đủ vế câu và phân biệt đáp án đúng với chấp thuận dịch vụ: sửa dev-004/013 nhưng làm lọt dev-017 hỏi phương thức thanh toán ngoài nguồn. Bản review-semantics-v3-dev thêm phân biệt không nhắc đến với phủ định vẫn lọt dev-017, đồng thời từ chối sai dev-013. Bản review-flags-first-dev dùng lại tiêu chí gốc, sinh ba cờ trước reason; từ chối sai tăng lên 10/15. Không chọn bản 23/24 chỉ dựa vào điểm tổng khi khả năng từ chối giảm.
+
+72 lượt dev mới không lỗi provider. Lần gọi khởi động đầu dừng ở /api/tags vì Ollama chưa chạy, chưa nhập nguồn hoặc hỏi câu nào; giữ preflight-error.json trong review-semantics-dev, khởi động runtime có sẵn và chạy vào thư mục mới. Đây là lỗi trước đánh giá, không tính vào quyết định từ chối hoặc 72 câu hoàn tất.
+
+CLI python -m app.review_rag tổng hợp phiếu người duyệt vào JSON mới, không gọi model hoặc sửa kết quả tự động. Chỉ tính rating có tên người chấm và gold_label_approved=true; mỗi chỉ số có mẫu số riêng, null không bị biến thành false hoặc true. Tách nhãn bị bác bỏ, câu chưa chấm và lỗi provider; chặn ID lạ/trùng, sai kiểu, trường không áp dụng và ghi đè đầu ra. Lưu hash của đúng dữ liệu đã đọc và mã chấm. 40 unittest và Vite build đạt; chạy trên 48 phiếu trống cho 0 câu chấm và mọi tỷ lệ null.
+
+Đánh giá một phần không đại diện cả tập. Tên người duyệt là thông tin tự khai; CLI kiểm tra dữ liệu, không xác thực danh tính hoặc tự chứng minh chất lượng nhãn. M3 vẫn cần người chấm đối chiếu nguồn, thống nhất trường hợp nêu điều kiện như doc-019 và bổ sung câu hỏi độc lập. Hướng dẫn ở evals/rag/README.md.
+
+- [review-semantics-v2-dev](../evals/rag/runs/review-semantics-v2-dev/summary.json): số đo, snapshot, completion và phiếu chấm.
+- [review-semantics-v3-dev](../evals/rag/runs/review-semantics-v3-dev/summary.json): số đo, snapshot, completion và phiếu chấm.
+- [review-flags-first-dev](../evals/rag/runs/review-flags-first-dev/summary.json): số đo, snapshot, completion và phiếu chấm.

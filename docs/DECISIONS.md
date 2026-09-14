@@ -87,3 +87,17 @@ Dev bounded-ids-dev giữ 22/24 quyết định đúng/proxy, từ chối đúng
 PDF/DOCX regression giữ nguyên điểm từng ca: 21/24 khớp nhãn/proxy, từ chối đúng 9/10, từ chối sai 2/14; không lỗi provider hoặc cặp ID vượt phạm vi. doc-005 chọn được câu chứa mốc 18 giờ nhưng kèm mảnh câu từ ranh giới chunk và câu về hóa đơn, rồi bị kiểm định từ chối. Ràng buộc ID đã làm đúng vai trò cấu trúc; không coi ca này đã trả lời đúng. Giữ nguyên nhãn doc-019, không chỉnh selector/kiểm định tiếp theo kết quả regression trong đợt này.
 
 TXT regression giữ 40/48 khớp nhãn/proxy, từ chối đúng 14/16 và từ chối sai 6/32; p50/p95 13,484/15,081 giây. Điểm từng ca của cả ba lượt không đổi; 96 ca không lỗi provider hoặc ID vượt phạm vi. Giữ bản sửa vì miền ID được ràng buộc đúng, không tuyên bố tăng độ đúng hoặc tốc độ. Cần người duyệt và dev riêng cho lỗi chọn nội dung/kiểm định, không bỏ bộ lọc để tăng điểm.
+
+## Phân biệt câu trả lời đúng với chấp thuận dịch vụ
+
+Dev cho thấy kiểm định bỏ sót nội dung đã có: dev-004 trích cả phí và ngưỡng miễn phí, dev-013 trích điều kiện nguyên tem/hóa đơn sau dấu chấm phẩy nhưng vẫn bị coi là thiếu ý. Thử bổ sung hướng dẫn đọc toàn bộ các vế và phân biệt chất lượng đáp án với việc khách được chấp thuận dịch vụ. Câu trả lời phủ định có nguồn vẫn có thể giải quyết câu hỏi. Giữ ba cờ kiểm định bắt buộc, quy tắc thiếu ngữ cảnh/mâu thuẫn/injection, selector, model và retrieval; không dùng tên chính sách hay đáp án benchmark trong prompt.
+
+Chỉ chọn bản mới nếu dev tăng quyết định khớp nhãn/proxy, không giảm từ chối đúng và không phát sinh lỗi provider. Chốt theo dev trước khi chạy lại TXT/PDF/DOCX; không chỉnh tiếp theo lỗi test trong đợt này. Mọi nhãn vẫn chờ người duyệt; sửa prompt không thay đánh giá độc lập hoặc bằng chứng ngữ nghĩa.
+
+Bản đầu review-semantics-v2-dev đạt 23/24, giải quyết dev-004/013 và không còn từ chối sai, nhưng từ chối đúng giảm 9/9 xuống 8/9. dev-017 hỏi phương thức thanh toán không được nguồn đề cập; đáp án chỉ liệt kê phương thức khác vẫn được chấp nhận. Loại bản này theo tiêu chí đã đặt, giữ kết quả/snapshot. Bản tiếp theo bổ sung phân biệt không được nhắc đến với phủ định được nguồn xác nhận, không cho danh sách lựa chọn khác thay câu trả lời về lựa chọn khách hỏi.
+
+Bản review-semantics-v3-dev vẫn lọt dev-017 và từ chối sai dev-013: 22/24 khớp nhãn/proxy, từ chối đúng 8/9, từ chối sai 1/15; p50/p95 15,323/16,340 giây, không lỗi provider. Loại bản này. Thử nghiệm kế tiếp dùng lại tiêu chí prompt gốc, chỉ đổi thứ tự trường trong schema để ba cờ được sinh trước reason, đồng bộ câu hướng dẫn thứ tự. Đây là thử ảnh hưởng thứ tự đầu ra, chưa khẳng định sửa được ngữ nghĩa; giữ nguyên phép AND ba cờ, xác thực chặt và giới hạn giải thích.
+
+Bản review-flags-first-dev chỉ đạt 14/24, từ chối đúng 9/9 nhưng từ chối sai 10/15; p50/p95 15,276/15,963 giây. Loại cả ba thử nghiệm trước test, đưa answer_service.py về đúng bản 0180479. Giữ 72 ca dev và snapshot; không chạy lại test khi RAG ứng dụng không đổi. Không dùng điểm tổng của bản 23/24 để che hồi quy ở câu ngoài nguồn.
+
+Ưu tiên hoàn thiện vòng người duyệt thay vì tiếp tục thử prompt trên tập cũ. CLI app.review_rag dùng stdlib, đọc phiếu riêng và kết quả bất biến, xác thực ID/kiểu/người chấm/phạm vi áp dụng rồi xuất tỷ lệ theo mẫu số thực được chấm. Nhãn bị bác bỏ và phần chưa chấm không thành điểm âm/dương; lỗi provider tách riêng. Không tự sửa nhãn, gọi model chấm thay người hoặc thêm UI/dependency khi quy trình JSONL đã có. Hash đầu vào và mã giúp đối chiếu báo cáo; danh tính người chấm vẫn tự khai.

@@ -34,3 +34,5 @@ Lượt `bounded-ids-test` chạy hồi quy với schema ID câu được giới
 Mở PDF/DOCX gốc và đối chiếu `cases.jsonl` trước khi xem câu trả lời. Trong bản sao `human-review.jsonl`, ghi reviewer, duyệt gold label rồi chấm answer_correct, all_claims_supported, citation_entailment_correct và abstention_correct khi áp dụng; không tự điền true từ điểm model/regex. Giữ null khi chưa chấm, ghi lý do nếu sửa nhãn và tạo dataset phiên bản mới.
 
 Ưu tiên câu cuối trang PDF, mọi câu bảng và nối tiếp, mâu thuẫn/injection, cùng các câu đạt proxy để phát hiện sai nghĩa bị bỏ sót. Muốn công bố tỷ lệ đúng bằng người, cần chấm đủ tập hoặc nêu rõ cách lấy mẫu/mẫu số. Chưa đo PDF scan/OCR, bảng PDF, DOCX gộp ô, tài liệu nhiều cột, khách thật hoặc tải đồng thời.
+
+Sau khi chấm bản sao phiếu, chạy `python -m app.review_rag --run evals/rag-documents/runs/bounded-ids-test --reviews DUONG_DAN_PHIEU.jsonl --output BAO_CAO_MOI.json`. Hướng dẫn trường áp dụng, cách giữ null và mẫu số ở [bộ TXT](../rag/README.md#tổng-hợp-phiếu-người-duyệt). CLI không gọi model hoặc ghi đè đầu ra; không tự duyệt nhãn doc-019 thay người.

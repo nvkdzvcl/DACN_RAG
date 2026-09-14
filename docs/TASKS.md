@@ -124,3 +124,13 @@ Task tiếp theo: xác nhận quy tắc trả lời nêu điều kiện so với
 - [x] Cập nhật đề cương 10 mục, roadmap, quyết định và báo cáo Markdown/Word bảy chương. Word sáu trang khớp Markdown, đã xuất bằng Word và kiểm tra đủ sáu ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
 
 Task tiếp theo: người duyệt xác nhận nhãn và cách trả lời nêu điều kiện ở doc-019; giảm chọn câu thừa/thiếu ngữ cảnh và kiểm định sai phủ định qua dev riêng. Không coi sửa ID là cải thiện điểm ngữ nghĩa hay hoàn thành M3. Widget/phiên khách và realtime vẫn chưa triển khai.
+
+## Thử giảm từ chối sai và chấm bằng người M3 - 14/09/2026
+
+- [x] Ba thử nghiệm dev, tổng 72 ca không lỗi provider: thêm hướng dẫn ngữ nghĩa đạt 23/24 nhưng giảm từ chối đúng 9/9 xuống 8/9; bổ sung phân biệt ngoài nguồn đạt 22/24, vẫn chỉ 8/9; sinh cờ trước reason đạt 14/24, từ chối sai 10/15. Loại cả ba, giữ snapshot và kết quả.
+- [x] RAG ứng dụng giữ nguyên bản 0180479. Không hiệu chỉnh theo test hoặc đo lại hồi quy khi luồng ứng dụng không đổi. Lần khởi động lỗi Ollama trước câu hỏi được lưu riêng, không tính là ca từ chối.
+- [x] CLI app.review_rag tổng hợp bản sao phiếu người duyệt: xác thực ID/kiểu/tên người chấm/trường áp dụng, chỉ tính nhãn được duyệt, mẫu số riêng cho từng chỉ số; giữ null khi chưa chấm và tách nhãn bị bác bỏ/lỗi provider.
+- [x] Đầu ra mới có hash đầu vào/mã, không gọi model hoặc ghi đè kết quả. 40 unittest đạt, Vite build đạt; CLI trên 48 phiếu trống trả 0 câu chấm và tỷ lệ null. Chưa có người chấm thực tế.
+- [x] Cập nhật đề cương 10 mục, roadmap, quyết định và hướng dẫn chấm. Báo cáo Word sáu trang khớp Markdown, giữ bảy chương; xuất bằng Word và kiểm tra đủ sáu ảnh trang bằng Poppler vì renderer đóng gói thiếu LibreOffice trên Windows.
+
+Task tiếp theo: người duyệt chấm bản sao phiếu trên lượt bounded-ids-test, đối chiếu nguồn và thống nhất câu nêu điều kiện; tổng hợp bằng CLI mới. M3 chưa nghiệm thu, lỗi phủ định/nối tiếp chưa được giải quyết; cần dữ liệu độc lập trước đợt cải thiện tiếp. Widget/phiên khách/realtime vẫn là phần chức năng kế tiếp.
