@@ -20,6 +20,8 @@
 
 ## Trạng thái
 
+Hồ sơ kỹ thuật: [thiết kế và sơ đồ](docs/DESIGN.md), [đặc tả API](docs/API.md), [ma trận kiểm chứng M4](docs/M4_ACCEPTANCE.md). Chạy toàn luồng với Ollama thật bằng `python -m app.tests.smoke_m4`; lệnh tự dùng DB/vector/tài liệu tạm. Phần nghiệm thu người dùng và chấm chất lượng M3 vẫn chờ duyệt.
+
 Đã có Unified Inbox với đăng nhập nhân viên, tiếp nhận và trả lời theo người phụ trách; AI dừng khi handoff. Backend chạy FastAPI/SQLite, frontend React/Vite. RAG chạy Ollama local (qwen3:4b + embeddinggemma:300m), Qdrant embedded lưu bền, có trích nguồn và giao diện Kho tri thức. LLM chọn câu nguồn bằng ID, backend ghép nguyên văn rồi gọi kiểm định. Tin khách được lưu trước khi gọi LLM; kiểm tra lại handoff/tin mới/phiên bản nguồn trước khi lưu AI.
 
 Chạy lần đầu tại root repo:

@@ -113,6 +113,8 @@ Không sửa timestamp DB thật để tạo ca trễ. Kiểm thử `python -m u
 
 ## Demo giải quyết và tiếp nhận lại
 
+Kiểm tra tự động toàn luồng bằng `python -m app.tests.smoke_m4` từ root repo khi Ollama sẵn sàng. Lệnh đăng nhập/tải tài liệu/hỏi đáp thật qua API, rồi handoff/giải quyết/nhắn tiếp/đóng; dùng dữ liệu tạm, không mở cổng. Kết quả và phạm vi tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md). Các bước trình duyệt bên dưới vẫn cần khi thay UI/proxy.
+
 1. Khách chọn Gặp nhân viên; nhân viên thứ nhất Tiếp nhận. Nhập Ghi chú hoàn tất (nội bộ), chọn Giải quyết và xác nhận. Kiểm tra ticket lưu người/thời điểm/ghi chú, widget chỉ hiện thông báo chung.
 2. Tải lại widget rồi nhắn thêm yêu cầu. Hội thoại cũ giữ lịch sử nhưng chuyển về hàng chờ, chưa có người phụ trách và có ticket mới. Nhân viên thứ hai tiếp nhận và trả lời; AI vẫn dừng.
 3. So SLA hai ticket. Nếu lượt đầu kết thúc chưa được trả lời, trạng thái Kết thúc trước phản hồi vẫn giữ dù lượt sau đã phản hồi đúng hạn. Ghi chú mỗi lượt hiển thị riêng trong Inbox.

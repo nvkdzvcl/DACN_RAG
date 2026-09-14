@@ -172,3 +172,16 @@ Task tiếp theo của đợt Inbox/SLA: hoàn thiện giải quyết/đóng tic
 Giới hạn: chưa mở lại hội thoại đã đóng bằng thao tác nhân viên, chưa SLA giải quyết/escalation hoặc kiểm thử tải. Chính sách phản hồi vẫn cố định, cần deadline/phiên bản trước khi cho sửa ưu tiên/quy tắc. Không đổi model/prompt/retrieval, không chạy lại benchmark; M3 còn chờ người duyệt và dữ liệu độc lập.
 
 Task tiếp theo: bổ sung BFD/BPMN, Use Case, ERD, Sequence, API spec và ma trận nghiệm thu toàn luồng M4 dựa trên chức năng thực có; sau đó Agentic RAG và kênh thứ hai theo roadmap. Không coi mốc con vòng đời ticket là nghiệm thu trọn M4.
+
+## Hồ sơ thiết kế và kiểm chứng M4 - 15/09/2026
+
+- [x] Bổ sung BFD, luồng phân làn, Use Case/quyền, ERD, trạng thái, kiến trúc và hai Sequence tại docs/DESIGN.md, đối chiếu với mã hiện có.
+- [x] docs/API.md bao phủ 31 cặp method/path, cookie/quyền/CSRF, snapshot riêng tư, payload finish, retry/SLA và lỗi runtime ngoài OpenAPI.
+- [x] docs/M4_ACCEPTANCE.md nối UC với kiểm thử và giới hạn; giữ người dùng/GVHD duyệt sau, không coi quyền tiếp tục làm là nghiệm thu M3/M4.
+- [x] Lệnh python -m app.tests.smoke_m4 chạy login/upload/chat/handoff/giải quyết/tiếp nhận lại/đóng qua HTTP ASGI với Ollama thật, store tạm và mật khẩu ngẫu nhiên. Đạt: câu hỏi 16,217 giây, toàn luồng 28,088 giây; không sửa .env hoặc DB người dùng.
+- [x] 53 unittest đạt trong 25,597 giây; Vite build đạt, assets không đổi. Không chạy lại QA giao diện hoặc benchmark khi UI/RAG không đổi.
+- [x] Cập nhật đề cương 10 mục và báo cáo Markdown/Word bảy chương cùng README, demo, roadmap và quyết định. Word chín trang khớp Markdown, đã xuất bằng Word/Poppler và kiểm tra đủ trang; chương kết luận bắt đầu trang riêng. Renderer đóng gói thiếu LibreOffice trên Windows.
+
+Giới hạn: sơ đồ phân làn chưa phải file BPMN 2.0; mockup và hồ sơ chờ duyệt, chưa đo tải/cloud hoặc nghiệm thu đầy đủ M4. Chưa chấm chất lượng M3; phần này giữ chờ người duyệt theo yêu cầu người dùng.
+
+Task tiếp theo: M5 tool calling với schema, danh tính/quyền do server xác định, tool tra đơn chỉ đọc và handoff vẫn chặn AI muộn; kiểm thử lỗi model/tool, giả mạo và tranh chấp trước tích hợp kênh thứ hai. Không chờ người duyệt M3 để làm phần kỹ thuật độc lập.
