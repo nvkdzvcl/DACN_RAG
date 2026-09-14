@@ -20,7 +20,7 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
     try:
         db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
         db.refresh(conversation)
-        if conversation.status in {"closed", "resolved"}:
+        if conversation.status == "closed":
             raise HTTPException(409, "Conversation is closed")
         if external_message_id:
             previous = db.query(Message).filter_by(conversation_id=conversation_id, external_message_id=external_message_id).first()
@@ -41,7 +41,10 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
         answer = error = None
         should_generate = False
         history = []
-        if conversation.status == "open":
+        if conversation.status in {"open", "resolved"}:
+            if conversation.status == "resolved":
+                handoff = True
+                conversation.assigned_agent_id = None
             order_id = extract_order_id(content)
             if not handoff and order_id:
                 order_result = lookup_order(db, order_id, conversation.customer_id)

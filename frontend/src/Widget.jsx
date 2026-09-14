@@ -32,7 +32,7 @@ export default function Widget() {
   const handoffId = useRef(null);
   const log = useRef(null);
   const nearBottom = useRef(true);
-  const closed = ['closed', 'resolved'].includes(session?.status);
+  const closed = session?.status === 'closed';
 
   function apply(data, version) {
     if (typeof data.conversation_id !== 'string' || !Array.isArray(data.messages)) throw new Error('Dữ liệu hội thoại không hợp lệ.');
@@ -138,7 +138,7 @@ export default function Widget() {
         {busy && <p className="widgetIntro" role="status">Đang xử lý tin nhắn...</p>}
       </div>
       <footer className="widgetFooter">
-        {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : !closed && <p className="widgetStatus" role="status">{session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
+        {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
         <form onSubmit={send}><label htmlFor="widgetDraft" className="widgetLabel">Tin nhắn của bạn</label><div className="widgetComposer"><textarea id="widgetDraft" rows={2} maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={busy || closed} placeholder={closed ? 'Hội thoại đã đóng' : 'Nhập tin nhắn...'} /><button aria-label="Gửi tin nhắn" disabled={busy || closed || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>

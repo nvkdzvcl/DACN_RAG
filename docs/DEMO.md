@@ -106,7 +106,17 @@ Kiểm chứng ngày 14/09/2026: 46 unittest đạt; trình duyệt Edge trên D
 1. Mở Inbox bằng tài khoản nhân viên và widget bằng phiên khách riêng. Khách chọn Gặp nhân viên: hội thoại xuất hiện tự động trong chu kỳ polling, không cần Làm mới. Khi đang xem một hội thoại, hội thoại mới không giành lựa chọn.
 2. Quan sát SLA phản hồi đầu tiên và Hạn phản hồi. Handoff hiện tạo ticket ưu tiên cao nên hạn là 15 phút tính từ tạo ticket, 24/7. Chọn Tiếp nhận: SLA vẫn chờ; chỉ tin trả lời đầu tiên của nhân viên mới chuyển sang đã phản hồi đúng hạn hoặc trễ.
 3. Khách gửi thêm tin khi đã assigned; nội dung tự xuất hiện trong Inbox, bản nháp của nhân viên vẫn giữ. Mở tài khoản nhân viên khác: trạng thái phụ trách tự cập nhật và ô gửi bị khóa nếu không phải người nhận.
-4. Dùng bộ lọc SLA để xem Trong hạn, Quá hạn chờ phản hồi, Đã phản hồi đúng hạn/trễ, Đóng trước phản hồi hoặc Chưa có SLA. Thẻ số Quá hạn chỉ tính hội thoại đang chờ trong bộ lọc và tìm kiếm hiện tại. Đóng trước trả lời không được tính đạt; SLA từng ticket vẫn hiện trong chi tiết.
+4. Dùng bộ lọc SLA để xem Trong hạn, Quá hạn chờ phản hồi, Đã phản hồi đúng hạn/trễ, Kết thúc trước phản hồi hoặc Chưa có SLA. Thẻ số Quá hạn chỉ tính hội thoại đang chờ trong bộ lọc và tìm kiếm hiện tại. Kết thúc trước trả lời không được tính đạt; SLA từng ticket vẫn hiện trong chi tiết.
 5. Tắt mạng trong trình duyệt thử: danh sách/nội dung và bản nháp còn giữ, có cảnh báo dữ liệu cũ; bật lại tự phục hồi. Chuyển tab ẩn hoặc mở Kho tri thức tạm ngừng polling. Nút Làm mới tải lại cả danh sách và chi tiết.
 
 Không sửa timestamp DB thật để tạo ca trễ. Kiểm thử `python -m unittest app.tests.test_inbox -v` có ca giả lập quá hạn, đúng ranh giới, phản hồi trễ, đóng chưa phản hồi và nhiều ticket. QA ngày 14/09/2026 dùng DB/vector riêng, hai tài khoản nhân viên và phiên widget: tự cập nhật người phụ trách/tin mới, giữ draft/lựa chọn, lỗi mạng/phục hồi, bộ lọc, hủy phản hồi cũ, mô phỏng tab ẩn và kiểm tra giao diện 390px đạt. Tổng 49 unittest và Vite build đạt; chưa đo tải hoặc thay kết quả chất lượng RAG.
+
+## Demo giải quyết và tiếp nhận lại
+
+1. Khách chọn Gặp nhân viên; nhân viên thứ nhất Tiếp nhận. Nhập Ghi chú hoàn tất (nội bộ), chọn Giải quyết và xác nhận. Kiểm tra ticket lưu người/thời điểm/ghi chú, widget chỉ hiện thông báo chung.
+2. Tải lại widget rồi nhắn thêm yêu cầu. Hội thoại cũ giữ lịch sử nhưng chuyển về hàng chờ, chưa có người phụ trách và có ticket mới. Nhân viên thứ hai tiếp nhận và trả lời; AI vẫn dừng.
+3. So SLA hai ticket. Nếu lượt đầu kết thúc chưa được trả lời, trạng thái Kết thúc trước phản hồi vẫn giữ dù lượt sau đã phản hồi đúng hạn. Ghi chú mỗi lượt hiển thị riêng trong Inbox.
+4. Ở lượt đang phụ trách, nhập ghi chú rồi chọn Đóng hội thoại. Hủy xác nhận để kiểm tra trạng thái không đổi; thực hiện lại và xác nhận để đóng. Widget khóa gửi, giữ lịch sử; chọn Kết thúc, nhập tên và bắt đầu phiên mới.
+5. Kiểm tra xung đột trên dữ liệu thử: khi hộp xác nhận đang mở, khách gửi tin mới rồi nhân viên xác nhận. API trả 409, tải lại nội dung và giữ ghi chú để đọc lại trước khi hoàn tất. Không dùng dữ liệu khách thật cho QA.
+
+Kiểm chứng ngày 14/09/2026: 53 unittest và Vite build đạt; QA Edge bản build với hai phiên nhân viên, phiên widget và DB/vector riêng kiểm tra đủ luồng trên, ghi chú không lộ, retry thao tác cũ không ảnh hưởng ticket mới. Desktop/mobile 390px đã kiểm tra trực quan, không tràn ngang. Chưa có mở lại hội thoại đã đóng bằng thao tác nhân viên, SLA giải quyết hoặc kiểm thử tải; không đo lại chất lượng RAG.

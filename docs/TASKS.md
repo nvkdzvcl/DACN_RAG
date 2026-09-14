@@ -17,8 +17,8 @@
 - [x] Dữ liệu demo đơn hàng và endpoint seed lặp lại an toàn; chưa có reset.
 - [x] Orchestration endpoint xử lý tin nhắn: RAG, Order Tool và handoff.
 - [x] API Unified Inbox: danh sách, lọc và chi tiết hội thoại/ticket.
-- [ ] Xây order tool và handoff.
-- [ ] Xây widget và inbox.
+- [ ] Hoàn thiện LLM tool calling và đánh giá handoff; đã có order lookup kiểm tra quyền và handoff theo quy tắc.
+- [x] Widget cùng origin và Inbox polling, SLA phản hồi đầu, giải quyết/đóng và tiếp nhận lại; nghiệm thu toàn bộ M4 còn riêng.
 
 ## Unified Inbox - 12/09/2026
 
@@ -158,4 +158,17 @@ Task tiếp theo: tự cập nhật Inbox và trạng thái hội thoại, sau �
 
 Giới hạn: polling chưa phải SSE/WebSocket; chính sách SLA demo cố định và tính lại từ timestamp, chưa có lịch làm việc, hạn giải quyết, escalation hoặc thống kê kiểm toán. Phải lưu deadline/phiên bản trước khi cho chỉnh chính sách/ưu tiên. Các API list chưa phân trang, chưa đo tải lớn. M3 giữ nguyên cấu hình, vẫn cần người chấm và dữ liệu độc lập.
 
-Task tiếp theo: hoàn thiện giải quyết/đóng ticket từ Inbox và quy tắc tiếp tục hỗ trợ; bổ sung hồ sơ thiết kế/kiểm thử toàn luồng trước nghiệm thu M4. Tiếp đó triển khai Agentic RAG và kênh thứ hai theo roadmap.
+Task tiếp theo của đợt Inbox/SLA: hoàn thiện giải quyết/đóng ticket từ Inbox và quy tắc tiếp tục hỗ trợ; kết quả ghi ở đợt tiếp theo.
+
+## Vòng đời ticket M4 - 14/09/2026
+
+- [x] Người phụ trách giải quyết/đóng hội thoại và các ticket hoạt động, ghi chú nội bộ bắt buộc, lưu người/thời điểm hoàn tất; admin không bỏ qua quyền phụ trách.
+- [x] Khách nhắn sau giải quyết tạo ticket mới, về hàng chờ và bỏ phân công cũ; giữ lịch sử, AI dừng. Đóng chặn tin mới, cho kết thúc phiên rồi bắt đầu phiên khác.
+- [x] Khóa ghi dùng chung với inbound; đối chiếu tin khách cuối, trả 409 khi nội dung đã đổi. Retry hoàn tất ticket cũ không ảnh hưởng lượt mới; UUID tin cũ không mở lại sau giải quyết.
+- [x] Migration v4 cộng bốn cột hoàn tất/SLA, chốt phản hồi từng ticket khi kết thúc; chạy lại không lấy phản hồi của lượt sau hoặc bịa người/thời điểm hoàn tất cũ.
+- [x] 53 unittest và Vite build đạt. QA Edge bản build, DB/vector riêng, hai nhân viên và phiên khách: quyền, hủy xác nhận, tin mới xung đột giữ ghi chú, giải quyết/tải lại/tiếp nhận lại, riêng tư ghi chú, SLA lịch sử, retry cũ, đóng/phiên mới. Desktop/mobile 390px không tràn ngang.
+- [x] Cập nhật README, demo, quyết định, roadmap, đề cương 10 mục và báo cáo Markdown/Word bảy chương. Word tám trang khớp Markdown, đã xuất bằng Word và kiểm tra đủ tám ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
+
+Giới hạn: chưa mở lại hội thoại đã đóng bằng thao tác nhân viên, chưa SLA giải quyết/escalation hoặc kiểm thử tải. Chính sách phản hồi vẫn cố định, cần deadline/phiên bản trước khi cho sửa ưu tiên/quy tắc. Không đổi model/prompt/retrieval, không chạy lại benchmark; M3 còn chờ người duyệt và dữ liệu độc lập.
+
+Task tiếp theo: bổ sung BFD/BPMN, Use Case, ERD, Sequence, API spec và ma trận nghiệm thu toàn luồng M4 dựa trên chức năng thực có; sau đó Agentic RAG và kênh thứ hai theo roadmap. Không coi mốc con vòng đời ticket là nghiệm thu trọn M4.

@@ -12,9 +12,10 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import check_csrf, token_hash
 from app.db.session import get_db
-from app.models.support import Conversation, Customer, Message, Ticket, WidgetSession
+from app.models.support import Conversation, Customer, Message, WidgetSession
 from app.services.handoff_service import classify_message
 from app.services.message_service import process_message
+from app.services.ticket_service import complete_tickets
 
 COOKIE = 'rag_widget_session'
 COOKIE_PATH = '/api/v1/widget'
@@ -160,8 +161,7 @@ def request_handoff(payload: WidgetAction, request: Request, session: WidgetSess
 @router.delete('/session')
 def end_session(response: Response, session: WidgetSession = Depends(require_session), db: Session = Depends(get_db)):
     db.execute(update(Conversation).where(Conversation.id == session.conversation_id).values(status='closed'))
-    db.execute(update(Ticket).where(Ticket.conversation_id == session.conversation_id,
-                                  Ticket.status.in_(['open', 'assigned'])).values(status='closed'))
+    complete_tickets(db, session.conversation_id, 'closed')
     db.delete(session)
     db.commit()
     response.delete_cookie(COOKIE, path=COOKIE_PATH)

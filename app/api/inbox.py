@@ -8,6 +8,7 @@ from app.core.auth import require_staff
 from app.db.session import get_db
 from app.models.support import Conversation, Message, Ticket, User
 from app.services.sla_service import conversation_sla, ticket_slas
+from app.services.ticket_service import complete_tickets
 
 router = APIRouter(prefix="/api/v1/inbox", tags=["inbox"])
 
@@ -21,6 +22,52 @@ class AgentMessageCreate(BaseModel):
         if not value.strip():
             raise ValueError("Message cannot be blank")
         return value.strip()
+
+class FinishConversation(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    status: Literal['resolved', 'closed']
+    ticket_id: str = Field(min_length=1, max_length=64)
+    last_customer_message_id: str | None = Field(max_length=64)
+    note: str = Field(min_length=1, max_length=2000)
+
+    @field_validator('note')
+    @classmethod
+    def nonblank_note(cls, value):
+        if not value.strip():
+            raise ValueError('Completion note cannot be blank')
+        return value.strip()
+
+
+@router.post('/conversations/{conversation_id}/finish')
+def finish_conversation(conversation_id: str, payload: FinishConversation, db: Session = Depends(get_db), user: User = Depends(require_staff)):
+    try:
+        locked = db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
+        if not locked.rowcount:
+            raise HTTPException(404, 'Conversation not found')
+        conversation = db.get(Conversation, conversation_id)
+        db.refresh(conversation)
+        ticket = db.get(Ticket, payload.ticket_id)
+        if ticket is None or ticket.conversation_id != conversation_id:
+            raise HTTPException(404, 'Ticket not found')
+        if ticket.status in {'resolved', 'closed'}:
+            if ticket.status == payload.status and ticket.completed_by_id == user.id and ticket.completion_note == payload.note:
+                db.commit()
+                return {'status': conversation.status, 'duplicate': True}
+            raise HTTPException(409, 'Ticket was already completed')
+        if conversation.status != 'assigned' or conversation.assigned_agent_id != user.id:
+            raise HTTPException(409, 'Only the assigned agent can complete this conversation')
+        if conversation.last_customer_message_id != payload.last_customer_message_id:
+            raise HTTPException(409, 'Có tin khách mới. Đọc lại hội thoại trước khi hoàn tất.')
+        complete_tickets(db, conversation_id, payload.status, user.id, payload.note)
+        conversation.status = payload.status
+        content = ('Nhân viên đã đánh dấu yêu cầu được giải quyết. Nếu cần hỗ trợ thêm, bạn có thể nhắn tiếp.'
+                   if payload.status == 'resolved' else 'Nhân viên đã đóng hội thoại. Bạn có thể kết thúc phiên và bắt đầu cuộc trò chuyện mới.')
+        db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system', content=content))
+        db.commit()
+        return {'status': conversation.status, 'duplicate': False}
+    except Exception:
+        db.rollback()
+        raise
 
 @router.get("/conversations")
 def list_conversations(status: str | None = None, priority: str | None = None, db: Session = Depends(get_db),
@@ -46,7 +93,8 @@ def conversation_detail(conversation_id: str, db: Session = Depends(get_db)):
     messages = db.query(Message).filter_by(conversation_id=conversation_id).order_by(Message.created_at).all()
     tickets = db.query(Ticket).filter_by(conversation_id=conversation_id).order_by(Ticket.created_at.desc()).all()
     slas = ticket_slas(db, [conversation_id])
-    return {"conversation_id": conversation.id, "customer_id": conversation.customer_id, "customer_name": conversation.customer.display_name, "customer_email": conversation.customer.email, "channel": conversation.channel, "status": conversation.status, "assigned_agent_id": conversation.assigned_agent_id, "priority": conversation.priority, "sla": conversation_sla(list(slas.values())), "messages": [{"id": m.id, "sender_type": m.sender_type, "agent_id": m.agent_id, "content": m.content, "citations": m.citations or [], "created_at": m.created_at} for m in messages], "tickets": [{"id": t.id, "status": t.status, "priority": t.priority, "summary": t.summary, "created_at": t.created_at, "sla": slas[t.id]} for t in tickets]}
+    completers = {u.id: u.display_name for u in db.query(User).filter(User.id.in_([t.completed_by_id for t in tickets if t.completed_by_id])).all()}
+    return {"conversation_id": conversation.id, "customer_id": conversation.customer_id, "customer_name": conversation.customer.display_name, "customer_email": conversation.customer.email, "channel": conversation.channel, "status": conversation.status, "assigned_agent_id": conversation.assigned_agent_id, "priority": conversation.priority, "sla": conversation_sla(list(slas.values())), "last_customer_message_id": conversation.last_customer_message_id, "messages": [{"id": m.id, "sender_type": m.sender_type, "agent_id": m.agent_id, "content": m.content, "citations": m.citations or [], "created_at": m.created_at} for m in messages], "tickets": [{"id": t.id, "status": t.status, "priority": t.priority, "summary": t.summary, "created_at": t.created_at, "completed_at": t.completed_at, "completed_by_id": t.completed_by_id, "completed_by_name": completers.get(t.completed_by_id), "completion_note": t.completion_note, "sla": slas[t.id]} for t in tickets]}
 
 @router.post("/conversations/{conversation_id}/accept")
 def accept_conversation(conversation_id: str, db: Session = Depends(get_db), user: User = Depends(require_staff)):

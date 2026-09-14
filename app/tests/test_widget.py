@@ -3,7 +3,7 @@ import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from threading import Event
+from threading import Barrier, Event
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -55,6 +55,127 @@ class WidgetTests(unittest.TestCase):
             db.add(AuthSession(token_hash=token_hash('staff-token'), user_id='staff', expires_at=int(time.time()) + 300))
             db.commit()
         self.other.cookies.set(COOKIE_NAME, 'staff-token', path='/api')
+
+    def finish_payload(self, cid, status='resolved'):
+        detail = self.other.get(f'/api/v1/inbox/conversations/{cid}').json()
+        return {'status': status, 'ticket_id': next(t['id'] for t in detail['tickets'] if t['status'] in ['open', 'assigned']),
+                'last_customer_message_id': detail['last_customer_message_id'], 'note': 'INTERNAL completion note'}
+
+    def test_resolve_reopen_close_preserves_ticket_history_and_sla(self):
+        cid = self.start().json()['conversation_id']
+        self.staff()
+        identity = str(uuid4())
+        with patch('app.services.message_service.answer_question') as rag:
+            self.send('gặp nhân viên', identity=identity)
+            self.other.post(f'/api/v1/inbox/conversations/{cid}/accept')
+            self.other.post(f'/api/v1/inbox/conversations/{cid}/messages', json={'content': 'Human response'})
+            payload = self.finish_payload(cid)
+            endpoint = f'/api/v1/inbox/conversations/{cid}/finish'
+            self.assertEqual(self.other.post(endpoint, json=payload).status_code, 200)
+            public = self.client.get(COOKIE_PATH + '/session')
+            self.assertEqual(public.json()['status'], 'resolved')
+            self.assertNotIn('INTERNAL', public.text)
+            self.assertNotIn('completed_by_id', public.text)
+            self.assertTrue(self.send('gặp nhân viên', identity=identity).json()['duplicate'])
+            self.assertEqual(self.client.get(COOKIE_PATH + '/session').json()['status'], 'resolved')
+            old = self.other.get(f'/api/v1/inbox/conversations/{cid}').json()['tickets'][0]
+            self.assertEqual(old['sla']['status'], 'met')
+            self.assertEqual(old['completed_by_id'], 'staff')
+            retry_id = str(uuid4())
+            reopened = self.send('Need more help', identity=retry_id)
+            self.assertEqual(reopened.json()['status'], 'handoff_requested')
+            self.assertTrue(self.send('Need more help', identity=retry_id).json()['duplicate'])
+            self.assertTrue(self.other.post(endpoint, json=payload).json()['duplicate'])
+            detail = self.other.get(f'/api/v1/inbox/conversations/{cid}').json()
+            self.assertEqual(detail['status'], 'handoff_requested')
+            self.assertIsNone(detail['assigned_agent_id'])
+            self.assertEqual(len(detail['tickets']), 2)
+            self.assertEqual(next(t for t in detail['tickets'] if t['id'] == old['id'])['sla'], old['sla'])
+            self.other.post(f'/api/v1/inbox/conversations/{cid}/accept')
+            closed = self.finish_payload(cid, 'closed')
+            self.assertEqual(self.other.post(endpoint, json=closed).status_code, 200)
+            self.assertEqual(self.send('Cannot reopen closed').status_code, 409)
+            detail = self.other.get(f'/api/v1/inbox/conversations/{cid}').json()
+            self.assertEqual(detail['tickets'][0]['sla']['status'], 'cancelled')
+            self.assertEqual(next(t for t in detail['tickets'] if t['id'] == old['id'])['sla'], old['sla'])
+            rag.assert_not_called()
+        self.client.delete(COOKIE_PATH + '/session')
+        self.assertNotEqual(self.start().json()['conversation_id'], cid)
+
+    def test_finish_requires_owner_valid_payload_and_current_customer_message(self):
+        cid = self.start().json()['conversation_id']
+        self.staff()
+        self.send('gặp nhân viên')
+        endpoint = f'/api/v1/inbox/conversations/{cid}/finish'
+        payload = self.finish_payload(cid)
+        self.assertEqual(self.client.post(endpoint, json=payload).status_code, 401)
+        self.assertEqual(self.other.post(endpoint, json=payload).status_code, 409)
+        self.other.post(f'/api/v1/inbox/conversations/{cid}/accept')
+        for extra in [{'note': ' '}, {'note': 'X' * 2001}, {'status': 'open'}, {'completed_by_id': 'staff'}]:
+            self.assertEqual(self.other.post(endpoint, json={**payload, **extra}).status_code, 422)
+        missing = dict(payload)
+        del missing['last_customer_message_id']
+        self.assertEqual(self.other.post(endpoint, json=missing).status_code, 422)
+        with Session(self.engine) as db:
+            db.add(User(id='admin', username='admin', display_name='Admin', role='admin', password_hash='unused'))
+            db.flush()
+            db.add(AuthSession(token_hash=token_hash('admin-token'), user_id='admin', expires_at=int(time.time()) + 300))
+            db.commit()
+        self.other.cookies.set(COOKIE_NAME, 'admin-token', path='/api')
+        self.assertEqual(self.other.post(endpoint, json=payload).status_code, 409)
+        self.other.cookies.set(COOKIE_NAME, 'staff-token', path='/api')
+        self.send('New customer information')
+        self.assertEqual(self.other.post(endpoint, json=payload).status_code, 409)
+        self.assertEqual(self.other.post(endpoint, json={**self.finish_payload(cid), 'ticket_id': 'unknown'}).status_code, 404)
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(Conversation, cid).status, 'assigned')
+            self.assertEqual(db.query(Message).filter_by(sender_type='system').count(), 0)
+
+    def test_finish_racing_customer_message_never_loses_inbound(self):
+        cid = self.start().json()['conversation_id']
+        self.staff()
+        self.send('gặp nhân viên')
+        self.other.post(f'/api/v1/inbox/conversations/{cid}/accept')
+        payload = self.finish_payload(cid)
+        barrier = Barrier(2)
+        def finish():
+            barrier.wait(5)
+            return self.other.post(f'/api/v1/inbox/conversations/{cid}/finish', json=payload)
+        def send():
+            barrier.wait(5)
+            return self.send('Concurrent follow-up')
+        with patch('app.services.message_service.answer_question') as rag, ThreadPoolExecutor(max_workers=2) as pool:
+            completion, message = pool.submit(finish), pool.submit(send)
+            completion, message = completion.result(8), message.result(8)
+            self.assertIn(completion.status_code, [200, 409])
+            self.assertEqual(message.status_code, 200, message.text)
+            rag.assert_not_called()
+        with Session(self.engine) as db:
+            self.assertEqual(db.query(Message).filter_by(conversation_id=cid, content='Concurrent follow-up').count(), 1)
+            self.assertEqual(db.get(Conversation, cid).status, 'handoff_requested' if completion.status_code == 200 else 'assigned')
+            self.assertEqual(db.query(Ticket).filter(Ticket.status.in_(['open', 'assigned'])).count(), 1)
+
+    def test_finish_during_inflight_ai_prevents_late_reply(self):
+        cid = self.start().json()['conversation_id']
+        self.staff()
+        entered, release = Event(), Event()
+        def slow(*args, **kwargs):
+            entered.set(); self.assertTrue(release.wait(8))
+            return {'answer': 'Late AI', 'grounded': False, 'citations': []}
+        with patch('app.services.message_service.answer_question', side_effect=slow), ThreadPoolExecutor(max_workers=2) as pool:
+            pending = pool.submit(self.send)
+            self.assertTrue(entered.wait(5))
+            try:
+                self.client.post(COOKIE_PATH + '/handoff', json={'client_message_id': str(uuid4())})
+                self.other.post(f'/api/v1/inbox/conversations/{cid}/accept')
+                response = self.other.post(f'/api/v1/inbox/conversations/{cid}/finish', json=self.finish_payload(cid))
+                self.assertEqual(response.status_code, 200, response.text)
+            finally:
+                release.set()
+            self.assertNotIn('Late AI', pending.result(5).text)
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(Conversation, cid).status, 'resolved')
+            self.assertEqual(db.query(Message).filter_by(sender_type='ai').count(), 0)
 
     def test_session_isolation_csrf_and_forged_fields(self):
         self.assertEqual(self.client.get(COOKIE_PATH + '/session').status_code, 401)

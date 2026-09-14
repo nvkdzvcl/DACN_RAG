@@ -65,6 +65,14 @@ Inbox hiển thị hạn, trạng thái và bộ lọc SLA; số Quá hạn ch�
 
 Chính sách cố định được tính từ timestamp hiện có, áp dụng cả ticket cũ; chưa có lịch làm việc/ngày nghỉ, hạn giải quyết, escalation hoặc thống kê SLA đã kiểm toán. Cần lưu phiên bản chính sách và deadline trước khi cho phép sửa quy tắc. Polling không phải WebSocket/SSE; chưa đo tải lớn hoặc bảo đảm độ trễ realtime.
 
+## Giải quyết và đóng yêu cầu hỗ trợ
+
+Người đang phụ trách nhập ghi chú nội bộ rồi chọn **Giải quyết** hoặc **Đóng hội thoại** trong Inbox. Cả hai thao tác kết thúc các ticket đang hoạt động và lưu thời điểm/người hoàn tất; admin cũng phải là người phụ trách. Ghi chú bắt buộc, tối đa 2000 ký tự, chỉ hiển thị cho nhân viên. Widget nhận thông báo trạng thái chung.
+
+Sau **Giải quyết**, khách nhắn tiếp trên cùng phiên sẽ tạo ticket mới, chuyển về hàng chờ và bỏ phân công cũ; nhân viên cần tiếp nhận lại, AI vẫn dừng. Gửi lại UUID của tin cũ không mở lượt hỗ trợ mới. Sau **Đóng hội thoại**, khách chỉ xem lịch sử; chọn Kết thúc rồi bắt đầu phiên mới để gửi yêu cầu khác.
+
+Nếu khách có tin mới trước khi thao tác hoàn tất được ghi, API trả 409 để nhân viên đọc lại; ghi chú đang soạn được giữ. Retry cùng ticket/trạng thái/người/ghi chú không kết thúc nhầm lượt hỗ trợ mới. SLA phản hồi đầu được chốt trên từng ticket khi kết thúc, nên phản hồi lượt sau không đổi kết quả lượt trước. Migration v4 bổ sung dữ liệu hoàn tất và chốt phản hồi đã quan sát của ticket cũ; không suy đoán thời điểm hoặc người hoàn tất còn thiếu.
+
 ## RAG local với Ollama
 
 Máy hiện tại đã có Ollama portable, model chat qwen3:4b và embeddinggemma:300m tại `data/runtime/` (không đưa lên Git); qwen3:1.7b cũ được giữ để đối chiếu. Sau khi khởi động lại máy, chạy `powershell -File scripts/start-ollama.ps1` trong terminal riêng; giữ terminal mở. Dịch vụ chỉ nghe 127.0.0.1:11434. Không cần API key.

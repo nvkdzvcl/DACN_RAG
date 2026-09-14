@@ -66,6 +66,10 @@ class Ticket(Base):
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     summary: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_by_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    completion_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    first_response_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 class Order(Base):
     __tablename__ = "orders"

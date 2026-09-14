@@ -38,3 +38,15 @@ def migrate(engine):
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (2)"))
         if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 3")).first():
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (3)"))
+        existing = {column['name'] for column in inspect(connection).get_columns('tickets')}
+        for name, definition in {'completed_at': 'TIMESTAMP', 'completed_by_id': 'VARCHAR(64) REFERENCES users(id)',
+                                 'completion_note': 'TEXT', 'first_response_at': 'TIMESTAMP'}.items():
+            if name not in existing:
+                connection.execute(text(f'ALTER TABLE tickets ADD COLUMN {name} {definition}'))
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 4")).first():
+            # Freeze observed legacy replies; completion time and actor remain unknown.
+            connection.execute(text("""UPDATE tickets SET first_response_at = (
+                SELECT MIN(messages.created_at) FROM messages WHERE messages.conversation_id = tickets.conversation_id
+                AND messages.sender_type = 'agent' AND messages.agent_id IS NOT NULL AND messages.created_at >= tickets.created_at
+            ) WHERE status IN ('closed', 'resolved')"""))
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (4)"))

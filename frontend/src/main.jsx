@@ -8,7 +8,7 @@ import Widget from './Widget';
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
 const priorities = { normal: 'Bình thường', high: 'Cao', urgent: 'Khẩn cấp', low: 'Thấp' };
-const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Đóng trước phản hồi', none: 'Chưa có SLA' };
+const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Kết thúc trước phản hồi', none: 'Chưa có SLA' };
 const senders = { customer: 'Khách hàng', ai: 'RAG AI', assistant: 'RAG AI', agent: 'Nhân viên', system: 'Hệ thống' };
 const nameOf = c => c.customer_name || c.customer_id;
 const initials = name => name.trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
@@ -93,6 +93,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   const [drafts, setDrafts] = useState({});
+  const [completionNotes, setCompletionNotes] = useState({});
   const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
@@ -153,6 +154,8 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   // Ignore previous customer's detail before effect cleanup runs.
   const current = detail?.conversation_id === activeId ? detail : null;
   const canReply = current?.status === 'assigned' && current.assigned_agent_id === user.id;
+  const activeTicket = current?.tickets.find(ticket => ['open', 'assigned'].includes(ticket.status));
+  const completionNote = completionNotes[activeId] || '';
   async function postAction(path, body) {
     const targetId = activeId;
     setActionLoading(true); setActionError('');
@@ -163,6 +166,19 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     finally { setActionLoading(false); }
   }
   async function acceptConversation() { await postAction('/accept', undefined); }
+  async function finishConversation(event) {
+    event.preventDefault();
+    if (!canReply || !activeTicket || actionLoading || !completionNote.trim()) return;
+    const nextStatus = event.nativeEvent.submitter?.value || 'resolved';
+    const message = nextStatus === 'resolved'
+      ? 'Đánh dấu đã giải quyết? Khách nhắn tiếp sẽ tạo ticket mới vào hàng chờ. AI vẫn dừng.'
+      : 'Đóng hội thoại? Khách không thể nhắn tiếp trong hội thoại này, nhưng có thể bắt đầu phiên mới. Lịch sử được giữ.';
+    if (!window.confirm(message)) return;
+    const targetId = activeId;
+    const result = await postAction('/finish', { status: nextStatus, ticket_id: activeTicket.id,
+      last_customer_message_id: current.last_customer_message_id, note: completionNote.trim() });
+    if (result) setCompletionNotes(previous => previous[targetId] === completionNote ? { ...previous, [targetId]: '' } : previous);
+  }
   async function sendReply(event) {
     event.preventDefault();
     const content = draft.trim();
@@ -204,10 +220,16 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
             {!selected ? <p className="state">Chọn hội thoại để xem nội dung.</p> : !current ? <p className="state" role="status">{detailError ? 'Chưa tải được hội thoại.' : 'Đang tải hội thoại...'}</p> : <>
               {!current.messages.length && <p className="state">Hội thoại chưa có tin nhắn.</p>}
               {current.messages.map(m => <div key={m.id} className={`bubble ${m.sender_type === 'customer' ? 'customer' : m.sender_type === 'agent' ? 'staff' : 'ai'}`}><b>{senders[m.sender_type] || m.sender_type}</b><div className="messageContent">{m.content}</div>{m.citations?.length > 0 && <Citations citations={m.citations} request={request} />}<time>{timeOf(m.created_at)}</time></div>)}
-              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary || 'Chưa có tóm tắt.'}</p><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section>
+              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary || 'Chưa có tóm tắt.'}</p><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section>
             </>}
           </div>
           {current && <form className="composer" onSubmit={sendReply}><input aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading}>Gửi</button></form>}
+          {canReply && activeTicket && <form className="completionForm" onSubmit={finishConversation}>
+            <label htmlFor="completionNote">Ghi chú hoàn tất (nội bộ)</label>
+            <textarea id="completionNote" rows={2} maxLength={2000} required value={completionNote} onChange={e => setCompletionNotes(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={actionLoading} />
+            <small>Áp dụng cho các ticket đang xử lý. Khách chỉ nhận thông báo trạng thái.</small>
+            <div><button value="resolved" disabled={actionLoading || !completionNote.trim()}>Giải quyết</button><button value="closed" disabled={actionLoading || !completionNote.trim()}>Đóng hội thoại</button></div>
+          </form>}
           {actionError?.id === activeId && <p className="state" role="alert">{actionError.message}</p>}
         </div>
         <div className="profile"><h3>Thông tin khách hàng</h3>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><div><b>{nameOf(current)}</b><small>{current.customer_id}</small></div></div><p>{current.customer_email || 'Chưa có email'}</p><hr /><h4>Hội thoại</h4><p>Kênh: {current.channel}</p><p>Trạng thái: {statuses[current.status] || current.status}</p><p>Ưu tiên: {priorities[current.priority] || current.priority}</p><h4>Ticket hỗ trợ</h4><p>{current.tickets.length} ticket</p></> : <p>Thông tin xuất hiện khi tải xong hội thoại.</p>}</div>

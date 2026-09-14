@@ -1,6 +1,6 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
-Ngày lập: 11/09/2026. Cập nhật: 14/09/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local và widget có phiên khách; các mốc M0-M8 chưa nghiệm thu toàn bộ.
+Ngày lập: 11/09/2026. Cập nhật: 14/09/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local, widget có phiên khách, Inbox polling và vòng đời ticket/SLA phản hồi; các mốc M0-M8 chưa nghiệm thu toàn bộ.
 
 ## Mục tiêu và phạm vi
 
@@ -88,3 +88,5 @@ Regression trích xuất 4B: 40/48 quyết định đúng, 14/16 từ chối đ�
 14/09/2026 (mốc con M4): triển khai widget nhúng cùng origin, phiên khách 24 giờ, lịch sử/trích dẫn, chống gửi trùng, handoff và nhận phản hồi nhân viên bằng polling 3 giây. Migration v3 cộng bảng phiên; 46 unittest, Vite build và QA Edge desktop/mobile 390px trên DB/vector tạm đạt. Một câu hỏi qua Ollama thật có đáp án/quote, khôi phục phiên và xử lý mất mạng/kết thúc đã kiểm tra. M4 chưa nghiệm thu vì thiếu Inbox realtime và SLA; chưa có nhúng khác origin hay xác minh chủ đơn cho khách ẩn danh. M3 giữ nguyên cấu hình, tiếp tục chờ người duyệt và dữ liệu độc lập.
 
 14/09/2026 (tự cập nhật Inbox và SLA M4): danh sách/nội dung/người phụ trách tự cập nhật mỗi 3 giây khi tab hiển thị; giữ lựa chọn và bản nháp, xử lý lỗi mạng và phản hồi cũ. SLA phản hồi đầu tiên tính từ tạo ticket theo ưu tiên 5/15/60/240 phút, tách đang chờ quá hạn, đã trả lời đúng/trễ và đóng trước phản hồi; bộ lọc cùng chỉ số trên tập đang xem. 49 unittest, Vite build và QA hai phiên Edge desktop/mobile đạt. Chưa có SSE/WebSocket, lịch làm việc, hạn giải quyết hoặc escalation; chưa nghiệm thu toàn bộ M4/hồ sơ thiết kế. Kế tiếp hoàn thiện vòng đời ticket ở Inbox; M3 vẫn chờ người duyệt và dữ liệu độc lập.
+
+14/09/2026 (vòng đời ticket M4): Inbox cho người phụ trách giải quyết/đóng với ghi chú nội bộ, lưu thời điểm/người hoàn tất. Khách nhắn sau giải quyết tạo ticket mới và về hàng chờ, AI vẫn dừng; đóng yêu cầu kết thúc phiên rồi bắt đầu phiên mới. Kiểm tra tin khách mới nhất và retry theo ticket ngăn hoàn tất nhầm lượt; migration v4 chốt phản hồi từng ticket, giữ SLA lịch sử. 53 unittest, Vite build và QA Edge hai nhân viên/phiên khách desktop/mobile đạt. Chưa có mở lại thủ công, SLA giải quyết hoặc kiểm thử tải. Tiếp theo hồ sơ thiết kế và nghiệm thu toàn luồng M4, sau đó Agentic RAG/kênh thứ hai; M3 vẫn chờ người duyệt và dữ liệu độc lập.

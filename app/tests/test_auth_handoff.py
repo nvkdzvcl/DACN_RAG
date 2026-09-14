@@ -213,14 +213,22 @@ class AuthHandoffTests(unittest.TestCase):
         with legacy.begin() as connection:
             connection.execute(text('CREATE TABLE conversations (id VARCHAR PRIMARY KEY, status VARCHAR)'))
             connection.execute(text("INSERT INTO conversations VALUES ('old', 'assigned')"))
-            connection.execute(text('CREATE TABLE messages (id VARCHAR PRIMARY KEY, content TEXT)'))
-            connection.execute(text("INSERT INTO messages VALUES ('message', 'Keep this content')"))
+            connection.execute(text('CREATE TABLE messages (id VARCHAR PRIMARY KEY, content TEXT, conversation_id VARCHAR, sender_type VARCHAR, agent_id VARCHAR, created_at TIMESTAMP)'))
+            connection.execute(text("INSERT INTO messages (id, content) VALUES ('message', 'Keep this content')"))
+            connection.execute(text("INSERT INTO messages VALUES ('reply', 'Legacy reply', 'old', 'agent', 'one', '2026-09-14 00:01:00.000000')"))
+            connection.execute(text('CREATE TABLE tickets (id VARCHAR PRIMARY KEY, conversation_id VARCHAR, status VARCHAR, priority VARCHAR, summary TEXT, created_at TIMESTAMP)'))
+            connection.execute(text("INSERT INTO tickets VALUES ('answered', 'old', 'closed', 'high', 'Keep summary', '2026-09-14 00:00:00.000000'), ('unanswered', 'old', 'resolved', 'high', 'No reply', '2026-09-14 01:00:00.000000')"))
         migrate(legacy)
+        with legacy.begin() as connection:
+            connection.execute(text("INSERT INTO messages VALUES ('future', 'Later cycle', 'old', 'agent', 'one', '2026-09-14 02:00:00.000000', NULL)"))
         migrate(legacy)
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
-            self.assertEqual(connection.execute(text('SELECT content FROM messages')).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 3)
+            self.assertEqual(connection.execute(text("SELECT content FROM messages WHERE id = 'message'")).scalar(), 'Keep this content')
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 4)
+            self.assertEqual(connection.execute(text("SELECT first_response_at FROM tickets WHERE id = 'answered'")).scalar(), '2026-09-14 00:01:00.000000')
+            self.assertIsNone(connection.execute(text("SELECT first_response_at FROM tickets WHERE id = 'unanswered'")).scalar())
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM tickets WHERE completed_at IS NOT NULL OR completed_by_id IS NOT NULL')).scalar(), 0)
 
 
 if __name__ == '__main__':

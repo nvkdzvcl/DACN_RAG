@@ -24,6 +24,8 @@ def ticket_slas(db, conversation_ids, now=None):
     ).filter(Ticket.conversation_id.in_(conversation_ids)).order_by(Ticket.created_at.desc(), Ticket.id).all()
     result = {}
     for ticket, replied_at, conversation_status in rows:
+        if ticket.status in {'closed', 'resolved'}:
+            replied_at = ticket.first_response_at
         target = RESPONSE_MINUTES.get(ticket.priority, RESPONSE_MINUTES['normal'])
         due_at = utc(ticket.created_at) + timedelta(minutes=target)
         replied_at = utc(replied_at) if replied_at else None

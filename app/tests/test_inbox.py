@@ -9,6 +9,7 @@ from app.api.inbox import accept_conversation, add_agent_message, conversation_d
 from app.db.session import Base
 from app.models.support import Conversation, Customer, Message, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, conversation_sla, ticket_slas
+from app.services.ticket_service import complete_tickets
 
 
 class InboxTests(unittest.TestCase):
@@ -101,12 +102,16 @@ class InboxTests(unittest.TestCase):
         reply.created_at = due + timedelta(microseconds=1)
         self.db.commit()
         self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'breached')
-        self.db.get(Ticket, 'ticket').status = 'closed'
+        complete_tickets(self.db, 'first', 'closed', self.user.id, 'Done')
         self.db.commit()
         self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'breached')
         self.db.query(Message).filter(Message.sender_type == 'agent').delete()
+        self.db.add(Ticket(id='unanswered', conversation_id='first', priority='high'))
+        self.db.flush()
+        complete_tickets(self.db, 'first', 'closed')
         self.db.commit()
-        self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'cancelled')
+        self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'breached')
+        self.assertEqual(ticket_slas(self.db, ['first'])['unanswered']['status'], 'cancelled')
 
     def test_sla_filters_and_earliest_pending_ticket(self):
         now = datetime.now(timezone.utc)
