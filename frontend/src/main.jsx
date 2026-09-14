@@ -8,6 +8,7 @@ import Widget from './Widget';
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
 const priorities = { normal: 'Bình thường', high: 'Cao', urgent: 'Khẩn cấp', low: 'Thấp' };
+const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Đóng trước phản hồi', none: 'Chưa có SLA' };
 const senders = { customer: 'Khách hàng', ai: 'RAG AI', assistant: 'RAG AI', agent: 'Nhân viên', system: 'Hệ thống' };
 const nameOf = c => c.customer_name || c.customer_id;
 const initials = name => name.trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
@@ -29,7 +30,10 @@ async function request(path, options = {}) {
   return data;
 }
 
-const getInbox = (path, signal) => request(`/inbox/conversations${path}`, { signal });
+const getInbox = (path, signal) => request(`/inbox/conversations${path}`, { signal, cache: 'no-store' });
+function SlaBadge({ value }) {
+  return <span className={`slaBadge sla-${value?.status || 'none'}`}>{slaStatuses[value?.status || 'none']}</span>;
+}
 
 function SessionGate() {
   const [user, setUser] = useState(null);
@@ -78,6 +82,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const [detail, setDetail] = useState(null);
   const [status, setStatus] = useState('');
   const [priority, setPriority] = useState('');
+  const [sla, setSla] = useState('');
   const [search, setSearch] = useState('');
   const [listLoading, setListLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -88,21 +93,32 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   const [drafts, setDrafts] = useState({});
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
+    if (page !== 'inbox' || actionLoading) return;
     const controller = new AbortController();
+    let timer;
     setListLoading(true);
     setListError('');
-    getInbox(`?${new URLSearchParams({ ...(status && { status }), ...(priority && { priority }) })}`, controller.signal)
-      .then(data => {
-        if (controller.signal.aborted) return;
-        if (!Array.isArray(data.conversations) || data.conversations.some(c => typeof c.conversation_id !== 'string' || typeof c.customer_id !== 'string')) throw new Error('Dữ liệu danh sách không hợp lệ.');
-        setConversations(data.conversations);
-      })
-      .catch(error => { if (!controller.signal.aborted) { if (error.status === 401) onExpired(); setListError(error.message || 'Không kết nối được backend.'); } })
-      .finally(() => { if (!controller.signal.aborted) setListLoading(false); });
-    return () => controller.abort();
-  }, [status, priority, refresh]);
+    async function load(first = false) {
+      if (first || !document.hidden) {
+        try {
+          const data = await getInbox(`?${new URLSearchParams({ ...(status && { status }), ...(priority && { priority }), ...(sla && { sla }) })}`, controller.signal);
+          if (controller.signal.aborted) return;
+          if (!Array.isArray(data.conversations) || data.conversations.some(c => typeof c.conversation_id !== 'string' || typeof c.customer_id !== 'string')) throw new Error('Dữ liệu danh sách không hợp lệ.');
+          setConversations(data.conversations);
+          setSelectedId(id => data.conversations.some(c => c.conversation_id === id) ? id : data.conversations[0]?.conversation_id || null);
+          setListError(''); setLastUpdated(new Date().toISOString());
+        } catch (error) {
+          if (!controller.signal.aborted) { if (error.status === 401) onExpired(); setListError(error.message || 'Không kết nối được backend.'); }
+        } finally { if (!controller.signal.aborted) setListLoading(false); }
+      }
+      if (!controller.signal.aborted) timer = setTimeout(load, 3000);
+    }
+    load(true);
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [status, priority, sla, refresh, page, actionLoading]);
 
   const query = search.trim().toLocaleLowerCase('vi');
   const visibleChats = conversations.filter(c => `${nameOf(c)} ${c.customer_id} ${c.channel}`.toLocaleLowerCase('vi').includes(query));
@@ -111,20 +127,28 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const draft = drafts[activeId] || '';
 
   useEffect(() => {
+    if (page !== 'inbox' || actionLoading) return;
     const controller = new AbortController();
+    let timer;
     setDetail(null);
     setDetailError('');
     setDetailLoading(Boolean(activeId));
-    if (activeId) getInbox(`/${encodeURIComponent(activeId)}`, controller.signal)
-      .then(data => {
-        if (controller.signal.aborted) return;
-        if (data.conversation_id !== activeId || !Array.isArray(data.messages) || !Array.isArray(data.tickets)) throw new Error('Dữ liệu hội thoại không hợp lệ.');
-        setDetail(data);
-      })
-      .catch(error => { if (!controller.signal.aborted) { if (error.status === 401) onExpired(); setDetailError(error.message || 'Không tải được hội thoại.'); } })
-      .finally(() => { if (!controller.signal.aborted) setDetailLoading(false); });
-    return () => controller.abort();
-  }, [activeId, detailRetry]);
+    async function load(first = false) {
+      if (first || !document.hidden) {
+        try {
+          const data = await getInbox(`/${encodeURIComponent(activeId)}`, controller.signal);
+          if (controller.signal.aborted) return;
+          if (data.conversation_id !== activeId || !Array.isArray(data.messages) || !Array.isArray(data.tickets)) throw new Error('Dữ liệu hội thoại không hợp lệ.');
+          setDetail(data); setDetailError('');
+        } catch (error) {
+          if (!controller.signal.aborted) { if (error.status === 401) onExpired(); setDetailError(error.message || 'Không tải được hội thoại.'); }
+        } finally { if (!controller.signal.aborted) setDetailLoading(false); }
+      }
+      if (!controller.signal.aborted) timer = setTimeout(load, 3000);
+    }
+    if (activeId) load(true);
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [activeId, detailRetry, page, actionLoading]);
 
   // Ignore previous customer's detail before effect cleanup runs.
   const current = detail?.conversation_id === activeId ? detail : null;
@@ -146,7 +170,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     const targetId = activeId;
     if (await postAction('/messages', { content })) setDrafts(previous => previous[targetId] === draft ? { ...previous, [targetId]: '' } : previous);
   }
-  const counts = [visibleChats.length, visibleChats.filter(c => c.status === 'open').length, visibleChats.filter(c => c.status === 'handoff_requested').length, visibleChats.filter(c => ['high', 'urgent'].includes(c.priority)).length];
+  const counts = [visibleChats.length, visibleChats.filter(c => c.status === 'open').length, visibleChats.filter(c => c.status === 'handoff_requested').length, visibleChats.filter(c => c.sla?.status === 'overdue').length];
   return <div className="shell">
     <aside aria-label="Điều hướng chính">
       <div className="brand"><span className="brandLogo"><Bot aria-hidden="true" /></span><b>RAG</b><small>Support Hub</small></div>
@@ -160,22 +184,27 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
       <nav className="mobileNav" aria-label="Điều hướng"><button aria-pressed={page === 'inbox'} onClick={() => setPage('inbox')}>Hội thoại</button><button aria-pressed={page === 'knowledge'} onClick={() => setPage('knowledge')}>Kho tri thức</button></nav>
       {page === 'knowledge' ? <KnowledgeBase user={user} request={request} onExpired={onExpired} /> : <>
       <header><div><h1>Hộp thư đa kênh</h1><p>Quản lý hội thoại, tin nhắn và yêu cầu hỗ trợ tập trung</p></div><label className="search"><Search size={16} /><input aria-label="Tìm kiếm hội thoại" placeholder="Tìm khách hàng, kênh..." value={search} onChange={e => setSearch(e.target.value)} /></label></header>
-      <div className="stats">{['Hội thoại trong bộ lọc', 'Đang mở', 'Chờ nhân viên', 'Ưu tiên cao / khẩn cấp'].map((label, i) => <div key={label}><b>{listLoading || listError ? '—' : counts[i]}</b><small>{label}</small></div>)}</div>
+      <p className="syncNote">Tự cập nhật mỗi 3 giây khi đang xem Inbox.{lastUpdated && ` Danh sách cập nhật: ${timeOf(lastUpdated)}.`}</p>
+      <div className="stats">{['Hội thoại trong bộ lọc', 'Đang mở', 'Chờ nhân viên', 'Quá hạn chờ phản hồi'].map((label, i) => <div key={label}><b>{listLoading || listError ? '—' : counts[i]}</b><small>{label}</small></div>)}</div>
       <section className="workspace">
         <div className="list" aria-label="Danh sách hội thoại" aria-busy={listLoading}>
-          <div className="listHead"><b>Hội thoại</b><button onClick={() => setRefresh(n => n + 1)} disabled={listLoading}>Làm mới</button></div>
+          <div className="listHead"><b>Hội thoại</b><button onClick={() => { setRefresh(n => n + 1); setDetailRetry(n => n + 1); }} disabled={listLoading || actionLoading}>Làm mới</button></div>
           <div className="filters"><label>Trạng thái<select value={status} onChange={e => setStatus(e.target.value)}><option value="">Tất cả</option>{Object.entries(statuses).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Ưu tiên<select value={priority} onChange={e => setPriority(e.target.value)}><option value="">Tất cả</option>{Object.entries(priorities).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
-          {listLoading ? <p className="state" role="status">Đang tải danh sách...</p> : listError ? <div className="state" role="alert"><p>{listError}</p><button onClick={() => setRefresh(n => n + 1)}>Thử lại</button></div> : !visibleChats.length ? <p className="state" role="status">Không có hội thoại phù hợp.</p> : visibleChats.map(c =>
-            <button key={c.conversation_id} aria-pressed={activeId === c.conversation_id} onClick={() => setSelectedId(c.conversation_id)} className={`chat ${activeId === c.conversation_id ? 'selected' : ''}`}><span className="avatar">{initials(nameOf(c))}</span><span className="chatText"><b>{nameOf(c)}</b><small>{c.channel} · {statuses[c.status] || c.status}</small><i>{priorities[c.priority] || c.priority}</i><small>{timeOf(c.created_at)}</small></span></button>)}
+          <label className="slaFilter">SLA phản hồi đầu tiên<select value={sla} onChange={e => setSla(e.target.value)}><option value="">Tất cả</option>{Object.entries(slaStatuses).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          {listError && <div className="state" role="alert"><p>{listError} Dữ liệu có thể đã cũ; đang thử kết nối lại.</p><button onClick={() => setRefresh(n => n + 1)}>Thử lại</button></div>}
+          {listLoading ? <p className="state" role="status">Đang tải danh sách...</p> : !visibleChats.length ? !listError && <p className="state" role="status">Không có hội thoại phù hợp.</p> : visibleChats.map(c =>
+            <button key={c.conversation_id} aria-pressed={activeId === c.conversation_id} onClick={() => setSelectedId(c.conversation_id)} className={`chat ${activeId === c.conversation_id ? 'selected' : ''}`}><span className="avatar">{initials(nameOf(c))}</span><span className="chatText"><b>{nameOf(c)}</b><small>{c.channel} · {statuses[c.status] || c.status}</small><i>{priorities[c.priority] || c.priority}</i><SlaBadge value={c.sla} /><small>{timeOf(c.created_at)}</small></span></button>)}
         </div>
         <div className="conversation" aria-label="Chi tiết hội thoại" aria-busy={detailLoading}>
           {selected && <div className="convHead"><div className="avatar big">{initials(nameOf(selected))}</div><div><b>{nameOf(selected)}</b><small>{selected.channel} · {statuses[current?.status || selected.status]}</small></div>{current?.status === 'handoff_requested' && <button onClick={acceptConversation} disabled={actionLoading || listLoading}>Tiếp nhận</button>}</div>}
           {current && ['handoff_requested', 'assigned'].includes(current.status) && <p className="handoff" role="status">AI đã dừng. {current.status === 'handoff_requested' ? 'Đang chờ nhân viên tiếp nhận.' : canReply ? 'Bạn đang phụ trách hội thoại.' : 'Nhân viên khác đang phụ trách hội thoại.'}</p>}
+          {current?.sla && <p className="slaSummary"><SlaBadge value={current.sla} /> Hạn phản hồi: {timeOf(current.sla.due_at)} · {current.sla.target_minutes} phút từ lúc tạo ticket (24/7).</p>}
+          {detailError && <div className="state" role="alert"><p>{detailError} Dữ liệu có thể đã cũ; đang thử kết nối lại.</p><button onClick={() => setDetailRetry(n => n + 1)}>Thử lại</button></div>}
           <div className="messages">
-            {!selected ? <p className="state">Chọn hội thoại để xem nội dung.</p> : detailError ? <div className="state" role="alert"><p>{detailError}</p><button onClick={() => setDetailRetry(n => n + 1)}>Thử lại</button></div> : !current ? <p className="state" role="status">Đang tải hội thoại...</p> : <>
+            {!selected ? <p className="state">Chọn hội thoại để xem nội dung.</p> : !current ? <p className="state" role="status">{detailError ? 'Chưa tải được hội thoại.' : 'Đang tải hội thoại...'}</p> : <>
               {!current.messages.length && <p className="state">Hội thoại chưa có tin nhắn.</p>}
               {current.messages.map(m => <div key={m.id} className={`bubble ${m.sender_type === 'customer' ? 'customer' : m.sender_type === 'agent' ? 'staff' : 'ai'}`}><b>{senders[m.sender_type] || m.sender_type}</b><div className="messageContent">{m.content}</div>{m.citations?.length > 0 && <Citations citations={m.citations} request={request} />}<time>{timeOf(m.created_at)}</time></div>)}
-              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary || 'Chưa có tóm tắt.'}</p><small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section>
+              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary || 'Chưa có tóm tắt.'}</p><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section>
             </>}
           </div>
           {current && <form className="composer" onSubmit={sendReply}><input aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading}>Gửi</button></form>}

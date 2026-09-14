@@ -147,3 +147,15 @@ Task tiếp theo: người duyệt chấm bản sao phiếu trên lượt bounde
 Giới hạn: cùng origin, một API worker, bộ đếm IP trong bộ nhớ, 200 tin gần nhất, UUID retry giữ trong trang hiện tại; chưa xác minh chủ đơn và chưa điều phối chung AI với API nhân viên. Đóng khung giữ phiên; Kết thúc đóng hội thoại/ticket nhưng không xóa lịch sử DB. Polling widget không phải realtime Inbox hay SLA. M3 vẫn chờ người duyệt, không chạy lại benchmark vì không đổi RAG.
 
 Task tiếp theo: tự cập nhật Inbox và trạng thái hội thoại, sau đó SLA cơ bản với hạn phản hồi và quá hạn. Song song cần người duyệt chấm phiếu M3 và cung cấp tài liệu/câu hỏi độc lập; các kết quả widget không thay nghiệm thu chất lượng.
+
+## Inbox tự cập nhật và SLA M4 - 14/09/2026
+
+- [x] Polling danh sách/chi tiết mỗi 3 giây khi đang xem Inbox; tạm dừng lúc tab ẩn, vào Kho tri thức hoặc thao tác ghi. Giữ lựa chọn, bản nháp và nội dung cũ, báo lỗi mạng và tự phục hồi; hủy phản hồi cũ khi đổi hội thoại/bộ lọc.
+- [x] SLA phản hồi đầu tiên từ tạo ticket, ưu tiên 5/15/60/240 phút, 24/7. Chỉ tin nhân viên có agent_id tính phản hồi; tiếp nhận/AI/khách không đặt lại hạn. Đúng ranh giới đạt, trả lời sau hạn trễ, đóng trước trả lời tách riêng.
+- [x] API danh sách/chi tiết trả SLA, lọc trạng thái hợp lệ; tóm tắt chọn ticket đang chờ có hạn sớm nhất hoặc ticket mới nhất. Inbox hiển thị hạn, thời điểm phản hồi đầu, trạng thái từng ticket và đếm quá hạn trong bộ lọc hiện tại.
+- [x] 49 unittest và Vite build đạt. QA Edge trên bản build, DB/vector riêng, hai phiên nhân viên + phiên khách: cập nhật trạng thái/tin mới, giữ draft/lựa chọn, mất mạng/phục hồi, lọc SLA, phản hồi cũ, tab ẩn mô phỏng, đóng hội thoại và đăng xuất; desktop/mobile 390px không tràn ngang.
+- [x] Cập nhật README, demo, quyết định, roadmap, đề cương 10 mục và báo cáo Markdown/Word bảy chương. Word tám trang khớp Markdown, đã xuất bằng Word và kiểm tra đủ tám ảnh trang bằng Poppler; renderer đóng gói thiếu LibreOffice trên Windows.
+
+Giới hạn: polling chưa phải SSE/WebSocket; chính sách SLA demo cố định và tính lại từ timestamp, chưa có lịch làm việc, hạn giải quyết, escalation hoặc thống kê kiểm toán. Phải lưu deadline/phiên bản trước khi cho chỉnh chính sách/ưu tiên. Các API list chưa phân trang, chưa đo tải lớn. M3 giữ nguyên cấu hình, vẫn cần người chấm và dữ liệu độc lập.
+
+Task tiếp theo: hoàn thiện giải quyết/đóng ticket từ Inbox và quy tắc tiếp tục hỗ trợ; bổ sung hồ sơ thiết kế/kiểm thử toàn luồng trước nghiệm thu M4. Tiếp đó triển khai Agentic RAG và kênh thứ hai theo roadmap.

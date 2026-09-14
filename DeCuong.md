@@ -69,7 +69,7 @@ Giả thuyết cần kiểm chứng: kết hợp truy hồi bằng chứng, côn
 
 Ưu tiên theo công việc: nền tảng dữ liệu và xác thực; RAG dùng mô hình thật; widget/realtime/SLA; Agentic RAG và handoff; kênh thứ hai; kiểm thử, triển khai và hồ sơ. Chi tiết mốc ở ROADMAP.md, trạng thái kỹ thuật ở docs/TASKS.md. Phần đã kiểm chứng của xác thực, handoff, RAG local dùng Ollama/Qdrant và baseline trên bộ câu hỏi giả lập được trình bày trong Chương 5-6 báo cáo; không coi các mục còn dự kiến là kết quả hoàn thành.
 
-Ngày 14/09/2026 bổ sung mốc con M4: widget cùng origin, phiên khách ẩn danh có thời hạn, lưu và khôi phục hội thoại, trích dẫn, chuyển nhân viên và nhận phản hồi bằng polling. Kiểm chứng cách ly danh tính, chống gửi trùng và chặn AI muộn; tên tự nhập không thay xác minh quyền sở hữu đơn hàng. Inbox realtime và SLA còn dự kiến. M3 vẫn chờ người duyệt nhãn/đáp án và dữ liệu độc lập; tiến độ chức năng widget không thay nghiệm thu chất lượng RAG.
+Ngày 14/09/2026 bổ sung mốc con M4: widget cùng origin, phiên khách ẩn danh có thời hạn, lưu và khôi phục hội thoại, trích dẫn, chuyển nhân viên và nhận phản hồi bằng polling. Kiểm chứng cách ly danh tính, chống gửi trùng và chặn AI muộn; tên tự nhập không thay xác minh quyền sở hữu đơn hàng. Inbox đã tự cập nhật bằng polling và có SLA phản hồi đầu tiên theo ưu tiên, tính 24/7; realtime đẩy sự kiện, lịch làm việc và hạn giải quyết còn dự kiến. M3 vẫn chờ người duyệt nhãn/đáp án và dữ liệu độc lập; tiến độ chức năng widget không thay nghiệm thu chất lượng RAG.
 
 **9. Dự kiến nội dung của tiểu luận**
 

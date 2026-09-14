@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, AgentMessageCreate
 from app.db.session import Base
 from app.models.support import Conversation, Customer, Message, Ticket, User
+from app.services.sla_service import RESPONSE_MINUTES, conversation_sla, ticket_slas
 
 
 class InboxTests(unittest.TestCase):
@@ -62,6 +63,67 @@ class InboxTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             add_agent_message('second', AgentMessageCreate(content='Không được gửi trước khi nhận.'), self.db, self.user)
         self.assertEqual(error.exception.status_code, 409)
+
+    def test_sla_deadline_acceptance_and_sender_isolation(self):
+        started = datetime(2026, 9, 14, 0, 0, tzinfo=timezone.utc)
+        self.db.get(Ticket, 'ticket').created_at = started
+        self.db.add_all([
+            Message(id='old-staff', conversation_id='first', sender_type='agent', agent_id=self.user.id, content='Old', created_at=started - timedelta(seconds=1)),
+            Message(id='other-staff', conversation_id='second', sender_type='agent', agent_id=self.user.id, content='Other', created_at=started + timedelta(seconds=1)),
+            Message(id='fake-staff', conversation_id='first', sender_type='agent', content='No authenticated staff', created_at=started + timedelta(seconds=1)),
+            Message(id='ai-after', conversation_id='first', sender_type='ai', content='AI is not staff', created_at=started + timedelta(seconds=2)),
+        ])
+        self.db.commit()
+        due = started + timedelta(minutes=15)
+        self.assertEqual(ticket_slas(self.db, ['first'], due)['ticket']['status'], 'on_track')
+        accept_conversation('first', self.db, self.user)
+        late = ticket_slas(self.db, ['first'], due + timedelta(microseconds=1))['ticket']
+        self.assertEqual(late['status'], 'overdue')
+        self.assertEqual(late['due_at'], due.isoformat())
+        self.assertIsNone(late['responded_at'])
+        self.assertEqual(ticket_slas(self.db, ['second'], due), {})
+        for priority, minutes in RESPONSE_MINUTES.items():
+            self.db.get(Ticket, 'ticket').priority = priority
+            self.db.flush()
+            self.assertEqual(ticket_slas(self.db, ['first'], started)['ticket']['due_at'], (started + timedelta(minutes=minutes)).isoformat())
+
+    def test_sla_first_reply_boundary_late_and_cancelled(self):
+        started = datetime(2026, 9, 14, 0, 0, tzinfo=timezone.utc)
+        self.db.get(Ticket, 'ticket').created_at = started
+        due = started + timedelta(minutes=15)
+        reply = Message(id='staff-first', conversation_id='first', sender_type='agent', agent_id=self.user.id, content='First response', created_at=due)
+        self.db.add(reply)
+        self.db.add(Message(id='staff-later', conversation_id='first', sender_type='agent', agent_id=self.user.id, content='Later', created_at=due + timedelta(hours=1)))
+        self.db.commit()
+        result = ticket_slas(self.db, ['first'], due + timedelta(days=1))['ticket']
+        self.assertEqual(result['status'], 'met')
+        self.assertEqual(result['responded_at'], due.isoformat())
+        reply.created_at = due + timedelta(microseconds=1)
+        self.db.commit()
+        self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'breached')
+        self.db.get(Ticket, 'ticket').status = 'closed'
+        self.db.commit()
+        self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'breached')
+        self.db.query(Message).filter(Message.sender_type == 'agent').delete()
+        self.db.commit()
+        self.assertEqual(ticket_slas(self.db, ['first'])['ticket']['status'], 'cancelled')
+
+    def test_sla_filters_and_earliest_pending_ticket(self):
+        now = datetime.now(timezone.utc)
+        self.db.get(Ticket, 'ticket').created_at = now - timedelta(minutes=20)
+        self.db.add(Ticket(id='new-ticket', conversation_id='first', priority='normal', created_at=now))
+        self.db.commit()
+        slas = list(ticket_slas(self.db, ['first'], now).values())
+        self.assertEqual(conversation_sla(slas)['ticket_id'], 'ticket')
+        self.assertEqual(list_conversations(db=self.db, sla='overdue')['count'], 1)
+        self.assertEqual(list_conversations(db=self.db, sla='on_track')['count'], 0)
+        self.assertEqual(list_conversations(db=self.db, sla='none')['conversations'][0]['conversation_id'], 'second')
+        self.assertEqual(conversation_detail('first', self.db)['sla']['status'], 'overdue')
+        self.assertEqual(len(conversation_detail('first', self.db)['tickets']), 2)
+        self.db.get(Conversation, 'first').status = 'closed'
+        self.db.commit()
+        self.assertEqual(list_conversations(db=self.db, sla='cancelled')['count'], 1)
+        self.assertEqual(list_conversations(db=self.db, sla='overdue')['count'], 0)
 
 
 if __name__ == '__main__':

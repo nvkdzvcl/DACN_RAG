@@ -36,7 +36,7 @@ Kiểm tra: `python -m unittest discover -s app/tests -v`; frontend: `npm --pref
 
 ## Website chat widget
 
-Mở `http://localhost:5173/widget-demo.html`, chọn Hỗ trợ và nhập tên; `/chat` là trang chat trực tiếp. Widget gọi RAG hiện có, hiển thị trích dẫn đã lưu, cho phép Gặp nhân viên và nhận phản hồi qua polling mỗi 3 giây khi tab hiển thị, không có thao tác đang chờ. Inbox nhân viên vẫn dùng nút Làm mới.
+Mở `http://localhost:5173/widget-demo.html`, chọn Hỗ trợ và nhập tên; `/chat` là trang chat trực tiếp. Widget gọi RAG hiện có, hiển thị trích dẫn đã lưu, cho phép Gặp nhân viên và nhận phản hồi qua polling mỗi 3 giây khi tab hiển thị, không có thao tác đang chờ. Inbox nhân viên cũng tự cập nhật mỗi 3 giây; nút Làm mới tải lại cả danh sách và hội thoại.
 
 Nhúng trên website cùng origin đã phục vụ frontend và proxy `/api` tới FastAPI:
 
@@ -47,6 +47,23 @@ Nhúng trên website cùng origin đã phục vụ frontend và proxy `/api` t�
 Giữ đường dẫn `/chat` trả về frontend SPA khi phục vụ bản build. Origin gồm scheme, hostname và port; không trộn `localhost` với `127.0.0.1`. Chưa hỗ trợ nhúng khác origin. Ngoài development cần HTTPS để cookie Secure hoạt động; chạy một API worker.
 
 Cookie HttpOnly riêng có hạn cố định 24 giờ, DB chỉ lưu hash token; server tạo danh tính khách và gắn phiên với một hội thoại. Tên tự nhập không xác minh chủ đơn hàng: tra mã đơn không thuộc khách này chuyển nhân viên, không lộ thông tin đơn. Đóng khung chat giữ phiên; Kết thúc thu hồi phiên, đóng hội thoại/ticket và giữ lịch sử cho nhân viên. Widget hiển thị tối đa 200 tin gần nhất, giữ ID khi thử gửi lại trong cùng trang. Giới hạn mỗi IP/phút: 6 yêu cầu tạo phiên, 10 gửi tin, 6 chuyển nhân viên; chỉ một lượt AI từ widget được xử lý cùng lúc, lượt bận trả 429 trước khi lưu. Handoff vẫn hoạt động trong lúc AI chờ; giới hạn này chưa điều phối các lời gọi RAG nội bộ của nhân viên.
+
+## Inbox tự cập nhật và SLA phản hồi đầu tiên
+
+Danh sách, nội dung, trạng thái phụ trách và SLA tự cập nhật mỗi 3 giây khi đang xem Inbox. Polling tạm dừng khi tab ẩn, mở Kho tri thức hoặc đang gửi/tiếp nhận; không gọi chồng trong cùng vòng cập nhật. Giữ hội thoại đang chọn, bản nháp và nội dung cũ khi mất mạng; báo dữ liệu có thể đã cũ và tự thử lại. API vẫn kiểm tra quyền nhân viên ở từng thao tác.
+
+SLA demo tính liên tục 24/7 từ thời điểm tạo ticket đến tin đầu tiên có người gửi là nhân viên xác thực. Tiếp nhận, tin khách và AI không tính là phản hồi, không đặt lại hạn.
+
+| Ưu tiên ticket | Hạn phản hồi đầu tiên |
+|---|---|
+| Khẩn cấp | 5 phút |
+| Cao | 15 phút |
+| Bình thường | 60 phút |
+| Thấp | 240 phút |
+
+Inbox hiển thị hạn, trạng thái và bộ lọc SLA; số Quá hạn chỉ đếm hội thoại đang chờ phản hồi trong bộ lọc hiện tại. Phản hồi đúng thời điểm hạn vẫn đạt; sau hạn là trễ. Đóng trước phản hồi mang trạng thái riêng, không tính đạt SLA. Với nhiều ticket, lấy ticket đang chờ có hạn sớm nhất; nếu không còn chờ, lấy ticket mới nhất. Chi tiết giữ SLA từng ticket.
+
+Chính sách cố định được tính từ timestamp hiện có, áp dụng cả ticket cũ; chưa có lịch làm việc/ngày nghỉ, hạn giải quyết, escalation hoặc thống kê SLA đã kiểm toán. Cần lưu phiên bản chính sách và deadline trước khi cho phép sửa quy tắc. Polling không phải WebSocket/SSE; chưa đo tải lớn hoặc bảo đảm độ trễ realtime.
 
 ## RAG local với Ollama
 
