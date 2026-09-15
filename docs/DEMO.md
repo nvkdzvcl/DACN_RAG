@@ -122,3 +122,9 @@ Kiểm tra tự động toàn luồng bằng `python -m app.tests.smoke_m4` từ
 5. Kiểm tra xung đột trên dữ liệu thử: khi hộp xác nhận đang mở, khách gửi tin mới rồi nhân viên xác nhận. API trả 409, tải lại nội dung và giữ ghi chú để đọc lại trước khi hoàn tất. Không dùng dữ liệu khách thật cho QA.
 
 Kiểm chứng ngày 14/09/2026: 53 unittest và Vite build đạt; QA Edge bản build với hai phiên nhân viên, phiên widget và DB/vector riêng kiểm tra đủ luồng trên, ghi chú không lộ, retry thao tác cũ không ảnh hưởng ticket mới. Desktop/mobile 390px đã kiểm tra trực quan, không tràn ngang. Chưa có mở lại hội thoại đã đóng bằng thao tác nhân viên, SLA giải quyết hoặc kiểm thử tải; không đo lại chất lượng RAG.
+
+## Demo bộ chọn tool M5
+
+Chạy `python -m app.tests.smoke_tools` khi Ollama local đã sẵn sàng. Lệnh tạo dữ liệu giả lập riêng và chạy bảy ca tra đơn/chuyển nhân viên/chính sách/nhiều mã; dùng dịch vụ nghiệp vụ thật, không mở server. Không sửa chủ đơn hoặc ID khách trong DB thật để tạo ca demo. Xem docs/M5_TOOLS.md cho trace và số liệu.
+
+Trong widget, câu “Đơn DH99999 đang ở đâu?” được bộ chọn phân loại nhưng quyền vẫn theo khách của phiên, nên không lộ đơn có sẵn thuộc người khác. Câu “Hủy đơn DH12345 giúp tôi” chuyển nhân viên nếu bộ chọn trả handoff, không hủy đơn. Câu “Tra đơn DH12345 và DH99999” yêu cầu chọn một mã. Trace chỉ trong GET chi tiết Inbox dành staff, không có bảng nhật ký riêng trên UI. Lỗi provider giữ tin; đọc lịch sử trước khi gửi một yêu cầu mới để thử lại.

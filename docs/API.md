@@ -73,6 +73,12 @@ status chỉ resolved/closed. ticket_id dài 1-64; last_customer_message_id bắ
 
 Thành công trả `{"status":"resolved","duplicate":false}`. Retry cùng ticket/trạng thái/người/ghi chú đã chốt trả duplicate true và trạng thái hội thoại hiện tại; không sửa lượt đang hoạt động mới. Sai người hoặc tin khách cuối đã đổi trả 409. Client đọc lại chi tiết, giữ ghi chú để người phụ trách quyết định tiếp. Khách nhắn sau resolved mở ticket mới và xóa phân công; closed yêu cầu kết thúc phiên và tạo phiên mới.
 
+## Chọn công cụ và nhật ký
+
+Từ migration v5, mỗi message trong GET chi tiết Inbox có thêm tool_trace (dict hoặc null), chỉ cho staff. Trường này ghi pending, clarification, executed, rag, provider_error hoặc skipped, kèm mã đơn/tool/kết quả kiểm tra khi có. Không chứa mã vận đơn hay phản hồi thô của model. Pending chỉ có nghĩa đã bắt đầu lựa chọn, không chứng minh tool đã chạy; tiến trình dừng hoặc lỗi DB có thể giữ pending. Widget vẫn dùng snapshot lọc riêng và không nhận trace.
+
+Tin có đúng một mã đơn rõ ràng thêm bước chọn tool ngoài SQL transaction. Backend kiểm tra schema, khóa lại hội thoại và chỉ thực thi khi còn open/đúng tin khách cuối; chủ đơn lấy theo khách trong DB. Model chọn rag thì dùng RAG chính sách hiện có. Tool trả trạng thái qua mẫu cố định, không đưa dữ liệu đơn cho model sinh lại. Lỗi chọn tool dùng ai_error như lỗi provider; lỗi SQL khi tra đơn trả 503, giữ inbound đã commit. Không thêm endpoint tool công khai hoặc quyền cho model.
+
 ## SLA và lỗi
 
 SLA gồm ticket_id, conversation_id, target_minutes, due_at, responded_at và status. due_at/response là ISO 8601 UTC; datetime khác trong JSON có thể không chứa offset do SQLite, frontend hiện diễn giải timestamp lưu DB là UTC. Hạn từ tạo ticket theo ưu tiên, không reset khi tiếp nhận; đúng thời điểm hạn vẫn đạt. cancelled là kết thúc trước phản hồi, không phải đạt. Ticket terminal lấy first_response_at đã chốt. Tóm tắt chọn ticket đang chờ có hạn sớm nhất, nếu không có chọn ticket mới nhất.

@@ -25,7 +25,7 @@ flowchart TD
     E --> E2[Tổng hợp phiếu người duyệt]
 ```
 
-LLM tool calling, kênh xã hội thứ hai, push realtime, OCR và SLA giải quyết thuộc phạm vi dự kiến, không nằm trong các nút đã thực hiện.
+M5 đã bổ sung model chọn công cụ đơn hàng bằng JSON Schema, backend xác thực và điều phối. Agent nhiều bước, kênh xã hội thứ hai, push realtime, OCR và SLA giải quyết vẫn thuộc phạm vi dự kiến.
 
 ## Luồng nghiệp vụ mức 0
 
@@ -77,7 +77,7 @@ flowchart TD
     Finish -->|Kết thúc hội thoại| Closed --> EndSession
 ```
 
-Khi hội thoại còn mở và có mã đơn, backend dùng hàm tra cứu theo customer_id của hội thoại. Không tìm thấy đơn thuộc khách sẽ chuyển nhân viên; không gọi LLM để tự quyết định tool. Phiên widget tự tạo khách mới, nên tên giống người mua không cấp quyền đơn có sẵn. Handoff là nhận diện theo quy tắc; tóm tắt ticket là trích tối đa tám tin gần nhất, không phải tóm tắt bằng LLM.
+Khi hội thoại còn mở và có đúng một mã đơn, model chọn lookup_order, handoff hoặc rag theo schema giới hạn. Không có mã đơn đi RAG như trước; nhiều mã thì yêu cầu chọn một mã, không tự chọn đơn. Backend kiểm tra lựa chọn rồi khóa lại hội thoại, xác nhận trạng thái/tin khách cuối và tra cứu theo customer_id trong DB. Không tìm thấy đơn thuộc khách sẽ chuyển nhân viên. Phiên widget tự tạo khách mới, nên tên giống người mua không cấp quyền đơn có sẵn. Handoff theo từ khóa vẫn ưu tiên trước model; tóm tắt ticket là trích tối đa tám tin gần nhất, không phải tóm tắt bằng LLM.
 
 ## Use Case và quyền
 
@@ -169,6 +169,7 @@ erDiagram
         string external_message_id
         text content
         json citations
+        json tool_trace
         datetime created_at
     }
     tickets {
@@ -210,7 +211,7 @@ erDiagram
     }
 ```
 
-ERD phản ánh liên kết khai báo trong SQLAlchemy và migration v4. SQLite hiện chưa bật PRAGMA foreign_keys trong cấu hình kết nối; không coi ký hiệu FK là bằng chứng DB cưỡng chế toàn bộ quan hệ. last_customer_message_id là con trỏ logic, không có FK. UUID tin ngoài không có UNIQUE index; chống trùng trong process_message dựa trên khóa ghi hội thoại và tra UUID theo hội thoại. Các state/priority là chuỗi, chưa có CHECK constraint. schema_migrations là bảng hạ tầng với version làm khóa chính.
+ERD phản ánh liên kết khai báo trong SQLAlchemy và migration v5. SQLite hiện chưa bật PRAGMA foreign_keys trong cấu hình kết nối; không coi ký hiệu FK là bằng chứng DB cưỡng chế toàn bộ quan hệ. last_customer_message_id là con trỏ logic, không có FK. UUID tin ngoài không có UNIQUE index; chống trùng trong process_message dựa trên khóa ghi hội thoại và tra UUID theo hội thoại. Các state/priority là chuỗi, chưa có CHECK constraint. schema_migrations là bảng hạ tầng với version làm khóa chính.
 
 Citation là snapshot JSON trong Message, không có FK tới chunk; quote lịch sử được giữ khi tài liệu bị xóa, mở nguồn có thể trả 404/409. Hash file có unique index; vector dùng ID chunk và phiên bản chỉ mục để đối chiếu với SQL. Không đồng nhất file, chunk và lịch sử hội thoại thành một nguồn dữ liệu.
 

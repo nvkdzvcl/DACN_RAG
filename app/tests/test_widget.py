@@ -268,7 +268,8 @@ class WidgetTests(unittest.TestCase):
             db.add(Order(id='DH12345', customer_id='victim', status='shipped', tracking_code='PRIVATE-TRACKING'))
             db.commit()
         self.start()
-        with patch('app.services.message_service.answer_question') as rag:
+        with patch('app.services.message_service.answer_question') as rag, patch('app.services.message_service.select_order_tool',
+                return_value={'name': 'lookup_order', 'arguments': {'order_id': 'DH12345'}}):
             result = self.send('Don DH12345?')
             self.assertEqual(result.json()['status'], 'handoff_requested')
             self.assertNotIn('PRIVATE-TRACKING', result.text)

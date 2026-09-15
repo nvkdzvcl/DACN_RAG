@@ -50,3 +50,7 @@ def migrate(engine):
                 AND messages.sender_type = 'agent' AND messages.agent_id IS NOT NULL AND messages.created_at >= tickets.created_at
             ) WHERE status IN ('closed', 'resolved')"""))
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (4)"))
+        if 'tool_trace' not in {c['name'] for c in inspect(connection).get_columns('messages')}:
+            connection.execute(text('ALTER TABLE messages ADD COLUMN tool_trace JSON'))
+        if not connection.execute(text('SELECT version FROM schema_migrations WHERE version = 5')).first():
+            connection.execute(text('INSERT INTO schema_migrations (version) VALUES (5)'))

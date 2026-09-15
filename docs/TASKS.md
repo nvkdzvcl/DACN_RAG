@@ -185,3 +185,17 @@ Task tiếp theo: bổ sung BFD/BPMN, Use Case, ERD, Sequence, API spec và ma t
 Giới hạn: sơ đồ phân làn chưa phải file BPMN 2.0; mockup và hồ sơ chờ duyệt, chưa đo tải/cloud hoặc nghiệm thu đầy đủ M4. Chưa chấm chất lượng M3; phần này giữ chờ người duyệt theo yêu cầu người dùng.
 
 Task tiếp theo: M5 tool calling với schema, danh tính/quyền do server xác định, tool tra đơn chỉ đọc và handoff vẫn chặn AI muộn; kiểm thử lỗi model/tool, giả mạo và tranh chấp trước tích hợp kênh thứ hai. Không chờ người duyệt M3 để làm phần kỹ thuật độc lập.
+
+## Chọn công cụ đơn hàng M5 - 15/09/2026
+
+- [x] Bộ chọn JSON Schema giới hạn tên tool/tham số cho một mã đơn trong tin hiện tại. Không có mã giữ RAG; nhiều mã hỏi làm rõ; handoff theo quy tắc vẫn ưu tiên.
+- [x] Tool tra cứu chỉ đọc, server lấy customer_id và kiểm tra chủ đơn/tin khách cuối dưới khóa ghi sau model. Kết quả được ghép từ DB; hủy/sửa đơn chỉ chuyển nhân viên.
+- [x] Migration v5 cộng Message.tool_trace, API staff nhận nhưng widget không nhận. Lỗi provider giữ inbound, lỗi DB trả 503/log và có thể giữ pending; UUID cũ không gọi lại model/tool.
+- [x] Sáu kiểm thử mới, tổng 59 unittest đạt trong 25,225 giây; schema giả mạo, quyền, retry, lỗi và tranh chấp được kiểm chứng. Vite build đạt, assets không đổi.
+- [x] Smoke Ollama thật 7/7 ca đạt, không lỗi provider trong lượt hoàn tất. Ca chính sách có mã đi RAG có nguồn, dữ liệu đơn khác không lộ. Pilot native tools có ba ca hết token đã bị loại; một lượt khi Ollama chưa chạy dừng trước câu hỏi.
+- [x] Cập nhật hồ sơ thiết kế/API, README/demo/quyết định/roadmap, đề cương 10 mục và báo cáo Markdown/Word bảy chương. Word mười trang khớp Markdown, đã kiểm tra đủ ảnh trang; xuất bằng Word/Poppler vì renderer đóng gói thiếu LibreOffice trên Windows.
+- [x] Hồi quy HTTP M4 với Ollama thật đạt sau migration v5: câu hỏi 15,175 giây, toàn luồng 22,249 giây trên store tạm.
+
+Giới hạn: structured tool selection do backend điều phối, chưa native tool_calls hoặc agent nhiều bước; nhận diện/tóm tắt chưa chấm chất lượng, chưa suy đơn từ lịch sử hoặc xác minh khách widget. Pipeline RAG cũ giữ nguyên; không chạy lại benchmark M3, không dùng smoke để tự nghiệm thu.
+
+Task tiếp theo: bổ sung đánh giá nghiệp vụ M5 độc lập và cơ chế xác minh khách trước tra đơn trên widget; chuẩn bị kênh thứ hai với danh tính theo kênh và chống tin/webhook trùng. Chỉ ghi tích hợp thật khi đã kiểm chứng gửi/nhận trên tài khoản kênh thực tế; M3 tiếp tục chờ người duyệt.

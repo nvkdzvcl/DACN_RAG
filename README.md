@@ -75,6 +75,14 @@ Sau **Giải quyết**, khách nhắn tiếp trên cùng phiên sẽ tạo ticke
 
 Nếu khách có tin mới trước khi thao tác hoàn tất được ghi, API trả 409 để nhân viên đọc lại; ghi chú đang soạn được giữ. Retry cùng ticket/trạng thái/người/ghi chú không kết thúc nhầm lượt hỗ trợ mới. SLA phản hồi đầu được chốt trên từng ticket khi kết thúc, nên phản hồi lượt sau không đổi kết quả lượt trước. Migration v4 bổ sung dữ liệu hoàn tất và chốt phản hồi đã quan sát của ticket cũ; không suy đoán thời điểm hoặc người hoàn tất còn thiếu.
 
+## Chọn công cụ đơn hàng M5
+
+Trong hội thoại đang mở, tin chứa đúng một mã đơn dạng DH/ORD được model phân loại bằng JSON Schema: tra trạng thái, chuyển nhân viên hoặc hỏi chính sách qua RAG. Nhiều mã đơn yêu cầu khách chọn một mã; yêu cầu gặp nhân viên theo quy tắc vẫn được xử lý ngay. Đây là lựa chọn công cụ có cấu trúc do backend điều phối, chưa phải agent tự lập kế hoạch nhiều bước.
+
+Tool tra đơn chỉ đọc DB giả lập, lấy customer_id từ hội thoại và kiểm tra chủ đơn ngay trước thực thi; không nhận danh tính, URL hoặc công cụ khác từ model. Backend dựng câu trả lời từ dữ liệu đơn, không nhờ model viết lại. Không thấy đơn thuộc khách thì chuyển nhân viên; không tự hủy/sửa đơn. Khách widget ẩn danh chưa được xác minh chủ đơn, tên giống nhau không cấp quyền.
+
+Migration v5 thêm Message.tool_trace cho nhật ký nội bộ; xem trong API chi tiết Inbox, widget không nhận trường này. Lỗi provider giữ tin khách; lỗi DB trả 503 và ghi log, trace có thể còn pending. Retry UUID cũ không gọi lại tool; cần đọc lịch sử trước khi gửi yêu cầu mới. Cách kiểm chứng và giới hạn tại [M5_TOOLS.md](docs/M5_TOOLS.md); chạy `python -m app.tests.smoke_tools` bằng Ollama thật trên DB/vector tạm.
+
 ## RAG local với Ollama
 
 Máy hiện tại đã có Ollama portable, model chat qwen3:4b và embeddinggemma:300m tại `data/runtime/` (không đưa lên Git); qwen3:1.7b cũ được giữ để đối chiếu. Sau khi khởi động lại máy, chạy `powershell -File scripts/start-ollama.ps1` trong terminal riêng; giữ terminal mở. Dịch vụ chỉ nghe 127.0.0.1:11434. Không cần API key.

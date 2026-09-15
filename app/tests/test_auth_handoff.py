@@ -220,12 +220,15 @@ class AuthHandoffTests(unittest.TestCase):
             connection.execute(text("INSERT INTO tickets VALUES ('answered', 'old', 'closed', 'high', 'Keep summary', '2026-09-14 00:00:00.000000'), ('unanswered', 'old', 'resolved', 'high', 'No reply', '2026-09-14 01:00:00.000000')"))
         migrate(legacy)
         with legacy.begin() as connection:
-            connection.execute(text("INSERT INTO messages VALUES ('future', 'Later cycle', 'old', 'agent', 'one', '2026-09-14 02:00:00.000000', NULL)"))
+            connection.execute(text("INSERT INTO messages (id, content, conversation_id, sender_type, agent_id, created_at) VALUES ('future', 'Later cycle', 'old', 'agent', 'one', '2026-09-14 02:00:00.000000')"))
+            connection.execute(text("UPDATE messages SET tool_trace = '{\"status\": \"pending\"}' WHERE id = 'future'"))
         migrate(legacy)
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
             self.assertEqual(connection.execute(text("SELECT content FROM messages WHERE id = 'message'")).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 4)
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 5)
+            self.assertIsNone(connection.execute(text("SELECT tool_trace FROM messages WHERE id = 'message'")).scalar())
+            self.assertEqual(connection.execute(text("SELECT tool_trace FROM messages WHERE id = 'future'")).scalar(), '{"status": "pending"}')
             self.assertEqual(connection.execute(text("SELECT first_response_at FROM tickets WHERE id = 'answered'")).scalar(), '2026-09-14 00:01:00.000000')
             self.assertIsNone(connection.execute(text("SELECT first_response_at FROM tickets WHERE id = 'unanswered'")).scalar())
             self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM tickets WHERE completed_at IS NOT NULL OR completed_by_id IS NOT NULL')).scalar(), 0)

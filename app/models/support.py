@@ -55,6 +55,7 @@ class Message(Base):
     external_message_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     citations: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    tool_trace: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     conversation: Mapped[Conversation] = relationship(back_populates="messages")
 

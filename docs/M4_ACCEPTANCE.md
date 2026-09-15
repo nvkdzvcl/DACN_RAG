@@ -56,3 +56,7 @@ Tên kiểm thử nằm trong app/tests; UC tham chiếu [DESIGN.md](DESIGN.md).
 Hồ sơ Mermaid đã có BFD, luồng phân làn, ERD, trạng thái và Sequence, kèm Use Case và hợp đồng API. Chưa có file BPMN 2.0, mockup được duyệt, nguồn tham khảo học thuật hoàn chỉnh hoặc xác nhận GVHD. Cần người dùng duyệt nghiệp vụ khi có thời gian; phần này không chặn tiếp tục M5.
 
 M4 chưa nghiệm thu toàn bộ: polling cùng origin chưa phải push realtime; chưa kiểm thử tải, lịch làm việc, SLA giải quyết, phân trang hoặc triển khai cloud. M3 vẫn chờ chấm nhãn/đáp án và nguồn/câu hỏi độc lập. M5 tiếp theo cần tool calling với schema và quyền xác định bởi server; không để LLM tự khai customer_id hoặc tự thực hiện hành động ghi. Kênh thứ hai chỉ tính hoàn tất khi có tài khoản/tích hợp thật và kiểm chứng gửi nhận.
+
+## Hồi quy khi thêm M5
+
+Ngày 15/09/2026, migration v5 và bộ chọn tool đơn hàng được kiểm chứng bằng tổng 59 unittest, gồm các ca M4 hiện có. Smoke HTTP toàn luồng M4 với Ollama thật chạy lại đạt: câu hỏi 15,175 giây, toàn luồng 22,249 giây. UI và assets không đổi. Nhật ký tool chỉ thêm vào API chi tiết staff; snapshot widget không lộ trace. Kết quả tool/model và giới hạn riêng tại docs/M5_TOOLS.md, không thay nghiệm thu người dùng M4 hoặc chấm ngữ nghĩa M3.

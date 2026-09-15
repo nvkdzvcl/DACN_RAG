@@ -1,12 +1,15 @@
 from uuid import uuid4
 from contextlib import nullcontext
+import logging
 
 from fastapi import HTTPException
 from sqlalchemy import update
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from app.models.support import Conversation, Message, Ticket
-from app.services.handoff_service import classify_message
-from app.services.order_service import extract_order_id, lookup_order
+from app.models.support import Conversation, Message
+from app.services.handoff_service import classify_message, queue_handoff
+from app.services.order_service import ORDER_PATTERN, lookup_order
+from app.services.tool_service import select_order_tool
 from app.rag.answer_service import answer_question, sources_current
 from app.rag.ollama import ProviderError
 from app.rag.vector_store import document_lock
@@ -40,34 +43,35 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
         order_result = rag = None
         answer = error = None
         should_generate = False
+        order_id = selection = None
         history = []
         if conversation.status in {"open", "resolved"}:
             if conversation.status == "resolved":
                 handoff = True
                 conversation.assigned_agent_id = None
-            order_id = extract_order_id(content)
-            if not handoff and order_id:
-                order_result = lookup_order(db, order_id, conversation.customer_id)
-                handoff = not order_result["found"]
             if handoff:
-                conversation.status = "handoff_requested"
-                conversation.priority = "high"
-                ticket = db.query(Ticket).filter(Ticket.conversation_id == conversation_id, Ticket.status.in_(["open", "assigned"])).first()
-                if ticket is None:
-                    recent = db.query(Message).filter_by(conversation_id=conversation_id).order_by(Message.created_at.desc(), Message.id.desc()).limit(8).all()
-                    summary = "\n".join(f"{item.sender_type}: {item.content[:400]}" for item in reversed(recent))
-                    db.add(Ticket(id=str(uuid4()), conversation_id=conversation_id, priority="high", summary=summary))
-            elif order_result:
-                answer = f"Đơn hàng {order_result['order_id']}: {order_result['status']}."
-                if order_result["tracking_code"]:
-                    answer += f" Mã vận đơn: {order_result['tracking_code']}."
+                queue_handoff(db, conversation)
             else:
-                should_generate = True
+                candidates = list(dict.fromkeys(m.group().upper() for m in ORDER_PATTERN.finditer(content)))
+                if len(candidates) > 1:
+                    answer = 'Bạn muốn tra cứu đơn nào? Vui lòng gửi một mã đơn trong mỗi tin nhắn.'
+                    message.tool_trace = {'status': 'clarification', 'reason': 'multiple_order_ids'}
+                elif candidates:
+                    order_id = candidates[0]
+                    message.tool_trace = {'status': 'pending', 'order_id': order_id}
+                else:
+                    should_generate = True
                 recent = db.query(Message).filter(Message.conversation_id == conversation_id, Message.id != message_id,
                     Message.sender_type.in_(["customer", "ai"])).order_by(Message.created_at.desc(), Message.id.desc()).limit(4).all()
                 history = [{"role": "user" if m.sender_type == "customer" else "assistant", "content": m.content[:500]} for m in reversed(recent)]
         # Persist inbound first. Ollama must never hold the conversation write lock.
         db.commit()
+        if order_id:
+            try:
+                selection = select_order_tool(content, order_id)
+                should_generate = selection is None
+            except ProviderError as exc:
+                error = str(exc)
         if should_generate:
             try:
                 rag = answer_question(content, history=history, db=db)
@@ -82,6 +86,24 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
             db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
             db.refresh(conversation)
             current = conversation.status == "open" and conversation.last_customer_message_id == message_id
+            if order_id:
+                trace = {'order_id': order_id, 'tool': selection['name'] if selection else None,
+                         'status': 'skipped' if not current else 'provider_error' if error else 'rag' if selection is None else 'executed'}
+                if current and selection:
+                    if selection['name'] == 'lookup_order':
+                        try:
+                            order_result = lookup_order(db, order_id, conversation.customer_id)
+                        except SQLAlchemyError as exc:
+                            logging.getLogger(__name__).exception('Order lookup failed for message %s', message_id)
+                            raise HTTPException(503, 'Không thể tra cứu đơn lúc này. Tin nhắn đã được lưu.') from exc
+                        trace['outcome'] = 'found' if order_result['found'] else 'not_found_or_not_owned'
+                        if order_result['found']:
+                            answer = f"Đơn hàng {order_result['order_id']}: {order_result['status']}."
+                            if order_result['tracking_code']:
+                                answer += f" Mã vận đơn: {order_result['tracking_code']}."
+                    if selection['name'] == 'handoff' or not order_result['found']:
+                        queue_handoff(db, conversation)
+                db.get(Message, message_id).tool_trace = trace
             valid_sources = not rag or not rag.get("grounded") or sources_current(db, rag.get("reviewed_sources", rag["citations"]))
             if answer and current and valid_sources:
                 ai_message_id = str(uuid4())

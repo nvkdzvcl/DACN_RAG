@@ -131,3 +131,11 @@ Migration v4 thêm completed_at, completed_by_id, completion_note và first_resp
 Ghi nhận người dùng cho phép tiếp tục các việc độc lập trong lúc chưa có thời gian duyệt. Nhãn/đáp án M3 và nghiệm thu người dùng giữ chờ duyệt; không tự ghi tên người chấm hoặc công bố đạt chất lượng. Hồ sơ Mermaid và API diễn tả mã thực có, tách rõ BFD/luồng phân làn với file BPMN 2.0 chưa làm và quyền staff với phiên khách công khai.
 
 Dùng TestClient đã cài để chạy smoke toàn luồng HTTP với Ollama thật trong tiến trình riêng. Đặt DB/vector/knowledge tạm trước import, chạy lifespan/migration thật, tạo mật khẩu ngẫu nhiên và login qua API; không dùng token QA cố định, server cổng mới hoặc dependency mới. Smoke chỉ một câu và một vòng nghiệp vụ, không thay kiểm thử trình duyệt, tải hoặc đánh giá chất lượng. Khi đổi UI/proxy cần chạy lại QA trình duyệt; khi đổi model/prompt/retrieval cần quy trình dev và regression riêng.
+
+## Chọn tool đơn hàng có cấu trúc 15/09/2026
+
+Giới hạn M5 ở tin có một mã đơn rõ ràng để không thêm model routing vào mọi câu hỏi chính sách. Schema giới hạn lookup_order/handoff/rag và đúng order_id đầu vào; server lấy customer_id, kiểm tra trạng thái và chủ đơn khi thực thi. Kết quả đơn được ghép theo mẫu, không đưa vào lượt model khác. Yêu cầu hủy chỉ tạo handoff; không thêm tool ghi hoặc quyền theo model. Nhiều mã hỏi làm rõ, chưa suy mã từ lịch sử.
+
+Pilot native tools sinh suy luận dài ở ba ca và hết 700 token; bỏ cách này, dùng JSON Schema qua transport chat đang có. Đây là structured selection do backend dispatch, không phải native provider tool_calls hay agent lập kế hoạch. Không thêm dependency hoặc vòng lặp retry. Provider/schema lỗi không tra đơn hoặc trả model prose.
+
+Migration v5 thêm Message.tool_trace, chỉ API staff thấy. Pending không đảm bảo hoàn tất; SQL lỗi rollback phần tool, giữ inbound trước đó, trả 503 và log lỗi, pending có thể còn lại. Khi model chờ, giao dịch không giữ khóa; lúc chạy tool phải khóa lại và loại tin cũ. M5_TOOLS.md ghi thử nghiệm bị loại, 7 ca smoke cuối cùng và giới hạn. Chưa dùng kết quả nhỏ này để nghiệm thu M5/M3.
