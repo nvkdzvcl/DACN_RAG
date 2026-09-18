@@ -1,6 +1,6 @@
 # Thiết kế hệ thống hỗ trợ khách hàng
 
-Ngày đối chiếu: 15/09/2026. Tài liệu mô tả chức năng đang có trên FastAPI/SQLite, React/Vite, Qdrant embedded và Ollama local. Đây là hồ sơ kỹ thuật để người dùng/GVHD duyệt sau; chưa phải xác nhận nghiệm thu. M3 còn chờ người duyệt chất lượng, M4 mới kiểm chứng chức năng local. API chi tiết tại [API.md](API.md), bằng chứng tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md).
+Ngày đối chiếu: 18/09/2026. Tài liệu mô tả chức năng đang có trên FastAPI/SQLite, React/Vite, Qdrant embedded và Ollama local. Đây là hồ sơ kỹ thuật để người dùng/GVHD duyệt sau; chưa phải xác nhận nghiệm thu. M3 còn chờ người duyệt chất lượng, M4 mới kiểm chứng chức năng local. API chi tiết tại [API.md](API.md), bằng chứng tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md).
 
 ## Phân rã chức năng BFD
 
@@ -11,6 +11,10 @@ flowchart TD
     S --> C[Hội thoại]
     S --> T[Xử lý yêu cầu]
     S --> E[Đánh giá RAG]
+    S --> W[Quản lý và báo cáo]
+    W --> W1[Tổng quan và phân tích SLA]
+    W --> W2[Hồ sơ khách và đơn nội bộ]
+    W --> W3[Cài đặt và đổi mật khẩu]
     A --> A1[Cấp tài khoản và đăng nhập nhân viên]
     A --> A2[Tạo và thu hồi phiên khách]
     K --> K1[Tải tài liệu và lập chỉ mục]
@@ -298,3 +302,7 @@ Tin mới thắng khóa trước finish khiến finish bị 409; finish resolved
 Màn hình hiện có gồm đăng nhập, Inbox ba vùng, Kho tri thức, trang chat và widget iframe. Inbox polling mỗi ba giây khi hiển thị, giữ bản nháp/lựa chọn, dừng khi tab ẩn hoặc thao tác ghi. Form hoàn tất chỉ hiện cho người phụ trách có ticket hoạt động; xác nhận giải thích hành vi nhắn tiếp. Widget sau resolved cho gửi, sau closed khóa composer và hướng dẫn bắt đầu phiên mới.
 
 QA giao diện ngày 14/09 đã kiểm tra desktop/mobile 390px; các ảnh trong data/runtime là bằng chứng local, không thuộc gói nguồn bắt buộc. Các mockup do người dùng tạo chưa được duyệt hoặc chỉnh sửa trong đợt này. Cần chốt mẫu thiết kế với GVHD, bổ sung BPMN chuẩn nếu biểu mẫu yêu cầu, nghiệm thu người dùng và đo tải trước tuyên bố hoàn tất toàn bộ M2/M4.
+
+## Các trang quản lý theo mockup
+
+Workspace.jsx dùng khung điều hướng hiện có, bảng có khung chi tiết, tìm kiếm/phân trang và trạng thái tải/lỗi/trống. API workspace.py không đổi schema DB; các lần sửa đối chiếu giá trị cũ bằng UPDATE có điều kiện. Staff đọc, admin mới tạo/sửa khách/đơn; chủ đơn bất biến qua giao diện. Hồ sơ khách mở đúng hội thoại trong Inbox và lọc đơn theo ID khách. Đổi mật khẩu yêu cầu mật khẩu hiện tại, cập nhật có điều kiện và thu hồi AuthSession của chính tài khoản trong transaction. Số liệu tổng hợp dùng hàm SLA hiện có và snapshot ticket kết thúc; xem docs/WORKSPACE.md về kỳ UTC và mẫu số.

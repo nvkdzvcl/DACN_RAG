@@ -128,3 +128,13 @@ Kiểm chứng ngày 14/09/2026: 53 unittest và Vite build đạt; QA Edge bả
 Chạy `python -m app.tests.smoke_tools` khi Ollama local đã sẵn sàng. Lệnh tạo dữ liệu giả lập riêng và chạy bảy ca tra đơn/chuyển nhân viên/chính sách/nhiều mã; dùng dịch vụ nghiệp vụ thật, không mở server. Không sửa chủ đơn hoặc ID khách trong DB thật để tạo ca demo. Xem docs/M5_TOOLS.md cho trace và số liệu.
 
 Trong widget, câu “Đơn DH99999 đang ở đâu?” được bộ chọn phân loại nhưng quyền vẫn theo khách của phiên, nên không lộ đơn có sẵn thuộc người khác. Câu “Hủy đơn DH12345 giúp tôi” chuyển nhân viên nếu bộ chọn trả handoff, không hủy đơn. Câu “Tra đơn DH12345 và DH99999” yêu cầu chọn một mã. Trace chỉ trong GET chi tiết Inbox dành staff, không có bảng nhật ký riêng trên UI. Lỗi provider giữ tin; đọc lịch sử trước khi gửi một yêu cầu mới để thử lại.
+
+## Demo năm trang quản lý ngày 18/09/2026
+
+1. Đăng nhập admin, mở Tổng quan và Phân tích; đổi kỳ 7/30/90 ngày. Nếu chưa có ticket trả lời, SLA hiện Chưa có.
+2. Vào Khách hàng, thêm khách và email thử; tìm lại, mở hồ sơ và sửa. Hồ sơ có lịch sử hội thoại và liên kết đơn của khách.
+3. Vào Đơn hàng, tạo mã ORD-TEST01 cho đúng khách; sửa trạng thái và vận đơn, kiểm tra tìm kiếm/bộ lọc. Đây là đơn nội bộ mô phỏng, không gửi sang hãng vận chuyển.
+4. Vào Cài đặt, tạo tài khoản agent. Đăng nhập bằng cửa sổ ẩn danh: được đọc khách/đơn, không có nút tạo/sửa hay danh sách tài khoản.
+5. Với tài khoản thử, đổi mật khẩu trong Cài đặt: đăng xuất mọi phiên của tài khoản đó; đăng nhập lại bằng mật khẩu mới. Không dùng tài khoản quan trọng để demo thu hồi phiên.
+
+Bằng chứng và giới hạn: docs/WORKSPACE.md. Khởi động lại backend nếu chạy không có --reload, rồi tải lại frontend để nhận các route mới.

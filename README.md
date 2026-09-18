@@ -106,3 +106,7 @@ Bộ 72 câu tiếng Việt và chính sách giả lập nằm trong `evals/rag/
 Bộ bổ sung `evals/rag-documents/` có 24 câu trên PDF ba trang và DOCX có bảng. Chạy `python -m app.evaluate_rag --dataset evals/rag-documents --split test --output evals/rag-documents/runs/my-run`. Trình chạy kiểm tra gold theo trang/đoạn/bảng, lưu hash file nhị phân và log ingestion; không tự nạp `.env`. Bộ mới giữ cấu hình RAG đã chốt, nhãn vẫn chờ người duyệt; không gộp điểm với bộ TXT để tuyên bố cải thiện.
 
 Chấm bản sao `human-review.jsonl`, rồi tổng hợp bằng `python -m app.review_rag --run evals/rag/runs/bounded-ids-test --reviews PHIEU_DA_CHAM.jsonl --output BAO_CAO_MOI.json`. CLI không gọi model; chỉ tính rating có tên người chấm và nhãn được duyệt, báo mẫu số riêng cùng ca chưa chấm, không ghi đè kết quả. Cách điền và trường áp dụng trong `evals/rag/README.md`.
+
+## Tổng quan và quản lý nội bộ
+
+Năm mục Tổng quan, Khách hàng, Đơn hàng, Phân tích, Cài đặt đã dùng được. Staff tìm/xem khách và đơn; admin tạo/sửa. Phân tích có kỳ 7/30/90 ngày và SLA từ dữ liệu thật. Trong Cài đặt, admin tạo tài khoản nhân viên; mỗi người tự đổi mật khẩu hiện tại, thu hồi mọi phiên của chính mình. Chi tiết quyền, công thức và giới hạn tại [WORKSPACE.md](docs/WORKSPACE.md).

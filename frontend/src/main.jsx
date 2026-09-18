@@ -4,12 +4,14 @@ import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot }
 import './styles.css';
 import KnowledgeBase, { Citations } from './KnowledgeBase';
 import Widget from './Widget';
+import Workspace from './Workspace';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
 const priorities = { normal: 'Bình thường', high: 'Cao', urgent: 'Khẩn cấp', low: 'Thấp' };
 const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Kết thúc trước phản hồi', none: 'Chưa có SLA' };
 const senders = { customer: 'Khách hàng', ai: 'RAG AI', assistant: 'RAG AI', agent: 'Nhân viên', system: 'Hệ thống' };
+const pages = [[Inbox, 'Tổng quan', 'overview'], [Inbox, 'Hội thoại', 'inbox'], [UserRound, 'Khách hàng', 'customers'], [Package, 'Đơn hàng', 'orders'], [BookOpen, 'Kho tri thức', 'knowledge'], [BarChart3, 'Phân tích', 'analytics'], [Settings, 'Cài đặt', 'settings']];
 const nameOf = c => c.customer_name || c.customer_id;
 const initials = name => name.trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
 function timeOf(value) {
@@ -65,7 +67,7 @@ function SessionGate() {
     finally { setBusy(false); }
   }
   if (loading) return <p className="state" role="status">Đang kiểm tra phiên đăng nhập...</p>;
-  if (user) return <App user={user} onExpired={() => setUser(null)} onLogout={logout} logoutBusy={busy} sessionError={error} />;
+  if (user) return <App user={user} onExpired={(message = '') => { setUser(null); setError(message); }} onLogout={logout} logoutBusy={busy} sessionError={error} />;
   return <main className="loginPage"><form className="loginCard" onSubmit={login} aria-busy={busy}>
     <Bot size={40} aria-hidden="true" /><p>RAG Support Hub</p><h1>Đăng nhập nhân viên</h1>
     <label>Tên đăng nhập<input name="username" autoComplete="username" required maxLength={64} pattern="[a-zA-Z0-9_.-]+" /></label>
@@ -77,6 +79,7 @@ function SessionGate() {
 
 function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const [page, setPage] = useState('inbox');
+  const [customerFilter, setCustomerFilter] = useState('');
   const [conversations, setConversations] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -187,18 +190,20 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     if (await postAction('/messages', { content })) setDrafts(previous => previous[targetId] === draft ? { ...previous, [targetId]: '' } : previous);
   }
   const counts = [visibleChats.length, visibleChats.filter(c => c.status === 'open').length, visibleChats.filter(c => c.status === 'handoff_requested').length, visibleChats.filter(c => c.sla?.status === 'overdue').length];
+  function navigate(target) { setCustomerFilter(''); setPage(target); }
+  function openInbox(id) { setStatus(''); setPriority(''); setSla(''); setSearch(''); setSelectedId(id); setPage('inbox'); }
   return <div className="shell">
     <aside aria-label="Điều hướng chính">
       <div className="brand"><span className="brandLogo"><Bot aria-hidden="true" /></span><b>RAG</b><small>Support Hub</small></div>
-      {[[Inbox, 'Tổng quan'], [Inbox, 'Hội thoại'], [UserRound, 'Khách hàng'], [Package, 'Đơn hàng'], [BookOpen, 'Kho tri thức'], [BarChart3, 'Phân tích'], [Settings, 'Cài đặt']].map(([Icon, label], i) =>
-        <button key={label} className={`nav ${(i === 1 && page === 'inbox') || (i === 4 && page === 'knowledge') ? 'active' : ''}`} disabled={i !== 1 && i !== 4} onClick={() => setPage(i === 4 ? 'knowledge' : 'inbox')} aria-current={(i === 1 && page === 'inbox') || (i === 4 && page === 'knowledge') ? 'page' : undefined}><Icon size={17} />{label}{i === 1 && <em>{listLoading || listError ? '—' : conversations.length}</em>}</button>)}
+      {pages.map(([Icon, label, target]) =>
+        <button key={target} className={`nav ${page === target ? 'active' : ''}`} onClick={() => navigate(target)} aria-current={page === target ? 'page' : undefined}><Icon size={17} />{label}{target === 'inbox' && <em>{listLoading || listError ? '—' : conversations.length}</em>}</button>)}
       <div className="agent"><div className="avatar"><UserRound size={18} /></div><div><b>{user.display_name}</b><small>{user.role === 'admin' ? 'Quản trị viên' : 'Nhân viên hỗ trợ'}</small></div></div>
     </aside>
     <main>
       <div className="sessionBar"><span>{user.display_name}</span><button onClick={onLogout} disabled={logoutBusy}>{logoutBusy ? 'Đang đăng xuất...' : 'Đăng xuất'}</button></div>
       {sessionError && <p role="alert">{sessionError}</p>}
-      <nav className="mobileNav" aria-label="Điều hướng"><button aria-pressed={page === 'inbox'} onClick={() => setPage('inbox')}>Hội thoại</button><button aria-pressed={page === 'knowledge'} onClick={() => setPage('knowledge')}>Kho tri thức</button></nav>
-      {page === 'knowledge' ? <KnowledgeBase user={user} request={request} onExpired={onExpired} /> : <>
+      <nav className="mobileNav" aria-label="Điều hướng">{pages.map(([, label, target]) => <button key={target} aria-pressed={page === target} onClick={() => navigate(target)}>{label}</button>)}</nav>
+      {page === 'knowledge' ? <KnowledgeBase user={user} request={request} onExpired={onExpired} /> : page !== 'inbox' ? <Workspace key={`${page}-${customerFilter}`} page={page} user={user} request={request} onExpired={onExpired} navigate={navigate} openInbox={openInbox} customerFilter={customerFilter} openOrders={id => { setCustomerFilter(id); setPage('orders'); }} /> : <>
       <header><div><h1>Hộp thư đa kênh</h1><p>Quản lý hội thoại, tin nhắn và yêu cầu hỗ trợ tập trung</p></div><label className="search"><Search size={16} /><input aria-label="Tìm kiếm hội thoại" placeholder="Tìm khách hàng, kênh..." value={search} onChange={e => setSearch(e.target.value)} /></label></header>
       <p className="syncNote">Tự cập nhật mỗi 3 giây khi đang xem Inbox.{lastUpdated && ` Danh sách cập nhật: ${timeOf(lastUpdated)}.`}</p>
       <div className="stats">{['Hội thoại trong bộ lọc', 'Đang mở', 'Chờ nhân viên', 'Quá hạn chờ phản hồi'].map((label, i) => <div key={label}><b>{listLoading || listError ? '—' : counts[i]}</b><small>{label}</small></div>)}</div>

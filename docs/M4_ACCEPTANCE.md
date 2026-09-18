@@ -60,3 +60,7 @@ M4 chưa nghiệm thu toàn bộ: polling cùng origin chưa phải push realtim
 ## Hồi quy khi thêm M5
 
 Ngày 15/09/2026, migration v5 và bộ chọn tool đơn hàng được kiểm chứng bằng tổng 59 unittest, gồm các ca M4 hiện có. Smoke HTTP toàn luồng M4 với Ollama thật chạy lại đạt: câu hỏi 15,175 giây, toàn luồng 22,249 giây. UI và assets không đổi. Nhật ký tool chỉ thêm vào API chi tiết staff; snapshot widget không lộ trace. Kết quả tool/model và giới hạn riêng tại docs/M5_TOOLS.md, không thay nghiệm thu người dùng M4 hoặc chấm ngữ nghĩa M3.
+
+## Bổ sung các trang quản lý ngày 18/09/2026
+
+Tổng quan, Khách hàng, Đơn hàng, Phân tích và Cài đặt đã nối dữ liệu thật, phân quyền và kiểm chứng riêng tại docs/WORKSPACE.md. 66 unittest/build đạt; QA trình duyệt bản build trên store riêng kiểm tra desktop/mobile, quản lý dữ liệu, tài khoản và đổi mật khẩu. Không dùng đợt này để tuyên bố nghiệm thu toàn M4 hoặc chất lượng M3/M5.

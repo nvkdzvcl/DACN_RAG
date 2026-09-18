@@ -139,3 +139,9 @@ Giới hạn M5 ở tin có một mã đơn rõ ràng để không thêm model r
 Pilot native tools sinh suy luận dài ở ba ca và hết 700 token; bỏ cách này, dùng JSON Schema qua transport chat đang có. Đây là structured selection do backend dispatch, không phải native provider tool_calls hay agent lập kế hoạch. Không thêm dependency hoặc vòng lặp retry. Provider/schema lỗi không tra đơn hoặc trả model prose.
 
 Migration v5 thêm Message.tool_trace, chỉ API staff thấy. Pending không đảm bảo hoàn tất; SQL lỗi rollback phần tool, giữ inbound trước đó, trả 503 và log lỗi, pending có thể còn lại. Khi model chờ, giao dịch không giữ khóa; lúc chạy tool phải khóa lại và loại tin cũ. M5_TOOLS.md ghi thử nghiệm bị loại, 7 ca smoke cuối cùng và giới hạn. Chưa dùng kết quả nhỏ này để nghiệm thu M5/M3.
+
+## 18/09/2026 — Hoàn thiện các trang quản lý theo mockup
+
+Dùng schema DB hiện có, không thêm dependency hoặc migration. Tổng quan/Phân tích chỉ tính dữ liệu thực, công bố kỳ UTC và mẫu số ticket đã phản hồi. Customer/Order dùng phân trang và UPDATE đối chiếu giá trị cũ; admin mới được ghi, chủ đơn không được sửa. Cài đặt tái sử dụng API cấp tài khoản và bổ sung đổi mật khẩu yêu cầu mật khẩu cũ, thu hồi mọi phiên riêng. Không đưa mật khẩu hoặc đường dẫn cấu hình máy chủ ra UI. Chính sách SLA và kênh chưa tích hợp chỉ hiển thị, không có nút cấu hình giả. RAG/tool chỉ đọc giữ nguyên; việc admin sửa đơn là nghiệp vụ riêng.
+
+Đăng nhập kiểm tra lại hash/active bằng UPDATE có điều kiện sau PBKDF2 và trước cấp phiên, tuần tự với đổi mật khẩu; kiểm thử đồng thời xác nhận lượt xác thực mật khẩu cũ bị từ chối khi mật khẩu đã đổi.

@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.core.auth import COOKIE_NAME, SESSION_SECONDS, check_csrf, hash_password, public_user, require_admin, require_staff, token_hash, verify_password
@@ -75,6 +75,12 @@ def login(payload: LoginRequest, request: Request, response: Response, db: Sessi
     user = db.query(User).filter_by(username=payload.username).first()
     valid = verify_password(payload.password, user.password_hash if user else _dummy_hash)
     if not valid or user is None or not user.active:
+        raise HTTPException(401, "Invalid username or password")
+    # Serialize session issuance with password changes after the expensive hash check.
+    current = db.execute(update(User).where(User.id == user.id, User.password_hash == user.password_hash,
+        User.active.is_(True)).values(password_hash=User.password_hash))
+    if current.rowcount != 1:
+        db.rollback()
         raise HTTPException(401, "Invalid username or password")
     token = secrets.token_urlsafe(32)
     db.execute(delete(AuthSession).where(AuthSession.expires_at <= int(now)))

@@ -199,3 +199,14 @@ Task tiếp theo: M5 tool calling với schema, danh tính/quyền do server xá
 Giới hạn: structured tool selection do backend điều phối, chưa native tool_calls hoặc agent nhiều bước; nhận diện/tóm tắt chưa chấm chất lượng, chưa suy đơn từ lịch sử hoặc xác minh khách widget. Pipeline RAG cũ giữ nguyên; không chạy lại benchmark M3, không dùng smoke để tự nghiệm thu.
 
 Task tiếp theo: bổ sung đánh giá nghiệp vụ M5 độc lập và cơ chế xác minh khách trước tra đơn trên widget; chuẩn bị kênh thứ hai với danh tính theo kênh và chống tin/webhook trùng. Chỉ ghi tích hợp thật khi đã kiểm chứng gửi/nhận trên tài khoản kênh thực tế; M3 tiếp tục chờ người duyệt.
+
+## Năm trang quản lý theo giao diện — 18/09/2026
+
+- [x] Mở đủ Tổng quan, Khách hàng, Đơn hàng, Phân tích, Cài đặt; sidebar xanh đậm/teal theo mockup, điều hướng mobile đủ bảy mục.
+- [x] Tổng hợp dữ liệu thật, kỳ 7/30/90 ngày UTC và SLA theo ticket tạo trong kỳ; tỷ lệ chỉ tính ticket đã phản hồi, không có mẫu trả null.
+- [x] Tìm kiếm/phân trang khách và đơn, hồ sơ lịch sử/mở Inbox, admin tạo/sửa có đối chiếu giá trị cũ; không đổi chủ đơn hoặc xóa dữ liệu.
+- [x] Cài đặt cho admin cấp tài khoản, mỗi người đổi mật khẩu cũ và thu hồi mọi phiên riêng. Kênh/SLA chưa tùy biến được ghi rõ.
+- [x] 66 unittest đạt trong 23,627 giây; Vite build đạt. QA trình duyệt trên store riêng: CRUD trong phạm vi, phân trang, mở đúng hội thoại, báo cáo, tạo agent/đăng nhập/quyền, đổi mật khẩu. Desktop/mobile 390px không tràn ngang toàn trang.
+- [x] Cập nhật README/demo, hợp đồng 42 method/path, thiết kế, quyết định, roadmap, đề cương và báo cáo bảy chương. Word mười trang khớp Markdown, kiểm tra đủ trang; xuất bằng Word/Poppler vì renderer thiếu LibreOffice trên Windows.
+
+Giới hạn: đơn nội bộ mô phỏng, chưa tích hợp vận chuyển/thanh toán; không có xóa/gộp khách, reset mật khẩu người khác, khóa tài khoản UI hoặc audit quản trị. Tổng hợp chưa đo tải lớn, SLA/kênh chưa chỉnh được. M3 chờ duyệt; không đổi RAG, không chạy lại benchmark. Tiếp tục đánh giá M5/xác minh khách/kênh thứ hai theo roadmap.

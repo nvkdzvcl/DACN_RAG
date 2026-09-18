@@ -1,12 +1,12 @@
 # Đặc tả API local
 
-Đối chiếu mã và OpenAPI ngày 15/09/2026: 31 cặp method/path dưới /api/v1. Swagger tại /docs, schema tại /openapi.json trên backend đang chạy là nguồn tham chiếu kiểu dữ liệu. Các route trả dict hiện chưa khai báo đầy đủ response_model hoặc lỗi runtime trong OpenAPI; bảng dưới bổ sung hợp đồng nghiệp vụ thực có, không tuyên bố OpenAPI đã mô tả hết bảo mật/lỗi.
+Đối chiếu mã và OpenAPI ngày 18/09/2026: 42 cặp method/path dưới /api/v1. Swagger tại /docs, schema tại /openapi.json trên backend đang chạy là nguồn tham chiếu kiểu dữ liệu. Các route trả dict hiện chưa khai báo đầy đủ response_model hoặc lỗi runtime trong OpenAPI; bảng dưới bổ sung hợp đồng nghiệp vụ thực có, không tuyên bố OpenAPI đã mô tả hết bảo mật/lỗi.
 
 ## Phiên và quyền truy cập
 
 Mọi thao tác ghi yêu cầu header `X-CSRF-Protection: 1`. Trình duyệt gửi cookie cùng origin. Staff là tài khoản admin hoặc agent đang hoạt động với cookie `rag_session` (path /api, tối đa 8 giờ); khách dùng `rag_widget_session` (path /api/v1/widget, tối đa 24 giờ). Token chỉ lưu hash SHA-256 trong DB, HttpOnly/SameSite Strict và Secure khi APP_ENV khác development. Không nhận token qua payload.
 
-Admin quản lý tài khoản/tài liệu. Staff đọc toàn bộ Inbox nội bộ; trả lời và hoàn tất vẫn phải là người phụ trách, kể cả admin. Khách chỉ truy cập hội thoại gắn với cookie, không tự chọn customer_id/conversation_id. Tên tự khai không cấp quyền đơn hàng.
+Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội bộ. Staff đọc toàn bộ Inbox nội bộ; trả lời và hoàn tất vẫn phải là người phụ trách, kể cả admin. Khách chỉ truy cập hội thoại gắn với cookie, không tự chọn customer_id/conversation_id. Tên tự khai không cấp quyền đơn hàng.
 
 ## Danh mục endpoint
 
@@ -95,3 +95,23 @@ SLA gồm ticket_id, conversation_id, target_minutes, due_at, responded_at và s
 | 503 | ProviderError tới handler chung; không tự coi là RAG từ chối |
 
 Lỗi nghiệp vụ thường có `detail` dạng chuỗi. Giới hạn widget mỗi IP/phút: 6 tạo phiên, 10 gửi tin, 6 handoff; đăng nhập 10 lần/phút. Một lượt AI widget chạy cùng lúc; slot bận trả 429 trước lưu tin. Chưa điều phối cùng các API RAG nội bộ. Từ chối RAG có nguồn thiếu/kiểm định không đạt là kết quả nghiệp vụ, khác lỗi provider và khác giới hạn gửi.
+
+## Các trang quản lý nội bộ
+
+Tiền tố /api/v1/workspace. GET yêu cầu Staff; POST/PATCH yêu cầu CSRF. Danh sách trả items và total; offset >= 0, limit mặc định 25, tối đa 100. Payload cấm trường thừa.
+
+| Method | Path | Quyền | Hợp đồng |
+|---|---|---|---|
+| GET | /customers | Staff | q <= 160 ký tự tìm tên/email/ID, offset/limit; số hội thoại/đơn từng khách |
+| GET | /customers/{customer_id} | Staff | Hồ sơ, số lượng và tối đa 20 hội thoại/đơn; không tồn tại 404 |
+| POST | /customers | Admin | display_name 1–160 không trắng, email tùy chọn <= 255; ID server sinh, 201 |
+| PATCH | /customers/{customer_id} | Admin | display_name/email mới và expected chứa hai giá trị cũ; khác/mất bản ghi trả 409 |
+| GET | /orders | Staff | q, status, customer_id, offset/limit; tên khách/trạng thái/vận đơn |
+| POST | /orders | Admin | id DH/ORD 6–64 ký tự, customer_id, status, tracking_code <= 100; 201, trùng 409, thiếu khách 404 |
+| PATCH | /orders/{order_id} | Admin | status/tracking_code và expected chứa giá trị cũ; không nhận customer_id, xung đột 409 |
+| GET | /summary | Staff | days thuộc 7/30/90; totals toàn bộ, period theo UTC, SLA nullable khi chưa có mẫu |
+| GET | /settings | Staff | Người dùng công khai, SLA cố định và tình trạng hỗ trợ kênh; không có secrets |
+| GET | /users | Admin | offset/limit; người dùng công khai và active, không password_hash |
+| POST | /password | Staff | current_password 1–128, new_password 12–128; sai mật khẩu cũ 400, không đổi 422, tranh chấp 409; thành công thu hồi mọi phiên của chính người đổi |
+
+status đơn nhận processing/paid/shipping/shipped/delivered/cancelled. Không đổi chủ đơn/xóa qua workspace. Công thức thống kê, phạm vi quản trị và bằng chứng tại [WORKSPACE.md](WORKSPACE.md). API /auth/users hiện có được dùng để tạo tài khoản từ Cài đặt; không thêm endpoint tạo tài khoản trùng.
