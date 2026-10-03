@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
 from fastapi import HTTPException
 from sqlalchemy import create_engine
@@ -39,6 +40,43 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(result['conversations'][0]['customer_name'], 'Customer A')
         self.assertEqual(list_conversations(status='closed', db=self.db)['conversations'], [])
 
+    def test_pagination_bounds_sla_work_and_orders_equal_timestamps(self):
+        created = datetime.now(timezone.utc) + timedelta(days=1)
+        self.db.add_all([Conversation(id=f'page-{i:03}', customer_id='a', created_at=created) for i in range(55)])
+        self.db.commit()
+        with patch('app.api.inbox.ticket_slas', wraps=ticket_slas) as slas:
+            first = list_conversations(db=self.db)
+            self.assertEqual(len(slas.call_args.args[1]), 25)
+        second = list_conversations(db=self.db, offset=25)
+        last = list_conversations(db=self.db, offset=50)
+        self.assertEqual((first['count'], first['total'], first['has_more']), (25, 57, True))
+        self.assertEqual([c['conversation_id'] for c in first['conversations']], [f'page-{i:03}' for i in range(25)])
+        ids = [c['conversation_id'] for page in (first, second, last) for c in page['conversations']]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual((last['count'], last['has_more']), (7, False))
+        outside = list_conversations(db=self.db, offset=1000)
+        self.assertEqual((outside['count'], outside['total'], outside['has_more']), (0, 57, False))
+
+    def test_search_and_sla_filter_before_pagination_across_batches(self):
+        created = datetime.now(timezone.utc) + timedelta(days=1)
+        self.db.get(Customer, 'a').display_name = 'ĐẶNG 100%_'
+        self.db.add_all([Conversation(id=f'page-{i:03}', customer_id='a', channel='telegram',
+                                     status='handoff_requested', priority='high', created_at=created) for i in range(205)])
+        self.db.flush()
+        self.db.add_all([Ticket(id=f'sla-{i}', conversation_id=f'page-{i:03}', priority='high',
+                               created_at=created - timedelta(days=2)) for i in range(195, 205)])
+        self.db.commit()
+        with patch('app.api.inbox.ticket_slas', wraps=ticket_slas) as slas:
+            result = list_conversations(db=self.db, q='đặng 100%_', sla='overdue',
+                                        status='handoff_requested', priority='high', offset=7, limit=2)
+            self.assertTrue(all(len(call.args[1]) <= 200 for call in slas.call_args_list))
+        self.assertEqual((result['count'], result['total'], result['has_more']), (2, 10, True))
+        self.assertEqual([c['conversation_id'] for c in result['conversations']], ['page-202', 'page-203'])
+        self.assertEqual(list_conversations(db=self.db, q='  TELEGRAM ', sla='none')['total'], 195)
+        self.assertEqual(list_conversations(db=self.db, q='%_')['total'], 206)
+        self.assertEqual(list_conversations(db=self.db, q='no match')['total'], 0)
+        self.assertEqual(list_conversations(db=self.db, q='b website')['total'], 1)
+
     def test_detail_order_and_customer_isolation(self):
         first = conversation_detail('first', self.db)
         self.assertEqual([m['id'] for m in first['messages']], ['earlier', 'later'])
@@ -54,6 +92,41 @@ class InboxTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             conversation_detail('missing', self.db)
         self.assertEqual(error.exception.status_code, 404)
+
+    def test_message_pages_cover_tied_timestamps_without_skips_or_duplicates(self):
+        created = datetime.now(timezone.utc) + timedelta(days=1)
+        self.db.add_all([Message(id=f'page-{i:03}', conversation_id='second', sender_type='customer',
+                                 content=f'Message {i}', created_at=created) for i in range(123)])
+        self.db.commit()
+        latest = conversation_detail('second', self.db)
+        self.assertEqual([m['id'] for m in latest['messages']], [f'page-{i:03}' for i in range(73, 123)])
+        self.assertEqual(latest['message_page'], {'limit': 50, 'before': None, 'has_more': True, 'next_before': 'page-073'})
+        # New arrivals must not move a cursor anchored in the older history.
+        self.db.add(Message(id='newest', conversation_id='second', sender_type='customer', content='New arrival',
+                            created_at=created + timedelta(seconds=1)))
+        self.db.commit()
+        middle = conversation_detail('second', self.db, before=latest['message_page']['next_before'])
+        oldest = conversation_detail('second', self.db, before=middle['message_page']['next_before'])
+        ids = [m['id'] for page in (oldest, middle, latest) for m in page['messages']]
+        self.assertEqual(ids, [f'page-{i:03}' for i in range(123)])
+        self.assertEqual(oldest['message_page'], {'limit': 50, 'before': 'page-023', 'has_more': False, 'next_before': None})
+        self.assertEqual(conversation_detail('second', self.db, limit=1)['messages'][0]['id'], 'newest')
+
+    def test_message_cursor_is_scoped_and_page_refreshes_mutable_fields(self):
+        for before in ('missing', 'earlier'):
+            with self.subTest(before=before), self.assertRaises(HTTPException) as error:
+                conversation_detail('second', self.db, before=before)
+            self.assertEqual(error.exception.status_code, 404)
+        page = conversation_detail('first', self.db, before='later', limit=1)
+        self.assertEqual([m['id'] for m in page['messages']], ['earlier'])
+        self.db.get(Message, 'earlier').tool_trace = {'status': 'provider_error'}
+        self.db.commit()
+        refreshed = conversation_detail('first', self.db, before='later', limit=1)
+        self.assertEqual(refreshed['messages'][0]['tool_trace'], {'status': 'provider_error'})
+        self.assertEqual(refreshed['tickets'], page['tickets'])
+        empty = conversation_detail('first', self.db, before='earlier')
+        self.assertEqual(empty['messages'], [])
+        self.assertFalse(empty['message_page']['has_more'])
 
     def test_accept_and_agent_reply(self):
         accepted = accept_conversation('first', self.db, self.user)

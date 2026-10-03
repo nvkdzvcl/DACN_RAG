@@ -7,6 +7,8 @@ import httpx
 
 CHAT_THINK = False
 CHAT_OPTIONS = {"temperature": 0, "num_ctx": 8192, "num_predict": 700}
+# ponytail: retain models for five idle minutes; let Ollama evict them if GPU memory is needed.
+KEEP_ALIVE = '5m'
 
 
 class ProviderError(RuntimeError):
@@ -21,7 +23,7 @@ def chat_model():
     return os.getenv("LLM_MODEL", "qwen3:4b")
 
 
-def call(path, payload=None):
+def call(path, payload=None, *, timeout=180):
     host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
     if "://" not in host:
         host = "http://" + host
@@ -29,7 +31,7 @@ def call(path, payload=None):
     if parsed.hostname in {"0.0.0.0", "::"}:
         host = urlunsplit(parsed._replace(netloc=f"127.0.0.1:{parsed.port or 11434}"))
     try:
-        with httpx.Client(timeout=httpx.Timeout(180, connect=5), trust_env=False) as client:
+        with httpx.Client(timeout=httpx.Timeout(timeout, connect=min(5, timeout)), trust_env=False) as client:
             response = client.get(host + path) if payload is None else client.post(host + path, json=payload)
             response.raise_for_status()
             result = response.json()
@@ -41,7 +43,7 @@ def call(path, payload=None):
 
 
 def embed(texts: list[str]) -> list[list[float]]:
-    result = call("/api/embed", {"model": embedding_model(), "input": texts, "truncate": False, "keep_alive": 0})
+    result = call("/api/embed", {"model": embedding_model(), "input": texts, "truncate": False, "keep_alive": KEEP_ALIVE})
     vectors = result.get("embeddings")
     if not isinstance(vectors, list) or len(vectors) != len(texts):
         raise ProviderError("Ollama trả embedding không hợp lệ.")
@@ -55,7 +57,7 @@ def embed(texts: list[str]) -> list[list[float]]:
 
 def chat(messages, schema):
     result = call("/api/chat", {"model": chat_model(), "messages": messages, "format": schema,
-                              "stream": False, "think": CHAT_THINK, "keep_alive": 0,
+                              "stream": False, "think": CHAT_THINK, "keep_alive": KEEP_ALIVE,
                               "options": CHAT_OPTIONS})
     message = result.get("message")
     content = message.get("content") if isinstance(message, dict) else None

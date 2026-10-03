@@ -3,17 +3,20 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 from uuid import uuid4
+import secrets
+import time
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.auth import hash_password, public_user, require_admin, require_staff, verify_password
+from app.core.auth import hash_password, public_user, require_admin, require_staff, token_hash, verify_password
 from app.db.session import get_db
-from app.models.support import AuthSession, Conversation, Customer, KnowledgeDocument, Message, Order, Ticket, User
+from app.models.support import AuthSession, Conversation, Customer, KnowledgeDocument, Message, Order, OrderAccess, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, ticket_slas, utc
+from app.telegram import telegram_status
 
 router = APIRouter(prefix='/api/v1/workspace', tags=['workspace'], dependencies=[Depends(require_staff)])
 OrderStatus = Literal['processing', 'paid', 'shipping', 'shipped', 'delivered', 'cancelled']
@@ -159,6 +162,31 @@ def edit_order(order_id: str, payload: OrderEdit, db: Session = Depends(get_db))
     return order_data(order, db.get(Customer, order.customer_id).display_name)
 
 
+@router.post('/orders/{order_id}/access-code', status_code=201)
+def issue_order_access(order_id: str, response: Response, user: User = Depends(require_admin), db: Session = Depends(get_db)):
+    # Serialize rotation with redemption and tool execution on the current SQLite store.
+    result = db.execute(update(Order).where(Order.id == order_id).values(status=Order.status))
+    if result.rowcount != 1:
+        db.rollback()
+        raise HTTPException(404, 'Không tìm thấy đơn hàng.')
+    order = db.get(Order, order_id)
+    code = secrets.token_urlsafe(32)
+    expires_at = int(time.time()) + 15 * 60
+    db.execute(delete(OrderAccess).where(OrderAccess.order_id == order_id))
+    db.add(OrderAccess(order_id=order_id, customer_id=order.customer_id, token_hash=token_hash(code),
+                       issued_by_id=user.id, expires_at=expires_at))
+    db.commit()
+    response.headers['Cache-Control'] = 'no-store'
+    return {'order_id': order_id, 'code': code, 'expires_at': expires_at}
+
+
+@router.delete('/orders/{order_id}/access-code', dependencies=[Depends(require_admin)])
+def revoke_order_access(order_id: str, db: Session = Depends(get_db)):
+    db.execute(delete(OrderAccess).where(OrderAccess.order_id == order_id))
+    db.commit()
+    return {'status': 'revoked'}
+
+
 @router.get('/summary')
 def summary(days: int = Query(7), db: Session = Depends(get_db)):
     if days not in (7, 30, 90):
@@ -192,7 +220,7 @@ def summary(days: int = Query(7), db: Session = Depends(get_db)):
 @router.get('/settings')
 def settings(user: User = Depends(require_staff)):
     return {'user': public_user(user), 'sla_minutes': RESPONSE_MINUTES, 'sla_schedule': '24/7',
-            'channels': [{'name': 'Website Widget', 'status': 'available'}, {'name': 'Kênh thứ hai', 'status': 'not_connected'}]}
+            'channels': [{'name': 'Website Widget', 'status': 'available'}, telegram_status()]}
 
 
 @router.get('/users', dependencies=[Depends(require_admin)])

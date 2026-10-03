@@ -1,0 +1,10 @@
+{
+  "result": "passed",
+  "scope": "HTTP API with real Ollama; no browser or load test",
+  "question_seconds": 3.675,
+  "total_seconds": 6.569,
+  "models": {
+    "qwen3:4b": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "embeddinggemma:300m": "85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1"
+  }
+}

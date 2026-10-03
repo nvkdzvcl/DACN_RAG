@@ -54,3 +54,16 @@ def migrate(engine):
             connection.execute(text('ALTER TABLE messages ADD COLUMN tool_trace JSON'))
         if not connection.execute(text('SELECT version FROM schema_migrations WHERE version = 5')).first():
             connection.execute(text('INSERT INTO schema_migrations (version) VALUES (5)'))
+        if not connection.execute(text('SELECT version FROM schema_migrations WHERE version = 6')).first():
+            connection.execute(text('INSERT INTO schema_migrations (version) VALUES (6)'))
+        if 'reply_to_id' not in {c['name'] for c in inspect(connection).get_columns('messages')}:
+            connection.execute(text('ALTER TABLE messages ADD COLUMN reply_to_id VARCHAR(64)'))
+        if not connection.execute(text('SELECT version FROM schema_migrations WHERE version = 7')).first():
+            connection.execute(text('INSERT INTO schema_migrations (version) VALUES (7)'))
+        # Performance-only indexes also apply to existing v7 stores; no data-format change.
+        for table in (support.Message.__table__, support.Ticket.__table__):
+            for index in table.indexes:
+                index.create(connection, checkfirst=True)
+
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 8")).first():
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (8)"))

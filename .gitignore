@@ -9,3 +9,8 @@ frontend/node_modules/.vite/
 data/runtime/
 data/vectors/
 data/knowledge_base/
+data/backups/
+data/restored/
+
+# Local previews and QA artifacts
+/output/

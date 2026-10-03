@@ -264,6 +264,19 @@ class RagTests(unittest.TestCase):
             self.assertEqual(result.json()['detail'], 'Unavailable')
 
 
+    def test_embedding_and_chat_retain_models_without_changing_generation(self):
+        with patch('app.rag.ollama.call', side_effect=[{'embeddings': [[1.0, 0.0]]},
+                {'done': True, 'message': {'content': '{}'}}]) as transport:
+            self.assertEqual(embed(['question']), [[1.0, 0.0]])
+            self.assertEqual(ollama_chat([], {}), '{}')
+        embedding, chat = [call.args[1] for call in transport.call_args_list]
+        self.assertEqual(embedding['keep_alive'], '5m')
+        self.assertFalse(embedding['truncate'])
+        self.assertEqual(chat['keep_alive'], '5m')
+        self.assertFalse(chat['think'])
+        self.assertFalse(chat['stream'])
+        self.assertEqual(chat['options'], {'temperature': 0, 'num_ctx': 8192, 'num_predict': 700})
+
     def test_chat_rejects_truncated_or_empty_output_and_hides_thinking(self):
         complete = {'done': True, 'done_reason': 'stop', 'message': {'content': '{"supported": false}', 'thinking': 'Internal reasoning'}}
         with patch('app.rag.ollama.call', return_value=complete):

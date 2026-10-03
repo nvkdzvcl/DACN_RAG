@@ -1,6 +1,11 @@
+import os
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
+from io import StringIO
+from getpass import GetPassWarning
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Barrier, Event
@@ -8,8 +13,9 @@ from unittest.mock import patch
 
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.api.auth import _attempts
 from app.api.inbox import accept_conversation
@@ -18,6 +24,7 @@ from app.db.migrations import migrate
 from app.db.session import get_db
 from app.main import app
 from app.models.support import AuthSession, Conversation, Customer, Message, Ticket, User
+from app.reset_password import main as reset_password
 from app.services.message_service import process_message
 
 
@@ -54,6 +61,143 @@ class AuthHandoffTests(unittest.TestCase):
         result = client.post('/api/v1/auth/login', json={'username': name, 'password': self.password})
         self.assertEqual(result.status_code, 200, result.text)
         return result
+
+    def reset(self, username='ADMIN', passwords=None):
+        self.reset_output = StringIO()
+        with patch('sys.argv', ['reset_password', username]), \
+                patch('app.reset_password.getpass', side_effect=passwords or ['New-password-2026'] * 2), \
+                patch('app.db.session.SessionLocal', sessionmaker(bind=self.engine)), \
+                patch('sys.stdout', self.reset_output), patch('sys.stderr', self.reset_output):
+            reset_password()
+
+    def test_password_reset_revokes_only_target_sessions_and_preserves_account(self):
+        self.login('admin')
+        other = TestClient(app)
+        agent = TestClient(app)
+        self.addCleanup(other.close)
+        self.addCleanup(agent.close)
+        self.login('admin', other)
+        self.login('one', agent)
+        self.reset()
+        self.assertIn('Password reset: admin', self.reset_output.getvalue())
+        self.assertNotIn('New-password-2026', self.reset_output.getvalue())
+        for client in (self.client, other):
+            self.assertEqual(client.get('/api/v1/auth/me').status_code, 401)
+        self.assertEqual(agent.get('/api/v1/auth/me').status_code, 200)
+        self.assertEqual(self.client.post('/api/v1/auth/login', json={
+            'username': 'admin', 'password': self.password}).status_code, 401)
+        self.assertEqual(self.client.post('/api/v1/auth/login', json={
+            'username': 'admin', 'password': 'New-password-2026'}).status_code, 200)
+        with Session(self.engine) as db:
+            user = db.get(User, 'admin')
+            self.assertEqual((user.username, user.role, user.display_name, user.active), ('admin', 'admin', 'admin', True))
+            self.assertEqual(db.query(User).count(), 3)
+
+    def test_password_reset_keeps_disabled_agent_disabled(self):
+        with Session(self.engine) as db:
+            db.get(User, 'one').active = False
+            db.commit()
+        self.reset('one')
+        with Session(self.engine) as db:
+            user = db.get(User, 'one')
+            self.assertFalse(user.active)
+            self.assertEqual(user.role, 'agent')
+            self.assertTrue(verify_password('New-password-2026', user.password_hash))
+        self.client.headers['X-CSRF-Protection'] = '1'
+        self.assertEqual(self.client.post('/api/v1/auth/login', json={
+            'username': 'one', 'password': 'New-password-2026'}).status_code, 401)
+
+    def test_password_reset_rejects_invalid_input_without_changes(self):
+        self.login('admin')
+        for name, passwords in [('missing', ['New-password-2026'] * 2), ('bad user', ['New-password-2026'] * 2),
+                                ('admin', ['short'] * 2), ('admin', ['x' * 129] * 2),
+                                ('admin', ['New-password-2026', 'Mismatch-password']), ('admin', [self.password] * 2)]:
+            with self.subTest(username=name, length=len(passwords[0])):
+                with self.assertRaises(SystemExit) as error:
+                    self.reset(name, passwords)
+                self.assertEqual(error.exception.code, 2)
+                self.assertEqual(self.client.get('/api/v1/auth/me').status_code, 200)
+                with Session(self.engine) as db:
+                    self.assertEqual(db.get(User, 'admin').password_hash, self.password_hash)
+                    self.assertEqual(db.query(User).count(), 3)
+        for failure in (EOFError, KeyboardInterrupt, GetPassWarning):
+            with self.assertRaises(SystemExit) as error:
+                self.reset(passwords=failure)
+            self.assertEqual(error.exception.code, 1)
+
+    def test_password_reset_rolls_back_if_session_revocation_fails(self):
+        self.login('admin')
+        def fail_delete(connection, cursor, statement, parameters, context, executemany):
+            if statement.startswith('DELETE FROM auth_sessions'):
+                raise SQLAlchemyError('Injected failure')
+        event.listen(self.engine, 'before_cursor_execute', fail_delete)
+        try:
+            with self.assertRaises(SystemExit) as error:
+                self.reset()
+            self.assertEqual(error.exception.code, 1)
+        finally:
+            event.remove(self.engine, 'before_cursor_execute', fail_delete)
+        self.assertNotIn('Injected failure', self.reset_output.getvalue())
+        self.assertEqual(self.client.get('/api/v1/auth/me').status_code, 200)
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(User, 'admin').password_hash, self.password_hash)
+
+    def test_login_in_flight_cannot_issue_session_after_local_password_reset(self):
+        entered, release = Event(), Event()
+        self.client.headers['X-CSRF-Protection'] = '1'
+        def delayed(password, encoded):
+            valid = verify_password(password, encoded)
+            entered.set()
+            self.assertTrue(release.wait(10))
+            return valid
+        with patch('app.api.auth.verify_password', side_effect=delayed), ThreadPoolExecutor(max_workers=1) as pool:
+            pending = pool.submit(self.client.post, '/api/v1/auth/login', json={'username': 'admin', 'password': self.password})
+            try:
+                self.assertTrue(entered.wait(5))
+                self.reset()
+            finally:
+                release.set()
+            self.assertEqual(pending.result(timeout=10).status_code, 401)
+        with Session(self.engine) as db:
+            self.assertEqual(db.query(AuthSession).count(), 0)
+
+    def test_password_reset_loads_explicit_env_before_database_and_respects_override(self):
+        config = Path(self.directory.name) / 'recovery.env'
+        config.write_text(f'DATABASE_URL={self.engine.url}\n', encoding='utf-8')
+        environment = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[2]))
+        environment.pop('DATABASE_URL', None)
+        for password in ('First-recovery-2026', 'Second-recovery-2026'):
+            code = f'from app import reset_password as cli; cli.getpass = lambda prompt: {password!r}; cli.main()'
+            result = subprocess.run([sys.executable, '-c', code, 'admin', '--env-file', str(config)],
+                                    cwd=self.directory.name, env=environment, capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            with Session(self.engine) as db:
+                self.assertTrue(verify_password(password, db.get(User, 'admin').password_hash))
+            environment['DATABASE_URL'] = str(self.engine.url)
+            config.write_text('DATABASE_URL=sqlite:///missing/no.db\n', encoding='utf-8')
+
+    def test_inbox_pagination_validates_bounds_and_requires_staff(self):
+        endpoint = '/api/v1/inbox/conversations'
+        self.assertEqual(self.client.get(endpoint, params={'limit': 1}).status_code, 401)
+        self.login()
+        for params in ({'limit': 0}, {'limit': 101}, {'offset': -1}, {'offset': 2**63}, {'limit': 'bad'}, {'q': 'x' * 161}):
+            with self.subTest(params=params):
+                self.assertEqual(self.client.get(endpoint, params=params).status_code, 422)
+        result = self.client.get(endpoint, params={'q': 'Test customer', 'limit': 1}).json()
+        self.assertEqual((result['count'], result['total'], result['offset'], result['limit']), (1, 1, 0, 1))
+        self.assertFalse(result['has_more'])
+
+    def test_message_pagination_validates_bounds_and_requires_staff(self):
+        endpoint = '/api/v1/inbox/conversations/chat'
+        self.assertEqual(self.client.get(endpoint).status_code, 401)
+        self.login()
+        for params in ({'limit': 0}, {'limit': 101}, {'limit': 'bad'}, {'before': ''}, {'before': 'x' * 65}):
+            with self.subTest(params=params):
+                self.assertEqual(self.client.get(endpoint, params=params).status_code, 422)
+        self.assertEqual(self.client.get(endpoint, params={'before': 'unknown'}).status_code, 404)
+        page = self.client.get(endpoint, params={'limit': 100}).json()
+        self.assertEqual(page['messages'], [])
+        self.assertEqual(page['message_page'], {'limit': 100, 'before': None, 'has_more': False, 'next_before': None})
 
     def test_password_and_cookie_session_lifecycle(self):
         self.assertTrue(verify_password(self.password, self.password_hash))
@@ -222,11 +366,18 @@ class AuthHandoffTests(unittest.TestCase):
         with legacy.begin() as connection:
             connection.execute(text("INSERT INTO messages (id, content, conversation_id, sender_type, agent_id, created_at) VALUES ('future', 'Later cycle', 'old', 'agent', 'one', '2026-09-14 02:00:00.000000')"))
             connection.execute(text("UPDATE messages SET tool_trace = '{\"status\": \"pending\"}' WHERE id = 'future'"))
+            # Existing v7 stores created before the load fix have no composite indexes.
+            connection.execute(text('DROP INDEX ix_messages_conversation_created_id'))
+            connection.execute(text('DROP INDEX ix_tickets_conversation_created'))
         migrate(legacy)
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
             self.assertEqual(connection.execute(text("SELECT content FROM messages WHERE id = 'message'")).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 5)
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 8)
+            plan = connection.execute(text("EXPLAIN QUERY PLAN SELECT id FROM messages WHERE conversation_id = 'old' ORDER BY created_at, id")).all()
+            self.assertTrue(any('ix_messages_conversation_created_id' in row[-1] for row in plan))
+            plan = connection.execute(text("EXPLAIN QUERY PLAN SELECT id FROM tickets WHERE conversation_id = 'old' ORDER BY created_at")).all()
+            self.assertTrue(any('ix_tickets_conversation_created' in row[-1] for row in plan))
             self.assertIsNone(connection.execute(text("SELECT tool_trace FROM messages WHERE id = 'message'")).scalar())
             self.assertEqual(connection.execute(text("SELECT tool_trace FROM messages WHERE id = 'future'")).scalar(), '{"status": "pending"}')
             self.assertEqual(connection.execute(text("SELECT first_response_at FROM tickets WHERE id = 'answered'")).scalar(), '2026-09-14 00:01:00.000000')

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Boolean, DateTime, ForeignKey, JSON, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Index, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
@@ -46,8 +46,24 @@ class WidgetSession(Base):
     conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), unique=True)
     expires_at: Mapped[int] = mapped_column(index=True)
 
+class CustomerAccount(Base):
+    __tablename__ = "customer_accounts"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), unique=True)
+    email: Mapped[str] = mapped_column(String(254), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+class CustomerSession(Base):
+    __tablename__ = "customer_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("customer_accounts.id"), index=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), index=True)
+    expires_at: Mapped[int] = mapped_column(index=True)
+
 class Message(Base):
     __tablename__ = "messages"
+    __table_args__ = (Index('ix_messages_conversation_created_id', 'conversation_id', 'created_at', 'id'),)
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"))
     sender_type: Mapped[str] = mapped_column(String(16))
@@ -56,11 +72,13 @@ class Message(Base):
     agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     citations: Mapped[list | None] = mapped_column(JSON, nullable=True)
     tool_trace: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    reply_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     conversation: Mapped[Conversation] = relationship(back_populates="messages")
 
 class Ticket(Base):
     __tablename__ = "tickets"
+    __table_args__ = (Index('ix_tickets_conversation_created', 'conversation_id', 'created_at'),)
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"))
     status: Mapped[str] = mapped_column(String(32), default="open")
@@ -78,6 +96,46 @@ class Order(Base):
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"))
     status: Mapped[str] = mapped_column(String(32), default="processing")
     tracking_code: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+class OrderAccess(Base):
+    __tablename__ = "order_access"
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    issued_by_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    expires_at: Mapped[int]
+    conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id"), nullable=True)
+
+class TelegramCursor(Base):
+    __tablename__ = "telegram_cursors"
+    bot_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    next_update_id: Mapped[int] = mapped_column(BigInteger, default=0)
+
+class TelegramPeer(Base):
+    __tablename__ = "telegram_peers"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    bot_id: Mapped[str] = mapped_column(String(32), index=True)
+    chat_id: Mapped[str] = mapped_column(String(32))
+    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), unique=True)
+    conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id"), nullable=True)
+
+class TelegramUpdate(Base):
+    __tablename__ = "telegram_updates"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    bot_id: Mapped[str] = mapped_column(String(32), index=True)
+    update_id: Mapped[int] = mapped_column(BigInteger)
+    peer_id: Mapped[str] = mapped_column(ForeignKey("telegram_peers.id"))
+    content: Mapped[str] = mapped_column(Text)
+    state: Mapped[str] = mapped_column(String(16), default="pending")
+    conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id"), nullable=True)
+
+class TelegramDelivery(Base):
+    __tablename__ = "telegram_deliveries"
+    message_id: Mapped[str] = mapped_column(ForeignKey("messages.id"), primary_key=True)
+    state: Mapped[str] = mapped_column(String(16), default="pending")
+    error: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    external_message_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 class KnowledgeDocument(Base):
     __tablename__ = "knowledge_documents"

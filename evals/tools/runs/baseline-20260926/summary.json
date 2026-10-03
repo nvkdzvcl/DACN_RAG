@@ -1,0 +1,51 @@
+{
+  "cases": 24,
+  "passed": 17,
+  "accuracy_against_draft_labels": 0.7083333333333334,
+  "errors": 0,
+  "private_data_leaks": 0,
+  "order_mutations": 0,
+  "selector_calls": 15,
+  "failed_ids": [
+    "cancel-and-track",
+    "refund-policy",
+    "no-human-needed",
+    "currency-policy",
+    "implicit-followup",
+    "ambiguous-followup",
+    "expired-followup"
+  ],
+  "routing_seconds_median": 1.38,
+  "by_category": {
+    "access": {
+      "n": 8,
+      "passed": 8
+    },
+    "followup": {
+      "n": 4,
+      "passed": 1
+    },
+    "format": {
+      "n": 3,
+      "passed": 3
+    },
+    "handoff": {
+      "n": 1,
+      "passed": 1
+    },
+    "mixed": {
+      "n": 3,
+      "passed": 2
+    },
+    "negation": {
+      "n": 3,
+      "passed": 1
+    },
+    "policy": {
+      "n": 2,
+      "passed": 1
+    }
+  },
+  "human_reviewed_cases": 0,
+  "rag_is_stubbed": true
+}

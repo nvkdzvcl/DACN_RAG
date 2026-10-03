@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Duyệt nhãn M5</title>
+<style>
+:root{color-scheme:light;--ink:#193d36;--paper:#fcfaf4;--line:#bfccc2;--accent:#176553}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top left,#dde9df,transparent 70%),var(--paper);color:var(--ink);font:16px/1.55 "Trebuchet MS",sans-serif}
+main{max-width:1100px;margin:auto;padding:40px 24px}h1,h2{font-family:Georgia,serif;line-height:1.2}h1{font-size:clamp(32px,6vw,52px);margin:8px 0 16px}h2{font-size:25px;margin:0 0 20px}.kicker{font-size:12px;text-transform:uppercase;letter-spacing:.16em}.intro{max-width:75ch}
+nav{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:28px 0 12px}nav label{flex:1;min-width:180px}label{display:block;font-weight:bold}input,select,textarea,button{font:inherit;border:1px solid var(--line);border-radius:5px;padding:10px;background:#fff;color:var(--ink);max-width:100%}input,select,textarea{width:100%;margin:6px 0 16px}nav select{margin-bottom:0}textarea{resize:vertical;min-height:130px}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}button.primary{background:var(--accent);color:white;border-color:var(--accent)}:focus-visible{outline:3px solid #c47715;outline-offset:3px}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,1fr);gap:24px;margin:24px 0}.panel{padding:24px;border:1px solid var(--line);border-top:4px solid var(--accent);background:#ffffffc9;min-width:0}.question{font-size:20px;font-family:Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere}pre{font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}dl{margin:0}dt{font-weight:bold;margin-top:12px}dd{margin:4px 0;overflow-wrap:anywhere}summary{cursor:pointer;font-weight:bold}.hint{font-size:14px;color:#496157}.notice{min-height:1.55em}#error{color:#9c2e1b;font-weight:bold}footer{border-top:1px solid var(--line);padding-top:20px;font-size:14px}code{overflow-wrap:anywhere}a{color:var(--accent)}
+@media(max-width:720px){main{padding:24px 16px}.layout{grid-template-columns:1fr}.panel{padding:18px}nav button{flex:1}nav label{flex-basis:100%}}
+</style>
+<main>
+  <header><div class="kicker">Nhóm kiểm thử / M5</div><h1>Duyệt nhãn điều phối</h1>
+  <p class="intro">Xác nhận <strong>nhãn mong đợi</strong> có đúng yêu cầu của khách và quyền truy cập hay không. Đồng ý nhãn không có nghĩa bot trả lời đúng. Đây là duyệt sau khi xem kết quả, chưa phải đánh giá độc lập.</p></header>
+  <noscript>Trang cần JavaScript. Có thể điền phiếu JSON và dùng app.review_tools nếu không bật JavaScript.</noscript>
+  <nav aria-label="Điều hướng ca kiểm thử"><label for="case-picker">Ca đang duyệt<select id="case-picker"></select></label><button id="previous" type="button">Ca trước</button><button id="next" type="button">Ca tiếp</button></nav>
+  <p id="progress" aria-live="polite"></p>
+  <div class="layout">
+    <section class="panel" aria-labelledby="case-title"><h2 id="case-title">Yêu cầu và nhãn nháp</h2>
+      <p id="question" class="question"></p><dl><dt>Phạm vi quyền</dt><dd id="scope"></dd></dl>
+      <details><summary>Lịch sử trước câu hỏi</summary><pre id="history"></pre></details>
+      <dl><dt>Nhánh mong đợi</dt><dd id="expected-route"></dd><dt>Kết quả tra đơn mong đợi</dt><dd id="expected-lookup"></dd><dt>Lý do của nhãn nháp</dt><dd id="rationale"></dd></dl>
+      <details><summary>Kết quả chạy đã lưu</summary><pre id="observed"></pre></details>
+    </section>
+    <section class="panel" aria-labelledby="review-title"><h2 id="review-title">Quyết định của người duyệt</h2>
+      <label for="reviewer">Tên người duyệt</label><input id="reviewer" maxlength="160" autocomplete="name" aria-describedby="identity-note">
+      <p id="identity-note" class="hint">Tên tự khai, chưa xác thực tài khoản. Chỉ điền quyết định của chính bạn.</p>
+      <label for="decision">Đồng ý cả hai nhãn mong đợi?</label><select id="decision"><option value="pending">Chưa quyết định</option><option value="approve">Đồng ý nhãn</option><option value="reject">Bác nhãn</option></select>
+      <label for="notes">Ghi chú / lý do bác nhãn</label><textarea id="notes" maxlength="4000" aria-describedby="notes-help"></textarea>
+      <p id="notes-help" class="hint">Bác nhãn cần ghi lý do và đề xuất sửa. Giữ “Chưa quyết định” nếu chưa đủ thông tin. Bằng chứng gốc không chỉnh sửa tại đây.</p>
+      <button id="download" class="primary" type="button">Tải JSON để tổng hợp</button>
+      <p><a id="download-link" hidden>Tải lại JSON vừa tạo</a></p>
+      <details id="export-fallback" hidden><summary>Sao chép JSON nếu không tải được</summary><label for="export-text">JSON đã tạo</label><textarea id="export-text" readonly spellcheck="false" rows="8"></textarea><p class="hint">Chọn nội dung, sao chép và lưu file .json với mã hóa UTF-8. Không sửa phần bằng chứng.</p></details>
+      <p id="error" role="alert"></p><p id="save-state" class="notice hint" role="status"></p>
+      <p id="download-state" class="hint" role="status"></p>
+    </section>
+  </div>
+  <footer>Trang không gửi dữ liệu lên mạng. Nháp lưu trong trình duyệt này khi được hỗ trợ; tải JSON để giữ bản riêng. Để tiếp tục ở máy khác, nhờ người tích hợp tạo trang từ JSON đã tải bằng <code>--html --reviews</code>. Điểm định tuyến được CLI tính sau; trang không tự duyệt hoặc chấm chất lượng RAG.</footer>
+</main>
+<script type="application/json" id="review-data" data-form-hash="<!--REVIEW_HASH-->"><!--REVIEW_DATA--></script>
+<script>
+'use strict';
+const forms = JSON.parse(document.getElementById('review-data').textContent);
+const cases = forms.map(row => JSON.parse(row.case_json));
+const get = id => document.getElementById(id);
+const routes = {lookup:'Tra cứu đơn', handoff:'Chuyển nhân viên', rag:'Hỏi chính sách qua RAG', clarification:'Yêu cầu làm rõ', error:'Lỗi xử lý', unknown:'Chưa xác định'};
+const lookups = {found:'Tìm thấy và có quyền', denied:'Không tìm thấy hoặc không có quyền', none:'Không tra đơn', any:'Không ràng buộc kết quả tra đơn'};
+const scopes = {owner:'Khách là chủ đơn DH78216; không sở hữu ORD-93427.', anonymous:'Khách chưa xác minh, không có quyền tra hai đơn.', granted:'Phiên được cấp quyền DH78216 còn hiệu lực; không có quyền ORD-93427.', expired:'Quyền DH78216 đã hết hạn.'};
+// ponytail: one browser draft per exact form; use exported JSON and the CLI for transfer, no shared editing service.
+const draftKey = 'm5-review:' + get('review-data').dataset.formHash;
+let index = 0, unsaved = false;
+const decisions = [null,true,false];
+const edits = () => forms.map(row => ({reviewer:row.reviewer,gold_label_approved:row.gold_label_approved,notes:row.notes}));
+const validEdit = row => row && (row.reviewer === null || typeof row.reviewer === 'string' && row.reviewer.length <= 160) && decisions.includes(row.gold_label_approved) && typeof row.notes === 'string' && row.notes.length <= 4000;
+const complete = row => row.gold_label_approved !== null && (row.reviewer || '').trim() && (row.gold_label_approved || row.notes.trim());
+try {
+  const saved = JSON.parse(localStorage.getItem(draftKey));
+  if (saved !== null) {
+    if (!Array.isArray(saved) || saved.length !== forms.length || !saved.every(validEdit)) throw new Error('Invalid draft');
+    saved.forEach((row,i) => { for (const key of ['reviewer','gold_label_approved','notes']) forms[i][key] = row[key]; });
+    get('save-state').textContent = 'Đã khôi phục nháp từ trình duyệt này. Tải JSON để giữ bản riêng.';
+  }
+} catch {
+  get('save-state').textContent = 'Không đọc được nháp trên trình duyệt này. Tải JSON trước khi đóng.';
+}
+forms.forEach((row,i) => { const option = document.createElement('option'); option.value = i; option.textContent = `${i+1}. ${row.id}`; get('case-picker').append(option); });
+function show() {
+  const row = forms[index], item = cases[index];
+  get('case-picker').value = index;
+  get('question').textContent = item.query;
+  get('scope').textContent = scopes[item.scope];
+  get('history').textContent = item.history.map(message => `${message.sender === 'customer' ? 'Khách' : 'AI'}: ${message.content}`).join('\n\n') || 'Không có lịch sử.';
+  get('expected-route').textContent = routes[item.expected_route];
+  get('expected-lookup').textContent = lookups[item.expected_lookup];
+  get('rationale').textContent = item.rationale;
+  get('observed').textContent = `Nhánh: ${routes[item.route]}\nTra đơn: ${lookups[item.lookup]}\nLỗi: ${item.error || 'Không'}\nPhản hồi: ${item.answer || '(không có)'}\nKhớp nhãn nháp tự động: ${item.passed ? 'Có' : 'Không'}`;
+  get('reviewer').value = row.reviewer || '';
+  get('decision').value = row.gold_label_approved === null ? 'pending' : row.gold_label_approved ? 'approve' : 'reject';
+  get('notes').value = row.notes;
+  get('previous').disabled = index === 0;
+  get('next').disabled = index === forms.length-1;
+  get('progress').textContent = `${forms.filter(complete).length}/${forms.length} ca có quyết định đủ thông tin. Ca hiện tại: ${index+1}/${forms.length}.`;
+}
+function update() {
+  Object.assign(forms[index], {reviewer:get('reviewer').value || null, gold_label_approved:get('decision').value === 'pending' ? null : get('decision').value === 'approve', notes:get('notes').value});
+  unsaved = true;
+  get('error').textContent = '';
+  get('download-state').textContent = '';
+  const link = get('download-link');
+  if (link.hasAttribute('href')) URL.revokeObjectURL(link.href);
+  link.removeAttribute('href'); link.hidden = true;
+  get('export-fallback').hidden = true; get('export-text').value = '';
+  try { localStorage.setItem(draftKey, JSON.stringify(edits())); unsaved = false; get('save-state').textContent = 'Đã lưu nháp trên trình duyệt này. Tải JSON để gửi cho người tổng hợp.'; }
+  catch { get('save-state').textContent = 'Không lưu được nháp. Giữ trang mở và tải JSON trước khi đóng.'; }
+  get('progress').textContent = `${forms.filter(complete).length}/${forms.length} ca có quyết định đủ thông tin. Ca hiện tại: ${index+1}/${forms.length}.`;
+}
+for (const id of ['reviewer','decision','notes']) get(id).addEventListener('input', update);
+get('case-picker').addEventListener('change', () => { index = Number(get('case-picker').value); show(); });
+get('previous').addEventListener('click', () => { index--; show(); });
+get('next').addEventListener('click', () => { index++; show(); });
+get('download').addEventListener('click', () => {
+  const invalid = forms.findIndex(row => !validEdit(row) || row.gold_label_approved !== null && !complete(row));
+  if (invalid !== -1) { index = invalid; show(); get('error').textContent = `Ca ${index+1}: cần tên người duyệt và lý do nếu bác nhãn.`; get(forms[index].reviewer?.trim() ? 'notes' : 'reviewer').focus(); return; }
+  const content = '[\n' + forms.map(row => JSON.stringify({id:row.id,run_sha256:row.run_sha256,reviewer:row.reviewer,gold_label_approved:row.gold_label_approved,notes:row.notes}).slice(0,-1) + ',"case":' + row.case_json + '}').join(',\n') + '\n]\n';
+  get('export-text').value = content; get('export-fallback').hidden = false;
+  const link = get('download-link');
+  if (link.hasAttribute('href')) URL.revokeObjectURL(link.href);
+  link.href = URL.createObjectURL(new Blob([content], {type:'application/json'})); link.download = `tool-review-${forms[0].run_sha256.slice(0,12)}.json`; link.hidden = false; link.click();
+  get('download-state').textContent = 'Đã yêu cầu tải JSON. Kiểm tra file trong mục Tải xuống trước khi đóng trang.';
+});
+window.addEventListener('beforeunload', event => { if (unsaved) { event.preventDefault(); event.returnValue = ''; } });
+show();
+</script>
+</html>

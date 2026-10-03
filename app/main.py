@@ -1,4 +1,7 @@
 from contextlib import asynccontextmanager
+import asyncio
+import os
+from pathlib import Path
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -14,27 +17,35 @@ from app.api.process import router as process_router
 from app.api.inbox import router as inbox_router
 from app.api.auth import router as auth_router
 from app.api.widget import router as widget_router
+from app.api.customer_auth import router as customer_auth_router
 from app.api.workspace import router as workspace_router
+from app.api.readiness import router as readiness_router
 from app.core.auth import require_admin, require_staff
 from app.db.migrations import migrate
 from app.rag.ollama import ProviderError
 from app.rag.vector_store import vector_store
+from app.telegram import start_telegram
 
 @asynccontextmanager
 async def lifespan(app):
     migrate(engine)
     with engine.begin() as connection:
         connection.execute(text("UPDATE knowledge_documents SET status = 'failed', index_version = NULL, error_message = 'Xử lý bị gián đoạn. Hãy lập chỉ mục lại.' WHERE status = 'processing'"))
+    telegram = start_telegram()
     try:
         yield
     finally:
+        if telegram:
+            telegram[0].set()
+            await asyncio.to_thread(telegram[1].join)
         vector_store.close()
 
 app = FastAPI(title="AI Customer Support Platform", version="0.1.0", lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(widget_router)
+app.include_router(customer_auth_router)
 app.include_router(workspace_router)
-for staff_router in (router, document_router, chunks_router, search_router, answer_router, orders_router, process_router, inbox_router):
+for staff_router in (router, document_router, chunks_router, search_router, answer_router, orders_router, process_router, inbox_router, readiness_router):
     app.include_router(staff_router, dependencies=[Depends(require_staff)])
 for admin_router in (seed_router,):
     app.include_router(admin_router, dependencies=[Depends(require_admin)])
@@ -48,3 +59,8 @@ def provider_error(request: Request, exc: ProviderError):
 @app.get("/api/v1/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "customer-support-api"}
+
+
+if os.getenv('SERVE_FRONTEND', '').lower() == 'true':
+    from app.web import mount_frontend
+    mount_frontend(app, Path(__file__).resolve().parent.parent / 'frontend' / 'dist')

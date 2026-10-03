@@ -1,0 +1,19 @@
+{
+  "cases": 8,
+  "passed": 8,
+  "accuracy_against_draft_labels": 1.0,
+  "errors": 0,
+  "private_data_leaks": 0,
+  "order_mutations": 0,
+  "selector_calls": 5,
+  "failed_ids": [],
+  "routing_seconds_median": 0.794,
+  "by_category": {
+    "followup-boundary": {
+      "n": 8,
+      "passed": 8
+    }
+  },
+  "human_reviewed_cases": 0,
+  "rag_is_stubbed": true
+}

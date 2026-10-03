@@ -1,6 +1,8 @@
 import tempfile
 import unittest
 import json
+from datetime import datetime, timedelta, timezone
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
@@ -12,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.widget import snapshot
+from app.api.inbox import conversation_detail
 from app.db.migrations import migrate
 from app.models.support import Conversation, Customer, Message, Order, Ticket, WidgetSession
 from app.rag.ollama import ProviderError
@@ -47,7 +50,9 @@ class ToolTests(unittest.TestCase):
 
     def test_structured_tool_schema_rejects_forgery_and_malformed_calls(self):
         with patch('app.services.tool_service.chat', return_value=completion()) as transport:
-            self.assertEqual(select_order_tool('Track DH12345', 'DH12345'), LOOKUP)
+            query = 'Không cần gặp nhân viên, tra DH12345.'
+            self.assertEqual(select_order_tool(unicodedata.normalize('NFD', query), 'DH12345'), LOOKUP)
+            self.assertEqual(json.loads(transport.call_args.args[0][-1]['content'])['request'], query)
             schema = transport.call_args.args[1]
             self.assertEqual(schema['properties']['arguments']['properties']['order_id']['enum'], ['DH12345'])
             self.assertNotIn('customer_id', str(schema))
@@ -73,6 +78,8 @@ class ToolTests(unittest.TestCase):
             trace = db.query(Message).filter_by(sender_type='customer').one().tool_trace
             self.assertEqual(trace['outcome'], 'found')
             self.assertNotIn('PRIVATE-TRACK', str(trace))
+            internal = conversation_detail('chat', db)
+            self.assertEqual(next(m['tool_trace'] for m in internal['messages'] if m['sender_type'] == 'customer'), trace)
             public = snapshot(db, WidgetSession(conversation_id='chat', expires_at=9999999999))
             self.assertNotIn('tool_trace', str(public))
 
@@ -106,6 +113,20 @@ class ToolTests(unittest.TestCase):
             self.process()
             model.assert_not_called()
 
+    def test_malformed_order_token_never_looks_up_its_valid_prefix(self):
+        with patch('app.services.message_service.select_order_tool', return_value=LOOKUP) as selector, patch(
+                'app.services.message_service.lookup_order') as lookup, patch(
+                'app.services.message_service.answer_question', return_value={'answer': 'Thiếu mã đơn hợp lệ.', 'citations': []}):
+            for content in ('Tra đơn DH12345-EXTRA', 'Tra đơn x-DH12345', 'Tra đơn DH12345_ABC',
+                            'Tra đơn DH1234ı', 'Tra đơn DH' + 'A' * 63):
+                result = self.process(content)
+                self.assertIsNone(result['order_lookup'])
+                with Session(self.engine) as db:
+                    self.assertIsNone(db.get(Message, result['message_id']).tool_trace)
+                    self.assertNotIn('PRIVATE-TRACK', db.get(Message, result['ai_message_id']).content)
+            selector.assert_not_called()
+            lookup.assert_not_called()
+
     def test_explicit_tool_handoff_provider_and_database_failures_preserve_inbound(self):
         with patch('app.services.tool_service.chat', side_effect=ProviderError('Offline')):
             self.assertEqual(self.process()['ai_error'], 'Offline')
@@ -121,11 +142,79 @@ class ToolTests(unittest.TestCase):
             self.assertEqual(traces, ['provider_error', 'pending', 'executed'])
             self.assertEqual(db.query(Message).filter_by(sender_type='ai').count(), 0)
 
+    def test_order_followup_uses_customer_history_and_current_permissions(self):
+        with Session(self.engine) as db:
+            db.add(Message(id='context', conversation_id='chat', sender_type='customer', content='Tra DH12345'))
+            db.commit()
+        with patch('app.services.tool_service.chat', return_value=completion()) as model, patch(
+                'app.services.message_service.answer_question', return_value={'answer': 'Policy', 'citations': []}):
+            result = self.process(unicodedata.normalize('NFD', 'Mã vận đơn của ĐƠN\nĐÓ là gì?'), identity='followup')
+            self.assertTrue(result['order_lookup']['found'])
+            self.assertTrue(self.process(unicodedata.normalize('NFD', 'Mã vận đơn của ĐƠN\nĐÓ là gì?'), identity='followup')['duplicate'])
+            self.assertEqual(model.call_count, 1)
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(Message, result['message_id']).tool_trace['order_id_source'], 'history')
+            self.assertEqual(db.get(Message, result['message_id']).content,
+                             unicodedata.normalize('NFD', 'Mã vận đơn của ĐƠN\nĐÓ là gì?'))
+            db.get(Order, 'DH12345').customer_id = 'other'
+            db.commit()
+        with patch('app.services.tool_service.chat', return_value=completion()):
+            result = self.process('Đơn đó đang ở đâu?')
+        self.assertEqual(result['status'], 'handoff_requested')
+        self.assertFalse(result['order_lookup']['found'])
+        self.assertIsNone(result['ai_message_id'])
+
+    def test_order_followup_does_not_guess_between_customer_codes(self):
+        with Session(self.engine) as db:
+            db.add(Message(id='context', conversation_id='chat', sender_type='customer', content='DH12345 và DH99999'))
+            db.commit()
+        with patch('app.services.tool_service.chat') as model, patch('app.services.message_service.answer_question',
+                return_value={'answer': 'Policy', 'citations': []}) as rag:
+            result = self.process('Đơn đó đang ở đâu?')
+            model.assert_not_called()
+            rag.assert_not_called()
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(Message, result['message_id']).tool_trace['status'], 'clarification')
+        with patch('app.services.tool_service.chat', return_value=completion()):
+            self.assertTrue(self.process('Đơn đó là DH12345, tra giúp tôi')['order_lookup']['found'])
+
+    def test_order_followup_ignores_ai_other_conversations_and_old_or_malformed_context(self):
+        for sender, context, query, expired in [
+                ('ai', 'DH12345', 'Đơn đó đang ở đâu?', False),
+                ('customer', 'DH12345-EXTRA', 'Đơn đó đang ở đâu?', False),
+                ('customer', 'DH12345', 'Đơn đó đang ở đâu?', True),
+                ('customer', 'DH12345', 'Chính sách giao hàng là gì?', False),
+                ('customer', 'DH12345', 'Tra đơn đó DH99999-EXTRA', False),
+                ('customer', 'DH12345', 'Tra đơn đó x-DH99999', False)]:
+            with self.subTest(sender=sender, context=context, query=query, expired=expired), Session(self.engine) as db:
+                db.query(Message).delete()
+                if not db.get(Conversation, 'other-chat'):
+                    db.add(Conversation(id='other-chat', customer_id='owner'))
+                    db.flush()
+                db.add(Message(id='other-context', conversation_id='other-chat', sender_type='customer', content='DH12345'))
+                db.add(Message(id='context', conversation_id='chat', sender_type=sender, content=context,
+                               created_at=datetime.now(timezone.utc) - timedelta(minutes=10)))
+                if expired:
+                    db.add_all([Message(id=f'later-{i}', conversation_id='chat', sender_type='ai', content='Nội dung khác')
+                                for i in range(4)])
+                db.commit()
+                with patch('app.services.tool_service.chat') as model, patch('app.services.message_service.answer_question',
+                        return_value={'answer': 'Policy', 'citations': []}) as rag:
+                    result = self.process(query)
+                model.assert_not_called()
+                rag.assert_called_once()
+                self.assertIsNone(result['order_lookup'])
+
     def test_tool_selection_releases_lock_and_skips_after_new_message_or_handoff_or_close(self):
-        for action in ['new_message', 'handoff', 'close', 'owner_change']:
-            with self.subTest(action=action), Session(self.engine) as db:
+        for scenario in ['new_message', 'handoff', 'close', 'owner_change',
+                         'history_new_message', 'history_handoff', 'history_close', 'history_owner_change']:
+            action = scenario.removeprefix('history_')
+            query = 'Đơn đó đang ở đâu?' if scenario.startswith('history_') else 'Đơn DH12345 đang ở đâu?'
+            with self.subTest(scenario=scenario), Session(self.engine) as db:
                 db.get(Conversation, 'chat').status = 'open'
                 db.get(Order, 'DH12345').customer_id = 'owner'
+                db.query(Message).delete()
+                db.add(Message(id='context', conversation_id='chat', sender_type='customer', content='Tra DH12345'))
                 db.commit()
             entered, release = Event(), Event()
             def slow(*args):
@@ -134,7 +223,7 @@ class ToolTests(unittest.TestCase):
                 return completion()
             with patch('app.services.tool_service.chat', side_effect=slow), patch(
                     'app.services.message_service.answer_question', return_value={'answer': 'New answer', 'citations': []}), ThreadPoolExecutor(max_workers=2) as pool:
-                pending = pool.submit(self.process)
+                pending = pool.submit(self.process, query)
                 self.assertTrue(entered.wait(5))
                 try:
                     if action in {'new_message', 'handoff'}:

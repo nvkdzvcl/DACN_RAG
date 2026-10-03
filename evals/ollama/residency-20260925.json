@@ -1,0 +1,675 @@
+{
+  "ollama_version": {
+    "version": "0.34.4"
+  },
+  "models": {
+    "models": [
+      {
+        "name": "embeddinggemma:300m",
+        "model": "embeddinggemma:300m",
+        "modified_at": "2026-09-25T13:13:37.4330043+07:00",
+        "size": 621875917,
+        "digest": "85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1",
+        "details": {
+          "parent_model": "embeddinggemma:300m-bf16",
+          "format": "gguf",
+          "family": "gemma3",
+          "families": [
+            "gemma3"
+          ],
+          "parameter_size": "307.58M",
+          "quantization_level": "BF16",
+          "context_length": 2048,
+          "embedding_length": 768
+        },
+        "capabilities": [
+          "embedding"
+        ]
+      },
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "modified_at": "2026-09-25T13:13:36.0665688+07:00",
+        "size": 2497293931,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 2560
+        },
+        "capabilities": [
+          "completion",
+          "tools",
+          "thinking"
+        ]
+      }
+    ]
+  },
+  "question": "Tôi được trả lại hàng trong bao lâu?",
+  "policy": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+  "options": {
+    "temperature": 0,
+    "num_ctx": 8192,
+    "num_predict": 700
+  },
+  "think": false,
+  "trials": [
+    {
+      "keep_alive": 0,
+      "iteration": 1,
+      "calls": [
+        {
+          "path": "/api/embed",
+          "seconds": 4.189,
+          "load_duration": 3773848900,
+          "total_duration": 3896786200,
+          "prompt_eval_duration": null,
+          "eval_duration": null,
+          "prompt_eval_count": 18,
+          "eval_count": null
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 5.492,
+          "load_duration": 4240672200,
+          "total_duration": 5197223500,
+          "prompt_eval_duration": 181159000,
+          "eval_duration": 760643000,
+          "prompt_eval_count": 308,
+          "eval_count": 51
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 5.617,
+          "load_duration": 4122537900,
+          "total_duration": 5322847100,
+          "prompt_eval_duration": 292128000,
+          "eval_duration": 891978000,
+          "prompt_eval_count": 582,
+          "eval_count": 64
+        }
+      ],
+      "seconds": 15.315,
+      "answer": {
+        "answer": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng.\n\nSản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng."
+          },
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "content": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.626266
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78"
+          }
+        ]
+      },
+      "resident_models": []
+    },
+    {
+      "keep_alive": 0,
+      "iteration": 2,
+      "calls": [
+        {
+          "path": "/api/embed",
+          "seconds": 4.125,
+          "load_duration": 3658993100,
+          "total_duration": 3820346600,
+          "prompt_eval_duration": null,
+          "eval_duration": null,
+          "prompt_eval_count": 18,
+          "eval_count": null
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 5.215,
+          "load_duration": 3974069100,
+          "total_duration": 4888601200,
+          "prompt_eval_duration": 190040000,
+          "eval_duration": 713607000,
+          "prompt_eval_count": 308,
+          "eval_count": 51
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 5.855,
+          "load_duration": 4308213300,
+          "total_duration": 5540249700,
+          "prompt_eval_duration": 300565000,
+          "eval_duration": 917203000,
+          "prompt_eval_count": 582,
+          "eval_count": 64
+        }
+      ],
+      "seconds": 15.207,
+      "answer": {
+        "answer": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng.\n\nSản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng."
+          },
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "content": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.626266
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78"
+          }
+        ]
+      },
+      "resident_models": []
+    },
+    {
+      "keep_alive": 0,
+      "iteration": 3,
+      "calls": [
+        {
+          "path": "/api/embed",
+          "seconds": 3.819,
+          "load_duration": 3366244900,
+          "total_duration": 3510554900,
+          "prompt_eval_duration": null,
+          "eval_duration": null,
+          "prompt_eval_count": 18,
+          "eval_count": null
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 6.039,
+          "load_duration": 4715936800,
+          "total_duration": 5730020100,
+          "prompt_eval_duration": 198907000,
+          "eval_duration": 802710000,
+          "prompt_eval_count": 308,
+          "eval_count": 51
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 6.2,
+          "load_duration": 4565042700,
+          "total_duration": 5848631100,
+          "prompt_eval_duration": 329184000,
+          "eval_duration": 936242000,
+          "prompt_eval_count": 582,
+          "eval_count": 64
+        }
+      ],
+      "seconds": 16.066,
+      "answer": {
+        "answer": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng.\n\nSản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng."
+          },
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "content": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.626266
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78"
+          }
+        ]
+      },
+      "resident_models": []
+    },
+    {
+      "keep_alive": "5m",
+      "iteration": 1,
+      "calls": [
+        {
+          "path": "/api/embed",
+          "seconds": 4.232,
+          "load_duration": 3781448600,
+          "total_duration": 3937557900,
+          "prompt_eval_duration": null,
+          "eval_duration": null,
+          "prompt_eval_count": 18,
+          "eval_count": null
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 4.783,
+          "load_duration": 3125131100,
+          "total_duration": 4414596000,
+          "prompt_eval_duration": 343068000,
+          "eval_duration": 915925000,
+          "prompt_eval_count": 308,
+          "eval_count": 51
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 1.669,
+          "load_duration": 6987900,
+          "total_duration": 1310999800,
+          "prompt_eval_duration": 263969000,
+          "eval_duration": 973146000,
+          "prompt_eval_count": 582,
+          "eval_count": 62
+        }
+      ],
+      "seconds": 10.704,
+      "answer": {
+        "answer": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng.\n\nSản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng."
+          },
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "content": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.626266
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78"
+          }
+        ]
+      },
+      "resident_models": [
+        {
+          "name": "qwen3:4b",
+          "model": "qwen3:4b",
+          "size": 3786324049,
+          "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen3",
+            "families": [
+              "qwen3"
+            ],
+            "parameter_size": "4.0B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2026-09-25T13:28:54.1146861+07:00",
+          "size_vram": 3786324049,
+          "context_length": 8192
+        },
+        {
+          "name": "embeddinggemma:300m",
+          "model": "embeddinggemma:300m",
+          "size": 681417113,
+          "digest": "85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma3",
+            "families": [
+              "gemma3"
+            ],
+            "parameter_size": "307.58M",
+            "quantization_level": "BF16"
+          },
+          "expires_at": "2026-09-25T13:28:47.6475089+07:00",
+          "size_vram": 681417113,
+          "context_length": 2048
+        }
+      ]
+    },
+    {
+      "keep_alive": "5m",
+      "iteration": 2,
+      "calls": [
+        {
+          "path": "/api/embed",
+          "seconds": 0.441,
+          "load_duration": 8186200,
+          "total_duration": 36350000,
+          "prompt_eval_duration": null,
+          "eval_duration": null,
+          "prompt_eval_count": 18,
+          "eval_count": null
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 1.6,
+          "load_duration": 7100200,
+          "total_duration": 1124203500,
+          "prompt_eval_duration": 75544000,
+          "eval_duration": 910326000,
+          "prompt_eval_count": 308,
+          "eval_count": 51
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 1.671,
+          "load_duration": 8674100,
+          "total_duration": 1104627400,
+          "prompt_eval_duration": 54691000,
+          "eval_duration": 899172000,
+          "prompt_eval_count": 582,
+          "eval_count": 62
+        }
+      ],
+      "seconds": 3.719,
+      "answer": {
+        "answer": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng.\n\nSản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng."
+          },
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "content": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.626266
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78"
+          }
+        ]
+      },
+      "resident_models": [
+        {
+          "name": "qwen3:4b",
+          "model": "qwen3:4b",
+          "size": 3786324049,
+          "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen3",
+            "families": [
+              "qwen3"
+            ],
+            "parameter_size": "4.0B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2026-09-25T13:28:58.1890966+07:00",
+          "size_vram": 3786324049,
+          "context_length": 8192
+        },
+        {
+          "name": "embeddinggemma:300m",
+          "model": "embeddinggemma:300m",
+          "size": 681417113,
+          "digest": "85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma3",
+            "families": [
+              "gemma3"
+            ],
+            "parameter_size": "307.58M",
+            "quantization_level": "BF16"
+          },
+          "expires_at": "2026-09-25T13:28:54.9150435+07:00",
+          "size_vram": 681417113,
+          "context_length": 2048
+        }
+      ]
+    },
+    {
+      "keep_alive": "5m",
+      "iteration": 3,
+      "calls": [
+        {
+          "path": "/api/embed",
+          "seconds": 0.41,
+          "load_duration": 8615800,
+          "total_duration": 21446000,
+          "prompt_eval_duration": null,
+          "eval_duration": null,
+          "prompt_eval_count": 18,
+          "eval_count": null
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 1.449,
+          "load_duration": 10048800,
+          "total_duration": 1072502400,
+          "prompt_eval_duration": 75445000,
+          "eval_duration": 887881000,
+          "prompt_eval_count": 308,
+          "eval_count": 51
+        },
+        {
+          "path": "/api/chat",
+          "seconds": 1.485,
+          "load_duration": 9364200,
+          "total_duration": 1079503600,
+          "prompt_eval_duration": 52343000,
+          "eval_duration": 911116000,
+          "prompt_eval_count": 582,
+          "eval_count": 62
+        }
+      ],
+      "seconds": 3.351,
+      "answer": {
+        "answer": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng.\n\nSản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng."
+          },
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "source": "policy.txt",
+            "score": 0.626266,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8_0000",
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78",
+            "content": "Khách hàng được đổi trả sản phẩm trong vòng 7 ngày kể từ ngày nhận hàng. Sản phẩm phải còn nguyên tem và có hóa đơn mua hàng.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.626266
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "cde3a2ed-70c4-444e-8880-f59624f10ef8",
+            "index_version": "916646e3-dd13-4301-ae73-1a27d699ce78"
+          }
+        ]
+      },
+      "resident_models": [
+        {
+          "name": "qwen3:4b",
+          "model": "qwen3:4b",
+          "size": 3786324049,
+          "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen3",
+            "families": [
+              "qwen3"
+            ],
+            "parameter_size": "4.0B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2026-09-25T13:29:01.877147+07:00",
+          "size_vram": 3786324049,
+          "context_length": 8192
+        },
+        {
+          "name": "embeddinggemma:300m",
+          "model": "embeddinggemma:300m",
+          "size": 681417113,
+          "digest": "85462619ee721b466c5927d109d4cb765861907d5417b9109caebc4e614679f1",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma3",
+            "families": [
+              "gemma3"
+            ],
+            "parameter_size": "307.58M",
+            "quantization_level": "BF16"
+          },
+          "expires_at": "2026-09-25T13:28:58.940792+07:00",
+          "size_vram": 681417113,
+          "context_length": 2048
+        }
+      ]
+    }
+  ],
+  "complete": true
+}

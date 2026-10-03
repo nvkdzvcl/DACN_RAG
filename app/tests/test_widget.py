@@ -1,7 +1,9 @@
 import tempfile
 import time
 import unittest
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from threading import Barrier, Event
 from unittest.mock import patch
@@ -205,6 +207,27 @@ class WidgetTests(unittest.TestCase):
         self.client.headers.pop('X-CSRF-Protection')
         self.assertEqual(self.send().status_code, 403)
 
+    def test_greeting_and_identity_reply_without_policy_guessing(self):
+        self.start()
+        self.assertTrue(_answer_slot.acquire(blocking=False))
+        try:
+            with patch('app.services.message_service.answer_question') as rag:
+                greeting = self.send('xin chào, tôi cần hỗ trợ')
+                self.assertEqual(greeting.status_code, 200, greeting.text)
+                self.assertIn('trợ lý AI', greeting.json()['messages'][-1]['content'])
+                identity = self.send('bạn là ai?')
+                self.assertIn('dựa trên tài liệu', identity.json()['messages'][-1]['content'])
+                rag.assert_not_called()
+        finally:
+            _answer_slot.release()
+        with patch('app.services.message_service.answer_question', return_value={
+            'answer': 'Phí giao là 30.000 đồng.', 'grounded': False, 'citations': []}) as rag:
+            policy = self.send('Xin chào, phí giao hàng là bao nhiêu?')
+            self.assertIn('30.000 đồng', policy.json()['messages'][-1]['content'])
+            rag.assert_called_once()
+        handoff = self.send('Xin chào, tôi cần gặp nhân viên')
+        self.assertEqual(handoff.json()['status'], 'handoff_requested')
+
     def test_message_retry_public_payload_and_provider_failure(self):
         cid = self.start().json()['conversation_id']
         identity = str(uuid4())
@@ -229,6 +252,86 @@ class WidgetTests(unittest.TestCase):
             self.assertEqual(db.query(Message).filter_by(conversation_id=cid, sender_type='customer').count(), 2)
         self.assertEqual(self.send(' ').status_code, 422)
         self.assertEqual(self.send(identity='invalid').status_code, 422)
+
+    def test_history_pagination_reaches_beyond_200_with_stable_ties(self):
+        cid = self.start().json()['conversation_id']
+        created = datetime.now(timezone.utc) - timedelta(days=1)
+        with Session(self.engine) as db:
+            db.get(Conversation, cid).status = 'handoff_requested'
+            db.add_all([Message(id=f'history-{i:03}', conversation_id=cid, sender_type='customer',
+                                content=f'Old message {i}', created_at=created) for i in range(223)])
+            db.commit()
+        endpoint = COOKIE_PATH + '/session'
+        page = self.client.get(endpoint).json()
+        self.assertEqual(page['message_page'], {'limit': 50, 'before': None, 'has_more': True, 'next_before': 'history-173'})
+        pages = [page['messages']]
+        sent = self.send('New message while reading history').json()
+        self.assertEqual(len(sent['messages']), 50)
+        self.assertIsNone(sent['message_page']['before'])
+        self.assertEqual(sent['messages'][-1]['content'], 'New message while reading history')
+        while page['message_page']['has_more']:
+            page = self.client.get(endpoint, params={'before': page['message_page']['next_before']}).json()
+            self.assertEqual(page['history_truncated'], page['message_page']['has_more'])
+            pages.append(page['messages'])
+        self.assertEqual([len(items) for items in pages], [50, 50, 50, 50, 23])
+        self.assertEqual([m['id'] for items in reversed(pages) for m in items], [f'history-{i:03}' for i in range(223)])
+        self.assertIsNone(page['message_page']['next_before'])
+
+    def test_history_cursor_cannot_read_another_session_and_expires_with_session(self):
+        first = self.start().json()['conversation_id']
+        second = self.start(self.other).json()['conversation_id']
+        with Session(self.engine) as db:
+            db.add(Message(id='private-anchor', conversation_id=first, sender_type='customer', content='PRIVATE MESSAGE'))
+            db.commit()
+        endpoint = COOKIE_PATH + '/session'
+        foreign = self.other.get(endpoint, params={'before': 'private-anchor', 'conversation_id': first})
+        missing = self.other.get(endpoint, params={'before': 'missing'})
+        self.assertEqual((foreign.status_code, foreign.json()), (missing.status_code, missing.json()))
+        self.assertEqual(foreign.status_code, 404)
+        self.assertNotIn('PRIVATE MESSAGE', foreign.text)
+        self.assertEqual(self.other.get(endpoint).json()['conversation_id'], second)
+        self.assertEqual(self.client.get(endpoint, params={'before': 'private-anchor'}).json()['messages'], [])
+        with Session(self.engine) as db:
+            db.query(WidgetSession).filter_by(conversation_id=first).update({'expires_at': int(time.time()) - 1})
+            db.commit()
+        self.assertEqual(self.client.get(endpoint, params={'before': 'private-anchor'}).status_code, 401)
+        self.assertEqual(self.other.delete(endpoint).status_code, 200)
+        self.assertEqual(self.other.get(endpoint, params={'before': 'private-anchor'}).status_code, 401)
+
+    def test_history_pages_keep_only_public_fields_on_closed_conversation(self):
+        initial = self.start().json()
+        self.assertEqual(initial['message_page'], {'limit': 50, 'before': None, 'has_more': False, 'next_before': None})
+        cid = initial['conversation_id']
+        created = datetime.now(timezone.utc)
+        with Session(self.engine) as db:
+            db.get(Conversation, cid).status = 'closed'
+            db.add(Ticket(id='internal-ticket', conversation_id=cid, summary='PRIVATE SUMMARY', completion_note='PRIVATE NOTE'))
+            db.add_all([
+                Message(id='old', conversation_id=cid, sender_type='ai', content='Public answer', created_at=created,
+                        tool_trace={'status': 'PRIVATE TRACE'}, citations=[{'source': 'policy.txt', 'quote': 'Public excerpt',
+                        'page': 2, 'location': 'Page 2', 'document_id': 'PRIVATE DOCUMENT', 'chunk_id': 'PRIVATE CHUNK'}]),
+                Message(id='new', conversation_id=cid, sender_type='system', content='Closed', created_at=created + timedelta(seconds=1))])
+            db.commit()
+        result = self.client.get(COOKIE_PATH + '/session', params={'before': 'new', 'limit': 1})
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertEqual(result.headers['cache-control'], 'no-store')
+        self.assertNotIn('PRIVATE', result.text)
+        self.assertNotIn('tickets', result.json())
+        message = result.json()['messages'][0]
+        self.assertEqual(set(message), {'id', 'sender_type', 'content', 'created_at', 'client_message_id', 'citations'})
+        self.assertEqual(message['citations'], [{'source': 'policy.txt', 'quote': 'Public excerpt', 'page': 2, 'location': 'Page 2'}])
+
+    def test_history_pagination_validates_limits_and_requires_session(self):
+        endpoint = COOKIE_PATH + '/session'
+        self.assertEqual(self.client.get(endpoint, params={'before': 'x'}).status_code, 401)
+        self.start()
+        for params in ({'limit': 0}, {'limit': 101}, {'limit': 'bad'}, {'before': ''}, {'before': 'x' * 65}):
+            with self.subTest(params=params):
+                self.assertEqual(self.client.get(endpoint, params=params).status_code, 422)
+        for limit in (1, 100):
+            page = self.client.get(endpoint, params={'limit': limit}).json()
+            self.assertEqual(page['messages'], [])
+            self.assertEqual(page['message_page']['limit'], limit)
 
     def test_handoff_agent_reply_end_and_expired_sessions(self):
         cid = self.start().json()['conversation_id']
@@ -324,6 +427,72 @@ class WidgetTests(unittest.TestCase):
         with Session(self.engine) as db:
             self.assertEqual(db.get(Conversation, cid).status, 'closed')
             self.assertEqual(db.query(Message).filter_by(conversation_id=cid, sender_type='ai').count(), 0)
+
+    def test_unicode_handoff_bypasses_busy_ai_and_preserves_original_message(self):
+        cid = self.start().json()['conversation_id']
+        content = unicodedata.normalize('NFD', 'Tôi cần gặp\nnhân viên.')
+        identity = str(uuid4())
+        self.assertTrue(_answer_slot.acquire(blocking=False))
+        try:
+            with patch('app.services.message_service.answer_question') as rag, patch(
+                    'app.services.message_service.select_order_tool') as tool:
+                response = self.send(content, identity=identity)
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(response.json()['status'], 'handoff_requested')
+                self.assertTrue(self.send(content, identity=identity).json()['duplicate'])
+                rag.assert_not_called()
+                tool.assert_not_called()
+        finally:
+            _answer_slot.release()
+        with Session(self.engine) as db:
+            message = db.query(Message).filter_by(conversation_id=cid).one()
+            self.assertEqual(message.content, content)
+            ticket = db.query(Ticket).filter_by(conversation_id=cid).one()
+            self.assertIn(content, ticket.summary)
+
+    def test_file_question_stays_open_without_a_false_complaint_ticket(self):
+        cid = self.start().json()['conversation_id']
+        with patch('app.services.message_service.answer_question', return_value={
+                'answer': 'Chưa có hướng dẫn.', 'grounded': False, 'citations': []}) as rag:
+            response = self.send('Cách tải tệp PDF?')
+            self.assertEqual(response.status_code, 200, response.text)
+            self.assertEqual(response.json()['status'], 'open')
+            rag.assert_called_once()
+        with Session(self.engine) as db:
+            self.assertEqual(db.query(Ticket).filter_by(conversation_id=cid).count(), 0)
+
+    def test_neutral_context_obeys_ai_capacity_but_mixed_handoff_bypasses_it(self):
+        cid = self.start().json()['conversation_id']
+        queries = ['Tiền tệ nào được hỗ trợ?', 'Chính sách hoàn tiền là gì?', 'Không cần gặp nhân viên.']
+        self.assertTrue(_answer_slot.acquire(blocking=False))
+        try:
+            for query in queries:
+                self.assertEqual(self.send(query).status_code, 429)
+            with Session(self.engine) as db:
+                self.assertEqual(db.query(Message).filter_by(conversation_id=cid).count(), 0)
+                self.assertEqual(db.query(Ticket).filter_by(conversation_id=cid).count(), 0)
+        finally:
+            _answer_slot.release()
+        with patch('app.services.message_service.answer_question', return_value={
+                'answer': 'Policy', 'grounded': False, 'citations': []}) as rag:
+            for query in queries:
+                response = self.send(query)
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(response.json()['status'], 'open')
+            self.assertEqual(rag.call_count, 3)
+        self.assertTrue(_answer_slot.acquire(blocking=False))
+        try:
+            query = 'Chính sách hoàn tiền là gì? Tôi cần gặp nhân viên.'
+            with patch('app.services.message_service.answer_question') as rag:
+                response = self.send(query)
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertEqual(response.json()['status'], 'handoff_requested')
+                rag.assert_not_called()
+        finally:
+            _answer_slot.release()
+        with Session(self.engine) as db:
+            self.assertEqual(db.query(Ticket).filter_by(conversation_id=cid).count(), 1)
+            self.assertIn(query, db.query(Ticket).filter_by(conversation_id=cid).one().summary)
 
 
 if __name__ == '__main__':

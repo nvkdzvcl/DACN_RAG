@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 
-from app.models.support import Conversation, Message, Ticket
+from app.models.support import Conversation, Message, TelegramDelivery, Ticket
 
 # ponytail: fixed 24/7 demo policy; persist policy/deadline per ticket before configurable SLAs.
 RESPONSE_MINUTES = {'urgent': 5, 'high': 15, 'normal': 60, 'low': 240}
@@ -14,11 +14,13 @@ def utc(value):
 
 def ticket_slas(db, conversation_ids, now=None):
     now = utc(now or datetime.now(timezone.utc))
-    first_reply = select(func.min(Message.created_at)).where(
+    response_time = case((Conversation.channel == 'telegram', TelegramDelivery.sent_at), else_=Message.created_at)
+    first_reply = select(func.min(response_time)).select_from(Message).outerjoin(
+        TelegramDelivery, TelegramDelivery.message_id == Message.id).where(
         Message.conversation_id == Ticket.conversation_id,
         Message.sender_type == 'agent', Message.agent_id.is_not(None),
         Message.created_at >= Ticket.created_at,
-    ).correlate(Ticket).scalar_subquery()
+    ).correlate(Ticket, Conversation).scalar_subquery()
     rows = db.query(Ticket, first_reply, Conversation.status).join(
         Conversation, Conversation.id == Ticket.conversation_id
     ).filter(Ticket.conversation_id.in_(conversation_ids)).order_by(Ticket.created_at.desc(), Ticket.id).all()

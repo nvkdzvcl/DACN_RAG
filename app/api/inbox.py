@@ -1,12 +1,13 @@
-from uuid import uuid4
-from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException
+from uuid import UUID, uuid4
+from itertools import islice
+from typing import Annotated, Literal
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import update
 from sqlalchemy.orm import Session, joinedload
 from app.core.auth import require_staff
 from app.db.session import get_db
-from app.models.support import Conversation, Message, Ticket, User
+from app.models.support import Conversation, Message, TelegramDelivery, Ticket, User, now_utc
 from app.services.sla_service import conversation_sla, ticket_slas
 from app.services.ticket_service import complete_tickets
 
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/api/v1/inbox", tags=["inbox"])
 class AgentMessageCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     content: str = Field(min_length=1, max_length=4000)
+    client_message_id: UUID | None = None
 
     @field_validator("content")
     @classmethod
@@ -36,6 +38,33 @@ class FinishConversation(BaseModel):
         if not value.strip():
             raise ValueError('Completion note cannot be blank')
         return value.strip()
+
+
+class RetryDelivery(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    confirm_uncertain: bool = False
+    action: Literal['retry', 'skip'] = 'retry'
+
+
+@router.post('/messages/{message_id}/retry-delivery')
+def retry_delivery(message_id: str, payload: RetryDelivery, db: Session = Depends(get_db), user: User = Depends(require_staff)):
+    message = db.get(Message, message_id)
+    if message is None:
+        raise HTTPException(404, 'Không tìm thấy tin nhắn.')
+    owned = db.execute(update(Conversation).where(Conversation.id == message.conversation_id,
+        Conversation.channel == 'telegram', Conversation.assigned_agent_id == user.id).values(status=Conversation.status))
+    if owned.rowcount != 1:
+        db.rollback()
+        raise HTTPException(403, 'Chỉ nhân viên phụ trách được gửi lại.')
+    delivery = db.get(TelegramDelivery, message_id)
+    if delivery is None or delivery.state not in {'failed', 'uncertain'}:
+        raise HTTPException(409, 'Tin nhắn không chờ gửi lại.')
+    if payload.action == 'retry' and delivery.state == 'uncertain' and not payload.confirm_uncertain:
+        raise HTTPException(409, 'Telegram có thể đã nhận tin. Xác nhận nguy cơ gửi trùng trước khi gửi lại.')
+    delivery.state = 'pending' if payload.action == 'retry' else 'skipped'
+    delivery.error = None if payload.action == 'retry' else 'skipped_by_staff'
+    db.commit()
+    return {'status': delivery.state}
 
 
 @router.post('/conversations/{conversation_id}/finish')
@@ -61,7 +90,8 @@ def finish_conversation(conversation_id: str, payload: FinishConversation, db: S
         complete_tickets(db, conversation_id, payload.status, user.id, payload.note)
         conversation.status = payload.status
         content = ('Nhân viên đã đánh dấu yêu cầu được giải quyết. Nếu cần hỗ trợ thêm, bạn có thể nhắn tiếp.'
-                   if payload.status == 'resolved' else 'Nhân viên đã đóng hội thoại. Bạn có thể kết thúc phiên và bắt đầu cuộc trò chuyện mới.')
+                   if payload.status == 'resolved' else 'Nhân viên đã đóng hội thoại. Tin nhắn tiếp theo sẽ bắt đầu hội thoại mới.'
+                   if conversation.channel == 'telegram' else 'Nhân viên đã đóng hội thoại. Bạn có thể kết thúc phiên và bắt đầu cuộc trò chuyện mới.')
         db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system', content=content))
         db.commit()
         return {'status': conversation.status, 'duplicate': False}
@@ -71,30 +101,65 @@ def finish_conversation(conversation_id: str, payload: FinishConversation, db: S
 
 @router.get("/conversations")
 def list_conversations(status: str | None = None, priority: str | None = None, db: Session = Depends(get_db),
-                       sla: Literal['on_track', 'overdue', 'met', 'breached', 'cancelled', 'none'] | None = None):
+                       sla: Literal['on_track', 'overdue', 'met', 'breached', 'cancelled', 'none'] | None = None,
+                       q: Annotated[str, Query(max_length=160)] = '',
+                       offset: Annotated[int, Query(ge=0, le=2**31 - 1)] = 0,
+                       limit: Annotated[int, Query(ge=1, le=100)] = 25):
     query = db.query(Conversation).options(joinedload(Conversation.customer)).order_by(Conversation.created_at.desc(), Conversation.id)
     if status: query = query.filter(Conversation.status == status)
     if priority: query = query.filter(Conversation.priority == priority)
-    items = query.all()
-    grouped = {}
-    for item in ticket_slas(db, [c.id for c in items]).values():
-        grouped.setdefault(item['conversation_id'], []).append(item)
-    result = [{"conversation_id": c.id, "customer_id": c.customer_id, "customer_name": c.customer.display_name, "channel": c.channel, "status": c.status, "assigned_agent_id": c.assigned_agent_id, "priority": c.priority, "created_at": c.created_at,
-               "sla": conversation_sla(grouped.get(c.id, []))} for c in items]
-    if sla:
-        result = [item for item in result if (item['sla']['status'] if item['sla'] else 'none') == sla]
-    return {"count": len(result), "conversations": result}
+    search = q.strip().lower()
+    scan = bool(search or sla)
+    # ponytail: Unicode search and derived SLA scan bounded batches; index/materialize before scaling these filters.
+    items = iter(query.yield_per(200) if scan else query.offset(offset).limit(limit).all())
+    total = 0 if scan else query.order_by(None).count()
+    result, now = [], now_utc()
+    while batch := list(islice(items, 200)):
+        if search:
+            batch = [c for c in batch if search in f'{c.customer.display_name or c.customer_id} {c.customer_id} {c.channel}'.lower()]
+        grouped = {}
+        for item in ticket_slas(db, [c.id for c in batch], now=now).values() if batch else ():
+            grouped.setdefault(item['conversation_id'], []).append(item)
+        for c in batch:
+            value = conversation_sla(grouped.get(c.id, []))
+            if sla and (value['status'] if value else 'none') != sla:
+                continue
+            if scan:
+                total += 1
+                if not offset < total <= offset + limit:
+                    continue
+            result.append({"conversation_id": c.id, "customer_id": c.customer_id, "customer_name": c.customer.display_name,
+                           "channel": c.channel, "status": c.status, "assigned_agent_id": c.assigned_agent_id,
+                           "priority": c.priority, "created_at": c.created_at, "sla": value})
+    return {"count": len(result), "total": total, "offset": offset, "limit": limit,
+            "has_more": offset + len(result) < total, "conversations": result}
 
 @router.get("/conversations/{conversation_id}")
-def conversation_detail(conversation_id: str, db: Session = Depends(get_db)):
+def conversation_detail(conversation_id: str, db: Session = Depends(get_db),
+                        before: Annotated[str | None, Query(min_length=1, max_length=64)] = None,
+                        limit: Annotated[int, Query(ge=1, le=100)] = 50):
     conversation = db.get(Conversation, conversation_id)
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    messages = db.query(Message).filter_by(conversation_id=conversation_id).order_by(Message.created_at).all()
+    query = db.query(Message).filter_by(conversation_id=conversation_id)
+    if before is not None:
+        anchor = query.filter(Message.id == before).first()
+        if anchor is None:
+            raise HTTPException(404, 'Message cursor not found in this conversation')
+        query = query.filter((Message.created_at < anchor.created_at) |
+                             ((Message.created_at == anchor.created_at) & (Message.id < anchor.id)))
+    # Use the indexed timestamp/ID pair so new arrivals do not shift older pages.
+    messages = query.order_by(Message.created_at.desc(), Message.id.desc()).limit(limit + 1).all()
+    has_more = len(messages) > limit
+    messages = list(reversed(messages[:limit]))
+    message_page = {'limit': limit, 'before': before, 'has_more': has_more,
+                    'next_before': messages[0].id if has_more else None}
     tickets = db.query(Ticket).filter_by(conversation_id=conversation_id).order_by(Ticket.created_at.desc()).all()
     slas = ticket_slas(db, [conversation_id])
     completers = {u.id: u.display_name for u in db.query(User).filter(User.id.in_([t.completed_by_id for t in tickets if t.completed_by_id])).all()}
-    return {"conversation_id": conversation.id, "customer_id": conversation.customer_id, "customer_name": conversation.customer.display_name, "customer_email": conversation.customer.email, "channel": conversation.channel, "status": conversation.status, "assigned_agent_id": conversation.assigned_agent_id, "priority": conversation.priority, "sla": conversation_sla(list(slas.values())), "last_customer_message_id": conversation.last_customer_message_id, "messages": [{"id": m.id, "sender_type": m.sender_type, "agent_id": m.agent_id, "content": m.content, "citations": m.citations or [], "tool_trace": m.tool_trace, "created_at": m.created_at} for m in messages], "tickets": [{"id": t.id, "status": t.status, "priority": t.priority, "summary": t.summary, "created_at": t.created_at, "completed_at": t.completed_at, "completed_by_id": t.completed_by_id, "completed_by_name": completers.get(t.completed_by_id), "completion_note": t.completion_note, "sla": slas[t.id]} for t in tickets]}
+    deliveries = {d.message_id: {'state': d.state, 'error': d.error, 'sent_at': d.sent_at}
+                  for d in db.query(TelegramDelivery).filter(TelegramDelivery.message_id.in_([m.id for m in messages]))}
+    return {"conversation_id": conversation.id, "customer_id": conversation.customer_id, "customer_name": conversation.customer.display_name, "customer_email": conversation.customer.email, "channel": conversation.channel, "status": conversation.status, "assigned_agent_id": conversation.assigned_agent_id, "priority": conversation.priority, "sla": conversation_sla(list(slas.values())), "last_customer_message_id": conversation.last_customer_message_id, "message_page": message_page, "messages": [{"id": m.id, "sender_type": m.sender_type, "agent_id": m.agent_id, "content": m.content, "citations": m.citations or [], "tool_trace": m.tool_trace, "delivery": deliveries.get(m.id, {"state": "pending"} if conversation.channel == "telegram" and m.sender_type != "customer" else None), "created_at": m.created_at} for m in messages], "tickets": [{"id": t.id, "status": t.status, "priority": t.priority, "summary": t.summary, "created_at": t.created_at, "completed_at": t.completed_at, "completed_by_id": t.completed_by_id, "completed_by_name": completers.get(t.completed_by_id), "completion_note": t.completion_note, "sla": slas[t.id]} for t in tickets]}
 
 @router.post("/conversations/{conversation_id}/accept")
 def accept_conversation(conversation_id: str, db: Session = Depends(get_db), user: User = Depends(require_staff)):
@@ -124,7 +189,13 @@ def add_agent_message(conversation_id: str, payload: AgentMessageCreate, db: Ses
     if owned.rowcount != 1:
         db.rollback()
         raise HTTPException(status_code=409, detail="Conversation must be assigned to the authenticated agent")
-    message = Message(id=str(uuid4()), conversation_id=conversation_id, sender_type="agent", agent_id=user.id, content=payload.content)
+    external_id = f'agent:{payload.client_message_id}' if payload.client_message_id else None
+    message = db.query(Message).filter_by(conversation_id=conversation_id, external_message_id=external_id).first() if external_id else None
+    if message and (message.sender_type != 'agent' or message.agent_id != user.id or message.content != payload.content):
+        db.rollback()
+        raise HTTPException(409, 'Mã gửi đã được dùng cho nội dung khác.')
+    message = message or Message(id=str(uuid4()), conversation_id=conversation_id, sender_type="agent", agent_id=user.id,
+                                 content=payload.content, external_message_id=external_id)
     db.add(message)
     db.commit()
     return {"message_id": message.id, "conversation_id": conversation_id, "sender_type": message.sender_type, "content": message.content, "status": conversation.status}
