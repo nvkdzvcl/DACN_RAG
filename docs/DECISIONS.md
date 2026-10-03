@@ -145,3 +145,5 @@ Migration v5 thêm Message.tool_trace, chỉ API staff thấy. Pending không đ
 Dùng schema DB hiện có, không thêm dependency hoặc migration. Tổng quan/Phân tích chỉ tính dữ liệu thực, công bố kỳ UTC và mẫu số ticket đã phản hồi. Customer/Order dùng phân trang và UPDATE đối chiếu giá trị cũ; admin mới được ghi, chủ đơn không được sửa. Cài đặt tái sử dụng API cấp tài khoản và bổ sung đổi mật khẩu yêu cầu mật khẩu cũ, thu hồi mọi phiên riêng. Không đưa mật khẩu hoặc đường dẫn cấu hình máy chủ ra UI. Chính sách SLA và kênh chưa tích hợp chỉ hiển thị, không có nút cấu hình giả. RAG/tool chỉ đọc giữ nguyên; việc admin sửa đơn là nghiệp vụ riêng.
 
 Đăng nhập kiểm tra lại hash/active bằng UPDATE có điều kiện sau PBKDF2 và trước cấp phiên, tuần tự với đổi mật khẩu; kiểm thử đồng thời xác nhận lượt xác thực mật khẩu cũ bị từ chối khi mật khẩu đã đổi.
+
+Ngày 25/09/2026 thay chính sách dỡ model bằng keep_alive=5m cho chat và embedding; dùng tự phát hiện GPU của Ollama. Máy 6 GiB giữ được cả hai model 100% GPU, tránh chi phí nạp lại; hết hạn hoặc thiếu bộ nhớ vẫn có thể dỡ. Bằng chứng/giới hạn tại evals/ollama/README.md; quyết định cũ giải phóng sau mỗi gọi là lịch sử.

@@ -22,7 +22,7 @@ Tổng quan đếm toàn bộ dữ liệu và trạng thái hiện tại. Phần
 
 Tỷ lệ đúng hạn = ticket phản hồi đúng hạn / ticket đã có phản hồi nhân viên. Ticket đang chờ trong hạn, quá hạn và kết thúc chưa phản hồi được tách riêng; không đưa vào mẫu số này. Thời gian trung bình tính từ tạo ticket đến phản hồi đầu của các ticket đã được phản hồi. Khi chưa có mẫu, API trả null, UI hiện Chưa có. Ticket đã kết thúc dùng first_response_at đã chốt; lượt hỗ trợ sau không sửa số liệu lịch sử. Chỉ số này không phải chất lượng RAG hoặc tỷ lệ giải quyết tự động.
 
-Số liệu tải khi mở trang, đổi bộ lọc hoặc nhấn Làm mới. Chỉ Inbox/widget giữ polling 3 giây. SLA vẫn cố định 24/7, chưa chỉnh trong Cài đặt. Kênh thứ hai hiện Chưa kết nối. Đơn nội bộ là dữ liệu mô phỏng phục vụ đồ án, chưa tích hợp vận chuyển/thanh toán, chưa có sản phẩm/giá trị đơn. Chưa có reset mật khẩu người khác, khóa tài khoản qua UI, audit thay đổi quản trị hoặc tổng hợp phù hợp dữ liệu lớn.
+Số liệu tải khi mở trang, đổi bộ lọc hoặc nhấn Làm mới. Chỉ Inbox/widget giữ polling 3 giây. SLA vẫn cố định 24/7, chưa chỉnh trong Cài đặt. Cài đặt hiển thị trạng thái worker Telegram và chi tiết lỗi đã lọc bí mật; mặc định Chưa kết nối. Cấu hình ngoài UI theo TELEGRAM.md, chưa kiểm chứng bot thật. SLA Telegram dùng thời điểm API Telegram xác nhận gửi. Đơn nội bộ là dữ liệu mô phỏng phục vụ đồ án, chưa tích hợp vận chuyển/thanh toán, chưa có sản phẩm/giá trị đơn. Chưa có reset mật khẩu người khác, khóa tài khoản qua UI, audit thay đổi quản trị hoặc tổng hợp phù hợp dữ liệu lớn.
 
 ## Kiểm chứng
 
@@ -32,3 +32,7 @@ Số liệu tải khi mở trang, đổi bộ lọc hoặc nhấn Làm mới. Ch
 - Không đổi pipeline/model/prompt RAG hoặc dữ liệu người dùng; không chạy lại benchmark M3. M3 và nghiệm thu người dùng vẫn chờ duyệt.
 
 Chạy kiểm thử: `python -m unittest discover -s app/tests -v`; build: `npm --prefix frontend run build`. Mở Cài đặt bằng admin để tạo nhân viên, sau đó dùng cửa sổ ẩn danh kiểm tra quyền agent.
+
+## Cấp quyền tra đơn ngày 21/09/2026
+
+Chi tiết đơn của admin có xác nhận đã kiểm tra người nhận, nút Cấp mã mới và Thu hồi quyền. Mã mới thay toàn bộ quyền widget cũ của đơn, hết hạn sau 15 phút và chỉ hiển thị lúc cấp. Staff không có điều khiển này; backend cũng kiểm tra quyền admin và CSRF. Không gửi mã vào chính hội thoại chưa xác minh. Xem [ORDER_ACCESS.md](ORDER_ACCESS.md) về phạm vi và demo.

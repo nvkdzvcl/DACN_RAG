@@ -1,6 +1,6 @@
 # Đặc tả API local
 
-Đối chiếu mã và OpenAPI ngày 18/09/2026: 42 cặp method/path dưới /api/v1. Swagger tại /docs, schema tại /openapi.json trên backend đang chạy là nguồn tham chiếu kiểu dữ liệu. Các route trả dict hiện chưa khai báo đầy đủ response_model hoặc lỗi runtime trong OpenAPI; bảng dưới bổ sung hợp đồng nghiệp vụ thực có, không tuyên bố OpenAPI đã mô tả hết bảo mật/lỗi.
+Đối chiếu mã và OpenAPI ngày 21/09/2026: 47 cặp method/path dưới /api/v1. Swagger tại /docs, schema tại /openapi.json trên backend đang chạy là nguồn tham chiếu kiểu dữ liệu. Các route trả dict hiện chưa khai báo đầy đủ response_model hoặc lỗi runtime trong OpenAPI; bảng dưới bổ sung hợp đồng nghiệp vụ thực có, không tuyên bố OpenAPI đã mô tả hết bảo mật/lỗi.
 
 ## Phiên và quyền truy cập
 
@@ -19,7 +19,8 @@ Mọi đường dẫn trong bảng đã có tiền tố /api/v1. Body JSON trừ
 | POST | /auth/logout | CSRF | Thu hồi token nhân viên hiện tại, xóa cookie |
 | POST | /auth/users | Admin | username, password, display_name, role; 201 |
 | POST | /widget/session | CSRF | display_name 1-80 không trắng; tạo/khôi phục snapshot, 201 |
-| GET | /widget/session | Phiên khách | Snapshot riêng của phiên |
+| GET | /widget/session | Phiên khách | Snapshot riêng, before/limit phân trang, message_page |
+| GET | /widget/orders/{order_id} | Phiên khách đã xác nhận mã cho đúng đơn | Chỉ trả order_id, status, tracking_code; thiếu quyền/hết hạn/thu hồi trả 404, no-store |
 | DELETE | /widget/session | Phiên khách | Đóng hội thoại/ticket hoạt động, thu hồi phiên; status ended |
 | POST | /widget/messages | Phiên khách | content 1-4000 không trắng, client_message_id UUID; snapshot và kết quả lưu |
 | POST | /widget/handoff | Phiên khách | client_message_id UUID; lưu yêu cầu gặp người thật và trả snapshot |
@@ -27,10 +28,10 @@ Mọi đường dẫn trong bảng đã có tiền tố /api/v1. Body JSON trừ
 | POST | /conversations/{conversation_id}/messages | Staff | content, external_message_id tùy chọn; xử lý tin khách, không phải gửi tin nhân viên |
 | POST | /conversations/{conversation_id}/tickets | Staff | Tạo/tái sử dụng ticket hoạt động, không giả lập tin khách |
 | POST | /conversations/{conversation_id}/process | Staff | content; cùng process_message, không có UUID trong schema này |
-| GET | /inbox/conversations | Staff | Query status, priority, sla; count và conversations |
-| GET | /inbox/conversations/{conversation_id} | Staff | Khách, messages, tickets, phân công, tin khách cuối và SLA |
+| GET | /inbox/conversations | Staff | Query status, priority, sla, q, offset, limit; count, total, offset, limit, has_more và conversations |
+| GET | /inbox/conversations/{conversation_id} | Staff | Khách, messages phân trang bằng before/limit, message_page, tickets, phân công, tin khách cuối và SLA |
 | POST | /inbox/conversations/{conversation_id}/accept | Staff | Không body; chỉ nhận khi handoff_requested và chưa phân công |
-| POST | /inbox/conversations/{conversation_id}/messages | Người phụ trách | content 1-4000 không trắng; lưu tin agent với agent_id từ phiên |
+| POST | /inbox/conversations/{conversation_id}/messages | Người phụ trách | content 1-4000 không trắng, client_message_id UUID tùy chọn; lưu tin agent với agent_id từ phiên |
 | POST | /inbox/conversations/{conversation_id}/finish | Người phụ trách | status, ticket_id, last_customer_message_id, note; status và duplicate |
 | GET | /documents | Staff | Danh sách tài liệu và trạng thái lập chỉ mục |
 | GET | /documents/runtime | Staff | ready, model cấu hình và model đã tải; lỗi Ollama trả ready false |
@@ -46,15 +47,21 @@ Mọi đường dẫn trong bảng đã có tiền tố /api/v1. Body JSON trừ
 | POST | /demo/seed | Admin | Tạo dữ liệu demo lặp lại an toàn, không phải reset |
 | GET | /health | Công khai | status ok, service; không chứng minh Ollama/DB/vector sẵn sàng |
 
-API staff cho phép chỉ định khách để vận hành nội bộ, không dùng thay xác minh khách công khai. Bộ lọc sla nhận on_track, overdue, met, breached, cancelled hoặc none; giá trị khác trả 422. status/priority hiện là chuỗi lọc so khớp, giá trị không có có thể trả danh sách rỗng. Chưa phân trang Inbox.
+API staff cho phép chỉ định khách để vận hành nội bộ, không dùng thay xác minh khách công khai. Bộ lọc sla nhận on_track, overdue, met, breached, cancelled hoặc none; giá trị khác trả 422. status/priority hiện là chuỗi lọc so khớp, giá trị không có có thể trả danh sách rỗng.
+
+Inbox phân trang từ 22/09/2026: limit mặc định 25, từ 1 đến 100; offset từ 0 đến 2147483647; q tối đa 160 ký tự. Tham số sai trả 422. q tìm chuỗi con không phân biệt hoa/thường trong tên khách, mã khách và kênh; giữ dấu tiếng Việt, coi %/_ là ký tự thường. Lọc trước phân trang, sắp created_at giảm dần rồi ID tăng dần. count là số dòng trang trả về, total là tổng khớp bộ lọc, has_more cho biết còn trang; offset vượt tổng trả mảng rỗng nhưng giữ total. Client cũ phải chuyển sang đọc total và phân trang, không coi count là tổng.
+
+Không tìm kiếm/lọc SLA thì SQL chỉ lấy trang yêu cầu và tính SLA trang đó. Có q hoặc sla thì quét theo lô 200 hội thoại bằng cùng công thức SLA và cùng mốc giờ trong request; giới hạn dữ liệu trả về nhưng thời gian lọc vẫn tăng theo dữ liệu. Chưa có chỉ mục tìm kiếm Unicode hoặc SLA tổng hợp. Phân trang offset là danh sách sống, không phải snapshot: dữ liệu mới/trạng thái đổi có thể dịch ranh giới trang giữa hai lần gọi.
 
 ## Snapshot widget
 
-GET /widget/session trả conversation_id, display_name, status, expires_at, history_truncated và messages. Mỗi tin chứa id, sender_type, content, created_at, client_message_id của tin khách hoặc null, cùng citations chỉ gồm source/page/location/quote. Không trả ticket, ghi chú nội bộ, agent_id, ID tài liệu/chunk hoặc retrieval thô.
+GET /widget/session trả conversation_id, display_name, status, expires_at, history_truncated, message_page và messages. Mỗi tin chứa id, sender_type, content, created_at, client_message_id của tin khách hoặc null, cùng citations chỉ gồm source/page/location/quote. Không trả ticket, ghi chú nội bộ, agent_id, ID tài liệu/chunk hoặc retrieval thô.
 
-Chỉ trả 200 tin gần nhất theo thứ tự thời gian; history_truncated báo còn tin cũ. POST /widget/messages thêm message_id, duplicate và ai_error. Lỗi provider sau khi lưu tin có thể trả 200 kèm ai_error và không có tin AI mới; 200 không tự chứng minh đã có đáp án. Nếu phiên bị thu hồi/hết hạn trong lúc model chạy, kiểm tra lại phiên trước trả snapshot và trả 401.
+Từ 26/09/2026, mặc định trả 50 tin gần nhất theo thứ tự created_at/id tăng dần; GET nhận limit 1-100 và before là ID dài 1-64 ký tự. Mốc phải thuộc hội thoại gắn với cookie, không nhận hội thoại đích từ khách; mốc không có hoặc thuộc phiên khác đều trả cùng lỗi 404. Tham số sai trả 422; phiên thiếu/hết hạn/thu hồi trả 401. SQL lấy tối đa limit+1 tin, không tải toàn bộ lịch sử. message_page gồm limit, before, has_more và next_before; next_before là tin đầu trang nếu còn tin cũ, ngược lại null. history_truncated giữ làm cờ tương thích, bằng has_more. Các POST trả snapshot 50 tin mới nhất với before=null. Client phải theo next_before để đọc đủ lịch sử, không suy ra hội thoại chỉ có 50 tin. POST /widget/messages thêm message_id, duplicate và ai_error. Lỗi provider sau khi lưu tin có thể trả 200 kèm ai_error và không có tin AI mới; 200 không tự chứng minh đã có đáp án. Nếu phiên bị thu hồi/hết hạn trong lúc model chạy, kiểm tra lại phiên trước trả snapshot và trả 401.
 
-UUID phải giữ khi thử lại cùng tin. Cùng UUID khác nội dung trả 409; retry tin cũ sau resolved không tạo ticket mới. Hội thoại closed từ chối gửi kể cả retry. UUID chưa được xác nhận chỉ giữ trong trang hiện tại, tải lại trang có thể mất draft/UUID. Tin agent chưa có khóa idempotency; khi lỗi mạng cần đọc lại lịch sử trước gửi lại để tránh trùng.
+UUID phải giữ khi thử lại cùng tin. Cùng UUID khác nội dung trả 409; retry tin cũ sau resolved không tạo ticket mới. Hội thoại closed từ chối gửi kể cả retry. UUID chưa được xác nhận chỉ giữ trong trang hiện tại, tải lại trang có thể mất draft/UUID. Tin agent nhận client_message_id UUID tùy chọn, giao diện gửi và giữ ID khi thử lại cùng nội dung. Cùng ID khác nội dung/người gửi trả 409; gửi lại vẫn phải đúng người phụ trách và hội thoại assigned. Tải lại trang có thể mất UUID; đọc lịch sử trước khi gửi bằng ID mới.
+
+Widget polling trang đang đọc bằng cùng before; tin mới không đẩy người đọc khỏi trang cũ. Tin mới hơn quay lại trang lịch sử đã mở, Về tin mới nhất tải cửa sổ hiện tại và cuộn xuống cuối. Như Inbox, quay về mới nhất không phải snapshot liên tục; đoạn vừa trượt khỏi cửa sổ vẫn đọc được qua Tin cũ hơn. Bản nháp giữ khi đổi trang hoặc tải trang lỗi; gửi tin/handoff/cấp quyền tra đơn thành công trở về mới nhất. Hết phiên xóa lịch sử khỏi giao diện; hội thoại closed vẫn xem được lịch sử khi cookie chưa hết hạn và chưa bấm Kết thúc. Khách chỉ đọc trạng thái và mã vận đơn của đúng đơn đã xác nhận qua mã truy cập; không đọc hồ sơ, sản phẩm hoặc ghi đơn.
 
 ## Hoàn tất ticket
 
@@ -115,3 +122,40 @@ Tiền tố /api/v1/workspace. GET yêu cầu Staff; POST/PATCH yêu cầu CSRF.
 | POST | /password | Staff | current_password 1–128, new_password 12–128; sai mật khẩu cũ 400, không đổi 422, tranh chấp 409; thành công thu hồi mọi phiên của chính người đổi |
 
 status đơn nhận processing/paid/shipping/shipped/delivered/cancelled. Không đổi chủ đơn/xóa qua workspace. Công thức thống kê, phạm vi quản trị và bằng chứng tại [WORKSPACE.md](WORKSPACE.md). API /auth/users hiện có được dùng để tạo tài khoản từ Cài đặt; không thêm endpoint tạo tài khoản trùng.
+
+## Mã truy cập từng đơn
+
+Bổ sung POST và DELETE /api/v1/workspace/orders/{order_id}/access-code cho Admin + CSRF, POST /api/v1/widget/order-access cho phiên khách + CSRF. Snapshot widget bổ sung order_access, chỉ có mã đơn và thời điểm hết quyền, không có mã truy cập/hash. Hợp đồng payload, trạng thái lỗi, retry, rotation và giới hạn tại [ORDER_ACCESS.md](ORDER_ACCESS.md).
+
+## Phân trang lịch sử Inbox
+
+`GET /api/v1/inbox/conversations/{conversation_id}?limit=50&before=MESSAGE_ID` trả tối đa 50 tin mặc định, cho phép limit 1-100. Bỏ before để lấy trang gần nhất; before là ID dài 1-64 ký tự, phải thuộc chính hội thoại, không lấy lại tin làm mốc. Mốc không tồn tại/sai hội thoại trả 404, tham số sai trả 422; vẫn yêu cầu phiên nhân viên.
+
+SQL lấy tối đa limit+1 tin theo created_at và id giảm dần, rồi đảo trang thành thứ tự tăng dần cho giao diện. Hai tin cùng thời gian được phân biệt bằng id. `message_page` gồm limit, before, has_more (còn tin cũ hơn), next_before (ID tin đầu trang nếu còn tin cũ, ngược lại null). Trường messages chỉ còn một trang; client cần theo next_before nếu muốn đọc toàn bộ. Danh sách ticket/SLA vẫn trả đầy đủ, không thuộc giới hạn tin nhắn.
+
+Inbox giữ tối đa 50 tin trên giao diện, có Tin cũ hơn và Tin mới hơn để quay lại các trang lịch sử đã mở; Về tin mới nhất lấy lại cửa sổ mới nhất. Trang lịch sử polling cùng before để giữ mốc và cập nhật delivery/tool_trace; không thêm tin mới vào trang cũ. Quay về mới nhất có thể bỏ qua đoạn vừa trượt khỏi cửa sổ 50 tin; dùng Tin cũ hơn từ đó để đọc tiếp, không coi đây là snapshot toàn hội thoại. Bản nháp/ghi chú được giữ khi đổi trang; gửi thành công trở về tin mới nhất. Giao diện yêu cầu về trang mới nhất trước khi hoàn tất ticket, backend vẫn kiểm tra last_customer_message_id. Widget cũng đã phân trang từ 26/09/2026; xem hợp đồng Snapshot widget.
+
+## Gửi tin Telegram
+
+POST /api/v1/inbox/messages/{message_id}/retry-delivery yêu cầu Staff + CSRF và đúng người phụ trách hội thoại Telegram, kể cả hội thoại đã đóng. Body: `{"action":"retry","confirm_uncertain":false}`; action nhận retry hoặc skip, mặc định retry, cấm trường thừa. Chỉ xử lý delivery failed/uncertain; uncertain + retry cần confirm_uncertain=true. Không tìm thấy tin trả 404, sai người/kênh 403, sai trạng thái hoặc thiếu xác nhận 409. Thành công trả status pending hoặc skipped. Không gọi Telegram trực tiếp trong request này.
+
+GET chi tiết Inbox bổ sung delivery cho tin gửi Telegram: state, error, sent_at; pending có thể chưa có hai trường sau. Kênh khác/tin khách trả null. GET /workspace/settings trả trạng thái Telegram thực của worker: not_connected, connecting, connected hoặc error và detail đã lọc token. Không có endpoint webhook; worker dùng polling. SLA Telegram tính theo sent_at khi API Telegram xác nhận gửi, Website theo Message.created_at; ticket kết thúc giữ snapshot cũ. Chi tiết vận hành tại [TELEGRAM.md](TELEGRAM.md).
+
+## Kiểm tra sẵn sàng
+
+GET /api/v1/ready yêu cầu Staff. Trả ready và checks gồm database, knowledge, vectors, ollama; HTTP 200 nếu tất cả ok, 503 nếu chưa đạt, Cache-Control: no-store. Các mã trạng thái và phạm vi tại [OPERATIONS.md](OPERATIONS.md). Không sinh đáp án, không gửi Telegram; không thay /health công khai. Auth chạy trước probe; DB không đủ để xác thực có thể lỗi trước khi tạo checks. Không có payload hoặc quyền quản trị mới.
+
+## Tài khoản khách hàng
+
+Prefix: `/api/v1/widget/account`. Cookie phiên khách, độc lập phiên staff. Tất cả phản hồi thành công đặt Cache-Control: no-store; POST yêu cầu CSRF như widget.
+
+| Method | Path | Nội dung |
+|---|---|---|
+| POST | /register | {display_name, email, password}; tên 1–80, mật khẩu 15–128 ký tự; trả 201 và snapshot, email đã dùng trả 409 |
+| POST | /login | {email, password}; trả snapshot; thông tin sai trả 401 với thông báo chung |
+| POST | /logout | Yêu cầu tài khoản khách; thu hồi phiên hiện tại, giữ lịch sử |
+| POST | /password | {current_password, new_password}; mật khẩu mới 15–128, khác cũ; thu hồi mọi phiên; sai mật khẩu cũ 400, tranh chấp 409 |
+| GET | /conversations | offset >= 0, limit 1–50 (mặc định 20); trả items, total, has_more của chính tài khoản |
+| GET | /conversations/{id} | limit 1–100 (mặc định 50), before tùy chọn; trả snapshot lịch sử; sai chủ hoặc không tồn tại trả 404 |
+
+Snapshot widget thêm `account: {email, email_verified: false}` cho tài khoản, null cho khách vãng lai. Đăng ký tạo hồ sơ khách mới; không tự ghép hồ sơ theo email hoặc chuyển lịch sử guest. POST register/login thay cookie hiện tại. DELETE `/api/v1/widget/session` với tài khoản trả snapshot hội thoại mới, giữ lịch sử; với guest giữ hành vi kết thúc phiên. Giới hạn mỗi IP/phút: đăng ký 6, đăng nhập 10, đổi mật khẩu 5; vượt trả 429. Chi tiết tại [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).

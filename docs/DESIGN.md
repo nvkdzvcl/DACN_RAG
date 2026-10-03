@@ -1,6 +1,6 @@
 # Thiết kế hệ thống hỗ trợ khách hàng
 
-Ngày đối chiếu: 18/09/2026. Tài liệu mô tả chức năng đang có trên FastAPI/SQLite, React/Vite, Qdrant embedded và Ollama local. Đây là hồ sơ kỹ thuật để người dùng/GVHD duyệt sau; chưa phải xác nhận nghiệm thu. M3 còn chờ người duyệt chất lượng, M4 mới kiểm chứng chức năng local. API chi tiết tại [API.md](API.md), bằng chứng tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md).
+Ngày đối chiếu: 21/09/2026. Tài liệu mô tả chức năng đang có trên FastAPI/SQLite, React/Vite, Qdrant embedded và Ollama local. Đây là hồ sơ kỹ thuật để người dùng/GVHD duyệt sau; chưa phải xác nhận nghiệm thu. M3 còn chờ người duyệt chất lượng, M4 mới kiểm chứng chức năng local. API chi tiết tại [API.md](API.md), bằng chứng tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md).
 
 ## Phân rã chức năng BFD
 
@@ -29,7 +29,7 @@ flowchart TD
     E --> E2[Tổng hợp phiếu người duyệt]
 ```
 
-M5 đã bổ sung model chọn công cụ đơn hàng bằng JSON Schema, backend xác thực và điều phối. Agent nhiều bước, kênh xã hội thứ hai, push realtime, OCR và SLA giải quyết vẫn thuộc phạm vi dự kiến.
+M5 đã bổ sung model chọn công cụ đơn hàng bằng JSON Schema, backend xác thực và điều phối. Telegram đã có adapter polling và kiểm thử local, chờ bot thật để nghiệm thu. Agent nhiều bước, push realtime, OCR và SLA giải quyết vẫn thuộc phạm vi dự kiến.
 
 ## Luồng nghiệp vụ mức 0
 
@@ -109,6 +109,8 @@ flowchart LR
     W[Widget iframe và trang chat] --> F[Origin frontend và proxy API]
     I[Inbox và Kho tri thức] --> F
     F --> A[FastAPI một worker]
+    TG[Telegram Bot API] <--> P[Polling một luồng, opt-in]
+    P --> A
     A --> S[(SQLite)]
     A --> D[File tài liệu]
     A --> Q[(Qdrant embedded)]
@@ -117,7 +119,7 @@ flowchart LR
     O --> E[embeddinggemma:300m]
 ```
 
-Frontend cần SPA fallback cho /chat và proxy /api cùng origin. Bản Vite build chỉ là tài nguyên tĩnh; backend không tự phục vụ frontend. Cookie SameSite Strict/HttpOnly tách khách và nhân viên, bật Secure ngoài development. Không giữ SQL transaction trong lúc gọi Ollama. Qdrant và giới hạn trong bộ nhớ hiện chỉ hỗ trợ một API worker. Triển khai cloud, sao lưu/khôi phục, tải đồng thời và HTTPS thực tế chưa được nghiệm thu.
+Frontend cần SPA fallback cho /chat và proxy /api cùng origin. Bản Vite build có thể được FastAPI phục vụ cùng origin khi SERVE_FRONTEND=true; mặc định tắt để giữ chế độ Vite dev. Chỉ mount assets và các trang công khai đã định nghĩa, không fallback URL API lạ về HTML. Endpoint /api/v1/ready có quyền Staff kiểm tra schema, nguồn/vector và tên model Ollama; chưa kiểm tra sinh đáp án thật. Cookie SameSite Strict/HttpOnly tách khách và nhân viên, bật Secure ngoài development. Không giữ SQL transaction trong lúc gọi Ollama. Qdrant và giới hạn trong bộ nhớ hiện chỉ hỗ trợ một API worker. Triển khai cloud, sao lưu/khôi phục, tải đồng thời và HTTPS thực tế chưa được nghiệm thu.
 
 ## ERD
 
@@ -129,10 +131,46 @@ erDiagram
     users o|--o{ tickets : completes
     customers ||--o{ conversations : starts
     customers ||--o{ orders : owns
+    orders ||--o| order_access : grants
+    users ||--o{ order_access : issues
+    customers ||--o{ order_access : scoped_owner
+    conversations o|--o{ order_access : redeems
     conversations ||--o| widget_sessions : has
     conversations ||--o{ messages : contains
     conversations ||--o{ tickets : tracks
     knowledge_documents ||--o{ document_chunks : contains
+    customers ||--o| telegram_peers : identifies
+    conversations o|--o{ telegram_peers : current_chat
+    telegram_peers ||--o{ telegram_updates : receives
+    conversations o|--o{ telegram_updates : processes
+    messages ||--o| telegram_deliveries : delivers
+    telegram_cursors {
+        string bot_id PK
+        bigint next_update_id
+    }
+    telegram_peers {
+        string id PK
+        string bot_id
+        string chat_id
+        string customer_id FK,UK
+        string conversation_id FK
+    }
+    telegram_updates {
+        string id PK
+        string bot_id
+        bigint update_id
+        string peer_id FK
+        string conversation_id FK
+        text content
+        string state
+    }
+    telegram_deliveries {
+        string message_id PK,FK
+        string state
+        string error
+        string external_message_id
+        datetime sent_at
+    }
     users {
         string id PK
         string username UK
@@ -171,6 +209,7 @@ erDiagram
         string agent_id FK
         string sender_type
         string external_message_id
+        string reply_to_id
         text content
         json citations
         json tool_trace
@@ -187,6 +226,14 @@ erDiagram
         string completed_by_id FK
         text completion_note
         datetime first_response_at
+    }
+    order_access {
+        string order_id PK,FK
+        string customer_id FK
+        string token_hash UK
+        string issued_by_id FK
+        int expires_at
+        string conversation_id FK
     }
     orders {
         string id PK
@@ -306,3 +353,11 @@ QA giao diện ngày 14/09 đã kiểm tra desktop/mobile 390px; các ảnh tron
 ## Các trang quản lý theo mockup
 
 Workspace.jsx dùng khung điều hướng hiện có, bảng có khung chi tiết, tìm kiếm/phân trang và trạng thái tải/lỗi/trống. API workspace.py không đổi schema DB; các lần sửa đối chiếu giá trị cũ bằng UPDATE có điều kiện. Staff đọc, admin mới tạo/sửa khách/đơn; chủ đơn bất biến qua giao diện. Hồ sơ khách mở đúng hội thoại trong Inbox và lọc đơn theo ID khách. Đổi mật khẩu yêu cầu mật khẩu hiện tại, cập nhật có điều kiện và thu hồi AuthSession của chính tài khoản trong transaction. Số liệu tổng hợp dùng hàm SLA hiện có và snapshot ticket kết thúc; xem docs/WORKSPACE.md về kỳ UTC và mẫu số.
+
+## Quyền tra từng đơn trong widget
+
+Migration v6 thêm OrderAccess với một bản ghi hiện tại mỗi đơn. Admin cấp mã sau xác minh ngoài hệ thống, DB chỉ giữ hash và người cấp; nhập mã ràng buộc vào hội thoại có phiên còn hiệu lực bằng UPDATE có điều kiện. Truy vấn quyền nối Order, OrderAccess, Conversation và WidgetSession, đối chiếu chủ đơn/thời hạn/trạng thái. Luồng cấp lại, thu hồi, nhập mã và thực thi tool được tuần tự hóa bởi khóa ghi SQLite; chưa kiểm chứng PostgreSQL. Không cập nhật customer_id của hội thoại và không tự bật lại AI khi handoff. Xem docs/ORDER_ACCESS.md.
+
+## Adapter Telegram
+
+Worker một luồng nằm trong lifespan FastAPI, khởi động sau migration v7 và dừng trước khi đóng vector store. Con trỏ bot và update được commit trước lần getUpdates tiếp theo. Khóa update gồm bot ID/update ID; peer gồm bot ID/chat ID, không ghép khách bằng tên. Không giữ transaction trong lúc gọi model hoặc API Telegram. Tin gửi có nhật ký; sending chưa hoàn tất sau restart chuyển uncertain, cần nhân viên xác nhận retry hoặc skip. AI chưa gửi bị bỏ khi handoff/tin mới/update chưa xử lý; không thể thu hồi request đã lên mạng. SLA Telegram theo sent_at, ghi chú nội bộ không gửi ra kênh. Đây là thiết kế local một worker, chưa có queue phân tán hoặc kết nối thật được nghiệm thu; xem TELEGRAM.md.

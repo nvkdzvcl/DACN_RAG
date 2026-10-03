@@ -1,5 +1,181 @@
 # Công việc
 
+## 03/10/2026 - Tài khoản khách hàng và giao diện đăng nhập
+
+Ngày 03/10/2026 bổ sung tài khoản khách hàng bằng email và mật khẩu tự quản lý, tách khỏi tài khoản nhân viên. Schema v8 thêm CustomerAccount và CustomerSession; hỗ trợ đăng ký, đăng nhập nhiều thiết bị, lịch sử theo tài khoản và đổi mật khẩu thu hồi mọi phiên. Mật khẩu lưu PBKDF2-SHA256; cookie HttpOnly có hạn 24 giờ. Email chưa xác minh, chưa có khôi phục qua email; không tự ghép lịch sử khách vãng lai hoặc cấp quyền xem đơn theo email.
+
+Giao diện đăng nhập khách hàng và nhân viên dùng bố cục hai cột, font Inter và form thích ứng màn hình nhỏ; có hiện/ẩn mật khẩu, đăng ký và khách vãng lai. Bộ backend đạt 165 kiểm thử; frontend build thành công. Kiểm tra trình duyệt với DB tạm xác nhận đăng ký, đăng nhập hai thiết bị, lịch sử, đổi mật khẩu thu hồi phiên, tải lại giữ phiên, kiểm tra mật khẩu nhập lại và widget nhúng. Kiểm tra chiều rộng 320–1536 px không tràn ngang. Chat thử dùng lời chào xử lý tại chỗ, không phải phép đo chất lượng hoặc độ trễ Ollama/RAG. Các kết quả này không thay nghiệm thu bot Telegram thật, nhãn RAG độc lập hoặc khả năng chịu tải triển khai.
+
+Khánh giữ phát triển và tích hợp chính. Nhóm kiểm thử bổ sung ca độc lập cho tài khoản, lịch sử và quyền đơn; nhóm báo cáo đối chiếu bằng chứng và cập nhật hồ sơ. Mốc tiếp theo: kiểm thử độc lập, sau đó bổ sung xác minh email/khôi phục mật khẩu khi chốt dịch vụ gửi email.
+
+
+## 01/10/2026 - Tự phục hồi kiểm tra kết nối Telegram
+
+Worker thử lại getMe/getWebhookInfo sau 5 giây khi lỗi mạng hoặc HTTP 5xx, thay vì dừng hẳn đến khi khởi động lại API. Trạng thái error giữ trong lúc chờ; Event cho dừng khoảng chờ khi tắt API. Token sai, bot không hợp lệ và webhook đang hoạt động vẫn dừng để xử lý cấu hình. Chỉ phục hồi hàng gửi và bắt đầu polling sau khi xác minh xong; không tự thử lại sendMessage hoặc đổi cấu hình/token.
+
+Hai test mới tái hiện trước sửa; 23 test Telegram đạt trong 6,217 giây sau sửa. Kiểm chứng chuỗi lỗi mạng/503/thành công, dừng trong lúc chờ, không truy cập DB trước xác minh và lỗi cấu hình không retry. DB tạm, transport/model giả lập; chưa gọi bot thật hoặc nghiệm thu M6. Khánh giữ sửa/tích hợp chính; nhóm kiểm thử chuẩn bị và chạy kịch bản bot thật khi có cấu hình. Không đổi schema/UI hoặc chạy lại toàn bộ suite cho thay đổi giới hạn trong khởi động Telegram.
+
+Word đồng bộ 91 đoạn/bảy chương/14 trang; đề cương giữ 10 mục. Renderer thiếu LibreOffice nên xuất qua Word; trang 12 đã xem, 13 trang khác khớp từng pixel với bản trước. git diff --check đạt.
+
+## 01/10/2026 - Phản hồi HTTP Telegram bị gián đoạn
+
+Bắt lỗi giao thức HTTP bằng ngoại lệ chuẩn http.client.HTTPException, chuyển sendMessage thành uncertain thay vì để sending kẹt đến restart. Giữ che token/lỗi thô, chặn tự gửi lại và tiếp tục gửi cho peer khác. Lỗi getUpdates đi qua nhánh phục hồi polling đã có; không đổi schema/UI/cấu hình.
+
+Test mới tái hiện IncompleteRead trước sửa; 21 test Telegram đạt trong 5,312 giây sau sửa, có BadStatusLine, không tự gửi lại, không xác nhận sent/SLA khi chưa rõ và không chặn peer khác. DB tạm, model/transport mock; không gọi bot thật. Không chạy lại toàn bộ suite vừa đạt 154 test ở mốc trước vì thay đổi giới hạn trong transport Telegram. Khánh giữ sửa/tích hợp chính; nhóm kiểm thử còn cần chạy kịch bản bot thật, M6 chưa nghiệm thu.
+
+Word đồng bộ 91 đoạn/bảy chương/14 trang, đề cương giữ 10 mục. Renderer thiếu LibreOffice nên xuất bằng Word; đã xem trang 12 thay đổi, 13 trang khác khớp từng pixel với bản trước. git diff --check đạt.
+
+## 01/10/2026 - Xử lý hàng chờ Telegram khi nhận tin lỗi
+
+Lỗi getUpdates trước đây bỏ qua process_next, khiến cả update đã commit bị kẹt. Đã tách lỗi transport/response khỏi xử lý một update trong hàng chờ mỗi vòng; rollback phần nhận lỗi, giữ con trỏ, trạng thái error và khoảng chờ 5 giây. Quy tắc failed/uncertain vẫn chặn gửi lại tự động. Không đổi schema, API, UI hoặc cấu hình thật; lỗi DB/khởi động vẫn cần xử lý riêng.
+
+Test mới tái hiện trước sửa, 20 test Telegram đạt trong 7,243 giây sau sửa; dùng DB tạm và transport/model giả lập. Kiểm tra pending/processing, lỗi mạng/response, con trỏ bền và không trùng tin/ticket. Khánh giữ phần sửa/tích hợp chính; nhóm kiểm thử thực hiện kịch bản bot thật khi có cấu hình, nhóm báo cáo đối chiếu bằng chứng. Chưa nghiệm thu M6, chưa tách worker hoặc đo tải Telegram.
+
+Hồi quy bản cuối: 154 unittest đạt trong 99,759 giây; git diff --check đạt. Word đồng bộ 91 đoạn/bảy chương/14 trang, đề cương giữ 10 mục. Renderer thiếu LibreOffice, xuất bằng Word; đã xem trang 1/12 thay đổi, 12 trang còn lại khớp từng pixel với bản trước. 44 ca M5 vẫn chờ duyệt; không chạy bot/model thật hoặc build lại UI không đổi.
+
+## 26/09/2026 - Gộp phiếu M5 theo phần được giao
+
+CLI app.review_tools thêm --merge để gộp JSON cùng lượt đo, giữ bằng chứng gốc, tên/ghi chú và ca chưa quyết định. Bỏ qua phần hoàn toàn trống, gộp bản trùng đúng nội dung; ca có bất kỳ trường duyệt khác nhau đều báo ID xung đột và không tạo output. Không chọn theo thứ tự file hoặc lấy đa số. Có thể xuất HTML để tiếp tục; phiếu gộp phải chạy --reviews riêng để tính điểm.
+
+Chín test liên quan đạt trong 0,368 giây, gồm hai test mới cho gộp phần riêng, ghi chú chờ, thứ tự đầu vào, xung đột, sai lượt/ID, giữ nguồn và không ghi đè/gọi model. Khánh giữ tích hợp chính, chia ID và đối chiếu xung đột với người duyệt; nhóm kiểm thử chỉ điền phần được giao, nhóm báo cáo dùng summary đã kiểm tra. Cả 44 ca thật còn trống; chưa nghiệm thu M5. Hướng dẫn: evals/tools/README.md. Không thay UI/runtime hoặc chạy lại Ollama.
+
+Đối chiếu ba bộ thật: gộp bản trống không sinh quyết định, HTML khớp template, runtime khớp snapshot. Word khớp 91 đoạn Markdown, bảy chương/14 trang; đề cương giữ 10 mục. Renderer thiếu LibreOffice, xuất qua Word; trang 13 đã kiểm tra, 13 trang còn lại khớp từng pixel với bản trước. git diff --check đạt.
+
+## 26/09/2026 - Giao diện duyệt nhãn M5 offline
+
+Đã có ba file HTML cho 24 ca gốc, tám ca nối tiếp và 12 ca ngữ cảnh; tên, quyết định và ghi chú lưu nháp trong trình duyệt. Chặn quyết định thiếu tên/lý do bác, xuất JSON giữ nguyên bằng chứng số và hash; CLI có thể tạo HTML tiếp tục từ JSON hợp lệ. Nội dung ca hiển thị như văn bản, CSP chặn mạng; không thêm dependency hoặc server.
+
+Bảy test CLI/HTML đạt trong 0,216 giây. QA desktop/mobile 390px trên ba ca giả lập kiểm tra điều hướng, khôi phục nháp, validation, HTML không thực thi và JSON được CLI chấp nhận. Tải Blob trong trình duyệt tích hợp chưa xác nhận; có ô sao chép JSON dự phòng đã kiểm chứng. Runtime không đổi, không chạy lại Ollama hoặc toàn bộ test runtime.
+
+Khánh giữ phần chính: tích hợp, tổng hợp quyết định, xử lý nhãn bị bác và đo lại khi đã chốt. Nhóm kiểm thử dùng biểu mẫu, ghi lý do/bổ sung câu độc lập; nhóm báo cáo đối chiếu bằng chứng và mẫu số. Cả 44 ca thật vẫn chờ người duyệt; chưa nghiệm thu M5. Hướng dẫn: evals/tools/README.md.
+
+Báo cáo Word khớp 91 đoạn Markdown, bảy chương/14 trang; đề cương giữ 10 mục. Renderer thiếu LibreOffice nên xuất qua Word; trang 13 đã xem, 13 trang khác giống từng pixel với bản trước. Ba snapshot runtime khớp mã hiện tại, các biểu mẫu HTML khớp template và 44 phiếu JSON vẫn chưa duyệt; git diff --check đạt. Đã dừng server và đóng tab QA riêng.
+
+## 26/09/2026 - Phiếu duyệt nhãn M5
+
+Thêm CLI app.review_tools tạo phiếu hoặc báo cáo từ lượt đo hoàn tất, ràng buộc hash và giữ nguyên bằng chứng. Kiểm tra manifest/kết quả/summary/điểm đã lưu; bác sửa case, sai lượt, ID trùng, kiểu dữ liệu sai, quyết định thiếu người chấm và ghi đè output. Nhãn được duyệt mới vào tỷ lệ; lỗi vẫn nằm trong mẫu số đó, nhãn bác/chờ duyệt ghi riêng; chưa duyệt thì tỷ lệ null. Tên người chấm tự khai, chưa có xác thực hoặc chấm mù.
+
+Đã tạo 44 phiếu trống cho bộ gốc/nối tiếp/ngữ cảnh ở evals/tools/reviews; toàn bộ còn chờ duyệt. Năm test mới đạt trong 0,078 giây; kiểm chứng CLI với lượt đo thật đã lưu, không gọi model hoặc sửa benchmark. Runtime khớp snapshot trước, không chạy lại bộ 144 test runtime. Khánh giữ tích hợp/điều phối và xử lý kết quả; nhóm kiểm thử duyệt nhãn, ghi lý do bác và chuẩn bị bộ độc lập; nhóm báo cáo cập nhật số liệu có mẫu số rõ. Chưa nghiệm thu M5 hoặc thay các điểm nhãn nháp đã công bố.
+
+Báo cáo Word đồng bộ 91 đoạn/bảy chương, giữ 14 trang; xuất qua Word do renderer thiếu LibreOffice. Đã xem trang 13 thay đổi, 13 trang còn lại giống từng pixel với bản trước; đề cương giữ 10 mục. git diff --check đạt.
+
+## 26/09/2026 - Giảm chuyển giao nhầm và chuẩn hóa đầu vào model
+
+Bỏ qua riêng cụm tiền tệ, mẫu phủ định gặp người rõ ở đầu mệnh đề và mẫu hỏi chính sách hoàn tiền; khiếu nại/yêu cầu khác trong cùng tin vẫn chuyển nhân viên. Quy tắc chạy đồng bộ chung cho widget/nghiệp vụ; tin trung tính không vượt giới hạn AI, handoff thật vẫn đi khi AI bận. Đầu vào bộ chọn được chuẩn hóa NFC sau khi bộ biên phát hiện model hiểu sai dấu tách; văn bản lưu/tóm tắt giữ nguyên. Không đổi schema/quyền hoặc thêm lời gọi model.
+
+Ba test mới và mở rộng kiểm tra NFC/văn bản gốc; bản cuối đạt 144 unittest trong 49,188 giây, model/transport được mock. Đo cuối bằng Ollama thật đạt 24/24 bộ gốc, 8/8 bộ nối tiếp, 10/12 bộ ngữ cảnh mới; 25 lời gọi selector, không lỗi provider hoặc lộ marker bị cấm/sửa đơn quan sát được. Lưu cả lượt trước NFC (9/12 bộ biên) và bản cuối ở evals/tools/runs/handoff-*. RAG giả lập, nhãn chưa người duyệt; hai ca policy-free-form và negation-prefixed vẫn nhận nhầm, chưa nghiệm thu M5. Khánh giữ phần tích hợp/sửa luồng chính; nhóm kiểm thử duyệt nhãn và bổ sung câu độc lập, nhóm báo cáo đối chiếu số liệu.
+
+Báo cáo Word đồng bộ 91 đoạn/bảy chương, giữ 14 trang sau rút gọn đoạn kết quả. Renderer thiếu LibreOffice; xuất bằng Word, kiểm tra trang 13 thay đổi và xác nhận 13 trang khác giống từng pixel với bản trước. DeCuong.md giữ 10 mục; snapshot nguồn và số liệu bản cuối đã đối chiếu, git diff --check đạt.
+
+## 26/09/2026 - Hỏi nối tiếp về đơn hàng M5
+
+Tin không nêu mã nhưng nhắc rõ đơn đó/này/ấy/vừa nêu/ở trên được đối chiếu với mã khách đã gửi trong bốn tin khách/AI gần nhất của cùng hội thoại. Mã hiện tại ưu tiên; nhiều mã lịch sử yêu cầu làm rõ; mã AI nêu không được dùng. Tin mới có DH/ORD sai định dạng không âm thầm chọn mã cũ. Trace nội bộ đánh dấu nguồn history; schema vẫn khóa một mã, quyền hiện tại kiểm tra lại khi thực thi, tool muộn tiếp tục bị chặn. Chưa suy luận tham chiếu tự do hoặc lịch sử dài.
+
+Bốn test mới và mở rộng kiểm thử tranh chấp trên cả mã hiện tại/lịch sử; 141 unittest đạt trong 49,555 giây. Ollama thật đạt 21/24 so với 18/24 trước đó, thêm ba ca nối tiếp đạt; tám ca biên bổ sung đạt. Tổng 22 lời gọi selector mới, không lỗi provider hoặc lộ marker bị cấm/sửa đơn quan sát được. RAG giả lập; nhãn chưa người duyệt, đây là tập phát triển/regression. Còn ba ca refund-policy, no-human-needed, currency-policy nhận nhầm do từ khóa. Bằng chứng tại evals/tools/runs/history-reference-20260926 và history-boundaries-20260926. Khánh phụ trách tích hợp/luồng chính; nhóm kiểm thử duyệt nhãn và bổ sung câu độc lập; chưa nghiệm thu M5.
+
+Báo cáo Word đã đồng bộ 91 đoạn/bảy chương, giữ 14 trang; xuất qua Word do renderer thiếu LibreOffice. Đã kiểm tra trang 13 thay đổi, 13 trang khác giống từng pixel với bản trước. Đề cương giữ 10 mục; git diff --check đạt. Không đổi schema/UI hoặc nghiệm thu bot thật.
+
+## 26/09/2026 - Đánh giá điều phối M5 bằng model thật
+
+Thêm CLI app.evaluate_tools và 24 ca nhãn nháp trên SQLite trong bộ nhớ, chạy bộ chọn Ollama/quyền thật, chỉ giả lập nhánh RAG. Baseline 17/24; thêm một câu prompt ưu tiên handoff cho yêu cầu hỗn hợp tra cứu và hủy/đổi đơn đạt 18/24. Tổng 30 lời gọi bộ chọn thật, không lỗi provider, không quan sát lộ marker mã vận đơn bị cấm hoặc sửa đơn. Lưu riêng manifest nguồn/model/dataset và kết quả hai lượt tại evals/tools/runs; đây là tập phát triển đã dùng chỉnh prompt, chưa nghiệm thu độc lập.
+
+Ba test runner mới; bộ đầy đủ 137 unittest đạt trước chỉnh prompt (83,449 giây), 10 test công cụ/runner chạy lại trên prompt cuối đạt (1,271 giây, transport mock). Kiểm tra CLI từ chối output đã tồn tại và giữ nguyên hash kết quả. Sáu ca chưa đạt thuộc quy tắc handoff ở phủ định/chính sách và hỏi nối tiếp không nêu mã; nhãn chưa được người duyệt, chưa đánh giá RAG/tóm tắt/bot thật. Khánh giữ phần sửa luồng chính, tích hợp và đo lại; nhóm kiểm thử duyệt nhãn, bổ sung ca độc lập; nhóm báo cáo đối chiếu số liệu. Chi tiết tại [evals/tools](../evals/tools/README.md).
+
+Báo cáo Word đồng bộ 91 đoạn với Markdown, giữ bảy chương/14 trang. Renderer đóng gói thiếu LibreOffice; xuất bằng Word và kiểm tra trang 13 thay đổi, 13 trang còn lại giống từng pixel với bản đã duyệt bố cục trước đó. DeCuong.md giữ đủ 10 mục; git diff --check đạt.
+
+## 26/09/2026 - Phân trang lịch sử widget
+
+Widget đã đọc được lịch sử ngoài 200 tin: mặc định 50/tối đa 100 tin mỗi request, before phải thuộc hội thoại của cookie còn hiệu lực. Giữ bộ lọc dữ liệu công khai, không trả ticket/ghi chú/trace/ID nguồn nội bộ. Mọi snapshot trả message_page; history_truncated giữ tương thích với has_more. Giao diện giữ bản nháp khi đổi trang/lỗi, polling trang cũ theo mốc, quay về mới nhất sau gửi/handoff/cấp quyền tra đơn; hết phiên xóa lịch sử đang hiển thị.
+
+Bốn test mới kiểm tra 223 tin trùng thời gian, tin mới giữa các trang, snapshot sau gửi, mốc khác phiên, hết hạn/thu hồi, hội thoại đóng, dữ liệu riêng tư và giới hạn. Tổng 134 unittest đạt trong 136,589 giây; Vite build đạt. QA trình duyệt trên DB tạm kiểm chứng năm trang, trích dẫn tin cũ, lỗi 503/thử lại giữ bản nháp, gửi từ trang cũ, hết phiên và desktop/mobile 390px không tràn ngang. Không gọi model/Telegram thật, không thay schema; chưa nghiệm thu tải bền hoặc M4/M7 toàn bộ. Hợp đồng mới tại [API.md](API.md#snapshot-widget).
+
+## 25/09/2026 - Phân trang lịch sử tin nhắn Inbox
+
+Chi tiết Inbox mặc định 50/tối đa 100 tin, phân trang bằng ID mốc trong cùng hội thoại và cặp created_at/id, không tải toàn bộ lịch sử vào bộ nhớ. Giao diện có Tin cũ hơn, Tin mới hơn cho trang lịch sử trước và Về tin mới nhất; giữ bản nháp/ghi chú, gửi xong về mới nhất, yêu cầu đọc trang mới nhất trước khi hoàn tất. Polling trang cũ giữ mốc và cập nhật trace/delivery; cửa sổ mới nhất vẫn thay đổi khi có tin mới.
+
+Ba test mới kiểm tra 123 tin trùng thời gian, tin đến sau mốc, không mất/trùng trang, cách ly cursor, trace cập nhật, trang rỗng, giới hạn và quyền. Tổng 130 unittest đạt trong 95,222 giây, Vite build đạt. QA trình duyệt trên DB tạm kiểm chứng ba trang 50/50/23 tin, polling khi có tin mới, giữ bản nháp, gửi từ trang cũ, hội thoại rỗng, khóa hoàn tất ở trang cũ và mobile 390px không tràn ngang. Không gọi Ollama/Telegram thật; ticket/SLA chưa phân trang, widget vẫn 200 tin. Hợp đồng thay đổi tại [API.md](API.md#phân-trang-lịch-sử-inbox); chưa nghiệm thu tải bền M7.
+
+## 25/09/2026 - Khôi phục mật khẩu local
+
+Đã có `python -m app.reset_password USERNAME --env-file .env` cho tài khoản đã tồn tại: nhập mật khẩu ẩn, kiểm tra 12-128 ký tự và khác mật khẩu cũ; cập nhật hash và thu hồi mọi phiên của tài khoản trong cùng transaction. Giữ nguyên quyền/trạng thái hoạt động, chặn đăng nhập đang dùng hash cũ và rollback nếu thu hồi phiên lỗi. `--env-file` đọc trước khi tạo engine, biến môi trường có sẵn được ưu tiên. Không sửa tài khoản thật, không thêm endpoint công khai hoặc migration.
+
+Sáu test mới dùng DB tạm kiểm tra vòng đăng nhập, tài khoản vô hiệu, đầu vào lỗi/hủy, rollback, đăng nhập đồng thời và cấu hình DB qua subprocess. Toàn bộ 127 unittest đạt trong 52,458 giây; CLI help và diff check đạt. Hướng dẫn tại [OPERATIONS.md](OPERATIONS.md#khôi-phục-mật-khẩu-nhân-viên). Chưa có reset qua email/OTP hoặc audit quản trị; M3/M5/M6/M7 vẫn chờ nghiệm thu riêng.
+
+## 25/09/2026 - Giữ model trong GPU
+
+25/09/2026 (mốc con M7 độ trễ Ollama): giữ hai model 5 phút thay vì dỡ sau mỗi lời gọi; Ollama đã dùng GPU trước sửa. RTX 3060 6 GiB xác nhận cả hai model 100% GPU, tổng 4,16 GiB. Ba lượt cũ 15,207-16,066 giây; lượt mới đầu 10,704 giây, hai lượt đã nạp 3,351-3,719 giây. Smoke HTTP thật đạt, câu hỏi 3,675 giây; 15 test RAG đạt. Giữ model/prompt/context/kiểm định; một câu hỏi lặp chưa chứng minh chất lượng M3 hoặc tải bền M7. Bằng chứng tại evals/ollama.
+
+Script khởi động ưu tiên Ollama đã cài, không mở trùng dịch vụ, cho phép hai model cùng nạp khi khởi động mới. 15 test RAG đạt trong 6,471 giây; thêm kiểm tra payload giữ 5m và không đổi tham số generation. Runner từ chối ghi đè kết quả cũ. Không sửa .env hoặc dữ liệu người dùng; không đổi UI/schema.
+
+Kiểm tra cuối: báo cáo Word khớp 87 đoạn Markdown, bảy chương/13 trang. Xuất bằng Word do thiếu LibreOffice đóng gói; trang 1/13 đã kiểm tra trực quan, 11 trang còn lại khớp từng pixel với bản trước. git diff --check đạt.
+
+## 22/09/2026 - Phân trang Inbox và tìm kiếm toàn danh sách
+
+- [x] API mặc định 25/tối đa 100 dòng, kiểm tra offset/limit/q, trả total và has_more; sắp ngày tạo giảm dần/ID tăng dần. Không tìm kiếm/lọc SLA thì SQL lấy đúng trang trước tính SLA.
+- [x] Tìm kiếm tiếng Việt không phân biệt hoa/thường và lọc SLA trước chia trang, quét theo lô 200 hội thoại. Ký tự %/_ không thành wildcard; không lọc riêng trên trang hiện tại.
+- [x] UI trước/sau, reset trang khi đổi bộ lọc, lùi về trang hợp lệ khi tổng giảm; giữ hội thoại và bản nháp, mở hội thoại ngoài trang từ hồ sơ khách. Thẻ số phân biệt tổng với số trên trang.
+- [x] Ba test mới; 120 unittest đạt trong 64,141 giây. Test HTTP biên offset chạy lại đạt sau chặn số vượt 32 bit; Vite build đạt. Smoke hai client/31 hội thoại kiểm tra API và retry/tranh chấp, không dùng làm benchmark hiệu năng.
+- [x] QA dữ liệu tạm: ba trang, tìm khách ngoài trang đầu, kết hợp SLA/rỗng, giữ bản nháp, mở từ hồ sơ khách, tiếp nhận và trả lời. Desktop 1440px/mobile 390px, phân trang bằng Enter, không tràn ngang hoặc lỗi console.
+
+Giới hạn: tìm kiếm/SLA còn quét tập phù hợp status/priority để đếm tổng; dữ liệu sống có thể dịch trang offset. API chi tiết vẫn trả toàn lịch sử. Chưa chạy model/Telegram thật hoặc nghiệm thu tải bền/cloud; không thay schema.
+
+Kiểm tra cuối: git diff --check đạt. Báo cáo Word khớp 86 đoạn Markdown, bảy chương/13 trang; xuất bằng Word do thiếu LibreOffice đóng gói. Trang 6/12/13 đã kiểm tra trực quan, mười trang còn lại khớp từng pixel với bản đã kiểm tra. Tab QA riêng đã đóng.
+
+## 22/09/2026 - Lưu bền thông báo handoff Telegram
+
+- [x] Tái hiện worker dừng sau commit handoff khiến trạng thái/ticket đã lưu nhưng thông báo cho khách bị mất.
+- [x] Lưu thông báo Telegram cùng transaction với trạng thái/ticket; bỏ tạo thông báo riêng trong adapter. Áp dụng cả handoff do lỗi gửi/phục hồi, không đổi schema v7.
+- [x] Hai test mới: gián đoạn và mở lại Session, nhận lại update, nhắn thêm khi chờ, rollback đồng thời, yêu cầu mới sau giải quyết. Kiểm tra phục hồi gửi lặp không tạo thông báo trùng.
+- [x] Tổng 117 unittest đạt trong 91,870 giây, gồm 19 test Telegram; transport/model Telegram được mock trên dữ liệu tạm.
+
+Lỗi gửi trước đó vẫn chặn thông báo trong hàng chờ; người phụ trách cần gửi lại/bỏ qua. Không tự bù thông báo thiếu trong dữ liệu cũ. Chưa kiểm chứng bot thật hoặc nghiệm thu M6.
+
+Kiểm tra cuối: git diff --check đạt. Báo cáo Word khớp 85 đoạn Markdown, bảy chương/13 trang; xuất bằng Word do thiếu LibreOffice đóng gói. Trang 6/12 đã kiểm tra trực quan, 11 trang còn lại khớp từng pixel với bản đã kiểm tra.
+
+## 22/09/2026 - Giữ đủ file khi sao lưu
+
+- [x] Tái hiện backup bỏ mọi file tên .lock trong tài liệu/thư mục con nhưng vẫn báo thành công; verify không phát hiện thay đổi các file bị bỏ qua.
+- [x] Giới hạn ngoại lệ đúng file thường .lock ở gốc Qdrant trong create/verify/restore; các file cùng tên khác vào manifest SHA-256 và được khôi phục nguyên vẹn.
+- [x] Hai test mới thất bại trước sửa, đạt sau sửa; kiểm tra file nguyên vẹn, khóa runtime không sao chép, file bị sửa/thêm bị từ chối trước restore và nguồn giữ nguyên.
+- [x] Chín test backup đạt, gồm CLI tạo/kiểm tra/khôi phục và mở lại Qdrant embedded thật. Không thay schema/format manifest, UI hoặc dữ liệu người dùng.
+
+Bản sao cũ thiếu file không tự phục hồi được; đã ghi hướng dẫn tạo lại từ nguồn đầy đủ. Phạm vi vẫn là sao lưu offline, chưa nghiệm thu M7 hoặc phục hồi bot thật.
+
+Kiểm tra cuối: chín test backup đạt trong 9,407 giây; git diff --check đạt. Báo cáo Word khớp 84 đoạn Markdown, bảy chương/13 trang; xuất bằng Word do thiếu LibreOffice đóng gói. Trang 12 thay đổi đã kiểm tra trực quan, 12 trang còn lại khớp từng pixel với bản đã kiểm tra.
+
+## 22/09/2026 - Handoff đúng ranh giới từ và Unicode
+
+- [x] Tái hiện tệp PDF bị nhầm thành khiếu nại tệ; gặp xuống dòng nhân viên/dấu NFD bị bỏ sót, widget trả 429 khi AI bận.
+- [x] Chuẩn hóa NFC/casefold/khoảng trắng riêng cho so khớp, dùng ranh giới từ Unicode; giữ nguyên tin và trích đoạn ticket, bộ từ khóa/nhãn/ưu tiên không đổi.
+- [x] Năm test mới: biến thể NFC/NFD, hoa/thường, năm loại khoảng trắng trên bảy từ khóa, từ chứa từ khóa, widget AI bận/retry/lưu nguyên văn, câu hỏi tệp không tạo ticket, Telegram receipt trùng không tạo thêm ticket.
+- [x] Test tái hiện thất bại trước sửa; tổng 113 unittest đạt trong 78,586 giây sau sửa. Không thay UI hoặc chạy model/Telegram thật.
+
+Giới hạn: chưa hiểu phủ định/trích dẫn/ngữ cảnh hoặc tiếng Việt không dấu; không dùng kết quả này làm độ chính xác sentiment/handoff M5. Trình phân loại vẫn trả negative cho các từ khóa đang có, kể cả yêu cầu gặp người thật trung tính.
+
+Báo cáo Word đồng bộ 83 đoạn với Markdown, giữ bảy chương/13 trang. Xuất bằng Word do renderer đóng gói thiếu LibreOffice; đã kiểm tra trang 6/12/13 thay đổi, mười trang còn lại khớp từng pixel với bản đã kiểm tra. git diff --check đạt.
+
+## 22/09/2026 - Chặn nhận nhầm mã đơn
+
+- [x] Tái hiện lỗi DH12345-EXTRA/x-DH12345 bị nhận thành DH12345, Unicode IGNORECASE nhận chữ ngoài ASCII và mã quá 64 ký tự vẫn qua bộ nhận diện.
+- [x] Sửa ORDER_PATTERN dùng ranh giới chữ/số/gạch nối/gạch dưới, tổng 6-64 ký tự và case-insensitive chỉ trong nhóm ASCII; không đổi kiểm tra quyền chủ đơn/widget.
+- [x] Hai test nhận diện và một test orchestration mới: mã hợp lệ, dấu câu, hoa/thường, biên độ dài, Unicode và mã ghép; xác nhận mã sai không gọi selector/lookup hoặc lộ vận đơn. Test tái hiện thất bại trước sửa, đạt sau sửa.
+- [x] Toàn bộ 108 unittest đạt trong 83,904 giây. UI không đổi; không build lại hoặc gọi model thật.
+
+Không có mã hợp lệ vẫn đi RAG như trước, chưa có thông báo riêng cho mã sai. Không nhận đơn từ lịch sử hoặc tự sửa mã khách nhập. Đây là sửa nhận diện đầu vào, không phải kết quả đánh giá ngữ nghĩa M5/M3.
+
+Báo cáo Word đồng bộ 82 đoạn với Markdown, giữ bảy chương/12 trang. Xuất bằng Word do renderer đóng gói thiếu LibreOffice; trang 6/12 đã kiểm tra trực quan, mười trang còn lại khớp từng pixel với bản đã duyệt bố cục trước đó. git diff --check đạt.
+
+## 22/09/2026 - Nhật ký công cụ trong Inbox
+
+- [x] Hiển thị trạng thái, mã đơn, hành động và kết quả dưới tin khách bằng details/summary; mặc định thu gọn, giữ mở qua polling, dùng được bàn phím.
+- [x] Phân biệt pending/gián đoạn, lỗi provider, bỏ qua lượt cũ, nhiều mã đơn và nhánh RAG; trạng thái lạ có fallback, tin thiếu trace không hiện nhật ký. Không render JSON thô hoặc cho chạy lại công cụ.
+- [x] Bổ sung assertion API chi tiết giữ trace, widget không nhận trace trong test sẵn có; sáu test công cụ đạt trong 3,033 giây, Vite build đạt.
+- [x] QA trên bản build và DB tạm: chín trace gồm sáu trạng thái hiện có, hai kết quả lookup, handoff và trạng thái lạ; một tin không trace. Desktop 1440px/mobile 390px, mở/đóng Enter, giữ mở sau polling, không tràn ngang.
+
+Không đổi API/schema/quyền hoặc pipeline RAG. Không chạy lại benchmark/model thật; kết quả này kiểm chứng hiển thị nhật ký, chưa nghiệm thu chất lượng M5. Khánh tiếp tục phụ trách tích hợp chính; nhóm kiểm thử có thể dùng docs/DEMO.md để đối chiếu nhật ký với kết quả hỗ trợ.
+
+Báo cáo Word ngày 22/09 đồng bộ 81 đoạn với Markdown, đủ bảy chương/12 trang; xuất bằng Word và kiểm tra toàn bộ ảnh trang vì renderer đóng gói thiếu LibreOffice. git diff --check đạt; tab và server QA riêng đã đóng.
+
 ## Đang làm
 
 - [x] Mô hình dữ liệu cơ bản: User, AuthSession, Customer, Conversation, Message, Ticket, Order, KnowledgeDocument.
@@ -210,3 +386,64 @@ Task tiếp theo: bổ sung đánh giá nghiệp vụ M5 độc lập và cơ ch
 - [x] Cập nhật README/demo, hợp đồng 42 method/path, thiết kế, quyết định, roadmap, đề cương và báo cáo bảy chương. Word mười trang khớp Markdown, kiểm tra đủ trang; xuất bằng Word/Poppler vì renderer thiếu LibreOffice trên Windows.
 
 Giới hạn: đơn nội bộ mô phỏng, chưa tích hợp vận chuyển/thanh toán; không có xóa/gộp khách, reset mật khẩu người khác, khóa tài khoản UI hoặc audit quản trị. Tổng hợp chưa đo tải lớn, SLA/kênh chưa chỉnh được. M3 chờ duyệt; không đổi RAG, không chạy lại benchmark. Tiếp tục đánh giá M5/xác minh khách/kênh thứ hai theo roadmap.
+
+## Quyền tra đơn cho phiên widget ngày 21/09/2026
+
+- [x] Admin cấp/thu hồi quyền từng đơn, mã chỉ hiển thị lúc cấp, hash trong DB, hết hạn sau 15 phút.
+- [x] Biểu mẫu widget riêng, chống CSRF và giới hạn thử, không chuyển mã vào Message/LLM hoặc gộp khách.
+- [x] Quyền chỉ đúng đơn/phiên, kiểm tra lại khi thực thi tool; thu hồi, đổi chủ, hết hạn và kết thúc phiên chặn lượt tra mới; giữ handoff.
+- [x] Migration v6 cộng bảng, bảy test mới; tổng 73 unittest/build đạt.
+- [x] Cập nhật hợp đồng API, thiết kế, đề cương và báo cáo tiến độ.
+
+Giới hạn: admin xác minh và giao mã qua kênh tin cậy ngoài hệ thống; chưa OTP email/SMS, đăng nhập khách hoặc audit đầy đủ. Kênh thứ hai chưa kết nối, M3 chưa có người chấm. Hướng dẫn và kiểm chứng: docs/ORDER_ACCESS.md.
+
+## 21/09/2026 - Adapter Telegram, chờ bot thật
+
+- [x] Polling opt-in, kiểm tra bot/webhook; không xóa webhook hoặc lộ token.
+- [x] Migration v7, danh tính bot/người dùng, update/con trỏ bền, chống nhận trùng và phục hồi sau gián đoạn.
+- [x] RAG/handoff dùng chung; chặn AI lỗi thời, chuyển nhân viên khi gửi lỗi, giữ thứ tự theo người nhận.
+- [x] Nhật ký pending/sending/sent/failed/uncertain/skipped; quyền retry/skip trong Inbox, UUID tin nhân viên, SLA theo xác nhận Telegram.
+- [x] 16 test Telegram; tổng 89 unittest đạt trong 32,999 giây, frontend build đạt. Model/transport được mock trong nhóm Telegram.
+- [ ] Bot thật: hai người dùng, RAG, /human, phản hồi nhân viên, đóng/nhắn lại và phục hồi gián đoạn.
+- [ ] Nghiệm thu M6, tải đồng thời, worker có lease/queue và triển khai thực tế.
+
+Cấu hình, demo và giới hạn: docs/TELEGRAM.md. Người dùng vẫn phụ trách kiến trúc/tích hợp chính; bộ phận kiểm thử có thể chuẩn bị kịch bản và lưu bằng chứng bot thật. Không thay người duyệt nhãn/đáp án M3.
+
+QA trình duyệt trên DB/vector riêng xác nhận cảnh báo nguy cơ trùng, gửi lại chuyển pending, bỏ qua giữ lịch sử, phản hồi nhân viên chờ gửi khi bot tắt và Cài đặt báo chưa kết nối. Desktop và khung mobile 390 pixel đã kiểm tra trực quan, không tràn ngang; không gửi tin ra Telegram thật.
+
+## 21/09/2026 - Sao lưu và khôi phục local
+
+- [x] CLI create/verify/restore, cấu hình env rõ ràng, chỉ SQLite schema v7.
+- [x] Snapshot SQLite bằng API backup, sao chép Qdrant/tài liệu offline, manifest SHA-256; chặn nguồn/đích lồng nhau, symlink/junction và ghi đè.
+- [x] Khôi phục vào thư mục mới, thu hồi phiên staff/widget và quyền truy cập đơn; giữ nguyên nguồn và bản sao.
+- [x] Bảy kiểm thử, gồm Qdrant thật sau khôi phục, dữ liệu hỏng/thiếu/thừa, lỗi sao chép và CLI không sao chép token.
+- [ ] Diễn tập trên môi trường triển khai, phục hồi Telegram thật, lịch sao lưu và retention, đo RPO/RTO.
+
+Hướng dẫn vận hành: docs/OPERATIONS.md. Không thay dữ liệu/config người dùng; frontend và pipeline RAG không đổi.
+
+Kiểm chứng mốc sao lưu: 96 unittest đạt trong 52,638 giây; git diff --check đạt. Không build lại frontend vì không thay UI.
+
+## 21/09/2026 - Bản build cùng origin và kiểm tra sẵn sàng
+
+- [x] SERVE_FRONTEND opt-in dùng StaticFiles/FileResponse sẵn có; một Uvicorn phục vụ build và API, không thêm dependency hoặc launcher.
+- [x] Allowlist trang/widget/assets, no-cache HTML, không lộ file riêng tư hoặc dùng HTML cho API lạ; thiếu build dừng rõ ràng.
+- [x] GET /api/v1/ready cho Staff: schema, nguồn, số vector theo phiên bản và model Ollama; timeout ngắn, không gọi generation, không giữ transaction khi gọi mạng.
+- [x] Bảy test mới cùng smoke HTTP Uvicorn thật: build/assets, chặn đường dẫn, đăng nhập, ready 503 khi Ollama tắt/kho trống, widget handoff, Inbox và logout.
+- [ ] HTTPS/cloud, kiểm tra model thật trong môi trường triển khai và đo tải; M7 chưa nghiệm thu.
+
+Smoke dùng DB/vector/tài liệu tạm, tài khoản ngẫu nhiên, Telegram tắt; không sửa dữ liệu/config người dùng. Frontend không đổi, dùng bản build hiện có để kiểm tra HTTP.
+
+Kiểm chứng mốc chạy bản build: 103 unittest đạt trong 56,660 giây; bảy test liên quan chạy lại đạt sau chỉnh trạng thái unchecked khi bận. OpenAPI có 47 method/path; git diff --check đạt.
+
+## 21/09/2026 - Đo tải HTTP local và index Inbox
+
+- [x] CLI app.measure_load dùng Uvicorn loopback/store tạm riêng; seed phiên, lưu raw samples/p50/p95/throughput, hash mã và complete=false khi lỗi; không ghi đè kết quả.
+- [x] Bốn lượt hoàn tất: thăm dò 100 hội thoại, baseline 500 và hai lượt 500 sau index. Với 10 client/1.000 request tải chính, throughput từ 13,755 lên 37,437/38,008 request/giây; mọi invariant đạt, không lỗi ngoài dự kiến.
+- [x] Retry UUID không trùng tin; tranh chấp chỉ một nhân viên nhận; handoff không trùng ticket và trả 429 đúng giới hạn. HTTP 409/429 dự kiến được ghi riêng.
+- [x] Hai index theo hội thoại/thời gian cho messages/tickets; migration chạy lại trên v7, test EXPLAIN QUERY PLAN xác nhận index và giữ dữ liệu/SLA cũ.
+- [x] Hai test công cụ đo mới; tổng 105 unittest đạt trong 57,055 giây. UI/RAG không đổi, không build hoặc chạy lại benchmark RAG.
+- [ ] Tải bền, RAG/Telegram đồng thời, proxy/HTTPS/cloud và SLO theo yêu cầu thực tế; chưa nghiệm thu M7.
+
+Kịch bản không có think time, không phải lịch polling UI 3 giây; không đo login/tạo phiên hoặc năng lực tối đa. Inbox còn trả toàn bộ danh sách. Hướng dẫn và bằng chứng tại evals/load/README.md; chưa cần đổi kiến trúc hoặc thêm dependency từ phép đo này.
+
+Kiểm tra cuối: 12 test auth/migration/công cụ đo chạy lại đạt sau bổ sung trường hợp DB v7 thiếu index; git diff --check đạt. Báo cáo Word đồng bộ 80 đoạn với Markdown, giữ bảy chương và 12 trang; đã xuất bằng Word và kiểm tra đủ ảnh trang do renderer đóng gói thiếu LibreOffice. Các tiến trình đo tải riêng đã kết thúc.

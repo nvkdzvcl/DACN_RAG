@@ -97,7 +97,7 @@ Kiểm thử model thật: `python -m app.tests.smoke_ollama` tự dùng thư m�
 5. Mất mạng khi gửi: bản nháp vẫn còn; thử gửi lại cùng nội dung trên cùng trang dùng lại ID. HTTP 429 do AI bận chưa lưu tin; có thể thử lại hoặc Gặp nhân viên. Không tải lại trang nếu cần giữ bản nháp/ID chưa xác nhận.
 6. Đóng khung chat rồi mở lại giữ phiên. Kết thúc có xác nhận, thu hồi phiên và đóng hội thoại/ticket; nhân viên vẫn xem lịch sử. Phiên hết hạn cần bắt đầu mới.
 
-Nhúng bằng `<script src="/widget.js" defer></script>` trên cùng origin đã phục vụ frontend, `/chat` và proxy `/api` tới backend. Bản build cần SPA fallback cho `/chat`, HTTPS ngoài development và một API worker. Cookie khách riêng với phiên nhân viên, không cấu hình CORS/cookie bên thứ ba. Chỉ hiển thị 200 tin gần nhất; giới hạn mỗi IP/phút là 6 tạo phiên, 10 gửi tin, 6 handoff. Giới hạn AI một lượt chỉ áp dụng cho widget, chưa bao gồm hỏi thử của nhân viên. Inbox đã có polling và SLA phản hồi đầu tiên; push realtime, SLA giải quyết và nhúng khác origin chưa triển khai.
+Nhúng bằng `<script src="/widget.js" defer></script>` trên cùng origin đã phục vụ frontend, `/chat` và proxy `/api` tới backend. Bản build cần SPA fallback cho `/chat`, HTTPS ngoài development và một API worker. Cookie khách riêng với phiên nhân viên, không cấu hình CORS/cookie bên thứ ba. Widget phân trang 50 tin, có Tin cũ hơn/Tin mới hơn/Về tin mới nhất; giữ bản nháp khi đổi trang và vẫn yêu cầu phiên khách còn hiệu lực. API giới hạn 100 tin mỗi request; giới hạn mỗi IP/phút là 6 tạo phiên, 10 gửi tin, 6 handoff. Giới hạn AI một lượt chỉ áp dụng cho widget, chưa bao gồm hỏi thử của nhân viên. Inbox đã có polling và SLA phản hồi đầu tiên; push realtime, SLA giải quyết và nhúng khác origin chưa triển khai.
 
 Kiểm chứng ngày 14/09/2026: 46 unittest đạt; trình duyệt Edge trên DB/vector QA riêng đã chạy một câu qua Ollama thật với quote, khôi phục phiên, handoff, phản hồi nhân viên bằng API và polling, giữ draft/UUID khi mất mạng, phục hồi polling, Escape trả focus và kết thúc thu hồi phiên. Kiểm tra trực quan desktop/mobile 390px, trang chat trực tiếp và khung nhúng; không tràn ngang. Đây là smoke chức năng, không phải benchmark chất lượng hoặc tải đồng thời.
 
@@ -125,9 +125,13 @@ Kiểm chứng ngày 14/09/2026: 53 unittest và Vite build đạt; QA Edge bả
 
 ## Demo bộ chọn tool M5
 
+Kiểm tra phân trang Inbox với hơn 25 hội thoại thử: chuyển Trang sau/Trang trước, tìm tên hoặc mã khách ở trang cuối, kết hợp bộ lọc SLA. Tổng kết quả phải tính trên toàn tập lọc, ba thẻ trạng thái chỉ tính trang đang xem. Soạn bản nháp rồi đổi trang/bộ lọc: hội thoại đang xem và bản nháp được giữ. Mở hội thoại cũ từ hồ sơ khách phải tải đúng chi tiết dù không nằm trong trang đầu. Không tạo hàng loạt hội thoại trong DB thật chỉ để thử phân trang.
+
+Kiểm tra handoff văn bản trên dữ liệu thử: gửi “Cách tải tệp PDF?” để xác nhận hội thoại không chuyển nhân viên chỉ vì chữ tệp; gửi “Tôi cần gặp” xuống dòng “nhân viên.” để xác nhận chuyển hàng chờ. Unicode tiếng Việt dạng dấu tách rời cũng phải được nhận. Nội dung tin và trích đoạn ticket giữ dấu/xuống dòng gốc; retry cùng UUID không tạo thêm tin/ticket.
+
 Chạy `python -m app.tests.smoke_tools` khi Ollama local đã sẵn sàng. Lệnh tạo dữ liệu giả lập riêng và chạy bảy ca tra đơn/chuyển nhân viên/chính sách/nhiều mã; dùng dịch vụ nghiệp vụ thật, không mở server. Không sửa chủ đơn hoặc ID khách trong DB thật để tạo ca demo. Xem docs/M5_TOOLS.md cho trace và số liệu.
 
-Trong widget, câu “Đơn DH99999 đang ở đâu?” được bộ chọn phân loại nhưng quyền vẫn theo khách của phiên, nên không lộ đơn có sẵn thuộc người khác. Câu “Hủy đơn DH12345 giúp tôi” chuyển nhân viên nếu bộ chọn trả handoff, không hủy đơn. Câu “Tra đơn DH12345 và DH99999” yêu cầu chọn một mã. Trace chỉ trong GET chi tiết Inbox dành staff, không có bảng nhật ký riêng trên UI. Lỗi provider giữ tin; đọc lịch sử trước khi gửi một yêu cầu mới để thử lại.
+Trong widget, câu “Đơn DH99999 đang ở đâu?” được bộ chọn phân loại nhưng quyền vẫn theo khách của phiên, nên không lộ đơn có sẵn thuộc người khác. Câu “Hủy đơn DH12345 giúp tôi” chuyển nhân viên nếu bộ chọn trả handoff, không hủy đơn. Câu “Tra đơn DH12345 và DH99999” yêu cầu chọn một mã. Trong Inbox nhân viên, mở **Nhật ký công cụ** dưới tin khách để xem trạng thái, mã đơn, hành động và kết quả. Có thể Tab tới tiêu đề rồi Enter/Space để mở/đóng; widget không nhận nhật ký này. Lỗi provider giữ tin; đọc lịch sử trước khi gửi một yêu cầu mới để thử lại. Chưa có kết quả có thể là lượt bị gián đoạn, không mặc định đang chạy; mục nhật ký không gọi lại tool.
 
 ## Demo năm trang quản lý ngày 18/09/2026
 
@@ -138,3 +142,11 @@ Trong widget, câu “Đơn DH99999 đang ở đâu?” được bộ chọn ph�
 5. Với tài khoản thử, đổi mật khẩu trong Cài đặt: đăng xuất mọi phiên của tài khoản đó; đăng nhập lại bằng mật khẩu mới. Không dùng tài khoản quan trọng để demo thu hồi phiên.
 
 Bằng chứng và giới hạn: docs/WORKSPACE.md. Khởi động lại backend nếu chạy không có --reload, rồi tải lại frontend để nhận các route mới.
+
+## Demo cấp quyền tra đơn trong widget
+
+Theo [ORDER_ACCESS.md](ORDER_ACCESS.md), dùng một đơn thử và phiên khách riêng: cấp mã bằng admin, nhập trong biểu mẫu widget rồi hỏi trạng thái có mã đơn. Kiểm tra chỉ đúng đơn được tra, thu hồi ngăn lượt tra tiếp theo và chuyển nhân viên. Mã không được gửi trong nội dung chat; dùng dữ liệu giả lập khi demo. Mã hết hạn sau 15 phút kể từ lúc cấp. Không coi quy trình này là OTP tự động hoặc xác minh toàn bộ tài khoản khách.
+
+## Telegram (chờ cấu hình bot thật)
+
+Theo [TELEGRAM.md](TELEGRAM.md): bật bot thử riêng, /start, hỏi chính sách, /human, tiếp nhận và trả lời trong Inbox, kiểm tra tin trên Telegram rồi đóng/nhắn lại. Hai người cùng tên phải có hồ sơ riêng. Chỉ ghi demo đa kênh đạt sau khi quan sát gửi/nhận thật; test mock và trạng thái connected không thay bằng chứng này.

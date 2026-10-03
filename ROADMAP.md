@@ -1,6 +1,18 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
-Ngày lập: 11/09/2026. Cập nhật: 15/09/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local, widget có phiên khách, Inbox polling và vòng đời ticket/SLA phản hồi; các mốc M0-M8 chưa nghiệm thu toàn bộ.
+03/10/2026: tài khoản khách hàng email + mật khẩu và giao diện đăng nhập đã kiểm chứng; schema v8, lịch sử nhiều thiết bị, đổi mật khẩu thu hồi phiên. 165 kiểm thử backend đạt, frontend build và QA trình duyệt đạt. Email chưa xác minh/chưa khôi phục qua email; quyền đơn vẫn theo mã truy cập. Chi tiết tại docs/CUSTOMER_AUTH.md và docs/TASKS.md.
+
+22/09/2026 (mốc con M5 nhật ký trong Inbox): nhân viên xem trace ngay dưới tin khách, gồm trạng thái/mã đơn/hành động/kết quả; pending không bị coi là đang chạy, rag không bị coi là đáp án thành công. Dùng details/summary, không thêm API, dependency hoặc quyền khách. Sáu test công cụ và Vite build đạt; QA trình duyệt desktop/390px xác nhận nhãn, bàn phím, giữ mở qua polling và không tràn ngang. Không thay model/quyền/tool execution; M3/M5/M6/M7 vẫn chờ các phần nghiệm thu riêng.
+
+Ngày lập: 11/09/2026. Cập nhật: 01/10/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local, widget có phiên khách, Inbox polling và vòng đời ticket/SLA phản hồi; các mốc M0-M8 chưa nghiệm thu toàn bộ.
+
+01/10/2026 (độ bền hàng chờ Telegram): lỗi nhận tin tiếp theo không còn chặn update đã commit; giữ trạng thái lỗi, con trỏ và quy tắc gửi lại. Test tái hiện trước sửa, 20 test Telegram đạt sau sửa bằng transport/model giả lập. Chưa tách worker, chưa kiểm chứng bot thật hoặc nghiệm thu M6.
+
+26/09/2026 (gộp phiếu M5): CLI --merge ghép phần duyệt cùng lượt đo, giữ ghi chú chờ và tên người chấm; xung đột cùng ca chặn output để Khánh đối chiếu. Chín test liên quan đạt, không gọi model hoặc đổi runtime; 44 ca thật vẫn chưa duyệt. Không có biểu quyết tự động hoặc nghiệm thu độc lập từ phiếu gộp. Hướng dẫn tại evals/tools/README.md.
+
+01/10/2026 (lỗi HTTP Telegram): response bị cắt/sai giao thức được ghi uncertain khi gửi, giữ che token và chặn gửi lại tự động; peer khác tiếp tục xử lý. 21 test Telegram đạt với transport/model giả lập, chưa kiểm chứng bot thật hoặc nghiệm thu M6.
+
+01/10/2026 (phục hồi khởi động Telegram): probe bot/webhook tự thử lại lỗi mạng/HTTP 5xx sau 5 giây; lỗi cấu hình vẫn dừng, chưa chạm DB trước xác minh. Hai test tái hiện trước sửa, 23 test Telegram đạt sau sửa; không gọi bot thật hoặc thay quy tắc gửi lại uncertain. M6 chưa nghiệm thu.
 
 ## Mục tiêu và phạm vi
 
@@ -31,7 +43,7 @@ Zalo, OCR nâng cao, phân tích dashboard nâng cao và các workflow Self-RAG 
 | M3 - RAG xuyên suốt | 02-08/10 | Upload PDF/DOCX -> xử lý -> vector -> hỏi đáp có nguồn; từ chối thiếu bằng chứng; bộ câu hỏi đánh giá đầu tiên | Chương 4-5 phần KB/RAG; lưu kết quả thử nghiệm thật |
 | M4 - Hội thoại và widget | 09-15/10 | Widget nhúng, lưu tin nhắn, unified inbox, realtime, ticket và SLA cơ bản; chốt hồ sơ thiết kế nội bộ ngày 12/10 trước mốc 16/10 | Chương 3-5 phần hội thoại; hồ sơ thiết kế mức 0 |
 | M5 - Agent và handoff | 16-22/10 | Tra cứu đơn hàng có kiểm soát quyền; khiếu nại/yêu cầu gặp nhân viên -> tóm tắt -> nhận xử lý -> AI dừng; kiểm thử tranh chấp AI/nhân viên | Chương 4-5 phần tool calling và chuyển giao; test nghiệp vụ |
-| M6 - Đa kênh và MVP | 23-29/10 | Kênh thứ hai thật về inbox; chống xử lý webhook trùng; phân biệt danh tính theo kênh; demo toàn bộ luồng; đóng băng tính năng | Chương 5; Chương 6 sơ bộ; kịch bản demo và danh sách giới hạn |
+| M6 - Đa kênh và MVP | 23-29/10 | Kênh thứ hai thật về inbox; chống xử lý sự kiện kênh trùng; phân biệt danh tính theo kênh; demo toàn bộ luồng; đóng băng tính năng | Chương 5; Chương 6 sơ bộ; kịch bản demo và danh sách giới hạn |
 | M7 - Kiểm thử và triển khai | 30/10-05/11 | Kiểm thử tích hợp, quyền truy cập, RAG, handoff; cloud chạy; đo chất lượng/độ trễ; sẵn sàng demo 06/11 | Chương 6 bằng số liệu thật; hướng dẫn cài đặt và vận hành |
 | M8 - Hoàn thiện | 06-13/11 | Sửa lỗi, regression; báo cáo Word/PDF, nguồn GitHub, link cloud, đề cương đã duyệt, slide nháp; diễn tập demo | Hoàn chỉnh Chương 1-7, trích dẫn, hình/bảng; kiểm tra bố cục Word/PDF |
 | Dự phòng và nộp | 14-22/11 | Sửa theo góp ý, kiểm tra in ấn và gói nộp; không mở rộng tính năng | Soát hồ sơ trước hạn 11:30 ngày 23/11 |
@@ -44,7 +56,7 @@ Zalo, OCR nâng cao, phân tích dashboard nâng cao và các workflow Self-RAG 
 - Đo retrieval Recall@k, tính có căn cứ và đúng trích dẫn, từ chối đúng, độ trễ p50/p95; chốt ngưỡng sau baseline đầu tiên. Không tuyên bố tuyệt đối không hallucination.
 - Order tool: đúng đơn, từ chối truy cập không hợp lệ, xử lý không tìm thấy và API lỗi.
 - Handoff: yêu cầu gặp nhân viên được xử lý rõ ràng; kiểm thử độ chính xác nhận diện khiếu nại, tóm tắt, phân công và AI ngừng phản hồi.
-- Hai kênh thật: nhận/gửi, giữ đúng hội thoại, tránh trùng tin khi webhook retry; không tự gộp khách hàng hai kênh chỉ vì cùng tên.
+- Hai kênh thật: nhận/gửi, giữ đúng hội thoại, tránh trùng tin khi nhận lại sự kiện; không tự gộp khách hàng hai kênh chỉ vì cùng tên.
 
 ## Quy tắc đồng hành báo cáo
 
@@ -60,6 +72,34 @@ Sau mỗi mốc hoàn thành và được kiểm chứng:
 Theo dõi định kỳ chỉ cập nhật khi có mốc mới hoặc thay đổi đáng kể; nhắc mốc chưa hoàn thành trước hạn nội bộ 3 ngày, 1 ngày hoặc khi quá hạn, tránh nhắc lặp. Không suy ra hoàn thành chỉ từ ngày đến hạn. Sau bảo vệ 27/11/2026 dừng theo dõi.
 
 ## Nhật ký nghiệm thu
+
+26/09/2026 (mốc con M5 duyệt nhãn): CLI đọc lượt đo hoàn tất, tạo phiếu gắn hash và tổng hợp chỉ nhãn được thành viên chấp thuận; lỗi xử lý vẫn ở mẫu số, ca bác/chờ tách riêng, chưa duyệt cho tỷ lệ null. Đã tạo 44 phiếu trống, năm test mới đạt trong 0,078 giây; không gọi model/sửa benchmark hoặc thay runtime. Người chấm tự khai, đây là duyệt sau xem kết quả, chưa phải đánh giá độc lập hoặc nghiệm thu M5. Phân công và hướng dẫn tại evals/tools/README.md.
+
+26/09/2026 (giao diện duyệt M5): ba biểu mẫu HTML offline lưu nháp, kiểm tra tên/lý do bác và xuất JSON nguyên bằng chứng; hỗ trợ tiếp tục từ JSON bằng CLI. Bảy test đạt, QA desktop/mobile và JSON xuất từ giao diện được CLI chấp nhận trên ca giả lập. Có sao chép JSON dự phòng vì tải Blob trong trình duyệt tích hợp chưa xác nhận. Cả 44 ca thật còn chờ duyệt; không thay runtime/model, chưa nghiệm thu độc lập M5.
+
+26/09/2026 (mốc con M5 ngữ cảnh handoff): bỏ qua riêng tiền tệ/phủ định rõ/câu hỏi chính sách hoàn tiền, giữ chuyển người khi còn yêu cầu khác; chuẩn hóa NFC ở đầu vào selector, giữ tin gốc. 144 unittest đạt trong 49,188 giây. Ba phép đo bản cuối bằng Ollama thật đạt 24/24 gốc, 8/8 nối tiếp, 10/12 ngữ cảnh mới, tổng 25 lời gọi selector không lỗi provider. Hai cách nói tự do vẫn nhận nhầm; RAG giả lập, nhãn chưa người duyệt, chưa nghiệm thu M5. Không đổi schema/quyền; lưu bằng chứng trước/sau tại evals/tools.
+
+26/09/2026 (mốc con M5 hỏi nối tiếp): giải quyết tham chiếu rõ “đơn đó/này” từ mã khách gửi trong bốn tin gần nhất cùng hội thoại; nhiều mã hỏi lại, không dùng mã AI nêu hoặc thay mã mới sai bằng mã cũ. Quyền hiện tại và chặn tool muộn giữ nguyên. 141 unittest đạt trong 49,555 giây; Ollama thật đạt 21/24 so 18/24, tám ca biên mới đạt, tổng 22 lời gọi selector mới không lỗi provider. Còn ba ca nhận nhầm do từ khóa; RAG giả lập, nhãn chưa người duyệt, chưa nghiệm thu độc lập M5. Bằng chứng tại evals/tools.
+
+26/09/2026 (mốc con M5 đánh giá điều phối): thêm 24 ca nhãn nháp, CLI đo Ollama thật và quyền trên SQLite tạm; riêng RAG giả lập. Một câu prompt ưu tiên handoff khi vừa tra cứu vừa hủy/đổi đơn nâng kết quả từ 17/24 lên 18/24; tổng 30 lời gọi selector, không lỗi provider hoặc lộ marker bị cấm/sửa đơn quan sát được. Bộ 137 unittest đạt trước sửa prompt, 10 test liên quan chạy lại đạt trên bản cuối. Sáu ca còn lỗi phủ định/chính sách/nối tiếp; tập này đã dùng chỉnh prompt, chưa người duyệt hoặc đánh giá độc lập. Chưa nghiệm thu M5/M3; bằng chứng và phân công tại evals/tools/README.md.
+
+26/09/2026 (mốc con M4 lịch sử widget): phân trang 50/tối đa 100 tin bằng cursor thuộc phiên khách, đọc vượt 200 tin mà vẫn lọc dữ liệu nội bộ. Giữ bản nháp, xử lý lỗi và hết phiên; bốn test mới, tổng 134 unittest đạt trong 136,589 giây. Build và QA desktop/mobile trên DB tạm đạt. Không đổi schema hoặc kiểm chứng model/kênh thật; ticket/SLA chưa phân trang, M4/M7 chưa nghiệm thu toàn bộ.
+
+25/09/2026 (mốc con M4 lịch sử Inbox): phân trang tin bằng cursor, mặc định 50/tối đa 100; giao diện giữ bản nháp và polling trang đang đọc. Ba test mới, tổng 130 unittest đạt trong 95,222 giây; build và QA desktop/mobile trên DB tạm đạt. Mốc đúng hội thoại, thứ tự ổn định khi trùng thời gian, không thay schema; API messages chỉ còn một trang. Ticket và lịch sử widget chưa phân trang, chưa nghiệm thu tải bền hoặc toàn bộ M4/M7.
+
+25/09/2026 (mốc con M7 khôi phục tài khoản): CLI local đặt lại mật khẩu tài khoản đã có và thu hồi mọi phiên trong cùng transaction, giữ nguyên role/active; chặn đăng nhập dùng hash cũ sau reset. Sáu test mới bằng DB tạm gồm rollback và cấu hình DB qua subprocess; tổng 127 unittest đạt trong 52,458 giây. Không thay tài khoản thật, schema hoặc API; chưa có email/OTP reset và audit quản trị. Hướng dẫn tại docs/OPERATIONS.md; chưa nghiệm thu toàn bộ M7.
+
+25/09/2026 (mốc con M7 độ trễ Ollama): giữ hai model 5 phút thay vì dỡ sau mỗi lời gọi; Ollama đã dùng GPU trước sửa. RTX 3060 6 GiB xác nhận cả hai model 100% GPU, tổng 4,16 GiB. Ba lượt cũ 15,207-16,066 giây; lượt mới đầu 10,704 giây, hai lượt đã nạp 3,351-3,719 giây. Smoke HTTP thật đạt, câu hỏi 3,675 giây; 15 test RAG đạt. Giữ model/prompt/context/kiểm định; một câu hỏi lặp chưa chứng minh chất lượng M3 hoặc tải bền M7. Bằng chứng tại evals/ollama.
+
+22/09/2026 (mốc con M4 phân trang Inbox): API mặc định 25/tối đa 100 hội thoại, tìm kiếm Unicode và lọc SLA trước chia trang; giao diện giữ hội thoại/bản nháp, mở đúng hội thoại ngoài trang từ hồ sơ khách. Ba test mới, tổng 120 unittest đạt trong 64,141 giây; test biên offset chạy lại đạt, Vite build và QA desktop/mobile 390px đạt. Smoke HTTP riêng với 31 hội thoại kiểm chứng hợp đồng phân trang, không dùng so throughput với baseline trả toàn danh sách. Tìm kiếm/SLA còn quét theo lô, offset không phải snapshot; chưa nghiệm thu tải bền/cloud hoặc M4/M7.
+
+22/09/2026 (mốc con M6 phục hồi handoff): sửa mất thông báo chuyển nhân viên khi worker dừng sau commit nghiệp vụ. Thông báo Telegram được lưu cùng trạng thái/ticket, rollback đồng thời; nhận lại update hoặc nhắn thêm khi đang chờ không tạo thông báo trùng, yêu cầu sau giải quyết tạo thông báo lượt mới. Hai test mới tái hiện lỗi trước sửa; tổng 117 unittest đạt trong 91,870 giây. Transport/model Telegram được mock; lỗi gửi vẫn chặn hàng chờ, không tự bù thông báo thiếu cũ. Schema v7 giữ nguyên; chưa nghiệm thu bot thật hoặc M6.
+
+22/09/2026 (mốc con M7 toàn vẹn sao lưu): sửa ngoại lệ .lock quá rộng gây bỏ file trong tài liệu/thư mục con mà vẫn báo thành công. Chỉ bỏ file khóa ở gốc Qdrant; các file khác được hash, sao chép và kiểm tra khi restore. Hai test tái hiện trước/sau và tổng chín test backup đạt, có Qdrant embedded thật. Giữ format 1/schema v7; bản cũ thiếu file cần tạo lại từ nguồn đầy đủ. Không sửa dữ liệu người dùng, chưa nghiệm thu vận hành cloud hoặc M7.
+
+22/09/2026 (mốc con M5 handoff văn bản): sửa nhận nhầm tệ trong tệp và bỏ sót yêu cầu gặp nhân viên do xuống dòng/dấu Unicode tách rời. So khớp NFC, gộp khoảng trắng và ranh giới từ; tin lưu/trích đoạn ticket giữ nguyên. Widget vẫn chuyển giao khi AI bận, Telegram dùng chung và chống update trùng. Năm test mới, tổng 113 unittest đạt trong 78,586 giây; model/transport được mock trong kiểm thử tích hợp. Chưa đánh giá ngữ nghĩa độc lập, phủ định/ngữ cảnh hay bot thật; M3/M5/M6 chưa nghiệm thu.
+
+22/09/2026 (mốc con M5 nhận diện mã đơn): sửa lỗi cắt mã trong chuỗi có dấu gạch nối và nhận chữ Unicode ngoài ASCII qua IGNORECASE; giới hạn tổng 64 ký tự như API tạo đơn. Ba test mới có bằng chứng thất bại trước sửa/đạt sau sửa; tổng 108 unittest đạt trong 83,904 giây. Quyền tra đơn, schema, UI và model giữ nguyên; không có mã hợp lệ vẫn đi nhánh RAG. Chưa nghiệm thu chất lượng chọn tool hoặc M3; hướng dẫn tại docs/M5_TOOLS.md.
 
 13/09/2026: kiểm chứng mốc con xác thực nhân viên, tiếp nhận và trả lời trong Inbox; bảo vệ API, lưu người phụ trách, chặn nhận tranh chấp, dừng AI khi handoff, lưu lịch sử và citation. Có kiểm thử tự động trong app/tests và kiểm tra trình duyệt desktop/mobile trên DB thử riêng.
 
@@ -96,3 +136,17 @@ Regression trích xuất 4B: 40/48 quyết định đúng, 14/16 từ chối đ�
 15/09/2026 (mốc con M5 chọn tool): model chọn lookup_order/handoff/rag bằng JSON Schema cho một mã đơn rõ ràng; backend xác thực tham số, lấy danh tính từ hội thoại, khóa lại và kiểm tra tin cuối/chủ đơn trước thực thi. Tool tra DB giả lập chỉ đọc, yêu cầu hủy chuyển nhân viên, không sửa đơn. Migration v5 lưu trace nội bộ; 59 unittest và Vite build đạt, 7/7 ca smoke model thật đạt. Pilot native tools bị loại vì sinh quá giới hạn ở ba ca; không dùng điểm smoke làm nghiệm thu agent hoặc chất lượng M3. Tiếp theo kiểm chứng M5 với dữ liệu độc lập, xác minh khách và tích hợp kênh thứ hai; người dùng vẫn có thể duyệt sau.
 
 Ngày 18/09/2026 hoàn thiện năm trang quản lý theo mockup: Tổng quan, Khách hàng, Đơn hàng, Phân tích, Cài đặt. Có API, phân quyền, phân trang, bảo vệ ghi đè và đổi mật khẩu; 66 unittest/build và QA trình duyệt desktop/mobile đạt. Chi tiết docs/WORKSPACE.md. Không thay nghiệm thu chất lượng M3/M5 hoặc xác minh khách widget; kênh thứ hai vẫn chưa kết nối.
+
+21/09/2026 (mốc con M5 quyền tra đơn): admin cấp/thu hồi mã 256 bit, hết hạn sau 15 phút, chỉ lưu hash; khách nhập biểu mẫu riêng để ràng buộc một đơn vào một phiên widget. Không gộp danh tính hoặc gửi mã biểu mẫu tới LLM. Kiểm tra quyền sau khi model chạy, giữ handoff và chặn dùng lại ở phiên khác. Migration v6 giữ dữ liệu cũ; 73 unittest và Vite build đạt. Chi tiết docs/ORDER_ACCESS.md. Xác minh/giao mã qua kênh tin cậy vẫn thủ công, chưa có OTP tự động. M3 chờ người chấm; kênh thứ hai/cloud chưa hoàn tất. Kế tiếp tích hợp kênh thứ hai thật và kiểm chứng M5 độc lập.
+
+21/09/2026 (mốc con M6 adapter Telegram): đã có polling chat riêng, danh tính theo bot/người dùng, lưu update/con trỏ bền và nhật ký gửi; xử lý lỗi không rõ kết quả bằng xác nhận gửi lại hoặc bỏ qua. Inbox dùng UUID cho tin nhân viên; SLA Telegram tính lúc API xác nhận gửi. Migration v7, 16 test Telegram mới và tổng 89 unittest đạt; frontend build đạt. Adapter chưa có token để kiểm chứng bot thật, mặc định tắt; không ghi M6 đã nghiệm thu. Một worker xử lý tuần tự, chưa đo tải hoặc triển khai cloud. Bước tiếp theo là smoke trên bot thử nghiệm thật theo docs/TELEGRAM.md; M3 vẫn chờ người duyệt.
+
+21/09/2026 (mốc con M7 vận hành local): bổ sung CLI sao lưu offline SQLite/Qdrant/tài liệu, manifest SHA-256 và kiểm tra schema v7. Khôi phục chỉ vào thư mục mới, giữ nguồn và thu hồi phiên/quyền tra đơn cũ; có kiểm thử vòng khôi phục bằng Qdrant embedded thật. Hướng dẫn docs/OPERATIONS.md yêu cầu dừng API, giữ Telegram tắt khi kiểm tra bản khôi phục và đối chiếu lịch sử trước bật lại bot. Chưa sao lưu nóng, mã hóa trong CLI, lịch/retention, RPO/RTO, cloud hoặc nghiệm thu M7.
+
+Kiểm chứng mốc sao lưu: 96 unittest đạt trong 52,638 giây; git diff --check đạt. Không build lại frontend vì không thay UI.
+
+21/09/2026 (mốc con M7 chạy bản build): SERVE_FRONTEND cho phép FastAPI phục vụ UI và API cùng origin, không cần Vite khi demo. Thêm /api/v1/ready dành Staff kiểm tra schema v7, nguồn/vector và model Ollama; 47 cặp method/path API. Bảy test mới và smoke Uvicorn thật trên dữ liệu tạm đã kiểm tra giao diện tĩnh, auth, lỗi readiness, handoff/Inbox/logout. Chưa đo tải, HTTPS/cloud hoặc sinh đáp án từ probe; /health giữ kiểm tra nhẹ. Cách chạy tại docs/OPERATIONS.md.
+
+Kiểm chứng mốc chạy bản build: 103 unittest đạt trong 56,660 giây; bảy test liên quan chạy lại đạt sau chỉnh trạng thái unchecked khi bận. OpenAPI có 47 method/path; git diff --check đạt.
+
+21/09/2026 (mốc con M7 đo tải local): app.measure_load chạy Uvicorn một worker và store tạm, seed phiên riêng; đo Inbox/widget/gửi tin/retry, kiểm tra tranh chấp tiếp nhận và giới hạn handoff. Với 10 client, 500 hội thoại seed cùng một probe, 1.000 request tải chính đạt 13,755 request/giây trước index; thêm index tin nhắn/ticket đạt 37,437 và lượt lặp 38,008. p95 danh sách Inbox giảm từ 1371,878 xuống 640,324/513,581 ms; không lỗi ngoài dự kiến, UUID/ticket/người phụ trách đúng. Migration cài index idempotent trên DB v7, không đổi dữ liệu nghiệp vụ. 105 unittest đạt trong 57,055 giây. Bằng chứng và giới hạn tại evals/load/README.md; không đo LLM, Telegram thật, mạng ngoài, tải bền hoặc số người dùng tối đa. Tiếp theo kiểm chứng tải trong môi trường triển khai và bot thật; M3/M6/M7 vẫn chưa nghiệm thu.
