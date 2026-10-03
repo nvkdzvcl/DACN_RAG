@@ -82,13 +82,15 @@ export default function KnowledgeBase({ user, request, onExpired }) {
   }
   return <section className="knowledge">
     <header><div><h1>Kho tri thức</h1><p>Tài liệu nội bộ và câu trả lời có trích nguồn</p></div><button onClick={() => load()} disabled={loading}>Làm mới</button></header>
+    <nav className="kbTabs" aria-label="Các phần kho tri thức"><a href="#tai-lieu">Tài liệu</a>{user.role === 'admin' && <a href="#tai-tai-lieu">Tải tài liệu</a>}<a href="#hoi-tai-lieu">Thử hỏi AI</a></nav>
     <p className={`runtime ${runtime?.ready ? 'ready' : ''}`} role="status">{!runtime ? 'Đang kiểm tra Ollama...' : runtime.ready ? `Ollama kết nối được, đã tải đủ model · ${runtime.chat_model} · ${runtime.embedding_model}` : runtime.error || `Cần tải đủ model ${runtime.chat_model} và ${runtime.embedding_model}.`}</p>
-    {user.role === 'admin' && <form className="uploadCard" onSubmit={upload} aria-busy={Boolean(busy)}>
+    {user.role === 'admin' && <form id="tai-tai-lieu" className="uploadCard" onSubmit={upload} aria-busy={Boolean(busy)}>
       <label>Tải tài liệu<input name="file" type="file" accept=".pdf,.docx,.txt,.md,.markdown" required disabled={Boolean(busy)} /></label>
       <p>PDF, DOCX, TXT, Markdown · tối đa 10 MB. PDF scan cần OCR trước.</p>
       <button disabled={Boolean(busy)}>{busy === 'upload' ? 'Đang trích xuất và lập chỉ mục...' : 'Tải lên và lập chỉ mục'}</button>
     </form>}
     {error && <p role="alert" className="kbError">{error}</p>}
+    <h2 className="documentHeading" id="tai-lieu">Tài liệu <span>{documents.length} tài liệu</span></h2>
     {loading ? <p role="status">Đang tải tài liệu...</p> : !documents.length ? <p>Chưa có tài liệu. Quản trị viên tải tài liệu để bắt đầu hỏi đáp.</p> : <div className="documentList">{documents.map(document => <article className="documentCard" key={document.document_id}>
       <div><h2>{document.filename}</h2><p>{labels[document.status] || document.status} · {document.chunks} đoạn</p>{document.error_message && <p className="kbError">{document.error_message}</p>}</div>
       <div className="documentActions"><button onClick={() => show(document)} disabled={Boolean(busy)}>Xem nội dung</button>
@@ -96,7 +98,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
       {removeId === document.document_id && <div className="deleteConfirm" role="alert"><p>Xóa tài liệu, các đoạn và vector? Lịch sử hội thoại vẫn giữ trích dẫn cũ.</p><button disabled={Boolean(busy)} onClick={() => mutate(`/documents/${document.document_id}`, { method: 'DELETE' }, document.document_id)}>Xác nhận xóa</button><button disabled={Boolean(busy)} onClick={() => setRemoveId(null)}>Hủy</button></div>}
     </article>)}</div>}
     {preview && <section className="sourcePreview" aria-label="Nội dung tài liệu"><button onClick={() => setPreview(null)}>Đóng nội dung</button><h2>{preview.name}</h2>{preview.loading ? <p role="status">Đang tải...</p> : preview.error ? <p role="alert">{preview.error}</p> : preview.chunks.map(chunk => <article key={chunk.chunk_id}><h3>{chunk.location || `Đoạn ${chunk.index + 1}`}</h3><p>{chunk.content}</p></article>)}</section>}
-    <section className="askCard"><h2>Thử hỏi từ tài liệu</h2><form onSubmit={ask}><label>Câu hỏi<textarea value={question} onChange={event => setQuestion(event.target.value)} maxLength={2000} required rows={3} /></label><button disabled={asking || Boolean(busy) || !question.trim()}>{asking ? 'Đang tìm nguồn và tạo câu trả lời...' : 'Hỏi AI'}</button></form>
+    <section id="hoi-tai-lieu" className="askCard"><h2>Thử hỏi từ tài liệu</h2><form onSubmit={ask}><label>Câu hỏi<textarea value={question} onChange={event => setQuestion(event.target.value)} maxLength={2000} required rows={3} /></label><button disabled={asking || Boolean(busy) || !question.trim()}>{asking ? 'Đang tìm nguồn và tạo câu trả lời...' : 'Hỏi AI'}</button></form>
       {answerError && <p role="alert" className="kbError">{answerError}</p>}
       {answer && <div className="ragAnswer" role="status"><b>{answer.grounded ? 'Có trích nguồn' : 'Chưa đủ bằng chứng'}</b><p>{answer.answer}</p><Citations citations={answer.citations} request={request} /></div>}
     </section>
