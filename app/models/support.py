@@ -51,8 +51,18 @@ class CustomerAccount(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), unique=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
     password_hash: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+class CustomerEmailToken(Base):
+    __tablename__ = "customer_email_tokens"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("customer_accounts.id"), index=True)
+    purpose: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[int] = mapped_column(index=True)
+    expires_at: Mapped[int] = mapped_column(index=True)
+    used: Mapped[bool] = mapped_column(Boolean, default=False)
 
 class CustomerSession(Base):
     __tablename__ = "customer_sessions"

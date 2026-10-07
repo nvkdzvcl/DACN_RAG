@@ -1,4 +1,4 @@
-"""Self-managed customer accounts; email is a login identifier, not verified ownership."""
+"""Self-managed customer accounts with verified-email recovery."""
 import os
 import re
 import secrets
@@ -6,7 +6,7 @@ import time
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import BackgroundTasks, APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 from sqlalchemy import delete, update
 from sqlalchemy.exc import IntegrityError
@@ -16,16 +16,16 @@ from app.api.widget import (COOKIE, COOKIE_PATH, SESSION_SECONDS, check_csrf, fi
                             no_cache, rate_limit, require_session, snapshot)
 from app.core.auth import hash_password, token_hash, verify_password
 from app.db.session import get_db
-from app.models.support import Conversation, Customer, CustomerAccount, CustomerSession
+from app.models.support import Conversation, Customer, CustomerAccount, CustomerEmailToken, CustomerSession
+from app.services.customer_email import deliver_challenge, mail_settings
 
 router = APIRouter(prefix=COOKIE_PATH + '/account', tags=['customer accounts'],
                    dependencies=[Depends(check_csrf), Depends(no_cache)])
 _dummy_hash = hash_password(secrets.token_urlsafe(32))
 
-class Credentials(BaseModel):
+class EmailAddress(BaseModel):
     model_config = ConfigDict(extra='forbid')
     email: str = Field(min_length=3, max_length=254)
-    password: SecretStr
 
     @field_validator('email')
     @classmethod
@@ -37,6 +37,9 @@ class Credentials(BaseModel):
                 or not re.fullmatch(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}', domain)):
             raise ValueError('Email không hợp lệ.')
         return value
+
+class Credentials(EmailAddress):
+    password: SecretStr
 
 class Register(Credentials):
     display_name: str = Field(min_length=1, max_length=80)
@@ -144,6 +147,7 @@ def change_password(payload: ChangePassword, request: Request, response: Respons
     if updated.rowcount != 1:
         db.rollback()
         raise HTTPException(409, 'Mật khẩu đã thay đổi. Vui lòng đăng nhập lại.')
+    db.execute(update(CustomerEmailToken).where(CustomerEmailToken.account_id == account.id).values(used=True))
     db.execute(delete(CustomerSession).where(CustomerSession.account_id == account.id))
     db.commit()
     response.delete_cookie(COOKIE, path=COOKIE_PATH)
@@ -169,3 +173,109 @@ def conversation_history(conversation_id: str, session=Depends(require_account),
         raise HTTPException(404, 'Không tìm thấy hội thoại.')
     context = CustomerSession(conversation_id=conversation.id, account_id=account.id, expires_at=session.expires_at)
     return snapshot(db, context, before, limit)
+
+
+class EmailChallenge(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    token: SecretStr
+
+class VerifyEmail(EmailChallenge):
+    password: SecretStr
+
+class ResetPassword(EmailChallenge):
+    new_password: SecretStr
+
+
+def configured_mail():
+    try:
+        return mail_settings()
+    except ValueError:
+        raise HTTPException(503, 'Gửi email chưa sẵn sàng. Vui lòng liên hệ cửa hàng hoặc thử lại sau.') from None
+
+
+def challenge_account(db, secret, purpose):
+    token = secret.get_secret_value()
+    if not re.fullmatch(r'[A-Za-z0-9_-]{43}', token):
+        raise HTTPException(400, 'Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng.')
+    challenge = db.get(CustomerEmailToken, token_hash(token))
+    if not challenge or challenge.used or challenge.purpose != purpose or challenge.expires_at <= int(time.time()):
+        raise HTTPException(400, 'Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng.')
+    account = db.get(CustomerAccount, challenge.account_id)
+    if account is None:
+        raise HTTPException(400, 'Liên kết không còn hiệu lực.')
+    return challenge, account
+
+
+def consume_challenge(db, challenge, account):
+    # Serialize against password changes and other challenge consumers, then recheck the one-time token.
+    locked = db.execute(update(CustomerAccount).where(CustomerAccount.id == account.id,
+                        CustomerAccount.password_hash == account.password_hash).values(email_verified=CustomerAccount.email_verified))
+    consumed = db.execute(update(CustomerEmailToken).where(CustomerEmailToken.token_hash == challenge.token_hash,
+                          CustomerEmailToken.used.is_(False), CustomerEmailToken.expires_at > int(time.time())).values(used=True))
+    if locked.rowcount != 1 or consumed.rowcount != 1:
+        db.rollback()
+        raise HTTPException(400, 'Liên kết không còn hiệu lực. Vui lòng yêu cầu liên kết mới.')
+
+
+@router.get('/email-status')
+def email_status():
+    try:
+        mail_settings()
+        enabled = True
+    except ValueError:
+        enabled = False
+    return {'configured': enabled}
+
+
+@router.post('/verification-request', status_code=202)
+def request_verification(request: Request, background: BackgroundTasks,
+                         session=Depends(require_account), db: Session = Depends(get_db)):
+    rate_limit(request, 'customer-verify-request', 3)
+    settings = configured_mail()
+    background.add_task(deliver_challenge, db.get_bind(), settings, 'verify', account_id=session.account_id)
+    return {'message': 'Đã tiếp nhận yêu cầu xác minh. Kiểm tra hộp thư và thư rác; nếu chưa nhận, chờ ít nhất một phút trước khi gửi lại.'}
+
+
+@router.post('/verify-email')
+def verify_email(payload: VerifyEmail, request: Request, db: Session = Depends(get_db)):
+    rate_limit(request, 'customer-verify', 10)
+    password = password_text(payload.password)
+    challenge, account = challenge_account(db, payload.token, 'verify')
+    if not verify_password(password, account.password_hash):
+        raise HTTPException(400, 'Mật khẩu không đúng. Nhập mật khẩu của tài khoản đã yêu cầu xác minh.')
+    consume_challenge(db, challenge, account)
+    db.execute(update(CustomerAccount).where(CustomerAccount.id == account.id).values(email_verified=True))
+    db.execute(update(CustomerEmailToken).where(CustomerEmailToken.account_id == account.id,
+               CustomerEmailToken.purpose == 'verify').values(used=True))
+    db.commit()
+    return {'message': 'Đã xác minh email. Bạn có thể dùng email này để khôi phục mật khẩu.'}
+
+
+@router.post('/forgot-password', status_code=202)
+def forgot_password(payload: EmailAddress, request: Request, background: BackgroundTasks, db: Session = Depends(get_db)):
+    rate_limit(request, 'customer-forgot', 5)
+    settings = configured_mail()
+    # Same response and foreground work for existing, unverified and unknown email addresses.
+    background.add_task(deliver_challenge, db.get_bind(), settings, 'reset', email=payload.email)
+    return {'message': 'Nếu email thuộc tài khoản đã xác minh, hệ thống sẽ gửi liên kết đặt lại mật khẩu. Kiểm tra hộp thư và thư rác; chờ ít nhất một phút trước khi gửi lại.'}
+
+
+@router.post('/reset-password')
+def reset_password(payload: ResetPassword, request: Request, response: Response, db: Session = Depends(get_db)):
+    rate_limit(request, 'customer-reset', 10)
+    password = password_text(payload.new_password, 15)
+    challenge, account = challenge_account(db, payload.token, 'reset')
+    if not account.email_verified:
+        raise HTTPException(400, 'Email chưa được xác minh.')
+    if verify_password(password, account.password_hash):
+        raise HTTPException(400, 'Mật khẩu mới phải khác mật khẩu hiện tại.')
+    encoded = hash_password(password)
+    consume_challenge(db, challenge, account)
+    db.execute(update(CustomerAccount).where(CustomerAccount.id == account.id).values(password_hash=encoded))
+    db.execute(update(CustomerEmailToken).where(CustomerEmailToken.account_id == account.id).values(used=True))
+    current = find_session(request, db)
+    if isinstance(current, CustomerSession) and current.account_id == account.id:
+        response.delete_cookie(COOKIE, path=COOKIE_PATH)
+    db.execute(delete(CustomerSession).where(CustomerSession.account_id == account.id))
+    db.commit()
+    return {'message': 'Đã đặt lại mật khẩu và đăng xuất mọi thiết bị. Vui lòng đăng nhập bằng mật khẩu mới.'}

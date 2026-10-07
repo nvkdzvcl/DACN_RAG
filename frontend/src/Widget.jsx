@@ -4,6 +4,7 @@ import './widget.css';
 import './portal.css';
 import { CustomerHistory, CustomerProfile } from './CustomerAccount';
 import AuthLayout, { AuthInput } from './AuthLayout';
+import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 
 const statuses = { open: 'Trợ lý hỗ trợ', handoff_requested: 'Đang chờ nhân viên', assigned: 'Nhân viên đã tiếp nhận', closed: 'Hội thoại đã đóng', resolved: 'Hội thoại đã giải quyết' };
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -22,6 +23,7 @@ async function request(path, options = {}) {
 }
 
 export default function Widget() {
+  const [emailAction, setEmailAction] = useState(takeEmailLink);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -49,6 +51,16 @@ export default function Widget() {
   const closed = session?.status === 'closed';
   const messageBefore = session?.message_page.before || null;
 
+  useEffect(() => {
+    function readLink() { const action = takeEmailLink(); if (action) setEmailAction(action); }
+    window.addEventListener('hashchange', readLink);
+    return () => window.removeEventListener('hashchange', readLink);
+  }, []);
+  function emailComplete(mode, message) {
+    if (mode === 'reset') clearIdentity(message);
+    else setNotice(message);
+    setEmailAction(null); setRetry(n => n + 1);
+  }
   function apply(data, version) {
     if (typeof data.conversation_id !== 'string' || !Array.isArray(data.messages) || !data.message_page) throw new Error('Dữ liệu hội thoại không hợp lệ.');
     if (version === sequence.current) {
@@ -159,7 +171,7 @@ export default function Widget() {
         email: fields.get('email').trim(), password: fields.get('password'),
         ...(authMode === 'register' && { display_name: fields.get('display_name').trim() })
       }) });
-      apply(data, version); setAuthMode('guest'); setDraft(''); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
+      apply(data, version); setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setDraft(''); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
       pending.current = null; handoffId.current = null;
     } catch (error) { setError(error.message); }
     finally { setBusy(false); }
@@ -221,7 +233,7 @@ export default function Widget() {
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
     <header className="widgetHeader"><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
       {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}</header>
-    {session && <div className="widgetAccountBar"><span>{session.account ? session.account.email : 'Khách vãng lai'}</span>{session.account ? <button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button> : <button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button>}</div>}
+    {session && <div className="widgetAccountBar"><span>{session.account ? session.account.email : 'Khách vãng lai'}{session.account && !session.account.email_verified && !embedded && <button onClick={() => setView('account')}>Xác minh email</button>}</span>{session.account ? <button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button> : <button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button>}</div>}
     {loading ? <p className="widgetState" role="status">Đang kết nối...</p> : !session || authMode !== 'guest' ? <section className="widgetWelcome">
       <span className="widgetEyebrow">RAG SUPPORT · KHÁCH HÀNG</span><h2>{authMode === 'register' ? 'Tạo tài khoản' : authMode === 'login' ? 'Chào mừng trở lại' : 'Bạn cần hỗ trợ điều gì?'}</h2>
       <p>{authMode === 'guest' ? 'Hỏi chính sách hoặc kết nối với nhân viên. Bạn có thể trò chuyện ngay mà không cần tài khoản.' : 'Đăng nhập để giữ lịch sử và tiếp tục trò chuyện trên nhiều thiết bị.'}</p>
@@ -233,7 +245,7 @@ export default function Widget() {
         {authMode === 'register' && <><label>Nhập lại mật khẩu<input name="confirm" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></label><small>Mật khẩu 15–128 ký tự. Email chưa được xác minh và không tự cấp quyền xem đơn.</small></>}
         <button>{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
       </fieldset></form>}
-      {authMode !== 'guest' && <small>Chưa hỗ trợ gửi email khôi phục mật khẩu. Lịch sử phiên khách không tự ghép vào tài khoản.</small>}
+      {authMode === 'login' && <button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button>}{authMode !== 'guest' && <small>Xác minh email trong mục Tài khoản để dùng khôi phục mật khẩu. Lịch sử phiên khách không tự ghép vào tài khoản.</small>}
       {notice && <p role="status">{notice}</p>}{error && <div className="widgetError" role="alert"><p>{error}</p>{authMode === 'guest' && <button onClick={() => { setError(''); setRetry(n => n + 1); }} disabled={busy}>Thử kết nối lại</button>}</div>}
     </section> : <>
       <nav className="widgetHistory" aria-label="Phân trang tin nhắn" aria-busy={historyLoading}>
@@ -266,6 +278,7 @@ export default function Widget() {
       </footer>
     </>}
   </section>;
+  if (emailAction) return <CustomerEmail key={emailAction.mode + (emailAction.token || '')} action={emailAction} request={request} onBack={() => setEmailAction(null)} onComplete={emailComplete} />;
   if (embedded) return chat;
   if (!loading && (!session || authMode !== 'guest')) return <AuthLayout>
     <h1>{authMode === 'register' ? 'Tạo tài khoản của bạn' : authMode === 'login' ? 'Chào mừng trở lại!' : 'Bạn cần hỗ trợ điều gì?'}</h1>
@@ -279,9 +292,9 @@ export default function Widget() {
       <button className="authSubmit"><ArrowRight size={18} />{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
     </fieldset></form>}
     {notice && <p className="authFeedback" role="status">{notice}</p>}{error && <p className="authFeedback" role="alert">{error}</p>}
-    {authMode === 'login' && <details className="authHelp"><summary>Quên mật khẩu?</summary><p>Chưa hỗ trợ khôi phục mật khẩu qua email. Nếu vẫn biết mật khẩu hiện tại, bạn có thể đổi trong mục Tài khoản sau khi đăng nhập.</p></details>}
+    {authMode === 'login' && <button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button>}
     <div className="authNote"><ShieldCheck size={21} /><div>{authMode === 'guest' ? 'Trò chuyện nhanh, không cần tài khoản' : 'Lịch sử của bạn, luôn được kết nối'}<small>{authMode === 'guest' ? 'Đăng ký khi bạn muốn lưu lịch sử lâu dài và dùng trên nhiều thiết bị.' : 'Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.'}</small></div></div>
-    {authMode === 'register' && <p className="authHelp">Chưa hỗ trợ gửi email khôi phục mật khẩu.</p>}
+    {authMode === 'register' && <p className="authHelp">Sau khi đăng ký, xác minh email trong mục Tài khoản để dùng khôi phục mật khẩu.</p>}
   </AuthLayout>;
   const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
   const activeAccess = session?.order_access?.filter(access => access.expires_at > Date.now() / 1000) || [];

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { EmailVerification } from './CustomerEmail';
 
 const labels = { open: 'AI hỗ trợ', handoff_requested: 'Chờ nhân viên', assigned: 'Nhân viên hỗ trợ', resolved: 'Đã giải quyết', closed: 'Đã kết thúc' };
 const senderLabels = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -55,5 +56,5 @@ export function CustomerProfile({ account, request, onExpired, onPasswordChanged
     catch (e) { if (e.status === 401) onExpired(); else setError(e.message); }
     finally { setBusy(false); }
   }
-  return <section className="portalPage"><div className="portalPageHead"><div><h1>Tài khoản khách hàng</h1><p>{account.email}</p></div></div><p className="accountInfo">Email này dùng để đăng nhập, chưa được xác minh quyền sở hữu. Quyền xem đơn hàng vẫn cần mã truy cập riêng.</p><form className="portalOrderForm" onSubmit={save}><fieldset disabled={busy}><h2>Đổi mật khẩu</h2><label>Mật khẩu hiện tại<input name="current_password" type="password" required maxLength={128} autoComplete="current-password" /></label><label>Mật khẩu mới<input name="new_password" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></label><label>Nhập lại mật khẩu mới<input name="confirm" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></label><p>15–128 ký tự. Đổi thành công sẽ đăng xuất tài khoản trên mọi thiết bị.</p>{error && <p role="alert" className="widgetError">{error}</p>}<button>{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form></section>;
+  return <section className="portalPage"><div className="portalPageHead"><div><h1>Tài khoản khách hàng</h1><p>{account.email}</p></div></div><EmailVerification account={account} request={request} onExpired={onExpired} /><form className="portalOrderForm" onSubmit={save}><fieldset disabled={busy}><h2>Đổi mật khẩu</h2><label>Mật khẩu hiện tại<input name="current_password" type="password" required maxLength={128} autoComplete="current-password" /></label><label>Mật khẩu mới<input name="new_password" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></label><label>Nhập lại mật khẩu mới<input name="confirm" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></label><p>15–128 ký tự. Đổi thành công sẽ đăng xuất tài khoản trên mọi thiết bị.</p>{error && <p role="alert" className="widgetError">{error}</p>}<button>{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form></section>;
 }

@@ -55,7 +55,7 @@ Phân tích nghiệp vụ và vai trò admin/nhân viên/khách hàng; thiết k
 
 Đối tượng là hội thoại CSKH tiếng Việt, tài liệu chính sách PDF/DOCX và dữ liệu đơn hàng giả lập. Phạm vi bắt buộc gồm Website và kênh thứ hai (đề xuất Telegram, cần thống nhất với GVHD). Phát triển trực tiếp trên Windows; Zalo, OCR nâng cao và Self-RAG là hướng mở rộng. Không dùng dữ liệu giả lập để khẳng định đã tích hợp kênh thật.
 
-Khách hàng có thể dùng phiên vãng lai hoặc tài khoản email và mật khẩu tự quản lý để giữ lịch sử trên nhiều thiết bị. Tài khoản khách tách khỏi tài khoản nhân viên; email chưa xác minh không được dùng làm căn cứ cấp quyền xem đơn. Xác minh email và khôi phục mật khẩu qua email là phần mở rộng chưa triển khai.
+Khách hàng có thể dùng phiên vãng lai hoặc tài khoản email và mật khẩu tự quản lý để giữ lịch sử trên nhiều thiết bị. Tài khoản khách tách khỏi tài khoản nhân viên; email chưa xác minh không được dùng làm căn cứ cấp quyền xem đơn. Xác minh email và khôi phục mật khẩu qua SMTP đã được triển khai, còn cần cấu hình và kiểm chứng giao thư thật. Email đã xác minh vẫn không tự cấp quyền xem đơn.
 
 **6. Phương pháp nghiên cứu**
 

@@ -25,7 +25,7 @@ def readiness(db: Session = Depends(get_db)):
     try:
         try:
             versions = list(db.execute(text('SELECT version FROM schema_migrations ORDER BY version')).scalars())
-            checks['database'] = 'ok' if versions == list(range(1, 9)) else 'schema_mismatch'
+            checks['database'] = 'ok' if versions == list(range(1, 10)) else 'schema_mismatch'
             documents = db.query(KnowledgeDocument).filter_by(status='indexed', embedding_model=embedding_model()).all()
             sources = [(d.id, d.filename, d.index_version) for d in documents]
             expected = db.query(DocumentChunk).filter(DocumentChunk.document_id.in_([d[0] for d in sources])).count()

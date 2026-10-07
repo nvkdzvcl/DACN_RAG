@@ -1,5 +1,14 @@
 # Công việc
 
+## 07/10/2026 - Xác minh email và khôi phục mật khẩu khách hàng
+
+Ngày 07/10/2026 triển khai xác minh email và khôi phục mật khẩu khách hàng qua SMTP dùng TLS. Schema v9 thêm cờ email_verified và bảng token email; tài khoản cũ mặc định chưa xác minh. Liên kết xác minh có hạn 60 phút, yêu cầu mật khẩu hiện tại; liên kết đặt lại mật khẩu có hạn 15 phút, chỉ cấp cho email đã xác minh. Token chỉ lưu hash, dùng một lần; đổi hoặc đặt lại mật khẩu thu hồi mọi phiên và token của tài khoản. Không tự ghép hồ sơ hoặc cấp quyền đơn hàng theo email.
+
+Bộ backend đạt 172 kiểm thử, frontend build đạt. Kiểm tra trình duyệt bằng DB và hộp thư thử cục bộ xác nhận đăng ký, xác minh từ phiên khác, từ chối mật khẩu sai, quên mật khẩu, đặt lại mật khẩu, thu hồi phiên cũ và chặn dùng lại liên kết; giao diện 390 px không tràn ngang. Kiểm thử còn bao gồm reset đồng thời, token hết hạn/sai mục đích, giới hạn gửi theo IP và tài khoản, TLS, lỗi SMTP không lộ bí mật, migration giữ dữ liệu và backup thu hồi token. Chưa cấu hình hoặc gửi thử tới hộp thư thật. Gửi email hiện dùng tác vụ nền trong tiến trình, chưa có hàng gửi bền hoặc retry tự động; cần kiểm chứng giao thư sau khi cấu hình SMTP trước nghiệm thu vận hành.
+
+Khánh tiếp tục phụ trách tích hợp chính và cấu hình hộp thư; nhóm kiểm thử chạy độc lập bằng email thật sau cấu hình, kiểm tra thư rác và thiết bị khác; nhóm báo cáo lưu bằng chứng giao thư. Mốc kế tiếp: cấu hình SMTP và nghiệm thu email thật; sau đó trở lại kiểm chứng RAG toàn luồng/Telegram.
+
+
 ## 03/10/2026 - Tài khoản khách hàng và giao diện đăng nhập
 
 Ngày 03/10/2026 bổ sung tài khoản khách hàng bằng email và mật khẩu tự quản lý, tách khỏi tài khoản nhân viên. Schema v8 thêm CustomerAccount và CustomerSession; hỗ trợ đăng ký, đăng nhập nhiều thiết bị, lịch sử theo tài khoản và đổi mật khẩu thu hồi mọi phiên. Mật khẩu lưu PBKDF2-SHA256; cookie HttpOnly có hạn 24 giờ. Email chưa xác minh, chưa có khôi phục qua email; không tự ghép lịch sử khách vãng lai hoặc cấp quyền xem đơn theo email.

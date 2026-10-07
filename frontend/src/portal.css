@@ -73,3 +73,5 @@
 .accountMessages .widgetMessage { max-width:90%; }
 .portalOrderForm fieldset { display:grid; gap:14px; border:0; min-width:0; margin:0; padding:0; }
 .portalOrderForm fieldset h2 { margin:0; }
+
+.portalEmailCard{display:flex;align-items:flex-start;gap:13px;background:#f0efff;padding:18px;border-radius:10px;margin-top:20px}.portalEmailCard>svg{flex:none;color:#604cf3}.portalEmailCard h2{margin:0}.portalEmailCard p{font-size:12px}.portalEmailCard button{padding:10px 14px;border:1px solid #d9d4f9;border-radius:7px;background:white;color:#5140c3}.widgetAccountBar>span>button{margin-left:10px}

@@ -1,6 +1,6 @@
 # Vận hành local và triển khai bản build
 
-CLI `python -m app.backup` hỗ trợ SQLite schema v7/v8, Qdrant embedded và tài liệu nguồn. Dùng Python 3.12 trở lên với dependency hiện có; bản kiểm chứng chạy Python 3.13 trên Windows. Không hỗ trợ PostgreSQL, sao lưu nóng hoặc triển khai nhiều worker.
+CLI `python -m app.backup` hỗ trợ SQLite schema v7/v8/v9, Qdrant embedded và tài liệu nguồn. Dùng Python 3.12 trở lên với dependency hiện có; bản kiểm chứng chạy Python 3.13 trên Windows. Không hỗ trợ PostgreSQL, sao lưu nóng hoặc triển khai nhiều worker.
 
 ## Chạy giao diện và API cùng origin
 
@@ -72,7 +72,7 @@ Bản sao vẫn chứa hội thoại, tài liệu, hash mật khẩu và token p
 
 ## Khôi phục vào thư mục mới
 
-1. Dùng phiên bản mã nguồn/dependency hỗ trợ schema của bản sao (v7 hoặc v8). Kiểm tra bản sao và chạy khôi phục vào thư mục chưa tồn tại:
+1. Dùng phiên bản mã nguồn/dependency hỗ trợ schema của bản sao (v7, v8 hoặc v9). Kiểm tra bản sao và chạy khôi phục vào thư mục chưa tồn tại:
 
 ```powershell
 python -m app.backup restore data/backups/before-deploy-20260921 data/restored/check-20260921
@@ -112,3 +112,5 @@ Chạy `python -m app.measure_load --clients 10 --rounds 20 --conversations 500 
 Đã thêm index messages(conversation_id, created_at, id) và tickets(conversation_id, created_at), áp dụng cả DB mới/cũ khi migration chạy. Khởi động lại API trong cửa sổ bảo trì để cài index; thao tác có thể mất thời gian trên DB lớn. Schema vẫn v7, bản sao v7 cũ tương thích; không cần sửa cấu hình hoặc lập chỉ mục lại tài liệu. Phép đo 10 client/500 hội thoại cải thiện từ 13,755 lên 37,437-38,008 request/giây; không đo chi phí startup tạo index. Các lượt đo này trả toàn danh sách. Từ 22/09/2026 Inbox mặc định trả 25 dòng và CLI ghi inbox_page_size; không so throughput trực tiếp giữa hai workload. Tìm kiếm/SLA vẫn quét theo lô. Kết quả không xác định sức chứa tối đa, tải RAG/Telegram hoặc SLO production.
 
 Từ schema v8, khôi phục thu hồi thêm `customer_sessions`. Tài khoản khách và lịch sử vẫn giữ; khách cần đăng nhập lại. Xem [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).
+
+Schema v9 bổ sung xác minh và khôi phục email. Restore thu hồi cả `customer_email_tokens` để liên kết trước sao lưu không còn dùng được. Cấu hình SMTP và giới hạn giao thư: [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).

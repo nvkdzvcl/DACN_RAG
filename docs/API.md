@@ -158,4 +158,18 @@ Prefix: `/api/v1/widget/account`. Cookie phiên khách, độc lập phiên staf
 | GET | /conversations | offset >= 0, limit 1–50 (mặc định 20); trả items, total, has_more của chính tài khoản |
 | GET | /conversations/{id} | limit 1–100 (mặc định 50), before tùy chọn; trả snapshot lịch sử; sai chủ hoặc không tồn tại trả 404 |
 
-Snapshot widget thêm `account: {email, email_verified: false}` cho tài khoản, null cho khách vãng lai. Đăng ký tạo hồ sơ khách mới; không tự ghép hồ sơ theo email hoặc chuyển lịch sử guest. POST register/login thay cookie hiện tại. DELETE `/api/v1/widget/session` với tài khoản trả snapshot hội thoại mới, giữ lịch sử; với guest giữ hành vi kết thúc phiên. Giới hạn mỗi IP/phút: đăng ký 6, đăng nhập 10, đổi mật khẩu 5; vượt trả 429. Chi tiết tại [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).
+Snapshot widget thêm `account: {email, email_verified}` cho tài khoản, null cho khách vãng lai. Đăng ký tạo hồ sơ khách mới; không tự ghép hồ sơ theo email hoặc chuyển lịch sử guest. POST register/login thay cookie hiện tại. DELETE `/api/v1/widget/session` với tài khoản trả snapshot hội thoại mới, giữ lịch sử; với guest giữ hành vi kết thúc phiên. Giới hạn mỗi IP/phút: đăng ký 6, đăng nhập 10, đổi mật khẩu 5; vượt trả 429. Chi tiết tại [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).
+
+### Xác minh email và khôi phục mật khẩu
+
+Cùng prefix `/api/v1/widget/account`, POST yêu cầu CSRF. GET/POST không trả token hoặc thông tin SMTP.
+
+| Method | Path | Hợp đồng |
+|---|---|---|
+| GET | /email-status | Công khai; {configured: boolean}, chỉ kiểm tra cấu hình |
+| POST | /verification-request | Phiên tài khoản khách; 202 message; gửi cho email tài khoản chưa xác minh |
+| POST | /verify-email | {token, password}; mật khẩu hiện tại + token verify còn hạn; 200 message, sai/đã dùng/hết hạn 400 |
+| POST | /forgot-password | {email}; 202 với thông báo chung cho tài khoản đã xác minh/chưa xác minh/không tồn tại; gửi nền chỉ khi đã xác minh |
+| POST | /reset-password | {token, new_password}; mật khẩu 15–128 ký tự khác mật khẩu cũ; 200 message, thu hồi mọi phiên/token; sai/đã dùng/hết hạn 400 |
+
+Hai endpoint yêu cầu gửi trả 503 khi cấu hình mail không hợp lệ; 202 chỉ là tiếp nhận yêu cầu, không xác nhận thư đã giao. Payload thừa/sai kiểu trả 422, vượt giới hạn IP trả 429. Token verify hạn 60 phút, reset 15 phút; chỉ POST hợp lệ mới tiêu thụ token, mở GET không đổi dữ liệu. Xác minh không đăng nhập tự động và không cấp quyền đơn. Snapshot trả cờ email_verified thực từ DB. Chi tiết giới hạn, cấu hình và retry tại [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).

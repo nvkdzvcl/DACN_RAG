@@ -373,7 +373,7 @@ class AuthHandoffTests(unittest.TestCase):
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
             self.assertEqual(connection.execute(text("SELECT content FROM messages WHERE id = 'message'")).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 8)
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 9)
             plan = connection.execute(text("EXPLAIN QUERY PLAN SELECT id FROM messages WHERE conversation_id = 'old' ORDER BY created_at, id")).all()
             self.assertTrue(any('ix_messages_conversation_created_id' in row[-1] for row in plan))
             plan = connection.execute(text("EXPLAIN QUERY PLAN SELECT id FROM tickets WHERE conversation_id = 'old' ORDER BY created_at")).all()

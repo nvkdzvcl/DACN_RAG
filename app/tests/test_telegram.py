@@ -484,7 +484,7 @@ class TelegramTests(unittest.TestCase):
         migrate(self.engine)
         self.assertEqual(self.db.query(TelegramUpdate).count(),1)
         self.assertEqual(self.db.query(TelegramDelivery).count(),1)
-        self.assertEqual(self.db.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(),8)
+        self.assertEqual(self.db.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(),9)
 
 
 if __name__ == '__main__':

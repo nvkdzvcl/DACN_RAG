@@ -1,10 +1,12 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+07/10/2026: đã triển khai xác minh email và khôi phục mật khẩu qua SMTP, schema v9; 172 kiểm thử và build đạt, UI kiểm chứng với hộp thư thử. SMTP thật chưa cấu hình, chưa nghiệm thu giao thư. Tài khoản cũ phải xác minh trước khi được khôi phục email; đơn hàng vẫn theo mã truy cập.
+
 03/10/2026: tài khoản khách hàng email + mật khẩu và giao diện đăng nhập đã kiểm chứng; schema v8, lịch sử nhiều thiết bị, đổi mật khẩu thu hồi phiên. 165 kiểm thử backend đạt, frontend build và QA trình duyệt đạt. Email chưa xác minh/chưa khôi phục qua email; quyền đơn vẫn theo mã truy cập. Chi tiết tại docs/CUSTOMER_AUTH.md và docs/TASKS.md.
 
 22/09/2026 (mốc con M5 nhật ký trong Inbox): nhân viên xem trace ngay dưới tin khách, gồm trạng thái/mã đơn/hành động/kết quả; pending không bị coi là đang chạy, rag không bị coi là đáp án thành công. Dùng details/summary, không thêm API, dependency hoặc quyền khách. Sáu test công cụ và Vite build đạt; QA trình duyệt desktop/390px xác nhận nhãn, bàn phím, giữ mở qua polling và không tràn ngang. Không thay model/quyền/tool execution; M3/M5/M6/M7 vẫn chờ các phần nghiệm thu riêng.
 
-Ngày lập: 11/09/2026. Cập nhật: 01/10/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local, widget có phiên khách, Inbox polling và vòng đời ticket/SLA phản hồi; các mốc M0-M8 chưa nghiệm thu toàn bộ.
+Ngày lập: 11/09/2026. Cập nhật: 07/10/2026. Đã kiểm chứng mốc con xác thực, handoff, RAG local, widget có phiên khách, Inbox polling và vòng đời ticket/SLA phản hồi; các mốc M0-M8 chưa nghiệm thu toàn bộ.
 
 01/10/2026 (độ bền hàng chờ Telegram): lỗi nhận tin tiếp theo không còn chặn update đã commit; giữ trạng thái lỗi, con trỏ và quy tắc gửi lại. Test tái hiện trước sửa, 20 test Telegram đạt sau sửa bằng transport/model giả lập. Chưa tách worker, chưa kiểm chứng bot thật hoặc nghiệm thu M6.
 

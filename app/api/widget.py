@@ -112,7 +112,7 @@ def snapshot(db, session, before=None, limit=50):
     has_more = len(recent) > limit
     messages = list(reversed(recent[:limit]))
     account = db.get(CustomerAccount, session.account_id) if isinstance(session, CustomerSession) else None
-    return {'account': {'email': account.email, 'email_verified': False} if account else None,
+    return {'account': {'email': account.email, 'email_verified': account.email_verified} if account else None,
             'conversation_id': conversation.id, 'display_name': conversation.customer.display_name,
             'status': conversation.status, 'expires_at': session.expires_at, 'history_truncated': has_more,
             'message_page': {'limit': limit, 'before': before, 'has_more': has_more,

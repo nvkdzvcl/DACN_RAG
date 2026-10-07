@@ -67,3 +67,8 @@ def migrate(engine):
 
         if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 8")).first():
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (8)"))
+
+        if 'email_verified' not in {c['name'] for c in inspect(connection).get_columns('customer_accounts')}:
+            connection.execute(text('ALTER TABLE customer_accounts ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT FALSE'))
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 9")).first():
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (9)"))

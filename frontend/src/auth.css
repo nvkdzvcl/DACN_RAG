@@ -3,3 +3,5 @@
 @media(max-width:1250px){.authPage{grid-template-columns:53% 47%}.authStory{padding:32px}.authStoryBody{margin-top:50px;min-height:660px}.authPitch h2{font-size:29px}.authPitch>p{max-width:330px}.authScene{transform:scale(.72);transform-origin:right bottom;right:-39px;top:263px;opacity:.85}.authFeatures{max-width:310px}.authFeatures p{max-width:220px}.authHighlights{padding:18px 5px}.authHighlights>div{padding:0 8px}.authHighlights b{font-size:14px}.authPanel{padding:32px}.authContent{padding:45px 0}}
 @media(max-width:960px){.authPage{display:block}.authStory{display:none}.authPanel{min-height:100dvh;padding:25px clamp(22px,7vw,60px)}.authContent{padding:50px 0}.authTop,.authFooter{width:100%;max-width:450px;margin-left:auto;margin-right:auto}.authFormBrand{margin-bottom:32px}}
 @media(prefers-reduced-motion:reduce){.authPage *{scroll-behavior:auto}}
+
+.authPage .authBack{display:flex;align-items:center;gap:7px;border:0;background:transparent;color:#5841d0;padding:10px 0;cursor:pointer;font-size:12px}

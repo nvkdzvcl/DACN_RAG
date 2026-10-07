@@ -1,6 +1,6 @@
 # Nền tảng trợ lý AI hỗ trợ khách hàng đa kênh dựa trên kiến trúc RAG
 
-Báo cáo tiến độ ngày 3 tháng 10 năm 2026
+Báo cáo tiến độ ngày 7 tháng 10 năm 2026
 
 Nhóm 5B phát triển hệ thống CSKH cho cửa hàng bán lẻ trực tuyến giả lập, dưới sự hướng dẫn của giảng viên Trần Đình Nghĩa. Phần xác thực nhân viên, tiếp nhận và trả lời trong Unified Inbox đã được kiểm chứng trên Windows với SQLite. RAG đã chạy mô hình Ollama local và Qdrant lưu bền, có giao diện quản lý tài liệu và câu trả lời kèm nguồn. Hệ thống chưa hoàn thành MVP đa kênh hoặc đánh giá chất lượng RAG toàn diện.
 
@@ -24,7 +24,7 @@ Các điều kiện kiểm chứng của mốc này gồm chặn truy cập chư
 
 ## Chương 4 Thiết kế hệ thống
 
-Backend là ứng dụng FastAPI chia module, dùng SQLAlchemy và SQLite; frontend là React/Vite. Các thực thể chính gồm User, AuthSession, WidgetSession, CustomerAccount, CustomerSession, Customer, Conversation, Message, Ticket, Order, OrderAccess, TelegramCursor, TelegramPeer, TelegramUpdate, TelegramDelivery, KnowledgeDocument và DocumentChunk. Conversation lưu assigned_agent_id; Message lưu agent_id và citations. Các bảng hội thoại và tài liệu tách khỏi Qdrant embedded trên đĩa. Tài liệu có hash chống trùng, phiên bản chỉ mục và model embedding; đoạn nguồn có trang hoặc vị trí dòng/đoạn/bảng.
+Backend là ứng dụng FastAPI chia module, dùng SQLAlchemy và SQLite; frontend là React/Vite. Các thực thể chính gồm User, AuthSession, WidgetSession, CustomerAccount, CustomerSession, CustomerEmailToken, Customer, Conversation, Message, Ticket, Order, OrderAccess, TelegramCursor, TelegramPeer, TelegramUpdate, TelegramDelivery, KnowledgeDocument và DocumentChunk. Conversation lưu assigned_agent_id; Message lưu agent_id và citations. Các bảng hội thoại và tài liệu tách khỏi Qdrant embedded trên đĩa. Tài liệu có hash chống trùng, phiên bản chỉ mục và model embedding; đoạn nguồn có trang hoặc vị trí dòng/đoạn/bảng.
 
 Mật khẩu được băm PBKDF2-HMAC-SHA256 với salt ngẫu nhiên và 600.000 vòng. Token phiên ngẫu nhiên có thời hạn 8 giờ; DB lưu giá trị SHA-256 của token. Trình duyệt giữ cookie HttpOnly, SameSite=Strict; thao tác ghi yêu cầu header chống CSRF. Cookie Secure bật khi APP_ENV khác development. Admin có quyền cấp tài khoản và tải tài liệu; quyền trả lời vẫn yêu cầu đúng người phụ trách, kể cả với admin.
 
@@ -177,6 +177,10 @@ Ngày 26/09/2026 đo M5 bằng Ollama trên SQLite tạm, RAG giả lập. Sau s
 Ngày 03/10/2026 bổ sung tài khoản khách hàng bằng email và mật khẩu tự quản lý, tách khỏi tài khoản nhân viên. Schema v8 thêm CustomerAccount và CustomerSession; hỗ trợ đăng ký, đăng nhập nhiều thiết bị, lịch sử theo tài khoản và đổi mật khẩu thu hồi mọi phiên. Mật khẩu lưu PBKDF2-SHA256; cookie HttpOnly có hạn 24 giờ. Email chưa xác minh, chưa có khôi phục qua email; không tự ghép lịch sử khách vãng lai hoặc cấp quyền xem đơn theo email.
 
 Giao diện đăng nhập khách hàng và nhân viên dùng bố cục hai cột, font Inter và form thích ứng màn hình nhỏ; có hiện/ẩn mật khẩu, đăng ký và khách vãng lai. Bộ backend đạt 165 kiểm thử; frontend build thành công. Kiểm tra trình duyệt với DB tạm xác nhận đăng ký, đăng nhập hai thiết bị, lịch sử, đổi mật khẩu thu hồi phiên, tải lại giữ phiên, kiểm tra mật khẩu nhập lại và widget nhúng. Kiểm tra chiều rộng 320–1536 px không tràn ngang. Chat thử dùng lời chào xử lý tại chỗ, không phải phép đo chất lượng hoặc độ trễ Ollama/RAG. Các kết quả này không thay nghiệm thu bot Telegram thật, nhãn RAG độc lập hoặc khả năng chịu tải triển khai.
+
+Ngày 07/10/2026 triển khai xác minh email và khôi phục mật khẩu khách hàng qua SMTP dùng TLS. Schema v9 thêm cờ email_verified và bảng token email; tài khoản cũ mặc định chưa xác minh. Liên kết xác minh có hạn 60 phút, yêu cầu mật khẩu hiện tại; liên kết đặt lại mật khẩu có hạn 15 phút, chỉ cấp cho email đã xác minh. Token chỉ lưu hash, dùng một lần; đổi hoặc đặt lại mật khẩu thu hồi mọi phiên và token của tài khoản. Không tự ghép hồ sơ hoặc cấp quyền đơn hàng theo email.
+
+Bộ backend đạt 172 kiểm thử, frontend build đạt. Kiểm tra trình duyệt bằng DB và hộp thư thử cục bộ xác nhận đăng ký, xác minh từ phiên khác, từ chối mật khẩu sai, quên mật khẩu, đặt lại mật khẩu, thu hồi phiên cũ và chặn dùng lại liên kết; giao diện 390 px không tràn ngang. Kiểm thử còn bao gồm reset đồng thời, token hết hạn/sai mục đích, giới hạn gửi theo IP và tài khoản, TLS, lỗi SMTP không lộ bí mật, migration giữ dữ liệu và backup thu hồi token. Chưa cấu hình hoặc gửi thử tới hộp thư thật. Gửi email hiện dùng tác vụ nền trong tiến trình, chưa có hàng gửi bền hoặc retry tự động; cần kiểm chứng giao thư sau khi cấu hình SMTP trước nghiệm thu vận hành.
 
 ## Chương 7 Kết luận và đề xuất
 
