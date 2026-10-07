@@ -14,3 +14,7 @@ data/restored/
 
 # Local previews and QA artifacts
 /output/
+
+# Private deployment settings and persistent production state
+/deploy/*.env
+/data/production/

@@ -1,5 +1,12 @@
 # Công việc
 
+## 07/10/2026 - Chuẩn bị cấu hình triển khai HTTPS
+
+Ngày 07/10/2026 bổ sung bộ cấu hình triển khai Windows một máy: Caddy HTTPS, frontend/API cùng origin, Uvicorn loopback một worker, Ollama nội bộ và dữ liệu production tách riêng. Script dùng file môi trường được chọn, chặn cấu hình development/HTTP và không chạy reload. Proxy chặn tài liệu API công khai, đặt header bảo vệ, giới hạn body 12 MB và không phục vụ thư mục mã nguồn. Một kiểm thử launcher đạt; Caddy v2.11.7 qua validate sau kiểm tra SHA-512. Smoke HTTPS local dùng DB/CA riêng đã kiểm chứng chứng chỉ, frontend, cookie Secure/HttpOnly, CSRF, logout, chặn file riêng tư, giả mạo IP và chuyển HTTP sang HTTPS. Chưa đổi DNS, mở firewall, triển khai cloud hoặc cài Windows Service; chưa đo GPU/model thật, tải bền hay diễn tập RPO/RTO. Cấu hình SMTP và Telegram giữ trống/tắt cho đến khi nghiệm thu riêng.
+
+Tài liệu: docs/DEPLOYMENT.md. Mốc kế tiếp: chốt máy và tên miền, cấu hình DNS/firewall rồi nghiệm thu trên thiết bị thứ hai; chưa coi M7 hoàn tất. Khánh giữ cấu hình/tích hợp chính; nhóm kiểm thử đối chiếu kịch bản triển khai, nhóm báo cáo lưu bằng chứng.
+
+
 ## 07/10/2026 - Xác minh email và khôi phục mật khẩu khách hàng
 
 Ngày 07/10/2026 triển khai xác minh email và khôi phục mật khẩu khách hàng qua SMTP dùng TLS. Schema v9 thêm cờ email_verified và bảng token email; tài khoản cũ mặc định chưa xác minh. Liên kết xác minh có hạn 60 phút, yêu cầu mật khẩu hiện tại; liên kết đặt lại mật khẩu có hạn 15 phút, chỉ cấp cho email đã xác minh. Token chỉ lưu hash, dùng một lần; đổi hoặc đặt lại mật khẩu thu hồi mọi phiên và token của tài khoản. Không tự ghép hồ sơ hoặc cấp quyền đơn hàng theo email.

@@ -1,0 +1,34 @@
+# Same-machine reverse proxy. CUSTOMER_PUBLIC_URL comes from production.env.
+{
+	admin 127.0.0.1:2019
+	# No metrics or admin endpoint on public interfaces.
+}
+
+{$CUSTOMER_PUBLIC_URL} {
+	encode zstd gzip
+
+	# The embedded widget currently supports same-origin hosting only.
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy no-referrer
+		-Server
+	}
+
+	# Swagger and the schema are available only via the local backend during deployment.
+	@api_docs path /docs /docs/* /redoc /redoc/* /openapi.json
+	respond @api_docs 404
+
+	# 10 MiB document limit plus multipart overhead; backend applies the file limit.
+	request_body {
+		max_size 12MB
+	}
+
+	# Do not expose the repository with file_server. FastAPI serves only built assets.
+	# Do not enable access logging here: URLs can include customer/order identifiers.
+	reverse_proxy 127.0.0.1:8000 {
+		transport http {
+			dial_timeout 5s
+		}
+	}
+}

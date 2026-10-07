@@ -1,5 +1,7 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+07/10/2026 (chuẩn bị M7): thêm production.env mẫu, Caddy HTTPS, launcher Windows một worker và hướng dẫn backup/restore. Kiểm thử launcher và smoke HTTPS local đạt; chưa triển khai Internet, chưa có tên miền/máy chủ được chọn, M7 còn chờ nghiệm thu.
+
 07/10/2026: đã triển khai xác minh email và khôi phục mật khẩu qua SMTP, schema v9; 172 kiểm thử và build đạt, UI kiểm chứng với hộp thư thử. SMTP thật chưa cấu hình, chưa nghiệm thu giao thư. Tài khoản cũ phải xác minh trước khi được khôi phục email; đơn hàng vẫn theo mã truy cập.
 
 03/10/2026: tài khoản khách hàng email + mật khẩu và giao diện đăng nhập đã kiểm chứng; schema v8, lịch sử nhiều thiết bị, đổi mật khẩu thu hồi phiên. 165 kiểm thử backend đạt, frontend build và QA trình duyệt đạt. Email chưa xác minh/chưa khôi phục qua email; quyền đơn vẫn theo mã truy cập. Chi tiết tại docs/CUSTOMER_AUTH.md và docs/TASKS.md.
