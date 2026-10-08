@@ -77,6 +77,22 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(list_conversations(db=self.db, q='no match')['total'], 0)
         self.assertEqual(list_conversations(db=self.db, q='b website')['total'], 1)
 
+    def test_assignment_filter_uses_session_user_before_pagination(self):
+        self.db.add(User(id='agent-2', username='agent-2', display_name='Other', password_hash='unused', role='agent'))
+        self.db.flush()
+        self.db.add_all([Conversation(id=f'own-{i:02}', customer_id='a', status='assigned', assigned_agent_id=self.user.id) for i in range(30)])
+        self.db.add(Conversation(id='other-owned', customer_id='b', status='assigned', assigned_agent_id='agent-2'))
+        self.db.commit()
+        result = list_conversations(db=self.db, assignment='mine', user=self.user, offset=25)
+        self.assertEqual((result['total'], result['count'], result['has_more']), (30, 5, False))
+        self.assertTrue(all(c['assigned_agent_id'] == self.user.id for c in result['conversations']))
+        other = list_conversations(db=self.db, assignment='mine', user=self.db.get(User, 'agent-2'))
+        self.assertEqual([c['conversation_id'] for c in other['conversations']], ['other-owned'])
+        unassigned = list_conversations(db=self.db, assignment='unassigned', user=self.user)
+        self.assertEqual(unassigned['total'], 2)
+        self.assertTrue(all(c['assigned_agent_id'] is None for c in unassigned['conversations']))
+        self.assertEqual(list_conversations(db=self.db, assignment='mine', user=self.user, status='closed')['total'], 0)
+
     def test_detail_order_and_customer_isolation(self):
         first = conversation_detail('first', self.db)
         self.assertEqual([m['id'] for m in first['messages']], ['earlier', 'later'])

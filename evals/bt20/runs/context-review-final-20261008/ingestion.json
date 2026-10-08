@@ -1,0 +1,26 @@
+[
+  {
+    "source": "test-bt20.md",
+    "sha256": "8f45ef96f33c162b840e70523859116cc99393096bd568858f4341228f1c2f8b",
+    "seconds": 1.846,
+    "status": "indexed",
+    "chunks": 30,
+    "error_message": null
+  },
+  {
+    "source": "test-conflict-a.txt",
+    "sha256": "c8235fbd746a148aa16666c6fa2b067abd7e69c672cadf6f9714de98089403a9",
+    "seconds": 0.779,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  },
+  {
+    "source": "test-conflict-b.txt",
+    "sha256": "96d2b8e17b481bb35664b00ef3d613efc7336ec8056e92c17734c8af079ea448",
+    "seconds": 0.794,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  }
+]

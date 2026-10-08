@@ -1,5 +1,21 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+## 08/10/2026 - Nâng cấp trích đoạn và đo hồi quy
+
+Đợt trích đoạn tiếp theo ngày 08/10/2026: BT20 từ 52/60 lên 58/60; TN8/LS2 từ 19/24 lên 22/24. Hồi quy PDF/DOCX 20/24 (trước 21/24), TXT 42/48 (trước 40/48). Tổng 156 lượt Ollama thật, 0 lỗi dịch vụ; 114/114 quote khớp đoạn truy hồi. 188 kiểm thử backend đạt. ID câu 1 chọn cả đoạn giới hạn 1.200 ký tự; ID từ 2 chọn câu riêng, giữ các điều kiện phụ mà không bắt buộc đưa chỉ dẫn giả vào đáp án. Bổ sung nhận diện lý do gửi nhầm/nhận sai và chỉ hỏi lại bằng quy tắc chờ đợi khi toàn câu là mẫu mơ hồ, tránh chặn chủ đề ngoài bán hàng. Chặn quote chứa mẫu yêu cầu bỏ qua chỉ dẫn/quy tắc ở backend; không coi bộ lọc cụm từ này là chống injection toàn diện. Giữ model, embedding, ngưỡng truy hồi và tối đa ba lượt chat; sửa bằng chứng vẫn phải kiểm định lại. Không đổi nhãn/corpus, không sửa dữ liệu người dùng. Các tập đều đã dùng để phát triển/hồi quy, chưa có người duyệt độc lập; điểm này không phải độ chính xác thực tế hoặc nghiệm thu M3. Chi tiết ca sửa được, thoái lui và giới hạn tại evals/bt20/TRICH_DOAN_20261008.md.
+
+## 08/10/2026 - Nâng cấp chọn nguồn và kiểm định RAG
+
+Ngày 08/10/2026 nâng cấp chọn câu và kiểm định RAG: giữ điều kiện trong cùng đoạn, loại trích dẫn lặp, hỏi làm rõ hai dạng mơ hồ tiếng Việt trước khi chọn nguồn và cho phép sửa ID câu tối đa một lần nhưng phải kiểm định lại. Giữ qwen3:4b, embeddinggemma:300m, think=false và ngưỡng truy hồi 0,35; không bỏ kiểm định hoặc thay kho tri thức người dùng. Chạy lại BT20 đạt 52/60 (86.7%), so với 43/60 trước sửa; từ chối sai giảm từ 13/46 còn 4/46. Cả hai câu mơ hồ hỏi lại; 4/4 ca mâu thuẫn, 4/4 ca chỉ dẫn giả và 6/6 ca thiếu dữ kiện đạt rubric. Bộ mới TN8/LS2 gồm 24 câu soạn trước lượt chạy đầu tiên đạt 19/24; tổng 84 lượt không lỗi dịch vụ và 71/71 trích dẫn khớp văn bản corpus. 184 kiểm thử backend đạt. BT20 có p50 5.197 giây, p95 6.553 giây. BT20 đã dùng để chỉnh sửa nên chỉ là đo hồi quy; bộ mới do cùng trợ lý soạn, chưa có người duyệt độc lập. Còn lỗi thiếu điều kiện phụ, chọn câu và truy hồi; chưa nghiệm thu M3. Chi tiết và toàn bộ đáp án tại evals/bt20/NANG_CAP_20261008.md và evals/rag-context/KET_QUA.md.
+
+08/10/2026 (M3 kiểm chứng BT20): 60 câu Ollama thật hoàn tất; 43/60 đạt rubric, 13/46 từ chối sai theo nhãn; p50/p95 4,960/7,521 giây. Trích nguồn khớp nhưng còn lỗi review/ngữ cảnh; chưa nghiệm thu chất lượng, chưa người duyệt độc lập. Bằng chứng: evals/bt20/KET_QUA.md.
+
+08/10/2026: bổ sung giao diện sáng/tối cho toàn bộ khu vực admin/nhân viên. Nút đổi trên sidebar và mobile; lưu lựa chọn bằng localStorage, mặc định theo hệ thống khi chưa chọn. Đổi theme giữ bản nháp; khi storage bị chặn vẫn đổi được trong phiên. Build và kiểm thử trình duyệt desktop/mobile đạt; đã xem sáu trang nội bộ trên API với DB thử. Runner: frontend/tests/theme.cjs. Phạm vi chưa gồm trang đăng nhập và customer /chat.
+
+08/10/2026 (giao diện Inbox): bố cục tham khảo Chatwoot, bộ lọc theo người phụ trách trên backend, hồ sơ/ticket thu gọn và mobile hai màn. 30 test Inbox/xác thực, build và QA trình duyệt API thật đạt; giữ quyền hiện có và chưa coi là nghiệm thu đa kênh/RAG.
+
+08/10/2026 (ô soạn tin): khách hàng và nhân viên dùng Enter để gửi, Shift+Enter xuống dòng; tự tăng chiều cao đến 160 px rồi cuộn. Frontend build và kiểm thử trình duyệt component chung đạt; không thay API hoặc pipeline RAG.
+
 07/10/2026 (chuẩn bị M7): thêm production.env mẫu, Caddy HTTPS, launcher Windows một worker và hướng dẫn backup/restore. Kiểm thử launcher và smoke HTTPS local đạt; chưa triển khai Internet, chưa có tên miền/máy chủ được chọn, M7 còn chờ nghiệm thu.
 
 07/10/2026: đã triển khai xác minh email và khôi phục mật khẩu qua SMTP, schema v9; 172 kiểm thử và build đạt, UI kiểm chứng với hộp thư thử. SMTP thật chưa cấu hình, chưa nghiệm thu giao thư. Tài khoản cũ phải xác minh trước khi được khôi phục email; đơn hàng vẫn theo mã truy cập.

@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.db.migrations import migrate
 from app.rag.answer_service import answer_question
-from app.rag.ollama import CHAT_OPTIONS, CHAT_THINK, call, chat, chat_model, embedding_model
+from app.rag.ollama import CHAT_OPTIONS, CHAT_THINK, KEEP_ALIVE, call, chat, chat_model, embedding_model
 from app.rag.vector_store import VectorStore
 from app.services.document_service import ALLOWED_EXTENSIONS, CHUNK_OVERLAP, CHUNK_SIZE, chunk_text, extract_sections, save_document
 
@@ -46,6 +46,8 @@ def load_cases(path=DATASET / "cases.jsonl"):
         queries.add(identity)
         if type(case["should_answer"]) is not bool or not case["expected_answer"].strip():
             raise ValueError("Invalid gold answer")
+        if type(case.get("should_clarify", False)) is not bool or (case.get("should_clarify") and case["should_answer"]):
+            raise ValueError("Clarification labels must be boolean and cannot be answerable")
         if case["should_answer"] and (not case["evidence"] or not case["required_patterns"]):
             raise ValueError("Answerable cases need gold evidence and fact patterns")
         for pattern in case["required_patterns"] + case["forbidden_patterns"]:
@@ -98,12 +100,14 @@ def score_case(case, answer, error=None):
     forbidden = any(re.search(p, text, re.IGNORECASE) for p in case["forbidden_patterns"])
     abstained = valid_run and not grounded and not citations
     patterns_ok = all(re.search(p, text, re.IGNORECASE) for p in case["required_patterns"])
+    clarification_ok = not case.get("should_clarify", False) or bool(answer and answer.get("needs_clarification"))
     return {
         "recall": recalls, "citation_count": len(citations), "gold_citation_count": valid_citations,
         "decision_correct": valid_run and (grounded if case["should_answer"] else abstained),
         "abstained": abstained, "forbidden_text": forbidden,
         "fact_pattern_pass": bool(valid_run and not forbidden and
-                                  (grounded and patterns_ok and valid_citations > 0 if case["should_answer"] else abstained)),
+                                  (grounded and patterns_ok and valid_citations > 0 if case["should_answer"]
+                                   else abstained and patterns_ok and clarification_ok)),
     }
 
 
@@ -157,12 +161,12 @@ def run(split, output, dataset=DATASET):
         "sha256": {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
         "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
         "chunk_words": CHUNK_SIZE, "overlap_words": CHUNK_OVERLAP,
-        **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": 0,
-        "answer_pipeline": "select sentence IDs, extract verbatim answer/citations, same-model review, source-version recheck",
-        "chat_calls_per_question": "0-2; review only for valid selections; completions saved in call order",
+        **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": KEEP_ALIVE,
+        "answer_pipeline": "select passage (sentence_id=1) or contextual excerpt IDs, review or clarify, at most one re-reviewed ID repair, source-version recheck",
+        "chat_calls_per_question": "0-3; selection, review including empty evidence, optional repaired-evidence review; completions saved in call order",
         "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx", "pypdf", "python-docx")},
         "label_status": "synthetic_agent_authored_pending_human_review",
-        "timing": "Sequential end-to-end calls; includes query embedding and model load/unload, excludes ingestion. No deliberate warmup.",
+        "timing": "Sequential end-to-end calls; includes query embedding and any model loading, excludes ingestion. No deliberate warmup.",
     }
     write_json(output / "manifest.json", manifest)
     for filename in ("answer_service.py", "ollama.py"):

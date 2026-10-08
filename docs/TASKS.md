@@ -1,5 +1,35 @@
 # Công việc
 
+## 08/10/2026 - Nâng cấp trích đoạn và đo hồi quy
+
+Đợt trích đoạn tiếp theo ngày 08/10/2026: BT20 từ 52/60 lên 58/60; TN8/LS2 từ 19/24 lên 22/24. Hồi quy PDF/DOCX 20/24 (trước 21/24), TXT 42/48 (trước 40/48). Tổng 156 lượt Ollama thật, 0 lỗi dịch vụ; 114/114 quote khớp đoạn truy hồi. 188 kiểm thử backend đạt. ID câu 1 chọn cả đoạn giới hạn 1.200 ký tự; ID từ 2 chọn câu riêng, giữ các điều kiện phụ mà không bắt buộc đưa chỉ dẫn giả vào đáp án. Bổ sung nhận diện lý do gửi nhầm/nhận sai và chỉ hỏi lại bằng quy tắc chờ đợi khi toàn câu là mẫu mơ hồ, tránh chặn chủ đề ngoài bán hàng. Chặn quote chứa mẫu yêu cầu bỏ qua chỉ dẫn/quy tắc ở backend; không coi bộ lọc cụm từ này là chống injection toàn diện. Giữ model, embedding, ngưỡng truy hồi và tối đa ba lượt chat; sửa bằng chứng vẫn phải kiểm định lại. Không đổi nhãn/corpus, không sửa dữ liệu người dùng. Các tập đều đã dùng để phát triển/hồi quy, chưa có người duyệt độc lập; điểm này không phải độ chính xác thực tế hoặc nghiệm thu M3. Chi tiết ca sửa được, thoái lui và giới hạn tại evals/bt20/TRICH_DOAN_20261008.md.
+
+## 08/10/2026 - Nâng cấp chọn nguồn và kiểm định RAG
+
+Ngày 08/10/2026 nâng cấp chọn câu và kiểm định RAG: giữ điều kiện trong cùng đoạn, loại trích dẫn lặp, hỏi làm rõ hai dạng mơ hồ tiếng Việt trước khi chọn nguồn và cho phép sửa ID câu tối đa một lần nhưng phải kiểm định lại. Giữ qwen3:4b, embeddinggemma:300m, think=false và ngưỡng truy hồi 0,35; không bỏ kiểm định hoặc thay kho tri thức người dùng. Chạy lại BT20 đạt 52/60 (86.7%), so với 43/60 trước sửa; từ chối sai giảm từ 13/46 còn 4/46. Cả hai câu mơ hồ hỏi lại; 4/4 ca mâu thuẫn, 4/4 ca chỉ dẫn giả và 6/6 ca thiếu dữ kiện đạt rubric. Bộ mới TN8/LS2 gồm 24 câu soạn trước lượt chạy đầu tiên đạt 19/24; tổng 84 lượt không lỗi dịch vụ và 71/71 trích dẫn khớp văn bản corpus. 184 kiểm thử backend đạt. BT20 có p50 5.197 giây, p95 6.553 giây. BT20 đã dùng để chỉnh sửa nên chỉ là đo hồi quy; bộ mới do cùng trợ lý soạn, chưa có người duyệt độc lập. Còn lỗi thiếu điều kiện phụ, chọn câu và truy hồi; chưa nghiệm thu M3. Chi tiết và toàn bộ đáp án tại evals/bt20/NANG_CAP_20261008.md và evals/rag-context/KET_QUA.md.
+
+## 08/10/2026 - Kiểm chứng 60 câu RAG BT20
+
+Ngày 08/10/2026 bổ sung và chạy bộ kiểm chứng RAG BT20 gồm 60 câu đã chốt trước đo, dùng bản sao chính sách đầy đủ và hai tài liệu CX10 mâu thuẫn trong DB/Qdrant tạm. Ollama 0.40.0 chạy qwen3:4b và embeddinggemma:300m trên RTX 3060 Laptop; 60/60 ca hoàn tất không lỗi dịch vụ. Chấm tự động đạt 43/60 (71,7%); 13/46 câu có nguồn bị từ chối. Recall@5 trung bình trên 50 ca gán nguồn đạt 98%; cả 67 quote đều khớp văn bản nhưng chưa chứng minh đúng ngữ nghĩa. Trung vị 4,960 giây, p95 7,521 giây trong lượt tuần tự. Lỗi nổi bật gồm review từ chối sai, chọn câu mất điều kiện, câu mơ hồ bị tự suy chủ đề và lịch sử chứa chỉ dẫn giả ảnh hưởng bước kiểm định. Hai nhãn có hạn chế được ghi riêng; không sửa nhãn/prompt sau đo, chưa có người duyệt độc lập. Chín test evaluator đạt sau sửa metadata keep_alive lấy từ runtime. Chi tiết tại evals/bt20/KET_QUA.md và CHI_TIET_60_CAU.md; chưa nghiệm thu M3.
+
+Khánh phụ trách sửa pipeline và tích hợp chính; nhóm kiểm thử duyệt nhãn, đối chiếu 17 ca chưa đạt và chuẩn bị bộ câu mới độc lập; nhóm báo cáo tổng hợp bảng và bằng chứng. Tiếp theo ưu tiên review, giữ điều kiện nguồn và hỏi làm rõ; không tắt kiểm định để tăng điểm.
+
+## 08/10/2026 - Giao diện sáng và tối
+
+08/10/2026: bổ sung giao diện sáng/tối cho toàn bộ khu vực admin/nhân viên. Nút đổi trên sidebar và mobile; lưu lựa chọn bằng localStorage, mặc định theo hệ thống khi chưa chọn. Đổi theme giữ bản nháp; khi storage bị chặn vẫn đổi được trong phiên. Build và kiểm thử trình duyệt desktop/mobile đạt; đã xem sáu trang nội bộ trên API với DB thử. Runner: frontend/tests/theme.cjs. Phạm vi chưa gồm trang đăng nhập và customer /chat.
+
+## 08/10/2026 - Inbox theo bố cục Chatwoot
+
+Ngày 08/10/2026 cập nhật Inbox theo bố cục tham khảo Chatwoot, dựng bằng React hiện có: thanh điều hướng sáng, danh sách hội thoại, vùng chat và hồ sơ khách có thể thu gọn. Bộ lọc Tất cả, Của tôi và Chưa nhận được áp dụng ở backend trước khi đếm và phân trang; người phụ trách lấy từ phiên đăng nhập. Ticket/SLA chuyển sang cột thông tin, hỗ trợ mở đơn hàng theo khách. Enter gửi tin, Shift+Enter xuống dòng; ô nhập tự tăng chiều cao tối đa 160 px. Kiểm chứng 30 test Inbox/xác thực, build frontend, kiểm thử ô nhập và trình duyệt với API thật trên DB tạm; sáu chiều rộng 320–1536 px không tràn ngang. Đã kiểm tra giữ bản nháp khi lỗi, phân quyền, tiếp nhận và hoàn tất ticket. Không gọi Ollama hoặc Telegram thật trong lượt QA giao diện này.
+
+Khánh giữ phần thiết kế/tích hợp chính. Nhóm kiểm thử đối chiếu admin/agent, bộ lọc, bản nháp và mobile; nhóm báo cáo lưu ảnh. Bằng chứng cục bộ: output/inbox-redesign/result.json và desktop-final.png. Không sao chép frontend Chatwoot; không đổi schema hoặc mở thêm quyền xem hội thoại.
+
+## 08/10/2026 - Ô soạn tin khách hàng và nhân viên
+
+- [x] Enter gửi qua form hiện có; Shift+Enter xuống dòng. Không gửi khi IME đang chọn ký tự, phím lặp hoặc nút gửi bị khóa.
+- [x] Ô nhập tự tăng/thu theo nội dung và độ rộng, tối đa 160 px rồi cuộn; giữ giới hạn 4.000 ký tự và xử lý gửi/lỗi hiện có.
+- [x] Frontend build đạt; kiểm thử trình duyệt component chung đạt cho Enter, Shift+Enter, IME, phím lặp, nội dung trắng, nút khóa, tăng/thu/giới hạn chiều cao và tự ngắt dòng. Runner: frontend/tests/message-input.cjs, dùng Playwright có sẵn qua NODE_PATH; không thêm dependency. Chưa chạy lại toàn luồng API ở mốc UI này.
+
 ## 07/10/2026 - Chuẩn bị cấu hình triển khai HTTPS
 
 Ngày 07/10/2026 bổ sung bộ cấu hình triển khai Windows một máy: Caddy HTTPS, frontend/API cùng origin, Uvicorn loopback một worker, Ollama nội bộ và dữ liệu production tách riêng. Script dùng file môi trường được chọn, chặn cấu hình development/HTTP và không chạy reload. Proxy chặn tài liệu API công khai, đặt header bảo vệ, giới hạn body 12 MB và không phục vụ thư mục mã nguồn. Một kiểm thử launcher đạt; Caddy v2.11.7 qua validate sau kiểm tra SHA-512. Smoke HTTPS local dùng DB/CA riêng đã kiểm chứng chứng chỉ, frontend, cookie Secure/HttpOnly, CSRF, logout, chặn file riêng tư, giả mạo IP và chuyển HTTP sang HTTPS. Chưa đổi DNS, mở firewall, triển khai cloud hoặc cài Windows Service; chưa đo GPU/model thật, tải bền hay diễn tập RPO/RTO. Cấu hình SMTP và Telegram giữ trống/tắt cho đến khi nghiệm thu riêng.

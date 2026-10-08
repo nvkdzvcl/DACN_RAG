@@ -68,6 +68,15 @@ class EvaluationTests(unittest.TestCase):
         self.assertFalse(score_case(case, answer)['fact_pattern_pass'])
         self.assertTrue(score_case(case, answer)['forbidden_text'])
 
+    def test_clarification_rubric_rejects_generic_abstention(self):
+        case = dict(self.case, should_answer=False, should_clarify=True, required_patterns=['trường hợp'])
+        answer = {'grounded': False, 'answer': 'Chưa đủ thông tin.', 'citations': [], 'results': []}
+        self.assertFalse(score_case(case, answer)['fact_pattern_pass'])
+        answer |= {'needs_clarification': True, 'answer': 'Bạn cho biết trường hợp cụ thể được không?'}
+        self.assertTrue(score_case(case, answer)['fact_pattern_pass'])
+        self.assertFalse(score_case(case, answer | {'answer': 'Chưa đủ thông tin.'})['fact_pattern_pass'])
+        self.assertFalse(score_case(case, answer | {'citations': [self.evidence]})['fact_pattern_pass'])
+
     def test_document_fixtures_have_real_pages_paragraphs_and_table_rows(self):
         cases = load_cases(ROOT / 'evals/rag-documents/cases.jsonl')
         self.assertEqual(len(cases), 24)
@@ -127,6 +136,8 @@ class EvaluationTests(unittest.TestCase):
             self.assertEqual(len(ingestion), 2)
             self.assertTrue(all(row['status'] == 'indexed' and row['chunks'] == 3 for row in ingestion))
             self.assertEqual(json.loads((output / 'manifest.json').read_text())['status'], 'complete')
+            from app.rag.ollama import KEEP_ALIVE
+            self.assertEqual(json.loads((output / 'manifest.json').read_text())['keep_alive'], KEEP_ALIVE)
             with self.assertRaises(FileExistsError):
                 run('test', output, ROOT / 'evals/rag-documents')
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History } from 'lucide-react';
 import './widget.css';
+import MessageInput from './MessageInput';
 import './portal.css';
 import { CustomerHistory, CustomerProfile } from './CustomerAccount';
 import AuthLayout, { AuthInput } from './AuthLayout';
@@ -274,7 +275,7 @@ export default function Widget() {
         {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
-        <form onSubmit={send}><label htmlFor="widgetDraft" className="widgetLabel">Tin nhắn của bạn</label><div className="widgetComposer"><textarea id="widgetDraft" rows={2} maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={busy || closed} placeholder={closed ? 'Hội thoại đã đóng' : 'Nhập tin nhắn...'} /><button aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
+        <form onSubmit={send}><div className="widgetComposer"><MessageInput id="widgetDraft" aria-label="Tin nhắn của bạn" maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={busy || closed} placeholder={closed ? 'Hội thoại đã đóng' : 'Nhập tin nhắn...'} /><button type="submit" aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
       </footer>
     </>}
   </section>;

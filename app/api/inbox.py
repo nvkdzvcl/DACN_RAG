@@ -104,8 +104,12 @@ def list_conversations(status: str | None = None, priority: str | None = None, d
                        sla: Literal['on_track', 'overdue', 'met', 'breached', 'cancelled', 'none'] | None = None,
                        q: Annotated[str, Query(max_length=160)] = '',
                        offset: Annotated[int, Query(ge=0, le=2**31 - 1)] = 0,
-                       limit: Annotated[int, Query(ge=1, le=100)] = 25):
+                       limit: Annotated[int, Query(ge=1, le=100)] = 25,
+                       assignment: Literal['all', 'mine', 'unassigned'] = 'all',
+                       user: User = Depends(require_staff)):
     query = db.query(Conversation).options(joinedload(Conversation.customer)).order_by(Conversation.created_at.desc(), Conversation.id)
+    if assignment == 'mine': query = query.filter(Conversation.assigned_agent_id == user.id)
+    elif assignment == 'unassigned': query = query.filter(Conversation.assigned_agent_id.is_(None))
     if status: query = query.filter(Conversation.status == status)
     if priority: query = query.filter(Conversation.priority == priority)
     search = q.strip().lower()

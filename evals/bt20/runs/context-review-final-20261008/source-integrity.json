@@ -1,0 +1,8 @@
+{
+  "checked_citations": 52,
+  "exact_corpus_substring_after_whitespace_normalization": 52,
+  "current_pipeline_matches_manifest": true,
+  "model_repair_attempts": 0,
+  "independent_human_review": false,
+  "meaning": "Text provenance only, not proof of semantic correctness."
+}
