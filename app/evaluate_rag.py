@@ -162,14 +162,14 @@ def run(split, output, dataset=DATASET):
         "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
         "chunk_words": CHUNK_SIZE, "overlap_words": CHUNK_OVERLAP,
         **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": KEEP_ALIVE,
-        "answer_pipeline": "select passage (sentence_id=1) or contextual excerpt IDs, review or clarify, at most one re-reviewed ID repair, source-version recheck",
+        "answer_pipeline": "bounded dense candidates with lexical ranking, filter instruction spans/history, select safe passage or sentence IDs, review or clarify, one re-reviewed repair, source-version recheck",
         "chat_calls_per_question": "0-3; selection, review including empty evidence, optional repaired-evidence review; completions saved in call order",
         "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx", "pypdf", "python-docx")},
         "label_status": "synthetic_agent_authored_pending_human_review",
         "timing": "Sequential end-to-end calls; includes query embedding and any model loading, excludes ingestion. No deliberate warmup.",
     }
     write_json(output / "manifest.json", manifest)
-    for filename in ("answer_service.py", "ollama.py"):
+    for filename in ("answer_service.py", "ollama.py", "vector_store.py"):
         (output / (filename + ".txt")).write_bytes((ROOT / "app/rag" / filename).read_bytes())
     rows = []
     try:
