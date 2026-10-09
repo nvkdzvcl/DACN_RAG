@@ -162,7 +162,7 @@ def run(split, output, dataset=DATASET):
         "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
         "chunk_words": CHUNK_SIZE, "overlap_words": CHUNK_OVERLAP,
         **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": KEEP_ALIVE,
-        "answer_pipeline": "bounded dense candidates with lexical ranking, filter instruction spans/history and refund choices, require bank-number evidence, validate IDs before exact-source focus, one repair or semantic retry, source-version recheck",
+        "answer_pipeline": "bounded retrieval, shared source/sentence grammar for selection and review plus backend ID validation, grounded event/schedule rendering before review, validated relevance pruning preserving original conditions, one re-reviewed repair/prune or semantic retry, source-version recheck",
         "chat_calls_per_question": "0-3; selection, review including empty evidence, optional repair or semantic review of verbatim evidence; conflicts and invalid reviews never retry; final review must accept every flag; completions saved in call order",
         "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx", "pypdf", "python-docx")},
         "label_status": "synthetic_agent_authored_pending_human_review",

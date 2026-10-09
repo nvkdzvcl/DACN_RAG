@@ -18,7 +18,7 @@ from app.db.migrations import migrate
 from app.db.session import get_db
 from app.main import app
 from app.models.support import Conversation, Customer, DocumentChunk, KnowledgeDocument, Message, User
-from app.rag.answer_service import ABSTENTION, CLARIFICATION, answer_question, needs_clarification, source_sentences, unresolved_notices
+from app.rag.answer_service import ABSTENTION, CLARIFICATION, Evidence, answer_question, needs_clarification, render_answer, source_sentences, unresolved_notices
 from app.rag.ollama import ProviderError, chat as ollama_chat, embed, embedding_model
 from app.rag.vector_store import VectorStore, rank_candidates
 from app.services.document_service import extract_sections, save_document
@@ -433,7 +433,7 @@ class RagTests(unittest.TestCase):
                 'app.rag.answer_service.chat', side_effect=[json.dumps(selection), json.dumps(ACCEPT_REVIEW)]) as chat:
             result = answer_question('Hoàn tiền tính từ lúc nào?', db=db)
         self.assertTrue(result['grounded'])
-        self.assertEqual(result['answer'], 'Hoàn tiền sau 4 ngày kể từ khi kiểm hàng.')
+        self.assertEqual(result['answer'], 'Mốc bắt đầu: kể từ khi kiểm hàng.\n\nHoàn tiền sau 4 ngày kể từ khi kiểm hàng.')
         choices = json.loads(chat.call_args_list[0].args[0][-1]['content'])['SOURCES'][0]['sentences']
         self.assertEqual([part['sentence_id'] for part in choices], [1, 3])
         self.assertIn('Giao hàng', json.loads(chat.call_args_list[1].args[0][-1]['content'])['SOURCES'][0]['text'])
@@ -442,6 +442,146 @@ class RagTests(unittest.TestCase):
                     {'citations': [{'source_id': 1, 'sentence_id': 2}]})) as chat:
             self.assertFalse(answer_question('Hoàn tiền tính từ lúc nào?', db=db)['grounded'])
         self.assertEqual(chat.call_count, 1)
+
+    def test_refund_review_reuses_selection_constraints_on_both_attempts(self):
+        self.upload('Giao hàng tính từ lúc xác nhận đơn. Hoàn tiền sau 4 ngày kể từ khi kiểm hàng.'.encode('utf-8'))
+        initial = ACCEPT_REVIEW | {'question_resolved': False, 'needs_clarification': True}
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                'app.rag.answer_service.chat', side_effect=[json.dumps(SELECTION), json.dumps(initial),
+                                                          json.dumps(ACCEPT_REVIEW)]) as chat:
+            result = answer_question('Hoàn tiền tính từ lúc nào?', db=db)
+        self.assertTrue(result['grounded'])
+        self.assertEqual(chat.call_count, 3)
+        constraints = chat.call_args_list[0].args[1]['$defs']['SentenceChoice']
+        self.assertEqual(constraints['oneOf'][0]['properties']['sentence_id']['enum'], [1, 3])
+        for call in chat.call_args_list[1:]:
+            self.assertEqual(call.args[1]['$defs']['SentenceChoice'], constraints)
+            self.assertIn('Giao hàng', json.loads(call.args[0][-1]['content'])['SOURCES'][0]['text'])
+
+    def test_refund_review_cannot_restore_filtered_delivery_choice(self):
+        self.upload('Giao hàng tính từ lúc xác nhận đơn. Hoàn tiền sau 4 ngày kể từ khi kiểm hàng.'.encode('utf-8'))
+        invalid = ACCEPT_REVIEW | {'repair_citations': [{'source_id': 1, 'sentence_id': 2}]}
+        for review in [invalid, invalid | {'question_resolved': False, 'needs_clarification': True}]:
+            with self.subTest(review=review), Session(self.engine) as db, patch(
+                    'app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                    'app.rag.answer_service.chat', side_effect=[json.dumps(SELECTION), json.dumps(review)]) as chat:
+                result = answer_question('Hoàn tiền tính từ lúc nào?', db=db)
+            self.assertFalse(result['grounded'])
+            self.assertEqual(result['citations'], [])
+            self.assertEqual(chat.call_count, 2)
+
+    def test_starting_event_rendering_retains_conditions_and_verbatim_evidence(self):
+        policy = 'Với hồ sơ được duyệt, hoàn tiền trong 6 ngày làm việc sau khi đối chiếu hàng trả; ngày lễ không tính.'
+        self.upload(policy.encode('utf-8'))
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                'app.rag.answer_service.chat', side_effect=[json.dumps(SELECTION), json.dumps(ACCEPT_REVIEW)]) as chat:
+            result = answer_question('Mốc bắt đầu hoàn tiền là khi nào?', db=db)
+        self.assertTrue(result['grounded'])
+        self.assertEqual(result['answer'], 'Mốc bắt đầu: sau khi đối chiếu hàng trả.\n\n' + policy)
+        self.assertEqual(result['citations'][0]['quote'], policy)
+        self.assertEqual(json.loads(chat.call_args.args[0][-1]['content'])['CANDIDATE']['answer'], result['answer'])
+
+    def test_exclusive_schedule_negation_is_reviewed_and_cited(self):
+        policy = 'Dịch vụ chỉ nhận đơn từ thứ Ba đến thứ Sáu tại quận 2.'
+        self.upload(policy.encode('utf-8'))
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                'app.rag.answer_service.chat', side_effect=[json.dumps(SELECTION), json.dumps(ACCEPT_REVIEW)]) as chat:
+            result = answer_question('Thứ Bảy có nhận không?', db=db)
+        self.assertTrue(result['grounded'])
+        self.assertTrue(result['answer'].startswith('Không. Thứ bảy nằm ngoài lịch thứ Ba đến thứ Sáu'))
+        self.assertEqual(result['citations'][0]['quote'], policy)
+        self.assertEqual(json.loads(chat.call_args.args[0][-1]['content'])['CANDIDATE']['answer'], result['answer'])
+        rejected = ACCEPT_REVIEW | {'sources_consistent': False}
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                'app.rag.answer_service.chat', side_effect=[json.dumps(SELECTION), json.dumps(rejected)]):
+            self.assertFalse(answer_question('Thứ Bảy có nhận không?', db=db)['grounded'])
+
+    def test_weekday_rendering_requires_exclusivity_matching_action_and_no_exceptions(self):
+        query = 'Chủ nhật có nhận không?'
+        for policy in ['Nhận đơn từ thứ Hai đến thứ Bảy.',
+                       'Không chỉ nhận đơn từ thứ Hai đến thứ Bảy.',
+                       'Chưa xác nhận chỉ nhận đơn từ thứ Hai đến thứ Bảy.',
+                       'Chỉ giao hàng từ thứ Hai đến thứ Bảy.',
+                       'Chỉ nhận đơn từ thứ Hai đến thứ Bảy; Chủ nhật nhận theo hẹn.',
+                       'Chỉ nhận đơn từ thứ Hai đến thứ Bảy nhưng có ngoại lệ.',
+                       'Chỉ nhận đơn từ thứ Hai đến thứ Bảy. Khách có thể đặt lịch riêng.']:
+            with self.subTest(policy=policy):
+                self.assertEqual(render_answer(query, [Evidence(source_id=1, quote=policy)]), policy)
+        policy = 'Chỉ nhận đơn từ thứ Hai đến thứ Bảy.'
+        for question in ['Thứ Hai có nhận không?', 'Thứ Bảy có nhận không?',
+                         'Chủ nhật có bị cấm nhận không?', 'Chủ nhật hay thứ Hai có nhận không?']:
+            self.assertEqual(render_answer(question, [Evidence(source_id=1, quote=policy)]), policy)
+        evidence = [Evidence(source_id=1, quote=policy), Evidence(source_id=2, quote='Nhận đơn Chủ nhật.')]
+        self.assertEqual(render_answer(query, evidence), '\n\n'.join(item.quote for item in evidence))
+        wrapped = 'Chỉ nhận đơn từ thứ Sáu đến thứ Hai.'
+        self.assertEqual(render_answer(query, [Evidence(source_id=1, quote=wrapped)]), wrapped)
+        self.assertTrue(render_answer('Thứ Ba có nhận không?', [Evidence(source_id=1, quote=wrapped)]).startswith('Không.'))
+
+    def test_event_rendering_does_not_invent_dates_or_resolve_ambiguity(self):
+        query = 'Tính từ lúc nào?'
+        for policy in ['Hoàn tiền khi hồ sơ được duyệt.', 'Không hoàn trong 6 ngày sau khi giao hàng.',
+                       'Tiền chưa được hoàn trong 6 ngày sau khi kiểm hàng.',
+                       'Hoàn trong 3 ngày sau khi duyệt. Giao trong 2 ngày sau khi nhận đơn.',
+                       'Hoàn tiền sau 5 ngày.', 'Thời hạn là 5 ngày sau khi nhận hàng. ' * 2]:
+            with self.subTest(policy=policy):
+                self.assertEqual(render_answer(query, [Evidence(source_id=1, quote=policy)]), policy)
+        policy = 'Hoàn tiền trong 6 ngày kể từ khi duyệt.'
+        self.assertEqual(render_answer('Điều kiện hoàn tiền?', [Evidence(source_id=1, quote=policy)]), policy)
+        self.assertEqual(render_answer(query, []), '')
+        long_quotes = [Evidence(source_id=index + 1, quote=('Hoàn trong 6 ngày sau khi duyệt. ' if not index else '') + 'nội dung ' * 145)
+                       for index in range(3)]
+        original = '\n\n'.join(item.quote for item in long_quotes)
+        self.assertLessEqual(len(original), 4000)
+        self.assertLessEqual(len(render_answer(query, long_quotes)), 4000)
+
+    def test_relevance_pruning_keeps_original_conditions_and_reviews_all_sources(self):
+        policy = 'Engraving requires approval. Metal engraving is not accepted.'
+        self.upload(policy.encode())
+        self.upload(b'Return requests take 4 days.', 'returns.txt')
+        selected = {'citations': [{'source_id': 1, 'sentence_id': 1}, {'source_id': 2, 'sentence_id': 1}]}
+        review = ACCEPT_REVIEW | {'repair_citations': [{'source_id': 1, 'sentence_id': 2}]}
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]):
+            hits = sorted(self.store.search('Engraving?', db=db), key=lambda hit: hit['source'] != 'policy.txt')
+            with patch.object(self.store, 'search', return_value=hits), patch('app.rag.answer_service.chat',
+                    side_effect=[json.dumps(selected), json.dumps(review), json.dumps(ACCEPT_REVIEW)]) as chat:
+                result = answer_question('Có khắc kim loại không?', db=db)
+        self.assertTrue(result['grounded'])
+        self.assertEqual(result['answer'], policy)
+        self.assertEqual(len(result['citations']), 1)
+        self.assertEqual(len(result['reviewed_sources']), 2)
+        self.assertEqual(chat.call_count, 3)
+        self.assertIn('remove passages about unrelated policies', chat.call_args_list[1].args[0][0]['content'])
+        payload = json.loads(chat.call_args.args[0][-1]['content'])
+        self.assertEqual(payload['CANDIDATE']['answer'], policy)
+        self.assertEqual(len(payload['SOURCES']), 2)
+
+    def test_pruning_cannot_bypass_conflict_invalid_id_or_second_review(self):
+        self.upload(b'Approval required. No metal engraving.')
+        self.upload(b'Return requests take 4 days.', 'returns.txt')
+        selected = {'citations': [{'source_id': 1, 'sentence_id': 1}, {'source_id': 2, 'sentence_id': 1}]}
+        prune = ACCEPT_REVIEW | {'repair_citations': [{'source_id': 1, 'sentence_id': 1}]}
+        for reviews in [[prune | {'sources_consistent': False}],
+                        [ACCEPT_REVIEW | {'repair_citations': [{'source_id': 1, 'sentence_id': 99}]}],
+                        [prune, ACCEPT_REVIEW | {'claims_supported': False}],
+                        [prune, ACCEPT_REVIEW | {'sources_consistent': False}]]:
+            with self.subTest(reviews=reviews), Session(self.engine) as db, patch(
+                    'app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                    'app.rag.answer_service.chat', side_effect=[json.dumps(selected), *map(json.dumps, reviews)]) as chat:
+                self.assertFalse(answer_question('Có khắc kim loại không?', db=db)['grounded'])
+            self.assertEqual(chat.call_count, 1 + len(reviews))
+
+    def test_open_question_keeps_accepted_evidence_when_late_review_suggests_shortening(self):
+        self.upload(b'Customer pays return shipping.')
+        self.upload(b'Keep all accessories for a return.', 'conditions.txt')
+        selected = {'citations': [{'source_id': 1, 'sentence_id': 1}, {'source_id': 2, 'sentence_id': 1}]}
+        initial = ACCEPT_REVIEW | {'question_resolved': False}
+        final = ACCEPT_REVIEW | {'repair_citations': [{'source_id': 1, 'sentence_id': 1}]}
+        with Session(self.engine) as db, patch('app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                'app.rag.answer_service.chat', side_effect=[json.dumps(selected), json.dumps(initial), json.dumps(final)]) as chat:
+            result = answer_question('Ai trả phí gửi hàng về?', db=db)
+        self.assertTrue(result['grounded'])
+        self.assertEqual(len(result['citations']), 2)
+        self.assertEqual(chat.call_count, 3)
 
     def test_bank_number_request_requires_number_next_to_account_label(self):
         document_id = self.upload('Không gửi thông tin tài khoản vào chat. Phí mua hàng 900000 đồng.'.encode('utf-8'))

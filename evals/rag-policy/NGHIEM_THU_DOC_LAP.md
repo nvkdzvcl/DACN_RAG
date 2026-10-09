@@ -4,7 +4,7 @@ Trạng thái: **chưa có người duyệt hoặc tập kín độc lập**. T�
 
 ## 1. Duyệt nguồn và nhãn hồi quy
 
-Người duyệt sao chép `human-review.jsonl` từ từng thư mục lượt chạy được ghi trong `XU_LY_TON_DONG_20261009.md`. Không sửa phiếu gốc hoặc điền tên người thật bằng công cụ tự động.
+Người duyệt sao chép `human-review.jsonl` từ từng thư mục lượt chạy được ghi trong `RANG_BUOC_KIEM_DINH_20261009.md`; các báo cáo `DO_CHINH_XAC_20261009.md` và `XU_LY_TON_DONG_20261009.md` giữ bằng chứng baseline trước nâng cấp. Không sửa phiếu gốc hoặc điền tên người thật bằng công cụ tự động.
 
 Đối chiếu từng câu với tài liệu gốc, vị trí nguồn và toàn bộ điều kiện; không dùng `fact_pattern_pass` hoặc kết luận của model làm nhãn người duyệt. Khi duyệt câu nối tiếp, đọc cả lịch sử khách hàng.
 
@@ -18,9 +18,9 @@ Người duyệt sao chép `human-review.jsonl` từ từng thư mục lượt c
 
 ### Bất đồng cần phân xử: `rag/test-026`
 
-Khách hỏi Chủ nhật có nhận giao hỏa tốc không. Gold trích: “Dịch vụ giao hỏa tốc của cửa hàng mẫu chỉ nhận đơn tại quận 1 từ 8 giờ đến 15 giờ, từ thứ Hai đến thứ Bảy.” Rubric đòi từ `không`, nhưng câu nguồn không có từ đó. Luồng trích nguyên văn có thể trả đúng phạm vi hoạt động mà vẫn trượt rubric. Đây là nhận xét của trợ lý, **chưa phải kết luận người duyệt**.
+Khách hỏi Chủ nhật có nhận giao hỏa tốc không. Gold trích: “Dịch vụ giao hỏa tốc của cửa hàng mẫu chỉ nhận đơn tại quận 1 từ 8 giờ đến 15 giờ, từ thứ Hai đến thứ Bảy.” Rubric đòi từ `không`, nhưng câu nguồn không có từ đó. Baseline trích nguyên văn có thể trả đúng phạm vi hoạt động mà vẫn trượt rubric. Bản nâng cấp diễn đạt phủ định khi có lịch độc quyền rõ ràng, đưa câu diễn đạt qua kiểm định và giữ citation nguyên văn. Người duyệt cần kiểm tra riêng suy luận loại trừ ngày, không chỉ đối chiếu quote. Đây vẫn **chưa phải kết luận người duyệt**.
 
-Không chèn thêm từ `không` ngoài nguồn hoặc trích câu phủ định không liên quan chỉ để đạt điểm. Nếu người duyệt chấp thuận nhãn ngữ nghĩa khác, tạo phiên bản dataset mới, ghi người duyệt/lý do và chạy baseline cùng runtime mới trên cùng phiên bản mới. Giữ nguyên điểm, corpus và nhãn của lượt cũ.
+Không chèn phủ định không được nguồn hỗ trợ hoặc trích câu phủ định không liên quan chỉ để đạt điểm. Nếu người duyệt chấp thuận nhãn ngữ nghĩa khác, tạo phiên bản dataset mới, ghi người duyệt/lý do và chạy baseline cùng runtime mới trên cùng phiên bản mới. Giữ nguyên điểm, corpus và nhãn của lượt cũ.
 
 Chạy từ thư mục gốc; thay các đường dẫn ví dụ bằng phiếu đã được người thật chấm:
 

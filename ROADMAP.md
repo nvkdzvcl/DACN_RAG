@@ -1,5 +1,15 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+## 09/10/2026 - Ổn định ID sửa bằng chứng RAG
+
+Lượt `refund-schema-v1-20261009` đạt 180/180 hồi quy, 218 kiểm thử backend. Kiểm định dùng grammar cặp ID hợp lệ của bước chọn nguồn; giữ kiểm tra backend, toàn bộ nguồn kiểm định và giới hạn ba lần chat. Chẩn đoán sáu ca xen kẽ đạt 30/30, gồm năm lần mốc hoàn tiền, nhưng không thay thế tập kín/người duyệt độc lập. Không đổi nhãn hoặc chính sách thật; chưa nghiệm thu M3/toàn bộ ưu tiên cao. Báo cáo: `evals/rag-policy/RANG_BUOC_KIEM_DINH_20261009.md`.
+
+## 09/10/2026 - Nâng cấp diễn đạt và độ liên quan RAG
+
+Kiểm tra lặp trên truy hồi lưu sẵn đạt 15/18; `bt20-032` chưa ổn định dù đạt trong lượt đầy đủ. Giữ từ chối an toàn khi kiểm định đề xuất ID ngoài tập hợp lệ; không đánh dấu ca này hoàn tất.
+
+Lượt `precision-final-20261009` đạt 180/180 rubric hồi quy (trước 178/180), 216 kiểm thử backend đạt. Mốc hoàn tiền và loại trừ ngày ngoài lịch độc quyền được diễn đạt trước kiểm định; câu có/không bỏ nguồn dư nhưng giữ điều kiện và kiểm định lại. Không đổi corpus/nhãn, model hoặc giới hạn ba lần chat. Câu mở còn có thể dư đoạn; điểm hồi quy không thay thế người duyệt/tập kín độc lập. M3 và toàn bộ ưu tiên cao chưa nghiệm thu. Báo cáo: `evals/rag-policy/DO_CHINH_XAC_20261009.md`.
+
 ## 09/10/2026 - Đóng băng bản xử lý tồn đọng RAG
 
 Lượt `priority-followup-verified-v2-20261009` đạt 178/180 rubric tự động, 209 kiểm thử backend; sửa 6/7 ca tồn đọng ban đầu. Giữ nhãn/corpus và chính sách thử tách khỏi dữ liệu thật. Còn ca hỏi lại dư `bt20-032`, bất đồng rubric `test-026`, đoạn dư ở `policy-013` và kiểm chứng độ ổn định. Chưa có người duyệt toàn tập hoặc tập kín do người khác soạn; không đánh dấu M3/ưu tiên cao hoàn tất. Báo cáo tại `evals/rag-policy/XU_LY_TON_DONG_20261009.md`, hướng dẫn nghiệm thu độc lập tại `evals/rag-policy/NGHIEM_THU_DOC_LAP.md`.

@@ -1,5 +1,15 @@
 # Công việc
 
+## 09/10/2026 - Ràng buộc nguồn sửa trong kiểm định RAG
+
+Bản `refund-schema-v1-20261009` giữ 180/180 hồi quy, 218 kiểm thử backend đạt. Bước kiểm định dùng chung grammar cặp ID với bước chọn nguồn, ngăn đề xuất câu giao hàng đã bị loại trong câu hỏi hoàn tiền; backend vẫn kiểm tra ID và mọi nguồn vẫn được dùng để kiểm định mâu thuẫn. Sáu ca trọng tâm lặp xen kẽ năm vòng đạt 30/30, riêng `bt20-032` 5/5 thay vì 0/3 của chẩn đoán trước; đây là phát lại truy hồi lưu sẵn, không phải 30 ca end-to-end độc lập. Không đổi prompt, model hoặc corpus/nhãn. Giới hạn còn lại: câu mở có thể dư đoạn, chưa bảo đảm ổn định với dữ liệu mới, chưa có người duyệt/tập kín độc lập; chưa nghiệm thu toàn bộ ưu tiên cao/M3. Báo cáo và bằng chứng: `evals/rag-policy/RANG_BUOC_KIEM_DINH_20261009.md`.
+
+## 09/10/2026 - Diễn đạt có nguồn và giảm đoạn dư RAG
+
+Kiểm tra lặp sáu ca với truy hồi lưu sẵn: 15/18 đạt; `bt20-032` bị từ chối sai ba lần vì kiểm định đề xuất mốc giao hàng không hợp lệ. Ca này đạt trong lượt đầy đủ nhưng chưa ổn định, vẫn thuộc ưu tiên cao. Không cộng lượt chẩn đoán vào điểm end-to-end.
+
+Bản `precision-final-20261009` đạt 180/180 rubric tự động, từ 178/180; 216 kiểm thử backend đạt. Sửa hỏi lại dư ở mốc hoàn tiền `bt20-032`, diễn đạt phủ định theo lịch độc quyền ở `test-026`, bỏ đoạn đổi trả dư ở `policy-013`. Mọi diễn đạt và đáp án rút gọn đều qua kiểm định, giữ nguyên citation/điều kiện và tối đa ba lần chat. 153/153 quote khớp chunk; 0 lỗi provider; corpus/nhãn giữ nguyên. Lưu cả hai lượt thử có thoái lui để đối chiếu. Câu mở vẫn có thể dư đoạn; chưa có người duyệt hoặc tập kín độc lập, chưa nghiệm thu M3/toàn bộ ưu tiên cao. Chi tiết và bằng chứng tại `evals/rag-policy/DO_CHINH_XAC_20261009.md`.
+
 ## 09/10/2026 - Xử lý tồn đọng RAG ưu tiên cao
 
 Bản `priority-followup-verified-v2-20261009`: 178/180 đạt rubric tự động (trước 173/180), 209 test backend đạt. Sửa 6/7 ca cũ; còn `test-026` lệch rubric và ca mới `bt20-032` hỏi lại dư dù có nguồn. Không gọi ưu tiên cao hoàn tất. Giữ tối đa ba lần chat và kiểm tra phiên bản nguồn, bổ sung trích câu cho chunk bị cắt, giữ bước xác minh, hỏi sản phẩm thiếu, chặn trả thông tin tài khoản khi thiếu số và chọn nhầm mốc giao cho hoàn tiền. 0 lỗi provider, 164/164 quote khớp chunk, mâu thuẫn 13/13 và injection 17/17 trên bộ này. Không sửa corpus/nhãn cũ; chưa có người thật duyệt hoặc tập kín độc lập. `policy-013` vẫn có đoạn dư dù đạt rubric. Chi tiết ca còn lại, các lượt không được chọn và hash tại `evals/rag-policy/XU_LY_TON_DONG_20261009.md`; quy trình bàn giao kiểm thử độc lập tại `evals/rag-policy/NGHIEM_THU_DOC_LAP.md`. Chưa nghiệm thu M3.
