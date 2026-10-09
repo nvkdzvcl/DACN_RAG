@@ -53,8 +53,11 @@ export default function Widget() {
   const handoffId = useRef(null);
   const log = useRef(null);
   const nearBottom = useRef(true);
+  const [atLatest, setAtLatest] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
   const closed = session?.status === 'closed';
   const messageBefore = session?.message_page.before || null;
+  const pendingBlocksSend = Boolean(pending && pending.content !== draft.trim());
 
   useEffect(() => {
     function readLink() { const action = takeEmailLink(); if (action) setEmailAction(action); }
@@ -113,9 +116,18 @@ export default function Widget() {
 
   useLayoutEffect(() => {
     nearBottom.current = !messageBefore;
+    setAtLatest(!messageBefore); setHasNewMessages(false);
     if (log.current) log.current.scrollTop = messageBefore ? 0 : log.current.scrollHeight;
   }, [session?.conversation_id, messageBefore, loading, view]);
   useEffect(() => { if (log.current && nearBottom.current && !messageBefore) log.current.scrollTop = log.current.scrollHeight; }, [session?.messages.at(-1)?.id, busy, notice]);
+  useEffect(() => {
+    if (!messageBefore && !nearBottom.current) setHasNewMessages(true);
+  }, [session?.messages.at(-1)?.id]);
+
+  function jumpLatest() {
+    if (log.current) { log.current.scrollTop = log.current.scrollHeight; log.current.focus({ preventScroll: true }); }
+    nearBottom.current = true; setAtLatest(true); setHasNewMessages(false);
+  }
 
   async function viewHistory(cursors) {
     if (busy || handoffBusy || historyLoading) return;
@@ -140,7 +152,7 @@ export default function Widget() {
   async function send(event, retryPending = false) {
     event.preventDefault();
     const content = retryPending ? pending?.content : draft.trim();
-    if (!content || busy || historyLoading || !session || closed) return;
+    if (!content || busy || historyLoading || !session || closed || (!retryPending && pendingBlocksSend)) return;
     const targetId = session.conversation_id;
     const submission = pending?.content === content ? pending : { content, client_message_id: crypto.randomUUID() };
     saveDrafts(previous => ({ ...previous, pending: { ...previous.pending, [targetId]: submission } }));
@@ -272,7 +284,10 @@ export default function Widget() {
         <button disabled={busy || handoffBusy || historyLoading || messageCursors.length < 2} onClick={() => viewHistory(messageCursors.slice(0, -1))}>Tin mới hơn</button>
         {messageBefore && <button disabled={busy || handoffBusy || historyLoading} onClick={() => viewHistory([])}>Về tin mới nhất</button>}
       </nav>
-      <div className="widgetLog" ref={log} role="log" tabIndex={0} aria-label="Tin nhắn hỗ trợ" aria-live={messageBefore ? 'off' : 'polite'} aria-relevant="additions" onScroll={e => { const el = e.currentTarget; nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}>
+      <div className="widgetLog" ref={log} role="log" tabIndex={0} aria-label="Tin nhắn hỗ trợ" aria-live={messageBefore ? 'off' : 'polite'} aria-relevant="additions" onScroll={e => {
+        const el = e.currentTarget; nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+        setAtLatest(nearBottom.current); if (nearBottom.current) setHasNewMessages(false);
+      }}>
         <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>
         {session.messages.map(message => <article key={message.id} className={`widgetMessage ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p>{message.content}</p>
@@ -281,6 +296,7 @@ export default function Widget() {
         {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}
       </div>
+      {!messageBefore && !atLatest && <div className="widgetLatest"><span role="status">{hasNewMessages ? 'Có tin mới' : 'Đang xem tin phía trên'}</span><button type="button" onClick={jumpLatest}>Về tin mới nhất</button></div>}
       <footer className="widgetFooter">
         <div className="widgetFooterTools" tabIndex={0} role="region" aria-label="Thao tác hội thoại">
         {!closed && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
@@ -293,10 +309,10 @@ export default function Widget() {
         {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
-        {draftError && <p className="widgetError" role="alert">Không lưu hoặc khôi phục được nháp. Giữ tab mở và sao chép nội dung trước khi tải lại.</p>}
-        {!busy && pending && <p className="widgetIntro" role="status">Tin trước chưa xác nhận. Xem lịch sử hoặc <button type="button" onClick={event => send(event, true)} disabled={closed || historyLoading}>Gửi lại tin chưa xác nhận</button>.</p>}
+        {!busy && pending && <div className="pendingNotice"><p className="widgetIntro" role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pending.content}</p></details><button type="button" onClick={event => send(event, true)} disabled={closed || historyLoading}>Gửi lại tin chưa xác nhận</button></div>}
         </div>
-        <form onSubmit={send}><div className="widgetComposer"><MessageInput id="widgetDraft" aria-label="Tin nhắn của bạn" maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={closed} placeholder={closed ? 'Hội thoại đã đóng' : busy ? 'Soạn tin tiếp; chờ xử lý xong để gửi' : 'Nhập tin nhắn...'} /><button type="submit" aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
+        {draftError && <p className="widgetError" role="alert">Không lưu hoặc khôi phục được nháp. Sao chép trước khi tải lại.</p>}
+        <form onSubmit={send}><div className="widgetComposer"><MessageInput id="widgetDraft" aria-label="Tin nhắn của bạn" maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={closed} placeholder={closed ? 'Hội thoại đã đóng' : busy ? 'Soạn tin tiếp; chờ xử lý xong để gửi' : 'Nhập tin nhắn...'} /><button type="submit" aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || pendingBlocksSend || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
       </footer>
     </>}
   </section>;

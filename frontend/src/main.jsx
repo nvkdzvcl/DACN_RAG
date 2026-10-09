@@ -236,6 +236,8 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const messageBefore = messageCursors.at(-1) || null;
   const selected = conversations.find(c => c.conversation_id === activeId) || (detail?.conversation_id === activeId ? detail : null);
   const draft = drafts[activeId] || '';
+  const pendingReply = savedDrafts.pending[activeId];
+  const pendingBlocksSend = Boolean(pendingReply && pendingReply.content !== draft.trim());
 
   useEffect(() => {
     if (page !== 'inbox' || actionLoading) return;
@@ -344,7 +346,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   async function sendReply(event, retryPending = false) {
     event.preventDefault();
     const content = retryPending ? pendingReplies.current[activeId]?.content : draft.trim();
-    if (!content || !activeId || !canReply || actionLoading) return;
+    if (!content || !activeId || !canReply || actionLoading || (!retryPending && pendingBlocksSend)) return;
     const targetId = activeId;
     if (pendingReplies.current[targetId]?.content !== content) pendingReplies.current[targetId] = {content, client_message_id:crypto.randomUUID()};
     saveDrafts(previous => ({ ...previous, pending: { ...pendingReplies.current } }));
@@ -422,7 +424,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
             </>}
           </div>
           {!atLatest && !messageBefore && <button className="jumpLatest" onClick={() => { if (messageLog.current) messageLog.current.scrollTop = messageLog.current.scrollHeight; }}>Về tin mới nhất</button>}
-          {draftError && <p className="readNotice" role="alert">Không lưu hoặc khôi phục được nháp. Giữ tab mở và sao chép nội dung trước khi tải lại.</p>}{canReply && !actionLoading && savedDrafts.pending[activeId] && <p className="readNotice" role="status">Tin trước chưa xác nhận. Xem lịch sử hoặc <button onClick={event => sendReply(event, true)}>Gửi lại tin chưa xác nhận</button>.</p>}{current && <><form className="composer" onSubmit={sendReply}><MessageInput aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading}><Send size={16} aria-hidden="true" />Gửi</button></form><div className="composerHint"><span>Enter để gửi · Shift+Enter xuống dòng</span><span>Phản hồi công khai</span></div></>}
+          {draftError && <p className="readNotice" role="alert">Không lưu hoặc khôi phục được nháp. Giữ tab mở và sao chép nội dung trước khi tải lại.</p>}{canReply && !actionLoading && pendingReply && <div className="readNotice pendingNotice"><p role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pendingReply.content}</p></details><button onClick={event => sendReply(event, true)}>Gửi lại tin chưa xác nhận</button></div>}{current && <><form className="composer" onSubmit={sendReply}><MessageInput aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading || pendingBlocksSend}><Send size={16} aria-hidden="true" />Gửi</button></form><div className="composerHint"><span>Enter để gửi · Shift+Enter xuống dòng</span><span>Phản hồi công khai</span></div></>}
           {canReply && activeTicket && <details className="finishPanel" key={activeId}><summary><CheckCheck size={15} aria-hidden="true" />Hoàn tất hội thoại</summary><form className="completionForm" onSubmit={finishConversation}>
             <label htmlFor="completionNote">Ghi chú hoàn tất (nội bộ)</label>
             <textarea id="completionNote" rows={2} maxLength={2000} required value={completionNote} onChange={e => setCompletionNotes(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={actionLoading} />

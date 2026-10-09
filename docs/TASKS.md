@@ -1,5 +1,9 @@
 # Công việc
 
+## 09/10/2026 - Giữ UUID chờ và báo tin mới cho khách
+
+Sau push `8613c2f`, chặn nháp mới ghi đè tin chưa xác nhận trong Inbox/widget; cho xem và gửi lại đúng nội dung/UUID cũ, xác nhận xong vẫn giữ nháp mới. Widget báo tin mới khi cuộn lên, giữ vị trí đọc, thêm về tin mới nhất và trả focus vào log. Footer co/cuộn, cảnh báo nháp lỗi luôn hiện cùng ô soạn trong viewport thấp đã thử. Bốn kiểm thử trình duyệt, hai test backend liên quan, build và diff check đạt. Chỉ sửa frontend, không thêm dependency hoặc thay RAG; điện thoại/trình đọc màn hình thật vẫn chờ. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
 ## 09/10/2026 - Khôi phục nháp, soạn khi AI xử lý và khả năng truy cập
 
 Nháp/ghi chú và UUID gửi chưa xác nhận lưu bằng sessionStorage trong tab, hết hạn sau 24 giờ từ lần lưu cuối; tách nhân viên/hội thoại, khôi phục sau reload hoặc đăng nhập lại cùng tài khoản và xóa khi đăng xuất chủ động/kết thúc hội thoại khách. Có cảnh báo storage lỗi và gửi lại UUID cũ. Khách soạn tin tiếp khi AI xử lý; kết quả cũ không xóa nháp mới. Thêm đánh dấu chưa đọc riêng nhân viên, chờ request đọc cùng tab trước khi lùi cursor. Dashboard giữ dữ liệu khi làm mới/lỗi, hiển thị thời điểm và tự cập nhật khi quay lại tab. Hồ sơ mobile dùng dialog native, giữ focus và trả focus khi Escape; điều chỉnh tương phản mẫu chữ, log tin mới và giữ ô soạn khi cảnh báo dài. 225 kiểm thử backend đạt (146,750 giây); runner trình duyệt mới: `frontend/tests/productivity.cjs`. Không đổi schema/RAG hoặc thêm dependency; chưa thử điện thoại/trình đọc màn hình thật. Chi tiết: `docs/UI_UPGRADE_20261009.md`.

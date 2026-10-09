@@ -22,13 +22,14 @@ const { chromium } = require('playwright');
     let holdRead = false, releaseRead, onReadStarted;
     let holdSend = false, releaseSend, onSendStarted, failStaffSend = false;
     const events = [], widgetSends = [], staffSends = [];
+    let widgetMessages = [{ id: 'welcome', sender_type: 'ai', content: 'Chào bạn', created_at: '2026-10-09T09:00:00Z' }];
     const chat = () => ({ conversation_id: 'one', customer_id: 'customer', customer_name: 'Khách thử', channel: 'website',
       status: 'assigned', assigned_agent_id: staffId, priority: 'normal', unread_count: unread,
       last_customer_message_id: 'customer-message', created_at: '2026-10-09T08:00:00Z',
       last_activity_at: '2026-10-09T09:00:00Z', last_message: { content: 'Cần hỗ trợ', sender_type: 'customer' }, sla: null });
     const snapshot = () => ({ conversation_id: widgetId, display_name: 'Khách thử', status: 'open', order_access: [],
       account: { email: `${widgetId}@example.test`, email_verified: true }, message_page: { before: null, has_more: false },
-      messages: [{ id: 'welcome', sender_type: 'ai', content: 'Chào bạn', created_at: '2026-10-09T09:00:00Z' }] });
+      messages: widgetMessages });
     await page.route('**/api/v1/**', async route => {
       const request = route.request(), u = new URL(request.url()), endpoint = u.pathname;
       let body = {}, status = 200;
@@ -79,7 +80,13 @@ const { chromium } = require('playwright');
     await page.locator('.finishPanel > summary').click(); assert.equal(await page.getByLabel('Ghi chú hoàn tất (nội bộ)').inputValue(), 'Ghi chú nháp');
     failStaffSend = true; await page.getByRole('button', { name: 'Gửi', exact: true }).click();
     await page.getByRole('button', { name: 'Gửi lại tin chưa xác nhận' }).waitFor(); await page.reload(); await draft.waitFor();
-    failStaffSend = false; await draft.fill('Nháp tiếp theo'); await page.getByRole('button', { name: 'Gửi lại tin chưa xác nhận' }).click();
+    failStaffSend = false; await draft.fill('Nháp tiếp theo');
+    assert.equal(await page.getByRole('button', { name: 'Gửi', exact: true }).isDisabled(), true);
+    await page.keyboard.press('Enter'); assert.equal(staffSends.length, 1);
+    assert.equal(await page.evaluate(() => JSON.parse(sessionStorage.getItem('rag-drafts:staff:staff')).pending.one.content), 'Nháp nhân viên');
+    await page.getByText('Xem tin chưa xác nhận', { exact: true }).click();
+    assert.equal(await page.locator('.pendingNotice details p').innerText(), 'Nháp nhân viên');
+    await page.getByRole('button', { name: 'Gửi lại tin chưa xác nhận' }).click();
     await page.waitForFunction(() => !document.querySelector('.composer button').disabled);
     assert.deepEqual(staffSends[0], staffSends[1]); assert.equal(await draft.inputValue(), 'Nháp tiếp theo');
     staffId = 'other'; await page.reload(); await draft.waitFor(); assert.equal(await draft.inputValue(), '');
@@ -141,6 +148,11 @@ const { chromium } = require('playwright');
     assert.equal(await customerDraft.isEnabled(), true); await customerDraft.fill('Tin tiếp theo');
     await page.keyboard.press('Enter'); assert.equal(widgetSends.length, 1);
     await page.reload(); await customerDraft.waitFor(); assert.equal(await customerDraft.inputValue(), 'Tin tiếp theo');
+    assert.equal(await page.getByRole('button', { name: 'Gửi tin nhắn', exact: true }).isDisabled(), true);
+    await page.keyboard.press('Enter'); assert.equal(widgetSends.length, 1);
+    assert.deepEqual(await page.evaluate(() => JSON.parse(sessionStorage.getItem('rag-drafts:widget')).pending.guest), widgetSends[0]);
+    await page.getByText('Xem tin chưa xác nhận', { exact: true }).click();
+    assert.equal(await page.locator('.pendingNotice details p').innerText(), 'Tin khách');
     holdSend = false; releaseSend(); await page.getByRole('button', { name: 'Gửi lại tin chưa xác nhận' }).click();
     await page.waitForFunction(() => !document.querySelector('.widgetComposer button').disabled);
     assert.deepEqual(widgetSends[0], widgetSends[1]); assert.equal(await customerDraft.inputValue(), 'Tin tiếp theo');
@@ -157,6 +169,19 @@ const { chromium } = require('playwright');
     await customerDraft.fill('Xóa khi đăng xuất'); await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
     await page.getByLabel('Email', { exact: true }).waitFor(); assert.equal(await page.evaluate(() => sessionStorage.getItem('rag-drafts:widget')), null);
     widgetExpired = false; await page.goto(url + 'chat'); await customerDraft.waitFor();
+    widgetMessages = Array.from({ length: 20 }, (_, index) => ({ id: `history-${index}`, sender_type: index % 2 ? 'customer' : 'agent',
+      content: `Tin ${index}: Nội dung đủ dài để kiểm tra cuộn đọc mà không mất vị trí.`, created_at: '2026-10-09T09:00:00Z' }));
+    await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await customerDraft.waitFor();
+    const log = page.getByRole('log', { name: 'Tin nhắn hỗ trợ', exact: true });
+    await log.evaluate(element => { element.scrollTop = 0; });
+    const jump = page.getByRole('button', { name: 'Về tin mới nhất', exact: true }); await jump.waitFor();
+    widgetMessages.push({ id: 'new-agent-message', sender_type: 'agent', content: 'Phản hồi mới của nhân viên', created_at: '2026-10-09T09:01:00Z' });
+    await page.getByText('Có tin mới', { exact: true }).waitFor();
+    assert.equal(await log.evaluate(element => element.scrollTop), 0);
+    await page.screenshot({ path: path.join(output, 'customer-new-message-mobile.png') });
+    await jump.focus(); await page.keyboard.press('Enter');
+    assert.ok(await log.evaluate(element => element.scrollHeight - element.scrollTop - element.clientHeight < 80));
+    assert.equal(await log.evaluate(element => element === document.activeElement), true); assert.equal(await jump.count(), 0);
     await page.evaluate(() => sessionStorage.setItem('rag-drafts:widget', JSON.stringify({ drafts: { guest: 'Nháp hết hạn' }, notes: {}, pending: {}, savedAt: Date.now() - 86400001 })));
     await page.reload(); await customerDraft.waitFor(); assert.equal(await customerDraft.inputValue(), '');
     assert.equal(await page.evaluate(() => sessionStorage.getItem('rag-drafts:widget')), null);
@@ -167,11 +192,18 @@ const { chromium } = require('playwright');
     assert.equal(await page.getByText('Không lưu hoặc khôi phục được nháp.', { exact: false }).count(), 1);
     for (const [width, height] of [[320, 700], [390, 500], [768, 900], [1366, 900]]) {
       await page.setViewportSize({ width, height });
+      await page.waitForFunction(() => Math.abs(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chat-height')) - visualViewport.height) < 1);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-      assert.ok(await customerDraft.evaluate(element => element.getBoundingClientRect().bottom <= innerHeight));
+      const inputBottom = await customerDraft.evaluate(element => element.getBoundingClientRect().bottom);
+      const warningBounds = await page.getByText('Không lưu hoặc khôi phục được nháp.', { exact: false }).evaluate(element => {
+        const bounds = element.getBoundingClientRect(); return [bounds.top, bounds.bottom];
+      });
+      await page.screenshot({ path: path.join(output, `customer-draft-${width}-${height}.png`) });
+      assert.ok(inputBottom <= height, `${width}×${height}: composer bottom ${inputBottom}`);
+      assert.ok(warningBounds[0] >= 0 && warningBounds[1] <= height, `${width}×${height}: draft warning ${warningBounds}`);
     }
     await page.screenshot({ path: path.join(output, 'customer-draft.png') });
     assert.deepEqual(errors, []);
-    console.log('PASS: persisted drafts/notes, account isolation, session expiry/logout, retry UUID, compose during AI, unread/read ordering, native modal keyboard, sampled contrast, dashboard focus/stale data, blocked/corrupt storage, simulated mobile');
+    console.log('PASS: persisted drafts/notes, account isolation, session expiry/logout, retained pending UUID and next draft, compose during AI, customer new-message scroll/keyboard, unread/read ordering, native modal keyboard, sampled contrast, dashboard focus/stale data, blocked/corrupt storage, simulated mobile');
   } finally { await browser?.close(); await server.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

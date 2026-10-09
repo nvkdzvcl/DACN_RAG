@@ -117,7 +117,14 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .widgetWelcome fieldset label { display:grid; gap:8px; font-size:12px; }
 .widgetWelcome fieldset small { font-size:11px; }
 .widgetWelcome fieldset button { width:100%; }
-.widgetFooter{display:flex;flex-direction:column;overflow:hidden}
+.widgetFooter{display:flex;flex-direction:column;overflow:hidden;flex:0 1 auto;min-height:0}
 .widgetFooterTools{min-height:0;overflow:auto;overscroll-behavior:contain;flex:0 1 auto}
 .widgetFooter>form{flex:none}
+.widgetFooter>.widgetError{flex:none;margin:6px 0}
 .widgetFooterTools:focus-visible{outline:2px solid var(--widget-green);outline-offset:-2px}
+.widgetLatest{display:flex;align-items:center;justify-content:center;gap:10px;flex:none;padding:6px 12px;background:var(--widget-ink);color:white;font-size:12px}
+.widgetLatest button{background:white;color:#193d36;border:0;padding:6px 10px;min-height:36px}
+.pendingNotice{padding:8px 0;font-size:12px}
+.pendingNotice p{margin:4px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.pendingNotice summary{cursor:pointer;padding:6px 0}
+.pendingNotice>button{margin:6px 0;padding:6px 10px;background:transparent;color:inherit;border:1px solid var(--widget-line)}

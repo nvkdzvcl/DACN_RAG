@@ -314,6 +314,7 @@ body:has(.shell[data-theme=dark]){background:#111827}
 .shell :is(button,input,textarea,select,summary,[tabindex]):focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .shell .dashboardSync{color:var(--muted);font-size:12px;line-height:1.6}
 .shell .readNotice button{color:var(--blue);background:transparent;border:1px solid var(--line);padding:4px 8px}
+.shell .pendingNotice{max-height:25%;min-height:0;flex:0 1 auto;overflow:auto}
 .shell[data-theme=light] .chat .avatar,.shell[data-theme=light] .profileUser .avatar{color:#74538f}
 .shell[data-theme=light] .chat:nth-child(3n+2) .avatar{color:#25635c}
 .shell[data-theme=light] .chat:nth-child(3n) .avatar{color:#79552c}

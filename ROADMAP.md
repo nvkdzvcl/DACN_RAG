@@ -1,5 +1,9 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+## 09/10/2026 - Bảo vệ gửi lại và cuộn chat khách
+
+Sau push `8613c2f`, giữ UUID tin chưa xác nhận khi người dùng soạn nội dung mới, chỉ mở gửi nội dung mới sau khi xác nhận tin cũ; xem/gửi lại nội dung chờ bằng UI native. Widget báo tin mới, giữ vị trí đọc và có nút cuộn/trả focus; cảnh báo lưu nháp và ô soạn luôn hiện trong viewport thấp đã thử. Bốn runner trình duyệt, hai kiểm thử backend liên quan và build đạt. Không thay backend/RAG hoặc thêm dependency; chưa nghiệm thu trên thiết bị thật. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
 ## 09/10/2026 - Lưu nháp và hiệu quả thao tác
 
 Nháp/ghi chú và UUID gửi chưa xác nhận giữ trong tab, hết hạn sau 24 giờ từ lần lưu cuối, tách tài khoản/hội thoại; xóa khi đăng xuất chủ động hoặc kết thúc hội thoại khách. Khách soạn khi AI xử lý, giữ nháp mới khi phản hồi cũ hoàn tất. Thêm đánh dấu chưa đọc riêng nhân viên, dashboard tự làm mới khi quay lại tab và báo số liệu cũ; hồ sơ mobile dùng dialog native, cải thiện mẫu tương phản và vùng cuộn để giữ ô nhập. 225 kiểm thử backend đạt; bốn runner trình duyệt và production build đạt. Không đổi schema/RAG hoặc thêm dependency; điện thoại/trình đọc màn hình thật và nghiệm thu độc lập vẫn chờ. Chi tiết: `docs/UI_UPGRADE_20261009.md`.

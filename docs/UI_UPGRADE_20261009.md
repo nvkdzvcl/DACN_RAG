@@ -78,3 +78,15 @@ Runner mới `frontend/tests/productivity.cjs` dùng Playwright có sẵn và AP
 Kết quả cuối: `productivity.cjs`, `navigation.cjs`, `theme.cjs`, `message-input.cjs` đạt; production build và `git diff --check` đạt. Đã xem ảnh hồ sơ mobile, Inbox sáng/tối và ô nhập khách khi storage lỗi.
 
 Giới hạn: chưa thử bàn phím điện thoại vật lý, VoiceOver/NVDA thật hoặc audit khả năng truy cập toàn diện. Kiểm thử trình duyệt dùng API giả lập; không gọi model/Telegram/email thật, không dùng kết quả này nghiệm thu RAG/M3/M6/M7.
+
+## Bổ sung bảo vệ tin chưa xác nhận và cuộn chat khách — 09/10/2026
+
+Đã commit/push đợt lưu nháp/điều hướng bằng `8613c2f` trước khi tiếp tục. Đợt này chỉ sửa frontend, không thay API/schema/RAG và không thêm dependency.
+
+- Khi tin trước chưa xác nhận, nội dung mới không được ghi đè UUID đang chờ. Gửi/Enter với nháp khác bị khóa; vẫn soạn được. Có mục native “Xem tin chưa xác nhận” và nút gửi lại đúng nội dung/UUID cũ. Xác nhận thành công mở gửi nháp mới và giữ nháp đó. Quy tắc áp dụng cho cả Inbox và widget; thay giới hạn ghi đè lần chờ cũ ở đợt trước.
+- Widget có “Về tin mới nhất” khi cuộn lên trong trang tin gần nhất. Polling thấy tin mới báo “Có tin mới” và giữ vị trí đọc; Enter trên nút cuộn xuống, trả focus vào log và xóa dấu tin mới. Trang tin cũ vẫn dùng phân trang hiện có.
+- Footer cho phần phụ co/cuộn khi viewport thấp. Cảnh báo không lưu được nháp nằm ngoài phần cuộn, luôn hiện cùng ô soạn trong viewport đã thử. Inbox giới hạn chiều cao mục tin chưa xác nhận để nội dung dài không đẩy ô nhập.
+
+Kiểm chứng: bốn runner `productivity.cjs`, `navigation.cjs`, `theme.cjs`, `message-input.cjs` đạt; production build và `git diff --check` đạt. Runner mới đã mở rộng kiểm tra chặn Enter/nút gửi nội dung mới, giữ UUID cũ qua reload, xem đúng nội dung chờ, tin mới không kéo vị trí đọc, nút cuộn hoạt động bằng bàn phím/trả focus, ô nhập và cảnh báo nháp cùng nằm trong viewport 320×700, 390×500, 768×900, 1366×900. Ảnh bổ sung ở `output/ui-productivity/customer-new-message-mobile.png` và `customer-draft-WIDTH-HEIGHT.png`.
+
+Hai kiểm thử backend hiện có về gửi lại UUID widget/lỗi provider và tiếp nhận/trả lời Inbox chạy lại đạt (0,666 giây). Không chạy lại toàn bộ backend vì đợt này không sửa backend; mốc gần nhất vẫn là 225 test đạt trước commit `8613c2f`. QA trình duyệt dùng API giả lập; chưa thử điện thoại/trình đọc màn hình thật hoặc dùng để nghiệm thu RAG.
