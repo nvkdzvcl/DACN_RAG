@@ -1,6 +1,6 @@
 # Vận hành local và triển khai bản build
 
-CLI `python -m app.backup` hỗ trợ SQLite schema v7/v8/v9, Qdrant embedded và tài liệu nguồn. Dùng Python 3.12 trở lên với dependency hiện có; bản kiểm chứng chạy Python 3.13 trên Windows. Không hỗ trợ PostgreSQL, sao lưu nóng hoặc triển khai nhiều worker.
+CLI `python -m app.backup` hỗ trợ SQLite schema v7/v8/v9/v10, Qdrant embedded và tài liệu nguồn. Dùng Python 3.12 trở lên với dependency hiện có; bản kiểm chứng chạy Python 3.13 trên Windows. Không hỗ trợ PostgreSQL, sao lưu nóng hoặc triển khai nhiều worker.
 
 ## Chạy giao diện và API cùng origin
 
@@ -72,7 +72,7 @@ Bản sao vẫn chứa hội thoại, tài liệu, hash mật khẩu và token p
 
 ## Khôi phục vào thư mục mới
 
-1. Dùng phiên bản mã nguồn/dependency hỗ trợ schema của bản sao (v7, v8 hoặc v9). Kiểm tra bản sao và chạy khôi phục vào thư mục chưa tồn tại:
+1. Dùng phiên bản mã nguồn/dependency hỗ trợ schema của bản sao (v7, v8, v9 hoặc v10). Kiểm tra bản sao và chạy khôi phục vào thư mục chưa tồn tại:
 
 ```powershell
 python -m app.backup restore data/backups/before-deploy-20260921 data/restored/check-20260921

@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, AgentMessageCreate
+from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, mark_conversation_read, ReadConversation, AgentMessageCreate
 from app.db.session import Base
 from app.models.support import Conversation, Customer, Message, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, conversation_sla, ticket_slas
@@ -34,27 +34,67 @@ class InboxTests(unittest.TestCase):
         ])
         self.db.commit()
 
+    def test_activity_preview_and_per_user_unread_cursor(self):
+        other = User(id='other', username='other', display_name='Other', password_hash='unused', role='agent')
+        self.db.add(other)
+        self.db.commit()
+        first = list_conversations(db=self.db, user=self.user)['conversations'][0]
+        self.assertEqual(first['conversation_id'], 'first')
+        self.assertEqual(first['last_message'], {'content': 'Reply', 'sender_type': 'ai'})
+        self.assertEqual(first['unread_count'], 1)
+        self.assertEqual(self.db.get(Conversation, 'first').created_at < first['last_activity_at'], True)
+        conversation_detail('first', self.db)
+        self.assertEqual(list_conversations(db=self.db, user=self.user)['conversations'][0]['unread_count'], 1)
+        mark_conversation_read('first', ReadConversation(message_id='later'), self.db, self.user)
+        self.assertEqual(list_conversations(db=self.db, user=self.user)['conversations'][0]['unread_count'], 0)
+        self.assertEqual(list_conversations(db=self.db, user=other)['conversations'][0]['unread_count'], 1)
+        stamp = self.db.get(Message, 'later').created_at
+        self.db.add(Message(id='new-customer', conversation_id='first', sender_type='customer', content='Next', created_at=stamp))
+        self.db.commit()
+        self.assertEqual(list_conversations(db=self.db, user=self.user)['conversations'][0]['unread_count'], 1)
+        mark_conversation_read('first', ReadConversation(message_id='new-customer'), self.db, self.user)
+        mark_conversation_read('first', ReadConversation(message_id='earlier'), self.db, self.user)
+        self.assertEqual(list_conversations(db=self.db, user=self.user)['conversations'][0]['unread_count'], 0)
+        self.db.expire_all()
+        self.assertEqual(list_conversations(db=self.db, user=self.user)['conversations'][0]['unread_count'], 0)
+
+    def test_read_cursor_cannot_cross_conversations_or_hide_new_arrivals(self):
+        with self.assertRaises(HTTPException) as error:
+            mark_conversation_read('second', ReadConversation(message_id='later'), self.db, self.user)
+        self.assertEqual(error.exception.status_code, 404)
+        self.db.rollback()
+        stamp = self.db.get(Message, 'later').created_at + timedelta(seconds=1)
+        self.db.add(Message(id='new-arrival', conversation_id='first', sender_type='customer', content='x' * 4000, created_at=stamp))
+        self.db.commit()
+        mark_conversation_read('first', ReadConversation(message_id='later'), self.db, self.user)
+        row = list_conversations(db=self.db, user=self.user)['conversations'][0]
+        self.assertEqual(row['unread_count'], 1)
+        self.assertEqual(len(row['last_message']['content']), 160)
+        with self.assertRaises(HTTPException) as error:
+            mark_conversation_read('missing', ReadConversation(message_id='later'), self.db, self.user)
+        self.assertEqual(error.exception.status_code, 404)
+
     def test_filters_and_customer_name(self):
-        result = list_conversations(status='handoff_requested', priority='high', db=self.db)
+        result = list_conversations(status='handoff_requested', priority='high', db=self.db, user=self.user)
         self.assertEqual(result['count'], 1)
         self.assertEqual(result['conversations'][0]['customer_name'], 'Customer A')
-        self.assertEqual(list_conversations(status='closed', db=self.db)['conversations'], [])
+        self.assertEqual(list_conversations(status='closed', db=self.db, user=self.user)['conversations'], [])
 
     def test_pagination_bounds_sla_work_and_orders_equal_timestamps(self):
         created = datetime.now(timezone.utc) + timedelta(days=1)
         self.db.add_all([Conversation(id=f'page-{i:03}', customer_id='a', created_at=created) for i in range(55)])
         self.db.commit()
         with patch('app.api.inbox.ticket_slas', wraps=ticket_slas) as slas:
-            first = list_conversations(db=self.db)
+            first = list_conversations(db=self.db, user=self.user)
             self.assertEqual(len(slas.call_args.args[1]), 25)
-        second = list_conversations(db=self.db, offset=25)
-        last = list_conversations(db=self.db, offset=50)
+        second = list_conversations(db=self.db, user=self.user, offset=25)
+        last = list_conversations(db=self.db, user=self.user, offset=50)
         self.assertEqual((first['count'], first['total'], first['has_more']), (25, 57, True))
         self.assertEqual([c['conversation_id'] for c in first['conversations']], [f'page-{i:03}' for i in range(25)])
         ids = [c['conversation_id'] for page in (first, second, last) for c in page['conversations']]
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual((last['count'], last['has_more']), (7, False))
-        outside = list_conversations(db=self.db, offset=1000)
+        outside = list_conversations(db=self.db, user=self.user, offset=1000)
         self.assertEqual((outside['count'], outside['total'], outside['has_more']), (0, 57, False))
 
     def test_search_and_sla_filter_before_pagination_across_batches(self):
@@ -67,15 +107,15 @@ class InboxTests(unittest.TestCase):
                                created_at=created - timedelta(days=2)) for i in range(195, 205)])
         self.db.commit()
         with patch('app.api.inbox.ticket_slas', wraps=ticket_slas) as slas:
-            result = list_conversations(db=self.db, q='đặng 100%_', sla='overdue',
+            result = list_conversations(db=self.db, user=self.user, q='đặng 100%_', sla='overdue',
                                         status='handoff_requested', priority='high', offset=7, limit=2)
             self.assertTrue(all(len(call.args[1]) <= 200 for call in slas.call_args_list))
         self.assertEqual((result['count'], result['total'], result['has_more']), (2, 10, True))
         self.assertEqual([c['conversation_id'] for c in result['conversations']], ['page-202', 'page-203'])
-        self.assertEqual(list_conversations(db=self.db, q='  TELEGRAM ', sla='none')['total'], 195)
-        self.assertEqual(list_conversations(db=self.db, q='%_')['total'], 206)
-        self.assertEqual(list_conversations(db=self.db, q='no match')['total'], 0)
-        self.assertEqual(list_conversations(db=self.db, q='b website')['total'], 1)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, q='  TELEGRAM ', sla='none')['total'], 195)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, q='%_')['total'], 206)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, q='no match')['total'], 0)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, q='b website')['total'], 1)
 
     def test_assignment_filter_uses_session_user_before_pagination(self):
         self.db.add(User(id='agent-2', username='agent-2', display_name='Other', password_hash='unused', role='agent'))
@@ -209,15 +249,15 @@ class InboxTests(unittest.TestCase):
         self.db.commit()
         slas = list(ticket_slas(self.db, ['first'], now).values())
         self.assertEqual(conversation_sla(slas)['ticket_id'], 'ticket')
-        self.assertEqual(list_conversations(db=self.db, sla='overdue')['count'], 1)
-        self.assertEqual(list_conversations(db=self.db, sla='on_track')['count'], 0)
-        self.assertEqual(list_conversations(db=self.db, sla='none')['conversations'][0]['conversation_id'], 'second')
+        self.assertEqual(list_conversations(db=self.db, user=self.user, sla='overdue')['count'], 1)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, sla='on_track')['count'], 0)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, sla='none')['conversations'][0]['conversation_id'], 'second')
         self.assertEqual(conversation_detail('first', self.db)['sla']['status'], 'overdue')
         self.assertEqual(len(conversation_detail('first', self.db)['tickets']), 2)
         self.db.get(Conversation, 'first').status = 'closed'
         self.db.commit()
-        self.assertEqual(list_conversations(db=self.db, sla='cancelled')['count'], 1)
-        self.assertEqual(list_conversations(db=self.db, sla='overdue')['count'], 0)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, sla='cancelled')['count'], 1)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, sla='overdue')['count'], 0)
 
 
 if __name__ == '__main__':

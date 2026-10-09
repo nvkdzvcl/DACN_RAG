@@ -32,6 +32,7 @@ class BackupTests(unittest.TestCase):
             db.execute("INSERT INTO customer_accounts (id, customer_id, email, password_hash, created_at) VALUES ('account', 'customer', 'test@example.com', 'test', CURRENT_TIMESTAMP)")
             db.execute("INSERT INTO customer_sessions (token_hash, account_id, conversation_id, expires_at) VALUES ('customer-session', 'account', 'chat', 9999999999)")
             db.execute("INSERT INTO customer_email_tokens (token_hash, account_id, purpose, created_at, expires_at, used) VALUES ('email-token', 'account', 'reset', 1, 9999999999, 0)")
+            db.execute("INSERT INTO conversation_reads (user_id, conversation_id, message_id, message_created_at) VALUES ('staff', 'chat', 'seen-message', CURRENT_TIMESTAMP)")
             db.commit()
         finally:
             db.close()
@@ -61,6 +62,7 @@ class BackupTests(unittest.TestCase):
         db = sqlite3.connect(restored / 'database.sqlite')
         try:
             self.assertEqual(db.execute('SELECT display_name FROM customers').fetchone(), ('Test',))
+            self.assertEqual(db.execute('SELECT user_id, conversation_id, message_id FROM conversation_reads').fetchone(), ('staff', 'chat', 'seen-message'))
             for table in ('auth_sessions', 'widget_sessions', 'customer_sessions', 'customer_email_tokens', 'order_access'):
                 self.assertEqual(db.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0], 0)
         finally:

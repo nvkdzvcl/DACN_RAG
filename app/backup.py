@@ -43,8 +43,8 @@ def check_database(path):
         if db.execute('PRAGMA integrity_check').fetchall() != [('ok',)]:
             raise ValueError('SQLite integrity check failed')
         versions = [row[0] for row in db.execute('SELECT version FROM schema_migrations ORDER BY version')]
-        if versions not in (list(range(1, 8)), list(range(1, 9)), list(range(1, 10))):
-            raise ValueError('Backup requires schema v7/v8/v9; use matching application version')
+        if versions not in (list(range(1, 8)), list(range(1, 9)), list(range(1, 10)), list(range(1, 11))):
+            raise ValueError('Backup requires schema v7/v8/v9/v10; use matching application version')
     return versions
 
 
@@ -152,7 +152,7 @@ def main():
         else:
             restore(args.source, args.destination)
     except (OSError, ValueError, sqlite3.Error):
-        parser.exit(1, 'Operation failed. Check paths, schema v7/v8/v9, offline state and file integrity. '
+        parser.exit(1, 'Operation failed. Check paths, schema v7/v8/v9/v10, offline state and file integrity. '
                     'Existing data was not overwritten; any new incomplete directory must not be used.\n')
     print(f'{args.command}: OK')
 

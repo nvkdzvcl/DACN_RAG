@@ -182,6 +182,17 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const [completionNotes, setCompletionNotes] = useState({});
   const [lastUpdated, setLastUpdated] = useState(null);
   const pendingReplies = useRef({});
+  const readMessages = useRef({});
+  const [readError, setReadError] = useState('');
+  const [atLatest, setAtLatest] = useState(true);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const resize = () => document.documentElement.style.setProperty('--chat-height', `${viewport?.height || window.innerHeight}px`);
+    resize();
+    viewport?.addEventListener('resize', resize);
+    return () => { viewport?.removeEventListener('resize', resize); document.documentElement.style.removeProperty('--chat-height'); };
+  }, []);
 
   useEffect(() => {
     if (page !== 'inbox' || actionLoading) return;
@@ -248,11 +259,40 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const current = detail?.conversation_id === activeId && detail.message_page.before === messageBefore ? detail : null;
   useLayoutEffect(() => {
     followMessages.current = true;
+    setAtLatest(true);
   }, [activeId, page, messageBefore]);
   useLayoutEffect(() => {
     const log = messageLog.current;
     if (log && current && followMessages.current) log.scrollTop = messageBefore ? 0 : log.scrollHeight;
-  }, [current?.messages.at(-1)?.id, activeId, page, messageBefore]);
+  }, [current?.messages.at(-1)?.id, activeId, page, messageBefore, mobileConversation]);
+  useEffect(() => {
+    setReadError('');
+    const log = messageLog.current;
+    const messageId = current?.messages.at(-1)?.id;
+    if (page !== 'inbox' || messageBefore || !messageId || !log) return;
+    const controller = new AbortController();
+    let pending = false;
+    async function markRead() {
+      if (pending || controller.signal.aborted || document.hidden || readMessages.current[activeId] === messageId ||
+          !log.clientHeight || log.scrollHeight - log.scrollTop - log.clientHeight > 20 ||
+          (window.matchMedia('(max-width: 760px)').matches && !mobileConversation) ||
+          (window.matchMedia('(max-width: 1279px)').matches && profileOpen)) return;
+      pending = true;
+      try {
+        await request(`/inbox/conversations/${encodeURIComponent(activeId)}/read`, {
+          method: 'POST', body: JSON.stringify({ message_id: messageId }), signal: controller.signal,
+        });
+        if (!controller.signal.aborted) { readMessages.current[activeId] = messageId; setReadError(''); setRefresh(value => value + 1); }
+      } catch (error) {
+        if (!controller.signal.aborted) { if (error.status === 401) onExpired(); setReadError('Chưa lưu được trạng thái đã đọc. Đang thử lại.'); }
+      } finally { pending = false; }
+    }
+    const start = setTimeout(markRead, 300);
+    const timer = setInterval(markRead, 3000);
+    log.addEventListener('scroll', markRead);
+    document.addEventListener('visibilitychange', markRead);
+    return () => { controller.abort(); clearTimeout(start); clearInterval(timer); log.removeEventListener('scroll', markRead); document.removeEventListener('visibilitychange', markRead); };
+  }, [current?.messages.at(-1)?.id, activeId, page, messageBefore, mobileConversation, profileOpen]);
   const canReply = current?.status === 'assigned' && current.assigned_agent_id === user.id;
   const activeTicket = current?.tickets.find(ticket => ['open', 'assigned'].includes(ticket.status));
   const completionNote = completionNotes[activeId] || '';
@@ -292,7 +332,13 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     }
   }
   function changeFilter(setter, value) { setter(value); setOffset(0); }
-  function navigate(target) { setCustomerFilter(''); setPage(target); }
+  function navigate(target, filters = {}) {
+    setCustomerFilter(''); setPage(target);
+    if (target === 'inbox') {
+      setAssignment(filters.assignment || 'all'); setStatus(filters.status || ''); setSla(filters.sla || '');
+      setPriority(''); setSearch(''); setOffset(0); setSelectedId(null); setMobileConversation(false);
+    }
+  }
   function openInbox(id) { setAssignment('all'); setMobileConversation(true); setStatus(''); setPriority(''); setSla(''); setSearch(''); setOffset(0); setSelectedId(id); setPage('inbox'); }
   return <div data-theme={theme} className={`shell ${page === 'inbox' ? 'inboxShell' : ''}`}>
     <aside aria-label="Điều hướng chính">
@@ -319,14 +365,15 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
           <div className="conversationList">
           {listError && <div className="state" role="alert"><p>{listError} Dữ liệu có thể đã cũ; đang thử kết nối lại.</p><button onClick={() => setRefresh(n => n + 1)}>Thử lại</button></div>}
           {listLoading ? <p className="state" role="status">Đang tải danh sách...</p> : !visibleChats.length ? !listError && <p className="state" role="status">Không có hội thoại phù hợp.</p> : visibleChats.map(c =>
-            <button key={c.conversation_id} aria-pressed={activeId === c.conversation_id} onClick={() => { setSelectedId(c.conversation_id); setMobileConversation(true); }} className={`chat ${activeId === c.conversation_id ? 'selected' : ''}`}><span className="avatar">{initials(nameOf(c))}</span><span className="chatText"><b>{nameOf(c)}</b><small className="chatStatus"><span className={`statusDot status-${c.status}`} />{statuses[c.status] || c.status}</small><span className="chatMeta"><span>{channelName(c.channel)}</span>{c.priority !== 'normal' && <i>{priorities[c.priority] || c.priority}</i>}</span>{c.sla && <SlaBadge value={c.sla} />}</span><time title={timeOf(c.created_at)}>{shortTime(c.created_at)}</time></button>)}
+            <button key={c.conversation_id} aria-pressed={activeId === c.conversation_id} onClick={() => { setSelectedId(c.conversation_id); setMobileConversation(true); }} className={`chat ${activeId === c.conversation_id ? 'selected' : ''} ${c.unread_count ? 'unread' : ''}`}><span className="avatar">{initials(nameOf(c))}</span><span className="chatText"><b>{nameOf(c)}</b><small className="chatPreview">{c.last_message ? `${senders[c.last_message.sender_type] || 'Tin nhắn'}: ${c.last_message.content}` : 'Chưa có tin nhắn'}</small><small className="chatStatus"><span className={`statusDot status-${c.status}`} />{statuses[c.status] || c.status}</small><span className="chatMeta"><span>{channelName(c.channel)}</span>{c.priority !== 'normal' && <i>{priorities[c.priority] || c.priority}</i>}</span>{c.sla && <SlaBadge value={c.sla} />}</span><span className="chatActivity"><time title={`Hoạt động gần nhất: ${timeOf(c.last_activity_at || c.created_at)}`}>{shortTime(c.last_activity_at || c.created_at)}</time>{c.unread_count > 0 && <span className="unreadBadge" aria-label={`${c.unread_count} tin khách chưa đọc`}>{c.unread_count > 99 ? '99+' : c.unread_count}</span>}</span></button>)}
           </div>
           <nav className="inboxPages" aria-label="Phân trang hội thoại"><span role="status">{listLoading || listError ? 'Đang cập nhật' : `${listMeta.total ? offset + 1 : 0}–${offset + conversations.length} / ${listMeta.total}`}</span><button className="iconButton" aria-label="Trang hội thoại trước" disabled={!offset || listLoading || actionLoading} onClick={() => setOffset(n => Math.max(0, n - pageSize))}><ChevronLeft size={16} /></button><button className="iconButton" aria-label="Trang hội thoại sau" disabled={!listMeta.has_more || listLoading || actionLoading || Boolean(listError)} onClick={() => setOffset(n => n + pageSize)}><ChevronRight size={16} /></button></nav>
         </div>
         <div className="conversation" aria-label="Chi tiết hội thoại" aria-busy={detailLoading}>
           <div className="convHead"><button className="iconButton backToList" aria-label="Về danh sách hội thoại" onClick={() => setMobileConversation(false)}><ChevronLeft size={20} /></button>{selected ? <><div className="avatar big">{initials(nameOf(selected))}</div><div className="conversationIdentity"><b>{nameOf(selected)}</b><small><Globe size={12} aria-hidden="true" />{channelName(selected.channel)}<span>·</span>{statuses[current?.status || selected.status]}</small></div></> : <b>Chi tiết hội thoại</b>}<div className="conversationActions">{current?.status === 'handoff_requested' && <button className="acceptButton" onClick={acceptConversation} disabled={actionLoading || listLoading}><UserRound size={15} aria-hidden="true" />Tiếp nhận</button>}<button ref={profileToggle} className="iconButton" aria-label={profileOpen ? 'Ẩn thông tin khách hàng' : 'Hiện thông tin khách hàng'} title="Thông tin khách hàng" aria-expanded={profileOpen} aria-controls="customerInfo" onClick={() => setProfileOpen(value => !value)}><PanelRight size={19} /></button></div></div>
           {current && ['handoff_requested', 'assigned'].includes(current.status) && <p className="handoff" role="status">AI đã dừng. {current.status === 'handoff_requested' ? 'Đang chờ nhân viên tiếp nhận.' : canReply ? 'Bạn đang phụ trách hội thoại.' : 'Nhân viên khác đang phụ trách hội thoại.'}</p>}
-          {current?.sla && <p className="slaSummary"><SlaBadge value={current.sla} /> Hạn phản hồi: {timeOf(current.sla.due_at)} · {current.sla.target_minutes} phút từ lúc tạo ticket (24/7).</p>}
+          {current?.sla && <p className="slaSummary"><SlaBadge value={current.sla} /><button className="slaDetails" onClick={() => setProfileOpen(true)}>Chi tiết SLA</button></p>}
+          {readError && <p className="readNotice" role="status">{readError}</p>}
           {detailError && <div className="state" role="alert"><p>{detailError} Dữ liệu có thể đã cũ; đang thử kết nối lại.</p><button onClick={() => setDetailRetry(n => n + 1)}>Thử lại</button></div>}
           {activeId && <nav className="messagePagination" aria-label="Phân trang tin nhắn">
             <span role="status">{messageBefore ? 'Đang xem tin cũ' : 'Tin gần nhất'}{current && ` · ${current.messages.length} tin`}</span>
@@ -334,13 +381,14 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
             <button disabled={messageCursors.length < 2 || detailLoading || actionLoading} onClick={() => setMessageHistory({ id: activeId, cursors: messageCursors.slice(0, -1) })}>Tin mới hơn</button>
             {messageBefore && <button onClick={() => setMessageHistory({ id: activeId, cursors: [] })}>Về tin mới nhất</button>}
           </nav>}
-          <div className="messages" ref={messageLog} onScroll={event => { const e = event.currentTarget; followMessages.current = e.scrollHeight - e.scrollTop - e.clientHeight < 80; }} key={`${activeId}:${messageBefore || ''}`} tabIndex={0} role="region" aria-label="Lịch sử tin nhắn">
+          <div className="messages" ref={messageLog} onScroll={event => { const e = event.currentTarget; followMessages.current = e.scrollHeight - e.scrollTop - e.clientHeight < 20; setAtLatest(followMessages.current); }} key={`${activeId}:${messageBefore || ''}`} tabIndex={0} role="region" aria-label="Lịch sử tin nhắn">
             {!activeId ? <div className="inboxEmpty"><span><MessageSquare size={30} aria-hidden="true" /></span><h2>Sẵn sàng hỗ trợ</h2><p>Chọn hội thoại bên trái để xem lịch sử<br />và tiếp tục hỗ trợ khách hàng.</p></div> : !current ? <p className="state" role="status">{detailError ? 'Chưa tải được hội thoại.' : 'Đang tải hội thoại...'}</p> : <>
               {!current.messages.length && <p className="state">Hội thoại chưa có tin nhắn.</p>}
               {current.messages.map(m => <div key={m.id} className={`bubble ${m.sender_type === 'customer' ? 'customer' : m.sender_type === 'agent' ? 'staff' : m.sender_type === 'system' ? 'system' : 'ai'}`}><b>{m.sender_type === 'ai' && <Bot size={13} aria-hidden="true" />}{senders[m.sender_type] || m.sender_type}</b><div className="messageContent">{m.content}</div>{m.citations?.length > 0 && <Citations citations={m.citations} request={request} />}<time title={timeOf(m.created_at)}>{shortTime(m.created_at)}</time><ToolTrace trace={m.tool_trace} /><DeliveryState message={m} canRetry={current.assigned_agent_id === user.id} onExpired={onExpired} onRetried={() => setDetailRetry(n=>n+1)} /></div>)}
 
             </>}
           </div>
+          {!atLatest && !messageBefore && <button className="jumpLatest" onClick={() => { if (messageLog.current) messageLog.current.scrollTop = messageLog.current.scrollHeight; }}>Về tin mới nhất</button>}
           {current && <><form className="composer" onSubmit={sendReply}><MessageInput aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading}><Send size={16} aria-hidden="true" />Gửi</button></form><div className="composerHint"><span>Enter để gửi · Shift+Enter xuống dòng</span><span>Phản hồi công khai</span></div></>}
           {canReply && activeTicket && <details className="finishPanel" key={activeId}><summary><CheckCheck size={15} aria-hidden="true" />Hoàn tất hội thoại</summary><form className="completionForm" onSubmit={finishConversation}>
             <label htmlFor="completionNote">Ghi chú hoàn tất (nội bộ)</label>

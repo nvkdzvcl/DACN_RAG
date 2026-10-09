@@ -1,5 +1,9 @@
 # Công việc
 
+## 09/10/2026 - Inbox chưa đọc, chat mobile và kho tri thức
+
+Đã thêm preview/tin cuối, sắp xếp hoạt động gần nhất và cursor đọc riêng nhân viên ở backend (schema v10), không ghi đọc từ GET hoặc chỉ nhìn danh sách mobile. Thu gọn header/SLA mobile, giữ bản nháp và thêm về tin mới; kho tri thức có tab bàn phím/tìm tên/lọc trạng thái, phân biệt kết quả AI và lỗi, xem đoạn nguồn đánh dấu quote; dashboard đưa hàng chờ thật lên đầu và mở đúng bộ lọc. Cập nhật backup/readiness theo schema mới. 221 kiểm thử backend, build và QA API trên DB tạm đạt, viewport 320–1366 không tràn ngang; AI trong QA được giả lập, không thay model/prompt hoặc dùng điểm cũ làm nghiệm thu mới. Chi tiết, kiểm thử và giới hạn: `docs/UI_UPGRADE_20261009.md`. Sao lưu offline trước nâng môi trường thật.
+
 ## 09/10/2026 - Ràng buộc nguồn sửa trong kiểm định RAG
 
 Bản `refund-schema-v1-20261009` giữ 180/180 hồi quy, 218 kiểm thử backend đạt. Bước kiểm định dùng chung grammar cặp ID với bước chọn nguồn, ngăn đề xuất câu giao hàng đã bị loại trong câu hỏi hoàn tiền; backend vẫn kiểm tra ID và mọi nguồn vẫn được dùng để kiểm định mâu thuẫn. Sáu ca trọng tâm lặp xen kẽ năm vòng đạt 30/30, riêng `bt20-032` 5/5 thay vì 0/3 của chẩn đoán trước; đây là phát lại truy hồi lưu sẵn, không phải 30 ca end-to-end độc lập. Không đổi prompt, model hoặc corpus/nhãn. Giới hạn còn lại: câu mở có thể dư đoạn, chưa bảo đảm ổn định với dữ liệu mới, chưa có người duyệt/tập kín độc lập; chưa nghiệm thu toàn bộ ưu tiên cao/M3. Báo cáo và bằng chứng: `evals/rag-policy/RANG_BUOC_KIEM_DINH_20261009.md`.

@@ -72,3 +72,5 @@ def migrate(engine):
             connection.execute(text('ALTER TABLE customer_accounts ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT FALSE'))
         if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 9")).first():
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (9)"))
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 10")).first():
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (10)"))

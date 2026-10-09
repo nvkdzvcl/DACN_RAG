@@ -1,5 +1,9 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+## 09/10/2026 - Hoàn thiện thao tác Inbox và tri thức
+
+Inbox có hoạt động/tin cuối và trạng thái đọc theo nhân viên; mobile dành thêm chỗ cho tin nhắn, dashboard mở hàng chờ đã lọc. Kho tri thức có tab/lọc, kết quả AI phân loại rõ và đối chiếu đoạn nguồn. Schema v10 thêm cursor đọc, giữ dữ liệu cũ; backup/readiness được cập nhật. QA dùng DB tạm và model giả lập, chưa thay nghiệm thu RAG hoặc đa kênh thật. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
 ## 09/10/2026 - Ổn định ID sửa bằng chứng RAG
 
 Lượt `refund-schema-v1-20261009` đạt 180/180 hồi quy, 218 kiểm thử backend. Kiểm định dùng grammar cặp ID hợp lệ của bước chọn nguồn; giữ kiểm tra backend, toàn bộ nguồn kiểm định và giới hạn ba lần chat. Chẩn đoán sáu ca xen kẽ đạt 30/30, gồm năm lần mốc hoàn tiền, nhưng không thay thế tập kín/người duyệt độc lập. Không đổi nhãn hoặc chính sách thật; chưa nghiệm thu M3/toàn bộ ưu tiên cao. Báo cáo: `evals/rag-policy/RANG_BUOC_KIEM_DINH_20261009.md`.

@@ -179,7 +179,7 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertEqual(self.other.get(COOKIE_PATH + '/orders/DH12345').status_code, 200)
         migrate(self.engine)
         with Session(self.engine) as db:
-            self.assertEqual(list(db.execute(text('SELECT version FROM schema_migrations ORDER BY version')).scalars()), list(range(1, 10)))
+            self.assertEqual(list(db.execute(text('SELECT version FROM schema_migrations ORDER BY version')).scalars()), list(range(1, 11)))
             self.assertEqual(db.query(CustomerAccount).count(), 1)
 
 

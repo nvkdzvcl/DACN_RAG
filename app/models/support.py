@@ -40,6 +40,13 @@ class Conversation(Base):
     customer: Mapped[Customer] = relationship(back_populates="conversations")
     messages: Mapped[list["Message"]] = relationship(back_populates="conversation", cascade="all, delete-orphan")
 
+class ConversationRead(Base):
+    __tablename__ = "conversation_reads"
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), primary_key=True)
+    message_id: Mapped[str] = mapped_column(String(64))
+    message_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
 class WidgetSession(Base):
     __tablename__ = "widget_sessions"
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)

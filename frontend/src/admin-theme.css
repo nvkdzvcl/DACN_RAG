@@ -30,8 +30,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .knowledge { max-width: 1260px; display: flex; flex-direction: column; }
 .knowledge header { order: 0; }
 .knowledge .kbTabs { order: 1; display: flex; gap: 24px; border-bottom: 1px solid #e1e6f3; margin: 3px 0 18px; overflow-x: auto; }
-.knowledge .kbTabs a { color: #64748b; text-decoration: none; white-space: nowrap; padding: 12px 4px; font-weight: 600; font-size: 13px; }
-.knowledge .kbTabs a:hover, .knowledge:not(:has(:target)) .kbTabs a:first-child, .knowledge:has(#tai-lieu:target) .kbTabs a[href="#tai-lieu"], .knowledge:has(#tai-tai-lieu:target) .kbTabs a[href="#tai-tai-lieu"], .knowledge:has(#hoi-tai-lieu:target) .kbTabs a[href="#hoi-tai-lieu"] { color: #2563eb; border-bottom: 2px solid #2563eb; }
 .knowledge .runtime { order: 2; border: 1px solid #e2e8f0; margin: 0 0 20px; }
 .knowledge .kbError { order: 3; }
 .knowledge .documentHeading { order: 4; display: flex; justify-content: space-between; align-items: center; margin: 4px 0 12px; font-size: 16px; }
@@ -281,5 +279,69 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 body:has(.shell[data-theme=dark]){background:#111827}
 .shell[data-theme=dark] .management .workspaceStats>div{background:#182131;border-color:var(--line)}
 .shell[data-theme=dark] :is(.inboxFilters summary,.headerSubtitle,.tickets>p,.sidebarNote small,.management .eyebrow,.knowledge .uploadCard p){color:#a3b1c6}
-.shell[data-theme=dark] .knowledge:not(:has(:target)) .kbTabs a:first-child,.shell[data-theme=dark] .knowledge .kbTabs a:hover,.shell[data-theme=dark] .knowledge:has(#tai-lieu:target) .kbTabs a[href="#tai-lieu"],.shell[data-theme=dark] .knowledge:has(#tai-tai-lieu:target) .kbTabs a[href="#tai-tai-lieu"],.shell[data-theme=dark] .knowledge:has(#hoi-tai-lieu:target) .kbTabs a[href="#hoi-tai-lieu"]{color:#93c5fd;border-bottom-color:#60a5fa}
 .shell .summaryLine .syncNote{display:block;margin:4px 0 0}
+.shell [hidden]{display:none!important}
+.shell .chatActivity{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+.shell .chatActivity time,.shell .chatText .chatStatus,.shell .chatText .chatPreview{font-size:12px;line-height:1.5}
+.shell .chatText .chatPreview{margin:5px 0;color:#52647b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shell .chat.unread .chatText>b{font-weight:750}
+.shell .unreadBadge{background:#2563eb;color:#fff;font-size:12px;font-weight:650;padding:2px 7px;border-radius:12px;min-width:24px;text-align:center}
+.shell .chatMeta,.shell .slaBadge,.shell .bubble time,.shell .bubble>b,.shell .conversationIdentity small{font-size:12px}
+.shell .chatText b{overflow-wrap:anywhere}
+.shell .chatText .slaBadge{white-space:normal}
+.shell .slaSummary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0;padding:5px 16px}
+.shell .slaDetails,.shell .jumpLatest{background:transparent;color:#2563eb;border:0;min-height:32px;cursor:pointer;font-size:12px}
+.shell .jumpLatest{flex:none;align-self:center;padding:6px 16px;border:1px solid var(--line);border-radius:16px;margin:4px}
+.shell .readNotice{margin:0;padding:6px 16px;color:#92400e;background:#fffbeb;font-size:12px}
+.shell .profile :is(p,small,.ticket,.ticket>b,.ticket small,.ticket p,.profileFootnote p),.shell .profileHeading h2{font-size:12px}
+.shell .citations{font-size:12px;overflow-wrap:anywhere}
+.shell .citations summary{padding:8px 0;line-height:1.5}
+.shell .citations button{min-height:36px}
+.shell .sourceLabel{font-size:12px;font-weight:600;margin:12px 0 6px}
+.shell .sourceContext{border-top:1px solid var(--line);margin-top:12px;line-height:1.6}
+.shell .sourceContext mark{background:#fef3c7;color:#713f12;padding:1px 0}
+.shell .knowledge .kbTabs{display:flex;gap:8px;overflow-x:auto}
+.shell .knowledge>[role=tabpanel]{order:4}
+.shell .kbTabs button{padding:12px 16px;min-height:44px;background:transparent;border:0;border-bottom:2px solid transparent;white-space:nowrap;color:#52647b;font-weight:600}
+.shell .kbTabs button[aria-selected=true]{color:#1d4ed8;border-bottom-color:#2563eb}
+.shell .documentFilters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:16px 0}
+.shell .documentFilters label{display:grid;gap:6px;flex:1;min-width:180px;font-size:13px}
+.shell .documentFilters :is(input,select){width:100%;min-height:42px;border:1px solid var(--line);border-radius:7px;padding:9px;background:#fff;color:inherit;font:inherit}
+.shell .knowledge button{cursor:pointer;min-height:36px}
+.shell .knowledge button:disabled{cursor:default}
+.shell .documentCard h2{overflow-wrap:anywhere}
+.shell .askCard>p{font-size:13px;line-height:1.6;color:#52647b}
+.shell .ragAnswer>p{white-space:pre-wrap;line-height:1.7}
+.shell .ragAnswer.clarification{border-left:4px solid #b45309}
+.shell .ragAnswer.abstention{border-left:4px solid #64748b}
+.shell .ragAnswer.grounded{border-left:4px solid #2563eb}
+.shell .workQueue{margin-bottom:20px}
+.shell .workQueue h2{font-size:18px;margin:0 0 6px}
+.shell .workQueue>p{color:#52647b;font-size:13px;margin:0 0 12px}
+.shell[data-theme=dark] :is(.chatText .chatPreview,.sourceLabel,.askCard>p,.workQueue>p,.slaDetails,.jumpLatest,.kbTabs button){color:#b7c9e2}
+.shell[data-theme=dark] .kbTabs button[aria-selected=true]{color:#93c5fd;border-bottom-color:#60a5fa}
+.shell[data-theme=dark] .documentFilters :is(input,select){background:#111827;border-color:#3c4a60;color:#e2e8f0}
+.shell[data-theme=dark] .sourceContext mark{background:#554328;color:#ffebad}
+.shell[data-theme=dark] .readNotice{background:#42341f;color:#f5cf8e}
+@media(max-width:760px){
+  .shell.inboxShell{height:var(--chat-height,100dvh)}
+  .inboxShell:has(.showConversation) .mobileNav,.inboxShell:has(.showConversation) .inboxHeader{display:none}
+  .shell .convHead{padding:10px 12px;min-height:60px;flex:none}
+  .shell .convHead .iconButton,.shell .backToList{min-width:44px;min-height:44px}
+  .shell .handoff{padding:6px 12px;font-size:12px}
+  .shell .slaSummary{padding:2px 12px}
+  .shell .slaDetails{min-height:36px}
+  .shell .messagePagination{padding:3px 12px;gap:4px}
+  .shell .messagePagination button{min-height:36px;font-size:12px}
+  .shell .conversation .messages{min-height:0}
+  .shell .composer{padding:10px 12px 4px}
+  .shell .composer textarea{font-size:16px}
+  .shell .composerHint{padding:4px 12px 6px;font-size:11px}
+  .shell .composerHint span:first-child{display:none}
+  .shell .finishPanel>summary{min-height:36px;padding:8px 12px}
+  .shell .conversation{padding-bottom:env(safe-area-inset-bottom)}
+  .shell .documentFilters label{min-width:100%;flex-basis:100%}
+  .shell .knowledge button{min-height:44px}
+  .shell .kbTabs button{padding:10px}
+  .shell .knowledge :is(input,select,textarea){font-size:16px}
+}

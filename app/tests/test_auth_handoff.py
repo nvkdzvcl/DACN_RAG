@@ -18,12 +18,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.api.auth import _attempts
-from app.api.inbox import accept_conversation
+from app.api.inbox import accept_conversation, mark_conversation_read, ReadConversation
 from app.core.auth import COOKIE_NAME, hash_password, verify_password
 from app.db.migrations import migrate
 from app.db.session import get_db
 from app.main import app
-from app.models.support import AuthSession, Conversation, Customer, Message, Ticket, User
+from app.models.support import AuthSession, Conversation, ConversationRead, Customer, Message, Ticket, User, now_utc
 from app.reset_password import main as reset_password
 from app.services.message_service import process_message
 
@@ -54,6 +54,36 @@ class AuthHandoffTests(unittest.TestCase):
         self.addCleanup(self.engine.dispose)
         self.addCleanup(app.dependency_overrides.clear)
         self.addCleanup(self.client.close)
+
+    def test_read_endpoint_auth_validation_and_concurrent_monotonic_cursor(self):
+        stamp = now_utc()
+        with Session(self.engine) as db:
+            db.add_all([Message(id=key, conversation_id='chat', sender_type='customer', content=key, created_at=stamp)
+                        for key in ('read-a', 'read-b')])
+            db.commit()
+        path = '/api/v1/inbox/conversations/chat/read'
+        self.client.headers['X-CSRF-Protection'] = '1'
+        self.assertEqual(self.client.post(path, json={'message_id': 'read-a'}).status_code, 401)
+        self.login()
+        self.assertEqual(self.client.post(path, json={'message_id': 'read-a', 'user_id': 'two'}).status_code, 422)
+        self.assertEqual(self.client.post(path, json={'message_id': 'missing'}).status_code, 404)
+        self.assertEqual(self.client.post(path, json={'message_id': 'read-a'}).status_code, 200)
+        del self.client.headers['X-CSRF-Protection']
+        self.assertEqual(self.client.post(path, json={'message_id': 'read-b'}).status_code, 403)
+        barrier = Barrier(2)
+        def read(message_id):
+            with Session(self.engine) as db:
+                user = db.get(User, 'one')
+                barrier.wait()
+                return mark_conversation_read('chat', ReadConversation(message_id=message_id), db, user)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            list(pool.map(read, ['read-b', 'read-a']))
+        migrate(self.engine)
+        migrate(self.engine)
+        with Session(self.engine) as db:
+            self.assertEqual(db.get(ConversationRead, ('one', 'chat')).message_id, 'read-b')
+            self.assertIsNone(db.get(ConversationRead, ('two', 'chat')))
+            self.assertEqual(db.query(Message).count(), 2)
 
     def login(self, name='one', client=None):
         client = client or self.client
@@ -373,7 +403,7 @@ class AuthHandoffTests(unittest.TestCase):
         with legacy.connect() as connection:
             self.assertEqual(connection.execute(text('SELECT status, assigned_agent_id FROM conversations')).one(), ('handoff_requested', None))
             self.assertEqual(connection.execute(text("SELECT content FROM messages WHERE id = 'message'")).scalar(), 'Keep this content')
-            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 9)
+            self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(), 10)
             plan = connection.execute(text("EXPLAIN QUERY PLAN SELECT id FROM messages WHERE conversation_id = 'old' ORDER BY created_at, id")).all()
             self.assertTrue(any('ix_messages_conversation_created_id' in row[-1] for row in plan))
             plan = connection.execute(text("EXPLAIN QUERY PLAN SELECT id FROM tickets WHERE conversation_id = 'old' ORDER BY created_at")).all()

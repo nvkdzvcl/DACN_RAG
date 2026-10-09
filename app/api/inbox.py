@@ -3,12 +3,12 @@ from itertools import islice
 from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from sqlalchemy import update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, joinedload
 from app.core.auth import require_staff
 from app.db.session import get_db
-from app.models.support import Conversation, Message, TelegramDelivery, Ticket, User, now_utc
-from app.services.sla_service import conversation_sla, ticket_slas
+from app.models.support import Conversation, ConversationRead, Message, TelegramDelivery, Ticket, User, now_utc
+from app.services.sla_service import conversation_sla, ticket_slas, utc
 from app.services.ticket_service import complete_tickets
 
 router = APIRouter(prefix="/api/v1/inbox", tags=["inbox"])
@@ -44,6 +44,29 @@ class RetryDelivery(BaseModel):
     model_config = ConfigDict(extra='forbid')
     confirm_uncertain: bool = False
     action: Literal['retry', 'skip'] = 'retry'
+
+class ReadConversation(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    message_id: str = Field(min_length=1, max_length=64)
+
+@router.post('/conversations/{conversation_id}/read')
+def mark_conversation_read(conversation_id: str, payload: ReadConversation, db: Session = Depends(get_db),
+                           user: User = Depends(require_staff)):
+    locked = db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
+    if not locked.rowcount:
+        raise HTTPException(404, 'Conversation not found')
+    message = db.get(Message, payload.message_id)
+    if message is None or message.conversation_id != conversation_id:
+        raise HTTPException(404, 'Message not found in this conversation')
+    cursor = db.get(ConversationRead, (user.id, conversation_id), populate_existing=True)
+    if cursor is None:
+        cursor = ConversationRead(user_id=user.id, conversation_id=conversation_id,
+                                  message_id=message.id, message_created_at=message.created_at)
+        db.add(cursor)
+    elif (utc(message.created_at), message.id) > (utc(cursor.message_created_at), cursor.message_id):
+        cursor.message_id, cursor.message_created_at = message.id, message.created_at
+    db.commit()
+    return {'conversation_id': conversation_id, 'message_id': cursor.message_id}
 
 
 @router.post('/messages/{message_id}/retry-delivery')
@@ -107,7 +130,10 @@ def list_conversations(status: str | None = None, priority: str | None = None, d
                        limit: Annotated[int, Query(ge=1, le=100)] = 25,
                        assignment: Literal['all', 'mine', 'unassigned'] = 'all',
                        user: User = Depends(require_staff)):
-    query = db.query(Conversation).options(joinedload(Conversation.customer)).order_by(Conversation.created_at.desc(), Conversation.id)
+    latest = select(Message.created_at).where(Message.conversation_id == Conversation.id).order_by(
+        Message.created_at.desc(), Message.id.desc()).limit(1).correlate(Conversation).scalar_subquery()
+    query = db.query(Conversation).options(joinedload(Conversation.customer)).order_by(
+        func.coalesce(latest, Conversation.created_at).desc(), Conversation.id)
     if assignment == 'mine': query = query.filter(Conversation.assigned_agent_id == user.id)
     elif assignment == 'unassigned': query = query.filter(Conversation.assigned_agent_id.is_(None))
     if status: query = query.filter(Conversation.status == status)
@@ -135,6 +161,22 @@ def list_conversations(status: str | None = None, priority: str | None = None, d
             result.append({"conversation_id": c.id, "customer_id": c.customer_id, "customer_name": c.customer.display_name,
                            "channel": c.channel, "status": c.status, "assigned_agent_id": c.assigned_agent_id,
                            "priority": c.priority, "created_at": c.created_at, "sla": value})
+    ids = [item['conversation_id'] for item in result]
+    latest_id = select(Message.id).where(Message.conversation_id == Conversation.id).order_by(
+        Message.created_at.desc(), Message.id.desc()).limit(1).correlate(Conversation).scalar_subquery()
+    messages = {message.conversation_id: message for message in db.query(Message).join(
+        Conversation, Conversation.id == Message.conversation_id).filter(Conversation.id.in_(ids), Message.id == latest_id)} if ids else {}
+    unread = dict(db.query(Message.conversation_id, func.count(Message.id)).outerjoin(ConversationRead,
+        (ConversationRead.conversation_id == Message.conversation_id) & (ConversationRead.user_id == user.id)).filter(
+        Message.conversation_id.in_(ids), Message.sender_type == 'customer',
+        ConversationRead.message_id.is_(None) | (Message.created_at > ConversationRead.message_created_at) |
+        ((Message.created_at == ConversationRead.message_created_at) & (Message.id > ConversationRead.message_id))
+    ).group_by(Message.conversation_id).all()) if ids else {}
+    for item in result:
+        message = messages.get(item['conversation_id'])
+        item.update(last_activity_at=message.created_at if message else item['created_at'],
+                    last_message={'content': message.content[:160], 'sender_type': message.sender_type} if message else None,
+                    unread_count=unread.get(item['conversation_id'], 0))
     return {"count": len(result), "total": total, "offset": offset, "limit": limit,
             "has_more": offset + len(result) < total, "conversations": result}
 
