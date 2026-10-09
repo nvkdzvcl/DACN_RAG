@@ -1,5 +1,9 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+## 09/10/2026 - Đóng băng bản xử lý tồn đọng RAG
+
+Lượt `priority-followup-verified-v2-20261009` đạt 178/180 rubric tự động, 209 kiểm thử backend; sửa 6/7 ca tồn đọng ban đầu. Giữ nhãn/corpus và chính sách thử tách khỏi dữ liệu thật. Còn ca hỏi lại dư `bt20-032`, bất đồng rubric `test-026`, đoạn dư ở `policy-013` và kiểm chứng độ ổn định. Chưa có người duyệt toàn tập hoặc tập kín do người khác soạn; không đánh dấu M3/ưu tiên cao hoàn tất. Báo cáo tại `evals/rag-policy/XU_LY_TON_DONG_20261009.md`, hướng dẫn nghiệm thu độc lập tại `evals/rag-policy/NGHIEM_THU_DOC_LAP.md`.
+
 ## 09/10/2026 - Truy hồi, ngữ cảnh và chính sách mẫu RAG
 
 Ngày 09/10/2026 nâng cấp truy hồi và ngữ cảnh RAG: lấy tập ứng viên vector giới hạn, xếp lại bằng cụm hai từ hiếm trong tập ứng viên nhưng giữ nguyên cosine score và kiểm tra phiên bản nguồn. Lọc mẫu chỉ dẫn giả khỏi lịch sử và lựa chọn nguồn; giữ đoạn đầu an toàn nguyên văn, các câu sạch phía sau vẫn có mặt để kiểm định xung đột. Trùng ID được gộp, không bỏ kiểm định. Bổ sung hỏi lại đơn cụ thể thiếu dịch vụ giao/lý do đổi/phương thức thanh toán, giữ chủ đề câu nối tiếp và chặn trả số điện thoại khi quote không có số. Giữ model/embedding/ngưỡng 0,35 và tối đa ba lần chat. BT20 58/60 thành 58/60; TN8/LS2 22/24 thành 24/24; PDF/DOCX 20/24 thành 23/24; TXT 42/48 thành 45/48. Bộ chính sách mẫu Mộc Demo mới: 20/24 thành 23/24. 180 lượt bản được chọn không lỗi provider hoặc chuỗi cấm theo rubric; 159/159 quote khớp đoạn truy hồi. 198 kiểm thử backend đạt. Không thay nhãn/corpus cũ, không tải chính sách giả lập vào kho tri thức thật. Các tập đã xem kết quả chỉ dùng phát triển/hồi quy; người duyệt và đánh giá độc lập vẫn chưa hoàn tất. Chi tiết, ca thoái lui và bằng chứng tại evals/rag-policy/NANG_CAP_20261009.md.
