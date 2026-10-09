@@ -1,3 +1,4 @@
+import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History } from 'lucide-react';
 import './widget.css';
@@ -6,6 +7,7 @@ import './portal.css';
 import { CustomerHistory, CustomerProfile } from './CustomerAccount';
 import AuthLayout, { AuthInput } from './AuthLayout';
 import CustomerEmail, { takeEmailLink } from './CustomerEmail';
+import { clearDrafts, useDrafts } from './drafts';
 
 const statuses = { open: 'Trợ lý hỗ trợ', handoff_requested: 'Đang chờ nhân viên', assigned: 'Nhân viên đã tiếp nhận', closed: 'Hội thoại đã đóng', resolved: 'Hội thoại đã giải quyết' };
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -32,7 +34,9 @@ export default function Widget() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [messageCursors, setMessageCursors] = useState([]);
   const [name, setName] = useState('');
-  const [draft, setDraft] = useState('');
+  const [savedDrafts, saveDrafts, draftError] = useDrafts('widget');
+  const draft = savedDrafts.drafts[session?.conversation_id] || '';
+  const setDraft = value => { if (session) saveDrafts(previous => ({ ...previous, drafts: { ...previous.drafts, [session.conversation_id]: value } })); };
   const [error, setError] = useState('');
   const [connectionError, setConnectionError] = useState('');
   const [notice, setNotice] = useState('');
@@ -45,7 +49,7 @@ export default function Widget() {
   const [orderLoading, setOrderLoading] = useState(false);
   const embedded = new URLSearchParams(window.location.search).get('embed') === '1';
   const sequence = useRef(0);
-  const pending = useRef(null);
+  const pending = savedDrafts.pending[session?.conversation_id];
   const handoffId = useRef(null);
   const log = useRef(null);
   const nearBottom = useRef(true);
@@ -133,18 +137,24 @@ export default function Widget() {
     catch (error) { fail(error, version); }
     finally { setBusy(false); }
   }
-  async function send(event) {
+  async function send(event, retryPending = false) {
     event.preventDefault();
-    const content = draft.trim();
+    const content = retryPending ? pending?.content : draft.trim();
     if (!content || busy || historyLoading || !session || closed) return;
-    if (pending.current?.content !== content) pending.current = { content, client_message_id: crypto.randomUUID() };
-    const submitted = draft;
+    const targetId = session.conversation_id;
+    const submission = pending?.content === content ? pending : { content, client_message_id: crypto.randomUUID() };
+    saveDrafts(previous => ({ ...previous, pending: { ...previous.pending, [targetId]: submission } }));
+    const submitted = draft.trim() === content ? draft : null;
     const version = ++sequence.current;
     setBusy(true); setError(''); setNotice(''); nearBottom.current = true;
     try {
-      const data = await request('/messages', { method: 'POST', body: JSON.stringify(pending.current) });
-      apply(data, version); setDraft(value => value === submitted ? '' : value); pending.current = null;
-      if (data.ai_error) setNotice('Tin nhắn đã được lưu nhưng AI chưa trả lời được. Bạn có thể chọn Gặp nhân viên.');
+      const data = await request('/messages', { method: 'POST', body: JSON.stringify(submission) });
+      apply(data, version);
+      saveDrafts(previous => {
+        const nextPending = { ...previous.pending }; delete nextPending[targetId];
+        return { ...previous, pending: nextPending, drafts: previous.drafts[targetId] === submitted ? { ...previous.drafts, [targetId]: '' } : previous.drafts };
+      });
+      if (version === sequence.current && data.ai_error) setNotice('Tin nhắn đã được lưu nhưng AI chưa trả lời được. Bạn có thể chọn Gặp nhân viên.');
     } catch (error) { fail(error, version); }
     finally { setBusy(false); }
   }
@@ -158,9 +168,9 @@ export default function Widget() {
     finally { setHandoffBusy(false); }
   }
   function clearIdentity(message = '') {
-    ++sequence.current; setSession(null); setMessageCursors([]); setDraft(''); setView('messages');
+    ++sequence.current; setSession(null); setMessageCursors([]); setView('messages');
     setOrderResult(null); setOrderId(''); setOrderError(''); setConnectionError(''); setNotice(message);
-    pending.current = null; handoffId.current = null; setAuthMode(embedded ? 'guest' : 'login');
+    handoffId.current = null; setAuthMode(embedded ? 'guest' : 'login');
   }
   function openAuth(mode) { setAuthMode(mode); setView('messages'); setError(''); }
   async function authenticate(event) {
@@ -172,15 +182,19 @@ export default function Widget() {
         email: fields.get('email').trim(), password: fields.get('password'),
         ...(authMode === 'register' && { display_name: fields.get('display_name').trim() })
       }) });
-      apply(data, version); setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setDraft(''); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
-      pending.current = null; handoffId.current = null;
+      apply(data, version); setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
+      handoffId.current = null;
     } catch (error) { setError(error.message); }
     finally { setBusy(false); }
   }
   async function logout() {
     if (busy || handoffBusy || historyLoading) return;
     setBusy(true); setError('');
-    try { await request('/account/logout', { method: 'POST' }); clearIdentity('Đã đăng xuất. Lịch sử tài khoản vẫn được lưu.'); }
+    try {
+      await request('/account/logout', { method: 'POST' });
+      saveDrafts({ drafts: {}, notes: {}, pending: {} }); clearDrafts('widget');
+      clearIdentity('Đã đăng xuất. Lịch sử tài khoản vẫn được lưu.');
+    }
     catch (error) { if (error.status === 401) clearIdentity(); else setError(error.message); }
     finally { setBusy(false); }
   }
@@ -190,7 +204,10 @@ export default function Widget() {
     const version = ++sequence.current; setBusy(true); setError('');
     try {
       const data = await request('/session', { method: 'DELETE' });
-      if (data.account) { apply(data, version); setDraft(''); setOrderResult(null); setOrderId(''); setNotice('Đã bắt đầu cuộc trò chuyện mới.'); pending.current = null; }
+      saveDrafts(previous => Object.fromEntries(Object.entries(previous).map(([field, entries]) => {
+        const next = { ...entries }; delete next[session.conversation_id]; return [field, next];
+      })));
+      if (data.account) { apply(data, version); setOrderResult(null); setOrderId(''); setNotice('Đã bắt đầu cuộc trò chuyện mới.'); }
       else clearIdentity('Hội thoại đã kết thúc.');
     } catch (error) { fail(error, version); }
     finally { setBusy(false); }
@@ -232,7 +249,7 @@ export default function Widget() {
   }
   function askSuggestion(question) { setDraft(question); setView('messages'); }
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
-    <header className="widgetHeader"><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
+    <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
       {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}</header>
     {session && <div className="widgetAccountBar"><span>{session.account ? session.account.email : 'Khách vãng lai'}{session.account && !session.account.email_verified && !embedded && <button onClick={() => setView('account')}>Xác minh email</button>}</span>{session.account ? <button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button> : <button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button>}</div>}
     {loading ? <p className="widgetState" role="status">Đang kết nối...</p> : !session || authMode !== 'guest' ? <section className="widgetWelcome">
@@ -261,10 +278,11 @@ export default function Widget() {
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p>{message.content}</p>
           {message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ` · ${citation.location}`}</summary><blockquote>{citation.quote}</blockquote></details>)}
         </article>)}
-        {busy && pending.current && !session.messages.some(m => m.client_message_id === pending.current.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.current.content}</p></article>}
+        {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}
       </div>
       <footer className="widgetFooter">
+        <div className="widgetFooterTools" tabIndex={0} role="region" aria-label="Thao tác hội thoại">
         {!closed && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
           <p>Nhập mã truy cập do cửa hàng cấp riêng. Không gửi mã truy cập trong tin nhắn.</p>
           {session.order_access?.map(access => <p key={access.order_id}>Đã cấp quyền: <strong>{access.order_id}</strong> đến {new Date(access.expires_at * 1000).toLocaleTimeString('vi-VN')}.</p>)}
@@ -275,7 +293,10 @@ export default function Widget() {
         {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
-        <form onSubmit={send}><div className="widgetComposer"><MessageInput id="widgetDraft" aria-label="Tin nhắn của bạn" maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={busy || closed} placeholder={closed ? 'Hội thoại đã đóng' : 'Nhập tin nhắn...'} /><button type="submit" aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
+        {draftError && <p className="widgetError" role="alert">Không lưu hoặc khôi phục được nháp. Giữ tab mở và sao chép nội dung trước khi tải lại.</p>}
+        {!busy && pending && <p className="widgetIntro" role="status">Tin trước chưa xác nhận. Xem lịch sử hoặc <button type="button" onClick={event => send(event, true)} disabled={closed || historyLoading}>Gửi lại tin chưa xác nhận</button>.</p>}
+        </div>
+        <form onSubmit={send}><div className="widgetComposer"><MessageInput id="widgetDraft" aria-label="Tin nhắn của bạn" maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={closed} placeholder={closed ? 'Hội thoại đã đóng' : busy ? 'Soạn tin tiếp; chờ xử lý xong để gửi' : 'Nhập tin nhắn...'} /><button type="submit" aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
       </footer>
     </>}
   </section>;

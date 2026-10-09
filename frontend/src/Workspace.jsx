@@ -9,25 +9,37 @@ const fieldsOf = (event) => Object.fromEntries(new FormData(event.currentTarget)
 const labelOf = (labels, value) => labels[value] || value;
 const number = value => value == null ? 'Chưa có' : value.toLocaleString('vi-VN');
 
-function useData(path, request, onExpired) {
+function useData(path, request, onExpired, refreshOnFocus = false) {
   const [data, setData] = useState(null), [error, setError] = useState(''), [loading, setLoading] = useState(true);
   const [version, setVersion] = useState(0);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const loadedPath = useRef(null);
   useEffect(() => {
-    if (!path) { setData(null); setLoading(false); return; }
+    if (!refreshOnFocus || !path) return;
+    let timer;
+    const refresh = () => {
+      if (!document.hidden) { clearTimeout(timer); timer = setTimeout(() => setVersion(n => n + 1), 150); }
+    };
+    window.addEventListener('focus', refresh); document.addEventListener('visibilitychange', refresh);
+    return () => { clearTimeout(timer); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
+  }, [path, refreshOnFocus]);
+  useEffect(() => {
+    if (!path) { setData(null); setUpdatedAt(null); setError(''); setLoading(false); loadedPath.current = null; return; }
     const controller = new AbortController();
-    setData(null); setError(''); setLoading(true);
+    if (loadedPath.current !== path) { setData(null); setUpdatedAt(null); }
+    loadedPath.current = path; setError(''); setLoading(true);
     request(path, { signal: controller.signal, cache: 'no-store' }).then(value => {
-      if (!controller.signal.aborted) setData(value);
+      if (!controller.signal.aborted) { setData(value); setUpdatedAt(new Date().toISOString()); }
     }).catch(e => {
       if (!controller.signal.aborted) { setError(e.message); if (e.status === 401) onExpired(); }
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [path, version]);
-  return { data, error, loading, reload: () => setVersion(n => n + 1) };
+  return { data, error, loading, updatedAt, reload: () => setVersion(n => n + 1) };
 }
 
 function LoadState({ state }) {
-  return <>{state.loading && <p className="state" role="status">Đang tải dữ liệu...</p>}{state.error && <div className="workspaceError" role="alert"><p>{state.error}</p><button onClick={state.reload}>Thử lại</button></div>}</>;
+  return <>{state.loading && <p className="state" role="status">{state.data ? 'Đang cập nhật dữ liệu...' : 'Đang tải dữ liệu...'}</p>}{state.error && <div className="workspaceError" role="alert"><p>{state.error}{state.data && ' Dữ liệu hiển thị có thể đã cũ.'}</p><button onClick={state.reload}>Thử lại</button></div>}</>;
 }
 
 function Pager({ total, offset, setOffset }) {
@@ -40,12 +52,15 @@ function Badge({ value, labels = orderLabels }) {
 
 function Metrics({ page, request, onExpired, navigate }) {
   const [days, setDays] = useState(7);
-  const state = useData(`/workspace/summary?days=${days}`, request, onExpired);
-  const mine = useData(page === 'overview' ? '/inbox/conversations?assignment=mine&status=assigned&limit=1' : null, request, onExpired);
-  const overdue = useData(page === 'overview' ? '/inbox/conversations?sla=overdue&limit=1' : null, request, onExpired);
+  const state = useData(`/workspace/summary?days=${days}`, request, onExpired, true);
+  const mine = useData(page === 'overview' ? '/inbox/conversations?assignment=mine&status=assigned&limit=1' : null, request, onExpired, true);
+  const overdue = useData(page === 'overview' ? '/inbox/conversations?sla=overdue&limit=1' : null, request, onExpired, true);
   const data = state.data, period = data?.period;
   const overview = page === 'overview';
+  const sources = overview ? [state, mine, overdue] : [state];
+  const updatedAt = sources.every(source => source.updatedAt) ? sources.map(source => source.updatedAt).sort()[0] : null;
   return <section className="management"><header><div><p className="eyebrow">SUPPORT WORKSPACE</p><h1>{overview ? 'Tổng quan' : 'Phân tích hỗ trợ'}</h1><p>{overview ? 'Nắm tình hình và tiếp tục công việc trong ngày.' : 'Theo dõi lưu lượng hội thoại và phản hồi nhân viên.'}</p></div><div className="toolbar"><label>Khoảng thống kê<select value={days} onChange={e => setDays(Number(e.target.value))}>{[7, 30, 90].map(n => <option key={n} value={n}>{n} ngày</option>)}</select></label><button onClick={() => { state.reload(); mine.reload(); overdue.reload(); }} disabled={state.loading}><RefreshCw size={16} />Làm mới</button></div></header>
+    <p className="dashboardSync" role="status">{sources.some(source => source.error) ? 'Cập nhật thất bại · Số liệu có thể đã cũ.' : sources.some(source => source.loading) ? 'Đang cập nhật...' : 'Đã cập nhật.'} {updatedAt ? <>Cập nhật gần nhất: <time dateTime={updatedAt}>{new Date(updatedAt).toLocaleString('vi-VN')}</time>.</> : 'Chưa đủ số liệu mới.'} Tự làm mới khi quay lại tab.</p>
     <LoadState state={state} />{data && <>
       {overview && <section className="workQueue" aria-label="Hội thoại cần xử lý"><h2>Cần xử lý hiện tại</h2><p>Hội thoại hiện tại, không giới hạn theo khoảng thống kê.</p><LoadState state={mine} /><LoadState state={overdue} /><div className="quickLinks">{[['Chờ tiếp nhận', data.conversation_statuses.handoff_requested || 0, { status: 'handoff_requested' }], ['Quá hạn phản hồi', overdue.data?.total, { sla: 'overdue' }], ['Bạn đang phụ trách', mine.data?.total, { assignment: 'mine', status: 'assigned' }]].map(([title, count, filters]) => <button key={title} onClick={() => navigate('inbox', filters)}><div><b>{title}</b><small>{count == null ? 'Chưa có số liệu' : `${number(count)} hội thoại`} · Mở danh sách</small></div><ArrowUpRight size={20} aria-hidden="true" /></button>)}</div></section>}
       <div className="stats workspaceStats">{(overview ? [['Hội thoại', data.totals.conversations], ['Khách hàng', data.totals.customers], ['Đơn hàng', data.totals.orders], ['Tài liệu', data.totals.documents]] : [['Hội thoại mới', period.conversations], ['Tin nhắn', period.messages], ['Ticket mới', period.tickets], ['Ticket đã phản hồi', period.responded_tickets]]).map(([label, value], index) => { const Icon = (overview ? [MessagesSquare, UsersRound, ShoppingBag, BookOpen] : [MessagesSquare, MessageCircle, TicketCheck, TicketCheck])[index]; return <div key={label}><span className="statIcon"><Icon size={20} aria-hidden="true" /></span><small>{label}</small><b>{number(value)}</b><span>{overview ? 'Toàn bộ dữ liệu' : `Trong ${days} ngày`}</span></div>; })}</div>
@@ -120,21 +135,21 @@ function OrderAccessControls({ orderId, request, onExpired }) {
   </section>;
 }
 
-function Records({ kind, request, onExpired, user, openInbox, openOrders, customerFilter = '' }) {
-  const [q, setQ] = useState(''), [status, setStatus] = useState(''), [offset, setOffset] = useState(0);
-  const [selected, setSelected] = useState(null), [adding, setAdding] = useState(false), [notice, setNotice] = useState('');
-  const [customerId, setCustomerId] = useState(customerFilter);
+function Records({ kind, request, onExpired, user, openInbox, openOrders, route, updateNavigation }) {
+  const { recordSearch: q, recordStatus: status, recordOffset: offset, recordId: selected, customerFilter: customerId } = route;
+  const setSelected = value => updateNavigation({ recordId: value }, false);
+  const [adding, setAdding] = useState(false), [notice, setNotice] = useState('');
   const detailPanel = useRef(null);
   useEffect(() => { if (selected || adding) detailPanel.current?.focus(); }, [selected, adding]);
   const customer = kind === 'customers';
   const state = useData(`/workspace/${kind}?${new URLSearchParams({ q, offset, ...(status && { status }), ...(!customer && customerId && { customer_id: customerId }) })}`, request, onExpired);
   const record = state.data?.items.find(item => item.id === selected);
   const saved = () => { setNotice('Đã lưu dữ liệu.'); setAdding(false); state.reload(); };
-  const filter = setter => e => { setter(e.target.value); setOffset(0); setSelected(null); };
+  const filter = key => event => updateNavigation({ [key]: event.target.value, recordOffset: 0, recordId: null });
   return <section className="management"><header><div><p className="eyebrow">CUSTOMER OPERATIONS</p><h1>{customer ? 'Khách hàng' : 'Đơn hàng'}</h1><p>{customer ? 'Hồ sơ, lịch sử hội thoại và đơn hàng tại một nơi.' : 'Tra trạng thái đơn hàng và thông tin vận chuyển.'}</p></div><div className="toolbar"><button onClick={state.reload} disabled={state.loading}><RefreshCw size={16} />Làm mới</button>{user.role === 'admin' && <button className="primary" onClick={() => { setAdding(true); setSelected(null); setNotice(''); }}><Plus size={16} />{customer ? 'Thêm khách hàng' : 'Tạo đơn hàng'}</button>}</div></header>
-    <div className="recordFilters"><label className="search"><Search size={16} /><input aria-label={customer ? 'Tìm khách hàng' : 'Tìm đơn hàng'} value={q} onChange={filter(setQ)} placeholder={customer ? 'Tên, email, mã khách...' : 'Mã đơn, tên khách, vận đơn...'} /></label>{!customer && <label>Trạng thái<select value={status} onChange={filter(setStatus)}><option value="">Tất cả</option>{Object.entries(orderLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>}{customerId && !customer && <button onClick={() => { setCustomerId(''); setOffset(0); setSelected(null); }}>Bỏ lọc khách hàng <X size={16} /></button>}</div>
+    <div className="recordFilters"><label className="search"><Search size={16} /><input aria-label={customer ? 'Tìm khách hàng' : 'Tìm đơn hàng'} maxLength={160} value={q} onChange={filter('recordSearch')} placeholder={customer ? 'Tên, email, mã khách...' : 'Mã đơn, tên khách, vận đơn...'} /></label>{!customer && <label>Trạng thái<select value={status} onChange={filter('recordStatus')}><option value="">Tất cả</option>{Object.entries(orderLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>}{customerId && !customer && <button onClick={() => updateNavigation({ customerFilter: '', recordOffset: 0, recordId: null })}>Bỏ lọc khách hàng <X size={16} /></button>}</div>
     {notice && <p role="status" className="workspaceNotice">{notice}</p>}<LoadState state={state} />
-    <div className={`recordsLayout ${adding || selected ? 'withDetail' : ''}`}><div className="workspaceCard tableCard">{state.data && <><div className="tableScroll"><table><caption className="visuallyHidden">{customer ? 'Danh sách khách hàng' : 'Danh sách đơn hàng'}</caption><thead><tr><th>{customer ? 'Khách hàng' : 'Mã đơn'}</th><th>{customer ? 'Email' : 'Khách hàng'}</th><th>{customer ? 'Hội thoại' : 'Trạng thái'}</th><th>{customer ? 'Đơn hàng' : 'Mã vận đơn'}</th></tr></thead><tbody>{state.data.items.map(item => <tr key={item.id} className={selected === item.id ? 'selectedRecord' : ''}><td><button className="recordLink" onClick={() => { setSelected(item.id); setAdding(false); setNotice(''); }}>{customer ? item.display_name : item.id}</button>{customer && <small className="recordId">{item.id}</small>}</td><td>{customer ? item.email || 'Chưa có' : item.customer_name}</td><td>{customer ? item.conversation_count : <Badge value={item.status} />}</td><td>{customer ? item.order_count : item.tracking_code || 'Chưa có'}</td></tr>)}</tbody></table></div>{!state.data.items.length && <p className="state">Không có {customer ? 'khách hàng' : 'đơn hàng'} phù hợp.</p>}<Pager total={state.data.total} offset={offset} setOffset={value => { setOffset(value); setSelected(null); }} /></>}</div>
+    <div className={`recordsLayout ${adding || selected ? 'withDetail' : ''}`}><div className="workspaceCard tableCard">{state.data && <><div className="tableScroll"><table className="recordTable" role="table"><caption className="visuallyHidden">{customer ? 'Danh sách khách hàng' : 'Danh sách đơn hàng'}</caption><thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">{customer ? 'Khách hàng' : 'Mã đơn'}</th><th role="columnheader" scope="col">{customer ? 'Email' : 'Khách hàng'}</th><th role="columnheader" scope="col">{customer ? 'Hội thoại' : 'Trạng thái'}</th><th role="columnheader" scope="col">{customer ? 'Đơn hàng' : 'Mã vận đơn'}</th></tr></thead><tbody role="rowgroup">{state.data.items.map(item => <tr role="row" key={item.id} className={selected === item.id ? 'selectedRecord' : ''}><td role="cell" data-label={customer ? 'Khách hàng' : 'Mã đơn'}><button className="recordLink" onClick={() => { setSelected(item.id); setAdding(false); setNotice(''); }}>{customer ? item.display_name : item.id}</button>{customer && <small className="recordId">{item.id}</small>}</td><td role="cell" data-label={customer ? 'Email' : 'Khách hàng'}>{customer ? item.email || 'Chưa có' : item.customer_name}</td><td role="cell" data-label={customer ? 'Hội thoại' : 'Trạng thái'}>{customer ? item.conversation_count : <Badge value={item.status} />}</td><td role="cell" data-label={customer ? 'Đơn hàng' : 'Mã vận đơn'}>{customer ? item.order_count : item.tracking_code || 'Chưa có'}</td></tr>)}</tbody></table></div>{!state.data.items.length && <p className="state">Không có {customer ? 'khách hàng' : 'đơn hàng'} phù hợp.</p>}<Pager total={state.data.total} offset={offset} setOffset={value => updateNavigation({ recordOffset: value, recordId: null }, false)} /></>}</div>
       {(adding || selected) && <section ref={detailPanel} tabIndex={-1} className="workspaceCard detailCard" aria-label="Chi tiết bản ghi"><div className="panelTitle"><h2>{adding ? customer ? 'Thêm khách hàng' : 'Tạo đơn hàng' : customer ? 'Hồ sơ khách hàng' : 'Thông tin đơn hàng'}</h2><button aria-label="Đóng chi tiết" onClick={() => { setSelected(null); setAdding(false); }}><X size={18} /></button></div>
         {adding ? <RecordForm key={`new-${kind}`} kind={kind} request={request} onExpired={onExpired} onSaved={saved} /> : customer ? <CustomerDetail key={selected} id={selected} request={request} onExpired={onExpired} user={user} onSaved={saved} openInbox={openInbox} openOrders={openOrders} /> : record ? <><p className="recordId">{record.id}</p><h3>{record.customer_name}</h3><p className="recordId">Mã khách: {record.customer_id}</p>{user.role === 'admin' ? <RecordForm key={JSON.stringify(record)} kind={kind} record={record} request={request} onExpired={onExpired} onSaved={saved} /> : <><Badge value={record.status} /><p>Mã vận đơn: {record.tracking_code || 'Chưa có'}</p></>}</> : <p>Đang tải hoặc bản ghi không còn trong bộ lọc.</p>}
         {!customer && record && !adding && user.role === 'admin' && <OrderAccessControls key={record.id} orderId={record.id} request={request} onExpired={onExpired} />}

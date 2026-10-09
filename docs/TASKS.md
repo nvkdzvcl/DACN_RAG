@@ -1,5 +1,13 @@
 # Công việc
 
+## 09/10/2026 - Khôi phục nháp, soạn khi AI xử lý và khả năng truy cập
+
+Nháp/ghi chú và UUID gửi chưa xác nhận lưu bằng sessionStorage trong tab, hết hạn sau 24 giờ từ lần lưu cuối; tách nhân viên/hội thoại, khôi phục sau reload hoặc đăng nhập lại cùng tài khoản và xóa khi đăng xuất chủ động/kết thúc hội thoại khách. Có cảnh báo storage lỗi và gửi lại UUID cũ. Khách soạn tin tiếp khi AI xử lý; kết quả cũ không xóa nháp mới. Thêm đánh dấu chưa đọc riêng nhân viên, chờ request đọc cùng tab trước khi lùi cursor. Dashboard giữ dữ liệu khi làm mới/lỗi, hiển thị thời điểm và tự cập nhật khi quay lại tab. Hồ sơ mobile dùng dialog native, giữ focus và trả focus khi Escape; điều chỉnh tương phản mẫu chữ, log tin mới và giữ ô soạn khi cảnh báo dài. 225 kiểm thử backend đạt (146,750 giây); runner trình duyệt mới: `frontend/tests/productivity.cjs`. Không đổi schema/RAG hoặc thêm dependency; chưa thử điện thoại/trình đọc màn hình thật. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
+## 09/10/2026 - Lọc chưa đọc, Back/reload và giao diện mobile
+
+Đã bổ sung lọc SQL chưa đọc riêng nhân viên trước phân trang; giữ chat sau khi đọc, giảm nhãn Inbox, URL/Back/reload giữ trang/bộ lọc/hội thoại và bản ghi khách/đơn. Bảng khách/đơn thành thẻ mobile; sáng/tối và thương hiệu RAG Support dùng chung đăng nhập/admin/khách. Cảnh báo tải lại khi Inbox còn bản nháp/ghi chú; sửa ResizeObserver khi đổi viewport. 223 kiểm thử backend đạt (141,515 giây), ba kiểm thử trình duyệt đạt, QA 320–1366 px đạt trong luồng đã thử. Không đổi schema v10/RAG/model hoặc thêm dependency; QA trình duyệt dùng API giả lập, chưa thử bàn phím điện thoại thật/tải lớn. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
 ## 09/10/2026 - Inbox chưa đọc, chat mobile và kho tri thức
 
 Đã thêm preview/tin cuối, sắp xếp hoạt động gần nhất và cursor đọc riêng nhân viên ở backend (schema v10), không ghi đọc từ GET hoặc chỉ nhìn danh sách mobile. Thu gọn header/SLA mobile, giữ bản nháp và thêm về tin mới; kho tri thức có tab bàn phím/tìm tên/lọc trạng thái, phân biệt kết quả AI và lỗi, xem đoạn nguồn đánh dấu quote; dashboard đưa hàng chờ thật lên đầu và mở đúng bộ lọc. Cập nhật backup/readiness theo schema mới. 221 kiểm thử backend, build và QA API trên DB tạm đạt, viewport 320–1366 không tràn ngang; AI trong QA được giả lập, không thay model/prompt hoặc dùng điểm cũ làm nghiệm thu mới. Chi tiết, kiểm thử và giới hạn: `docs/UI_UPGRADE_20261009.md`. Sao lưu offline trước nâng môi trường thật.

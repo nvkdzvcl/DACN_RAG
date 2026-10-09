@@ -28,8 +28,10 @@ Mọi đường dẫn trong bảng đã có tiền tố /api/v1. Body JSON trừ
 | POST | /conversations/{conversation_id}/messages | Staff | content, external_message_id tùy chọn; xử lý tin khách, không phải gửi tin nhân viên |
 | POST | /conversations/{conversation_id}/tickets | Staff | Tạo/tái sử dụng ticket hoạt động, không giả lập tin khách |
 | POST | /conversations/{conversation_id}/process | Staff | content; cùng process_message, không có UUID trong schema này |
-| GET | /inbox/conversations | Staff | Query status, priority, sla, q, offset, limit; count, total, offset, limit, has_more và conversations |
+| GET | /inbox/conversations | Staff | Query status, priority, sla, assignment, unread_only, q, offset, limit; count, total, offset, limit, has_more và conversations |
 | GET | /inbox/conversations/{conversation_id} | Staff | Khách, messages phân trang bằng before/limit, message_page, tickets, phân công, tin khách cuối và SLA |
+| POST | /inbox/conversations/{conversation_id}/read | Staff + CSRF | message_id thuộc hội thoại; cursor riêng nhân viên, không lùi khi retry |
+| POST | /inbox/conversations/{conversation_id}/unread | Staff + CSRF | message_id của tin khách thuộc hội thoại; lùi cursor riêng nhân viên để tin này và tin khách sau đó thành chưa đọc |
 | POST | /inbox/conversations/{conversation_id}/accept | Staff | Không body; chỉ nhận khi handoff_requested và chưa phân công |
 | POST | /inbox/conversations/{conversation_id}/messages | Người phụ trách | content 1-4000 không trắng, client_message_id UUID tùy chọn; lưu tin agent với agent_id từ phiên |
 | POST | /inbox/conversations/{conversation_id}/finish | Người phụ trách | status, ticket_id, last_customer_message_id, note; status và duplicate |
@@ -49,9 +51,13 @@ Mọi đường dẫn trong bảng đã có tiền tố /api/v1. Body JSON trừ
 
 API staff cho phép chỉ định khách để vận hành nội bộ, không dùng thay xác minh khách công khai. Bộ lọc sla nhận on_track, overdue, met, breached, cancelled hoặc none; giá trị khác trả 422. status/priority hiện là chuỗi lọc so khớp, giá trị không có có thể trả danh sách rỗng.
 
-Inbox phân trang từ 22/09/2026: limit mặc định 25, từ 1 đến 100; offset từ 0 đến 2147483647; q tối đa 160 ký tự. Tham số sai trả 422. q tìm chuỗi con không phân biệt hoa/thường trong tên khách, mã khách và kênh; giữ dấu tiếng Việt, coi %/_ là ký tự thường. Lọc trước phân trang, sắp created_at giảm dần rồi ID tăng dần. count là số dòng trang trả về, total là tổng khớp bộ lọc, has_more cho biết còn trang; offset vượt tổng trả mảng rỗng nhưng giữ total. Client cũ phải chuyển sang đọc total và phân trang, không coi count là tổng.
+Inbox phân trang từ 22/09/2026: limit mặc định 25, từ 1 đến 100; offset từ 0 đến 2147483647; q tối đa 160 ký tự. Tham số sai trả 422. q tìm chuỗi con không phân biệt hoa/thường trong tên khách, mã khách và kênh; giữ dấu tiếng Việt, coi %/_ là ký tự thường. Lọc trước phân trang, sắp thời điểm tin cuối (hoặc thời điểm tạo nếu chưa có tin) giảm dần rồi ID hội thoại tăng dần. count là số dòng trang trả về, total là tổng khớp bộ lọc, has_more cho biết còn trang; offset vượt tổng trả mảng rỗng nhưng giữ total. Client cũ phải chuyển sang đọc total và phân trang, không coi count là tổng.
 
 Không tìm kiếm/lọc SLA thì SQL chỉ lấy trang yêu cầu và tính SLA trang đó. Có q hoặc sla thì quét theo lô 200 hội thoại bằng cùng công thức SLA và cùng mốc giờ trong request; giới hạn dữ liệu trả về nhưng thời gian lọc vẫn tăng theo dữ liệu. Chưa có chỉ mục tìm kiếm Unicode hoặc SLA tổng hợp. Phân trang offset là danh sách sống, không phải snapshot: dữ liệu mới/trạng thái đổi có thể dịch ranh giới trang giữa hai lần gọi.
+
+Từ 09/10/2026, `unread_only` là boolean, mặc định false; giá trị không hợp lệ trả 422. Khi true, SQL lọc hội thoại có ít nhất một tin khách nằm sau cursor đọc **của nhân viên trong phiên**, trước phân trang/tìm kiếm/SLA. Tin AI/nhân viên không làm hội thoại trở thành chưa đọc. `total` và `has_more` tính theo toàn bộ bộ lọc, không chỉ trang đang hiển thị. Mỗi dòng trả `last_activity_at`, `last_message` (content tối đa 160 ký tự, sender_type) và `unread_count`. GET không ghi đã đọc. POST `/inbox/conversations/{conversation_id}/read` chỉ nhận `message_id` thuộc hội thoại, kiểm tra staff/CSRF; không nhận user_id từ client. Cursor so theo thời gian/ID và không lùi khi request cũ đến sau. Không thay schema v10 ở đợt bổ sung lọc này.
+
+POST `/inbox/conversations/{conversation_id}/unread` nhận `{ "message_id": "..." }` và trả `conversation_id`, `unread_from_message_id`. Chỉ chấp nhận tin khách trong hội thoại; ID sai/hội thoại thiếu/tin AI trả 404, trường thừa trả 422. Cursor riêng nhân viên lùi về tin khách trước đó theo `(created_at, id)`, hoặc bị xóa nếu không có tin khách trước. Tin khách này và tin khách mới hơn trở thành chưa đọc. GET vẫn không ghi trạng thái; tab khác đang đọc cùng tài khoản có thể cập nhật cursor sau thao tác này. Không thay schema v10.
 
 ## Snapshot widget
 

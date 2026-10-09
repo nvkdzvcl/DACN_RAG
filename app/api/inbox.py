@@ -68,6 +68,29 @@ def mark_conversation_read(conversation_id: str, payload: ReadConversation, db: 
     db.commit()
     return {'conversation_id': conversation_id, 'message_id': cursor.message_id}
 
+@router.post('/conversations/{conversation_id}/unread')
+def mark_conversation_unread(conversation_id: str, payload: ReadConversation, db: Session = Depends(get_db),
+                             user: User = Depends(require_staff)):
+    locked = db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
+    if not locked.rowcount:
+        raise HTTPException(404, 'Conversation not found')
+    message = db.get(Message, payload.message_id)
+    if message is None or message.conversation_id != conversation_id or message.sender_type != 'customer':
+        raise HTTPException(404, 'Customer message not found in this conversation')
+    previous = db.query(Message).filter(Message.conversation_id == conversation_id, Message.sender_type == 'customer',
+        (Message.created_at < message.created_at) |
+        ((Message.created_at == message.created_at) & (Message.id < message.id))).order_by(Message.created_at.desc(), Message.id.desc()).first()
+    cursor = db.get(ConversationRead, (user.id, conversation_id), populate_existing=True)
+    if previous:
+        if cursor is None:
+            cursor = ConversationRead(user_id=user.id, conversation_id=conversation_id)
+            db.add(cursor)
+        cursor.message_id, cursor.message_created_at = previous.id, previous.created_at
+    elif cursor:
+        db.delete(cursor)
+    db.commit()
+    return {'conversation_id': conversation_id, 'unread_from_message_id': message.id}
+
 
 @router.post('/messages/{message_id}/retry-delivery')
 def retry_delivery(message_id: str, payload: RetryDelivery, db: Session = Depends(get_db), user: User = Depends(require_staff)):
@@ -129,6 +152,7 @@ def list_conversations(status: str | None = None, priority: str | None = None, d
                        offset: Annotated[int, Query(ge=0, le=2**31 - 1)] = 0,
                        limit: Annotated[int, Query(ge=1, le=100)] = 25,
                        assignment: Literal['all', 'mine', 'unassigned'] = 'all',
+                       unread_only: bool = False,
                        user: User = Depends(require_staff)):
     latest = select(Message.created_at).where(Message.conversation_id == Conversation.id).order_by(
         Message.created_at.desc(), Message.id.desc()).limit(1).correlate(Conversation).scalar_subquery()
@@ -138,6 +162,13 @@ def list_conversations(status: str | None = None, priority: str | None = None, d
     elif assignment == 'unassigned': query = query.filter(Conversation.assigned_agent_id.is_(None))
     if status: query = query.filter(Conversation.status == status)
     if priority: query = query.filter(Conversation.priority == priority)
+    unread_messages = db.query(Message).outerjoin(ConversationRead,
+        (ConversationRead.conversation_id == Message.conversation_id) & (ConversationRead.user_id == user.id)).filter(
+        Message.sender_type == 'customer',
+        ConversationRead.message_id.is_(None) | (Message.created_at > ConversationRead.message_created_at) |
+        ((Message.created_at == ConversationRead.message_created_at) & (Message.id > ConversationRead.message_id)))
+    if unread_only:
+        query = query.filter(unread_messages.filter(Message.conversation_id == Conversation.id).exists())
     search = q.strip().lower()
     scan = bool(search or sla)
     # ponytail: Unicode search and derived SLA scan bounded batches; index/materialize before scaling these filters.
@@ -166,12 +197,8 @@ def list_conversations(status: str | None = None, priority: str | None = None, d
         Message.created_at.desc(), Message.id.desc()).limit(1).correlate(Conversation).scalar_subquery()
     messages = {message.conversation_id: message for message in db.query(Message).join(
         Conversation, Conversation.id == Message.conversation_id).filter(Conversation.id.in_(ids), Message.id == latest_id)} if ids else {}
-    unread = dict(db.query(Message.conversation_id, func.count(Message.id)).outerjoin(ConversationRead,
-        (ConversationRead.conversation_id == Message.conversation_id) & (ConversationRead.user_id == user.id)).filter(
-        Message.conversation_id.in_(ids), Message.sender_type == 'customer',
-        ConversationRead.message_id.is_(None) | (Message.created_at > ConversationRead.message_created_at) |
-        ((Message.created_at == ConversationRead.message_created_at) & (Message.id > ConversationRead.message_id))
-    ).group_by(Message.conversation_id).all()) if ids else {}
+    unread = dict(unread_messages.with_entities(Message.conversation_id, func.count(Message.id)).filter(
+        Message.conversation_id.in_(ids)).group_by(Message.conversation_id).all()) if ids else {}
     for item in result:
         message = messages.get(item['conversation_id'])
         item.update(last_activity_at=message.created_at if message else item['created_at'],

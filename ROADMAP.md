@@ -1,5 +1,13 @@
 # Lộ trình đồ án CSKH đa kênh với Agentic RAG
 
+## 09/10/2026 - Lưu nháp và hiệu quả thao tác
+
+Nháp/ghi chú và UUID gửi chưa xác nhận giữ trong tab, hết hạn sau 24 giờ từ lần lưu cuối, tách tài khoản/hội thoại; xóa khi đăng xuất chủ động hoặc kết thúc hội thoại khách. Khách soạn khi AI xử lý, giữ nháp mới khi phản hồi cũ hoàn tất. Thêm đánh dấu chưa đọc riêng nhân viên, dashboard tự làm mới khi quay lại tab và báo số liệu cũ; hồ sơ mobile dùng dialog native, cải thiện mẫu tương phản và vùng cuộn để giữ ô nhập. 225 kiểm thử backend đạt; bốn runner trình duyệt và production build đạt. Không đổi schema/RAG hoặc thêm dependency; điện thoại/trình đọc màn hình thật và nghiệm thu độc lập vẫn chờ. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
+## 09/10/2026 - Lọc chưa đọc, điều hướng và mobile
+
+Bổ sung lọc chưa đọc theo nhân viên trước phân trang, giảm nhãn Inbox; URL/Back/reload giữ trang và bộ lọc, giữ chat đang đọc. Khách hàng/đơn hàng dùng thẻ mobile, theme dùng chung đăng nhập/admin/khách. Kiểm chứng bằng DB tạm và API giả lập trình duyệt; chưa thử bàn phím điện thoại thật hoặc thay nghiệm thu RAG. Không đổi schema v10/model/prompt. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
+
 ## 09/10/2026 - Hoàn thiện thao tác Inbox và tri thức
 
 Inbox có hoạt động/tin cuối và trạng thái đọc theo nhân viên; mobile dành thêm chỗ cho tin nhắn, dashboard mở hàng chờ đã lọc. Kho tri thức có tab/lọc, kết quả AI phân loại rõ và đối chiếu đoạn nguồn. Schema v10 thêm cursor đọc, giữ dữ liệu cũ; backup/readiness được cập nhật. QA dùng DB tạm và model giả lập, chưa thay nghiệm thu RAG hoặc đa kênh thật. Chi tiết: `docs/UI_UPGRADE_20261009.md`.

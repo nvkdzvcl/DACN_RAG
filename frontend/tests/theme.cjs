@@ -46,6 +46,7 @@ const { chromium } = require('playwright');
     if (process.env.QA_SCREENSHOTS) await page.screenshot({ path: path.join(process.env.QA_SCREENSHOTS, 'theme-dark.png') });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('.chat').click();
+    await page.getByRole('button', { name: 'Về danh sách hội thoại', exact: true }).click();
     const toggle = page.locator('.mobileNav').getByRole('button', { name: 'Chuyển sang giao diện sáng' });
     await toggle.focus(); await page.keyboard.press('Enter'); assert.equal(await theme(), 'light');
     await page.locator('.mobileNav').getByRole('button', { name: 'Chuyển sang giao diện tối' }).click();

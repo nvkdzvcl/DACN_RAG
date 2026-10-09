@@ -117,3 +117,7 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .widgetWelcome fieldset label { display:grid; gap:8px; font-size:12px; }
 .widgetWelcome fieldset small { font-size:11px; }
 .widgetWelcome fieldset button { width:100%; }
+.widgetFooter{display:flex;flex-direction:column;overflow:hidden}
+.widgetFooterTools{min-height:0;overflow:auto;overscroll-behavior:contain;flex:0 1 auto}
+.widgetFooter>form{flex:none}
+.widgetFooterTools:focus-visible{outline:2px solid var(--widget-green);outline-offset:-2px}

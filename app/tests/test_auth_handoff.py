@@ -85,6 +85,38 @@ class AuthHandoffTests(unittest.TestCase):
             self.assertIsNone(db.get(ConversationRead, ('two', 'chat')))
             self.assertEqual(db.query(Message).count(), 2)
 
+    def test_unread_filter_http_validation_and_employee_scope(self):
+        path = '/api/v1/inbox/conversations?unread_only=true'
+        self.assertEqual(self.client.get(path).status_code, 401)
+        with Session(self.engine) as db:
+            db.add(Message(id='unread-http', conversation_id='chat', sender_type='customer', content='Unread'))
+            db.commit()
+        self.login()
+        self.assertEqual(self.client.get('/api/v1/inbox/conversations?unread_only=invalid').status_code, 422)
+        self.assertEqual(self.client.get(path).json()['total'], 1)
+        self.client.post('/api/v1/inbox/conversations/chat/read', json={'message_id': 'unread-http'})
+        self.assertEqual(self.client.get(path).json()['total'], 0)
+        self.assertEqual(self.client.get('/api/v1/inbox/conversations?unread_only=false').json()['total'], 1)
+        self.login('two')
+        self.assertEqual(self.client.get(path).json()['total'], 1)
+
+    def test_mark_unread_http_auth_csrf_and_employee_scope(self):
+        path = '/api/v1/inbox/conversations/chat/unread'
+        self.client.headers['X-CSRF-Protection'] = '1'
+        self.assertEqual(self.client.post(path, json={'message_id': 'unread-http'}).status_code, 401)
+        with Session(self.engine) as db:
+            db.add(Message(id='unread-http', conversation_id='chat', sender_type='customer', content='Unread'))
+            db.commit()
+        self.login()
+        self.assertEqual(self.client.post(path, json={'message_id': 'unread-http', 'user_id': 'two'}).status_code, 422)
+        self.assertEqual(self.client.post(path, json={'message_id': 'missing'}).status_code, 404)
+        self.client.post('/api/v1/inbox/conversations/chat/read', json={'message_id': 'unread-http'})
+        self.assertEqual(self.client.get('/api/v1/inbox/conversations?unread_only=true').json()['total'], 0)
+        self.assertEqual(self.client.post(path, json={'message_id': 'unread-http'}).status_code, 200)
+        self.assertEqual(self.client.get('/api/v1/inbox/conversations?unread_only=true').json()['total'], 1)
+        del self.client.headers['X-CSRF-Protection']
+        self.assertEqual(self.client.post(path, json={'message_id': 'unread-http'}).status_code, 403)
+
     def login(self, name='one', client=None):
         client = client or self.client
         client.headers['X-CSRF-Protection'] = '1'

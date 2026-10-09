@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, mark_conversation_read, ReadConversation, AgentMessageCreate
+from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, mark_conversation_read, mark_conversation_unread, ReadConversation, AgentMessageCreate
 from app.db.session import Base
 from app.models.support import Conversation, Customer, Message, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, conversation_sla, ticket_slas
@@ -62,6 +62,7 @@ class InboxTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             mark_conversation_read('second', ReadConversation(message_id='later'), self.db, self.user)
         self.assertEqual(error.exception.status_code, 404)
+
         self.db.rollback()
         stamp = self.db.get(Message, 'later').created_at + timedelta(seconds=1)
         self.db.add(Message(id='new-arrival', conversation_id='first', sender_type='customer', content='x' * 4000, created_at=stamp))
@@ -74,11 +75,57 @@ class InboxTests(unittest.TestCase):
             mark_conversation_read('missing', ReadConversation(message_id='later'), self.db, self.user)
         self.assertEqual(error.exception.status_code, 404)
 
+
+    def test_unread_filter_before_pagination_and_per_employee(self):
+        stamp = datetime.now(timezone.utc) + timedelta(days=1)
+        self.db.add_all([Conversation(id=f'unread-{i:03}', customer_id='a', channel='telegram',
+                                     status='handoff_requested', priority='high') for i in range(30)])
+        self.db.flush()
+        self.db.add_all([Message(id=f'unread-message-{i:03}', conversation_id=f'unread-{i:03}',
+                                 sender_type='customer', content='New', created_at=stamp) for i in range(30)])
+        self.db.add(Message(id='ai-only', conversation_id='second', sender_type='ai', content='AI', created_at=stamp))
+        other = User(id='other-unread', username='other-unread', display_name='Other', password_hash='unused', role='agent')
+        self.db.add(other)
+        self.db.commit()
+        for i in range(0, 30, 2):
+            mark_conversation_read(f'unread-{i:03}', ReadConversation(message_id=f'unread-message-{i:03}'), self.db, self.user)
+        page = list_conversations(db=self.db, user=self.user, unread_only=True, offset=5, limit=3,
+                                  q='telegram', status='handoff_requested', priority='high', sla='none')
+        self.assertEqual((page['total'], page['count'], page['has_more']), (15, 3, True))
+        self.assertEqual([c['conversation_id'] for c in page['conversations']], ['unread-011', 'unread-013', 'unread-015'])
+        self.assertTrue(all(c['unread_count'] == 1 for c in page['conversations']))
+        self.assertEqual(list_conversations(db=self.db, user=other, unread_only=True, q='telegram')['total'], 30)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, unread_only=True, q='Customer B')['total'], 0)
+        mark_conversation_read('first', ReadConversation(message_id='later'), self.db, self.user)
+        self.db.add(Message(id='zz-arrival', conversation_id='first', sender_type='customer', content='After cursor',
+                            created_at=self.db.get(Message, 'later').created_at))
+        self.db.commit()
+        self.assertEqual(list_conversations(db=self.db, user=self.user, unread_only=True, q='website')['total'], 1)
+
     def test_filters_and_customer_name(self):
         result = list_conversations(status='handoff_requested', priority='high', db=self.db, user=self.user)
         self.assertEqual(result['count'], 1)
         self.assertEqual(result['conversations'][0]['customer_name'], 'Customer A')
         self.assertEqual(list_conversations(status='closed', db=self.db, user=self.user)['conversations'], [])
+
+    def test_mark_unread_resets_only_employee_cursor_with_timestamp_ties(self):
+        other = User(id='unread-other', username='unread-other', display_name='Other', password_hash='unused', role='agent')
+        stamp = self.db.get(Message, 'earlier').created_at
+        self.db.add_all([other, Message(id='zzz', conversation_id='first', sender_type='customer', content='Next', created_at=stamp)])
+        self.db.commit()
+        for user in [self.user, other]:
+            mark_conversation_read('first', ReadConversation(message_id='later'), self.db, user)
+        mark_conversation_unread('first', ReadConversation(message_id='zzz'), self.db, self.user)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, unread_only=True)['conversations'][0]['unread_count'], 1)
+        self.assertEqual(list_conversations(db=self.db, user=other, unread_only=True)['total'], 0)
+        self.db.expire_all()
+        mark_conversation_unread('first', ReadConversation(message_id='earlier'), self.db, self.user)
+        self.assertEqual(list_conversations(db=self.db, user=self.user, unread_only=True)['conversations'][0]['unread_count'], 2)
+        for conversation_id, message_id in [('second', 'earlier'), ('missing', 'earlier'), ('first', 'later'), ('first', 'missing')]:
+            with self.assertRaises(HTTPException) as error:
+                mark_conversation_unread(conversation_id, ReadConversation(message_id=message_id), self.db, self.user)
+            self.assertEqual(error.exception.status_code, 404)
+            self.db.rollback()
 
     def test_pagination_bounds_sla_work_and_orders_equal_timestamps(self):
         created = datetime.now(timezone.utc) + timedelta(days=1)

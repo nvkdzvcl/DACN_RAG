@@ -12,11 +12,14 @@ export default function MessageInput({ value, ...props }) {
     resize();
     // ponytail: observe width only; CSS caps height and scrolls long drafts.
     let width = element.clientWidth;
+    let frame;
     const observer = new ResizeObserver(() => {
-      if (element.clientWidth !== width) { width = element.clientWidth; resize(); }
+      if (element.clientWidth !== width) {
+        width = element.clientWidth; cancelAnimationFrame(frame); frame = requestAnimationFrame(resize);
+      }
     });
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
   }, [value]);
   return <textarea {...props} ref={input} value={value} rows={1}
     title="Enter để gửi, Shift+Enter để xuống dòng"

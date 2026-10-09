@@ -5,3 +5,50 @@
 @media(prefers-reduced-motion:reduce){.authPage *{scroll-behavior:auto}}
 
 .authPage .authBack{display:flex;align-items:center;gap:7px;border:0;background:transparent;color:#5841d0;padding:10px 0;cursor:pointer;font-size:12px}
+
+/* Theme shared by staff login, customer login and customer chat. */
+:root[data-theme=dark]{color-scheme:dark}
+:root[data-theme=dark] body{background:#111827;color:#e2e8f0}
+.themeToggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 12px;border:1px solid #d8e0ec;border-radius:8px;background:#fff;color:#334155;font:inherit;cursor:pointer}
+.themeToggle svg{flex:none}
+:root[data-theme=dark] .themeToggle{background:#202c3d;color:#d4deed;border-color:#475569}
+:root[data-theme=dark] .authPage{--auth-ink:#e2e8f0;--auth-muted:#b7c9e2;--auth-purple:#b6a7ff;background:#111827;color:#e2e8f0}
+:root[data-theme=dark] .authStory{background:radial-gradient(ellipse at 82% 51%,#302b5a,transparent 53%),#182131}
+:root[data-theme=dark] .authStory:after{opacity:.15}
+:root[data-theme=dark] :is(.authPanel,.authInput,.authTabs,.authNote,.authHighlights,.authBubble,.authSource,.authChecklist){background:#202c3d;border-color:#475569;color:#e2e8f0}
+:root[data-theme=dark] .authTabs button[aria-pressed=true]{background:#35314f;color:#d1b8f3}
+:root[data-theme=dark] .authFeedback{background:#302b4a;color:#d4caff}
+:root[data-theme=dark] .authFeedback[role=alert]{background:#43282d;color:#ffb8ad}
+:root[data-theme=dark] :is(.authPitch h2 em,.authEyebrow,.authHighlights b){color:#b6a7ff}
+:root[data-theme=dark] .authEyebrow{background:#35314f}
+:root[data-theme=dark] :is(.customerPortal,.customerWidget){--widget-ink:#e2e8f0;--widget-line:#475569;background:#182131;color:#e2e8f0;border-color:#475569}
+:root[data-theme=dark] :is(.portalMain,.customerPortal .widgetLog,.widgetLog,.widgetWelcome){background:#111827;color:#e2e8f0}
+:root[data-theme=dark] :is(.portalContext,.portalOrderForm,.portalOrderResult,.portalQuestions,.portalEmpty,.portalAccess,.portalMobileNav,.widgetFooter,.widgetHistory,.widgetAccountBar,.widgetMessage,.widgetWelcome form,.customerPortal .widgetHeader){background:#202c3d;color:#e2e8f0;border-color:#475569}
+:root[data-theme=dark] :is(.portalPage p,.portalPerson small,.portalContextBlock p,.portalOrderResult small,.portalOrderResult dt,.widgetMessage b,.widgetWelcome p,.widgetWelcome small,.widgetState,.widgetHistory span,.customerPortal .widgetHeader p){color:#b7c9e2}
+:root[data-theme=dark] :is(.customerPortal .widgetHeader h1,.widgetWelcome h2,.widgetWelcome form label,.portalQuestions button,.portalAccess button){color:#e2e8f0}
+:root[data-theme=dark] :is(.portalOrderForm input,.widgetWelcome input,.widgetComposer textarea,.widgetOrderAccess input){background:#111827;color:#e2e8f0;border-color:#64748b}
+:root[data-theme=dark] :is(.widgetHistory button,.widgetHandoff,.widgetEnd,.portalContextBlock button,.widgetError button,.customerAuthTabs button,.portalEmailCard button){background:#302b4a;color:#d4caff;border-color:#68608a}
+:root[data-theme=dark] :is(.widgetOwn,.widgetStatus,.widgetIntro,.portalEmailCard){background:#302b4a;color:#e4deff;border-color:#68608a}
+:root[data-theme=dark] .widgetOwn b{color:#c9bcff}
+:root[data-theme=dark] .widgetError{color:#ffb8ad}
+:root[data-theme=dark] .portalMobileNav button{color:#b7c9e2}
+:root[data-theme=dark] .portalMobileNav button[aria-current=page]{background:#35314f;color:#d4caff}
+:root[data-theme=dark] .portalOrderResult>span{background:#183d35;color:#a2e1c5}
+:root[data-theme=dark] :is(.authPage,.customerWidget,.customerPortal) :focus-visible{outline-color:#b6a7ff}
+.widgetHeader .themeToggle{order:4;flex:none;width:44px;padding:8px}
+.widgetHeader .themeToggle span{display:none}
+:root[data-theme=dark] .widgetOrderAccess{background:#202c3d;border-color:#475569;color:#e2e8f0}
+:root[data-theme=dark] .widgetOrderAccess summary{color:#c9bcff}
+:root[data-theme=dark] .widgetAccountBar button{background:#302b4a;color:#d4caff;border-color:#68608a}
+@media(max-width:760px){
+  .authTop{align-items:center;flex-wrap:wrap}
+  .authInput input{font-size:16px}
+  .customerPortal{position:fixed;top:var(--chat-top,0px);left:0;right:0;height:var(--chat-height,100dvh);width:100%;margin:0;min-height:0;border-radius:0}
+  .customerWidget{height:var(--chat-height,100dvh)}
+  .widgetHeader{padding:10px 12px;gap:8px}
+  .widgetHeader .widgetMark{display:none}
+  .widgetHeader>div{min-width:0}
+  .widgetHeader h1{font-size:15px}
+  .widgetFooter{padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .widgetComposer textarea,.portalOrderForm input{font-size:16px}
+}
