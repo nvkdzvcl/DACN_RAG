@@ -1,0 +1,1732 @@
+{
+  "complete": true,
+  "started_at": "2026-09-21T06:58:04.583795+00:00",
+  "scope": "Loopback, one Uvicorn worker, seeded sessions, no LLM/Telegram/browser",
+  "load": {
+    "clients": 5,
+    "rounds": 10,
+    "conversations": 100,
+    "seed_messages_per_chat": 10,
+    "schedule": "Closed loop; no think time; latency includes HTTP wait, excludes setup/startup"
+  },
+  "runtime": {
+    "python": "3.13.0",
+    "os": "Windows",
+    "cpu_count": 16,
+    "packages": {
+      "fastapi": "0.141.1",
+      "uvicorn": "0.52.4",
+      "sqlalchemy": "2.0.52",
+      "httpx": "0.28.1"
+    }
+  },
+  "source_sha256": {
+    "app/api/answer.py": "122fbc41d009496174a80c02da3fed96f41a770918ae6851701af8a0529293a0",
+    "app/api/auth.py": "c550f7cb501a2d19b5819d495a59e339d57ad5a8867692b2086ae3ea272885ee",
+    "app/api/chunks.py": "f741b24dbcf2227d7eb51f9c4eb80bdf982d2bce903779d35399b2dbacf7d914",
+    "app/api/documents.py": "ff2cc9b9bf9740d79d93d1b32dd21be60f3c46c6fe5744c27481be9c3752de25",
+    "app/api/inbox.py": "9b5bc0c4e103c88f0c1dc328d3a854db038297b937ea8de7aa51681ce33e6e8f",
+    "app/api/orders.py": "56ef2ccf08a2e8bc4d06d7c8eecdd9a084989d9bf842fd911148ec399db481b6",
+    "app/api/process.py": "21b3e4be1e642647e75b8aeabe741320c86ee08a32eb4317bb56dbec5b2fe24d",
+    "app/api/readiness.py": "c66887620bd387199b7f1f4caef278be7b639114bd69c9ff036c9bd08c356d6f",
+    "app/api/routes.py": "840f4fe9edf0e3619427ca8c6b836e06789c39ca5313c2eba25452ce6d496942",
+    "app/api/search.py": "e22a2846b798b5fc3f16493f3b067c9293a9c958639ca3a53653342d4e0dedaa",
+    "app/api/seed.py": "75a1e256c50d9574005b4afb6a8cb5cf75d219248102ffef2ae67b22e41bf6d9",
+    "app/api/widget.py": "815192947c32ad5f1af904851fca5f99cfd1bf1926d17f5e3a32a4cd89636a5d",
+    "app/api/workspace.py": "e0d9bea46f29c3d89cb3b949d30c54658913f78e5a43aca871deb46c0b36346a",
+    "app/backup.py": "2957f27bd846c22e30f0846f415e51d19cedd9d2be1226ec7e1440d9d5f6c852",
+    "app/core/auth.py": "84d7f305661ed38f1f41b28f984c709810f2dad1704f59933a4b79e1e20ce395",
+    "app/create_user.py": "2b39d12435e47316ba2d9de8bc6839bf32c4a154fbb3aa193d8e841cad7fe45f",
+    "app/db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/db/migrations.py": "a875e5654e8e43d73898a9e77a98f67d4eee7dfef59ab3982d121c461b63bb31",
+    "app/db/session.py": "c0f76e07a172363cbdbffdf19fe1a7b6146509c57db524b558af782c39297399",
+    "app/evaluate_rag.py": "72855945045556512e40c09a57cc288c88f0c2cddebe40c6e172c9dec6eecf39",
+    "app/main.py": "48ebbb6d21a492bca57564f4ce8cfd41425f1acbe30377ec868b69e471dcac31",
+    "app/measure_load.py": "895314e1a50ba9a563a433958d1241810eaee029ee73684e35b0128248b4f172",
+    "app/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/models/support.py": "716229b57cb18971fbee20a2adf67ef67597d1cd0045ceaa05b998256a0f3ad7",
+    "app/rag/answer_service.py": "17fd73c52adc8af64399e715f0b765eb004762f9cbe64f7c4165e21d1d0d5e08",
+    "app/rag/ollama.py": "ee867b89b1936e36ecf222a0be437188e78843c1904186a3a832a7f582e64f73",
+    "app/rag/vector_store.py": "b462df830e0ff1b1e90f39fe10563e3771d1ed54c59373aaadc1d0a7d93af86a",
+    "app/review_rag.py": "599dc7fd586b7b6b4c42d6b44d9355b298e6344e9fdf4e5d6fd1fd0f1abb5784",
+    "app/schemas/conversation.py": "f8665a1487e2cffbab90abe6999a75bc34385093fffaaf1ba6b21f60d7b35d51",
+    "app/services/document_service.py": "c2ad26ccf379d37a53de249e16cb97a357985820934eb173efea618eb51ad1b6",
+    "app/services/handoff_service.py": "c1faa474377e01cdac5aec2a90af8f9aa8db64f85c81a6f4d3b0ae492e2bef58",
+    "app/services/message_service.py": "3ce4c4980cdc4cc5c1a147c7aa296834832e89a004aeb34590d6d4ff4a2f9730",
+    "app/services/order_service.py": "6982ca51e13e3c0231161723a470a6615e8970e136a43098e68504e1a43d6560",
+    "app/services/sla_service.py": "0be6348eeea1325d5fe7f26eca025851830670afbd869e36ff2ec92ab5632ece",
+    "app/services/ticket_service.py": "9394b50a2b3e92c591ffd9c56bbfb1a2ac46f6aeef1a257cd177585b2b850196",
+    "app/services/tool_service.py": "0a72c56043f58f6eed0384099bf9feab63f54a0b615a14c75c6fc77bc6b7ecab",
+    "app/telegram.py": "403c29596bd8540d9a620a398d60848e5612a4e72367826c8608386e6545ffb5",
+    "app/tests/smoke_m4.py": "8326450261dc9d55b21ce2ba71f15e0442dd6c161d93bacf61d3b85285afa5a2",
+    "app/tests/smoke_ollama.py": "97bb5561f74ca8f2b4d9cc41997b0187d947e8caf8ef7f0a98739acb20900534",
+    "app/tests/smoke_tools.py": "103e1071c4558084e96163b526d0113c2bfe5f50d8a5a39b21de747a2bcad306",
+    "app/tests/test_auth_handoff.py": "3d433e53ef7387cd57c530f5328aee0e4bbad7f550ce48b4319b5fb69c9dce09",
+    "app/tests/test_backup.py": "892ac58b4d7841e403dd699a749d6596515dfcf3ba7c154d1a2835cec60fde10",
+    "app/tests/test_evaluate_rag.py": "52405c65da09ba76adfd5e3eabdc962e5f41bbb98d1806f66cc5ecd103dca026",
+    "app/tests/test_inbox.py": "334ba7a934a07f48b2beefa2e87ebcb25f52a78e2172a00f5a78d232c2a23b12",
+    "app/tests/test_order_access.py": "fd8767ef12211cb2a5bacfdeb0e2a74bf41201d90301c5bb758975ce3900854d",
+    "app/tests/test_order_service.py": "22cbf782878e3d6a13ed59ee9f768fb89e7f994e8e15b9c0b9c5f57df1df6a07",
+    "app/tests/test_rag.py": "bdc03624acc2348e76417fe8d35972440ab937dc8651d5755df29e62da2c16d1",
+    "app/tests/test_review_rag.py": "c32f94b2c61fc759a049a1d15f212204c1f61c7f9bb56feb460289d01c110e22",
+    "app/tests/test_serving.py": "5725b0dfcbb926e45046944dff2c6d0df97323e64fb60c6c48b2f021a0757a1c",
+    "app/tests/test_telegram.py": "f05ad25e04eb259f5e5122aa3ec9d40790a1579356db47650d571740398d6fbc",
+    "app/tests/test_tools.py": "2a759d8546be4d3dbb49d7f0642a3fd61d38b5b7a15b26960a55fc32c6296d87",
+    "app/tests/test_widget.py": "6c2d234fa4634f9e707922aecd61ab4753674a1c0be9391f7410bc3b5550266b",
+    "app/tests/test_workspace.py": "872745b7d9555424d721ad0f35d8b2057555d9e591beda0418cbdb189941e00c",
+    "app/web.py": "3e93bd16e3aee8cef2dd3118584a152418e73d5be06de3234aae647586890675"
+  },
+  "workload_seconds": 4.239,
+  "workload_requests_per_second": 58.976,
+  "invariants": "passed: distinct guests, UUID retries, one owner/ticket, handoff dedup, rate limit, no AI",
+  "operations": {
+    "accept_race": {
+      "requests": 5,
+      "unexpected": 0,
+      "statuses": {
+        "200": 1,
+        "409": 4
+      },
+      "p50_ms": 69.228,
+      "p95_ms": 97.549
+    },
+    "handoff": {
+      "requests": 1,
+      "unexpected": 0,
+      "statuses": {
+        "200": 1
+      },
+      "p50_ms": 37.647,
+      "p95_ms": 37.647
+    },
+    "handoff_retry_limit": {
+      "requests": 6,
+      "unexpected": 0,
+      "statuses": {
+        "200": 5,
+        "429": 1
+      },
+      "p50_ms": 16.656,
+      "p95_ms": 21.088
+    },
+    "inbox_detail": {
+      "requests": 50,
+      "unexpected": 0,
+      "statuses": {
+        "200": 50
+      },
+      "p50_ms": 85.648,
+      "p95_ms": 154.703
+    },
+    "inbox_list": {
+      "requests": 50,
+      "unexpected": 0,
+      "statuses": {
+        "200": 50
+      },
+      "p50_ms": 76.068,
+      "p95_ms": 149.726
+    },
+    "staff_retry": {
+      "requests": 50,
+      "unexpected": 0,
+      "statuses": {
+        "200": 50
+      },
+      "p50_ms": 57.165,
+      "p95_ms": 127.169
+    },
+    "staff_send": {
+      "requests": 50,
+      "unexpected": 0,
+      "statuses": {
+        "200": 50
+      },
+      "p50_ms": 98.295,
+      "p95_ms": 182.63
+    },
+    "widget_poll": {
+      "requests": 50,
+      "unexpected": 0,
+      "statuses": {
+        "200": 50
+      },
+      "p50_ms": 75.434,
+      "p95_ms": 124.224
+    }
+  },
+  "samples": [
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.115768
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.140091
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141115
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.149726
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.180608
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.103762
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.068815
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087617
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.084921
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.04653
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.027739
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.035139
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.075726
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.08128
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.11661
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.124926
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.109157
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.04146
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.081071
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.0294
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.116863
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.082682
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.201987
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.110882
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.179034
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036979
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.127169
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.067324
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037527
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.124531
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.140327
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.059963
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.051003
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037581
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.043621
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.080667
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.093849
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.048379
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087141
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.101865
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.128184
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.072923
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.122488
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.135212
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.073712
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.048103
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.093195
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.17883
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.11764
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.170565
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.079359
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.057165
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.027571
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.041525
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.053022
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.098295
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.142847
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.065072
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.047549
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.073321
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.044773
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.042637
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.047635
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.091037
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.151392
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.038361
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.064189
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.08475
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141004
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.076642
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036474
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.107095
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.085359
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.108534
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036406
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.047988
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.047346
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.093237
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036913
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.06934
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.115649
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.030788
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.092564
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.125485
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.148822
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.046389
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.123788
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.207439
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.079772
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.143599
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.120193
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.061823
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.090769
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.06053
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.114827
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.115942
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.075434
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.0989
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.03717
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.071156
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.044071
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.078643
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.098382
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.063232
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.05779
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.022204
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.111795
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.072189
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.039036
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.072322
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.074304
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.083859
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.038167
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.056418
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.18263
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.113262
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.111774
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.154703
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.07415
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.085997
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.119723
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037218
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037322
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.10053
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.144978
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.040916
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.043396
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.062319
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.077326
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.055495
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.056258
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.127258
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.052444
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.048698
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.048388
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.072334
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.108504
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.027273
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.137315
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.038248
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.094802
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.060754
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.106564
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.076605
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.082204
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.086148
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.027433
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.124224
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141899
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.041765
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.111835
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.058939
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.040575
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.132271
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.058371
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036654
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.144467
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.092855
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.023523
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.098788
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.145858
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.09711
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087052
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.079929
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.046934
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.124433
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.054488
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.118068
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.075608
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.061623
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.020365
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.043203
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.102426
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.026916
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.097796
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.0462
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037189
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.031391
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.118128
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.119642
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.076068
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.035791
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.080085
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.114113
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.116242
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.084992
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.106408
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.09532
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.058787
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.053714
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.103749
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.04364
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087044
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.129113
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.068712
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.138301
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.163403
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.116205
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.027676
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.11645
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.050459
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.068298
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.106822
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.079462
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.181843
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.081868
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.092878
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.103607
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.078306
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.066702
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.090515
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.085648
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.069805
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.074058
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.123132
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.03395
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.091154
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.092097
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.067931
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036815
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.097575
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.076093
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.061404
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.170878
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.08932
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.050049
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.040982
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.085367
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.058451
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.090703
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.064934
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.051515
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.033082
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.03811
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.060093
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.077832
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.097121
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.064055
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.08673
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.089969
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.075346
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.14342
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.072635
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.105981
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.029842
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.102595
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.033519
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.040501
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.091389
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.027182
+    },
+    {
+      "operation": "handoff",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037647
+    },
+    {
+      "operation": "accept_race",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.058748
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.069228
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.067858
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.079513
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.097549
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.021088
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.016656
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.014242
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.016801
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.018765
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 429,
+      "expected": true,
+      "seconds": 0.006763
+    }
+  ]
+}

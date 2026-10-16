@@ -1,0 +1,6 @@
+{
+  "status": "preflight_failed",
+  "completed_cases": 0,
+  "error": "Ollama was not running: connection refused at /api/tags before ingestion or questions. Started existing portable Ollama; retry uses review-semantics-v2-dev.",
+  "git_commit": "0180479b70b07da7765296b5522897664a575973"
+}

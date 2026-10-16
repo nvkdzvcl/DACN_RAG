@@ -1,0 +1,51 @@
+{
+  "ollama_version": {
+    "version": "0.40.0"
+  },
+  "resident_models": {
+    "models": [
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "size": 3786324049,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-08T20:17:38.0749212+07:00",
+        "size_vram": 3786324049,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      },
+      {
+        "name": "embeddinggemma:300m",
+        "model": "embeddinggemma:300m",
+        "size": 681417113,
+        "digest": "5265a4c1d1e7ef31b67da5be71b21030cf8f3f0ffab7b38614866c4e92a8c4b5",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "gemma-embedding",
+          "families": [
+            "gemma-embedding"
+          ],
+          "parameter_size": "307.58M",
+          "quantization_level": "BF16"
+        },
+        "expires_at": "2026-10-08T20:17:38.8194788+07:00",
+        "size_vram": 681417113,
+        "context_length": 2048,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "gpu": "name, memory.total [MiB], memory.used [MiB], utilization.gpu [%]\nNVIDIA GeForce RTX 3060 Laptop GPU, 6144 MiB, 5139 MiB, 0 %\n",
+  "scope": "Local sequential real Ollama evaluation; isolated SQLite/Qdrant; no browser or concurrent load test."
+}

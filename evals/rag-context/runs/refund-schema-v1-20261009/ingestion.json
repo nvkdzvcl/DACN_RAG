@@ -1,0 +1,10 @@
+[
+  {
+    "source": "test-policy.txt",
+    "sha256": "fd6fdaa21a09f17bd01bfc975680dd8a66006edd316a2c5350d2a412724383b1",
+    "seconds": 1.172,
+    "status": "indexed",
+    "chunks": 12,
+    "error_message": null
+  }
+]

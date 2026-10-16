@@ -1,0 +1,18 @@
+[
+  {
+    "source": "test-dich-vu.docx",
+    "sha256": "a780ccf5167bf0975c838c28f2c1fdf34792773518ba2c8d4f9b7d455e13d96e",
+    "seconds": 3.852,
+    "status": "indexed",
+    "chunks": 10,
+    "error_message": null
+  },
+  {
+    "source": "test-nhan-hang-lap-dat.pdf",
+    "sha256": "a939b1031bef91466190829ca81c0f0b1cac0fc9c819ec2b10a58e4f9852af52",
+    "seconds": 3.699,
+    "status": "indexed",
+    "chunks": 6,
+    "error_message": null
+  }
+]

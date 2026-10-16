@@ -1,0 +1,6262 @@
+{
+  "complete": true,
+  "started_at": "2026-09-21T06:59:23.288191+00:00",
+  "scope": "Loopback, one Uvicorn worker, seeded sessions, no LLM/Telegram/browser",
+  "load": {
+    "clients": 10,
+    "rounds": 20,
+    "conversations": 500,
+    "seed_messages_per_chat": 10,
+    "schedule": "Closed loop; no think time; latency includes HTTP wait, excludes setup/startup"
+  },
+  "runtime": {
+    "python": "3.13.0",
+    "os": "Windows",
+    "cpu_count": 16,
+    "packages": {
+      "fastapi": "0.141.1",
+      "uvicorn": "0.52.4",
+      "sqlalchemy": "2.0.52",
+      "httpx": "0.28.1"
+    }
+  },
+  "source_sha256": {
+    "app/api/answer.py": "122fbc41d009496174a80c02da3fed96f41a770918ae6851701af8a0529293a0",
+    "app/api/auth.py": "c550f7cb501a2d19b5819d495a59e339d57ad5a8867692b2086ae3ea272885ee",
+    "app/api/chunks.py": "f741b24dbcf2227d7eb51f9c4eb80bdf982d2bce903779d35399b2dbacf7d914",
+    "app/api/documents.py": "ff2cc9b9bf9740d79d93d1b32dd21be60f3c46c6fe5744c27481be9c3752de25",
+    "app/api/inbox.py": "9b5bc0c4e103c88f0c1dc328d3a854db038297b937ea8de7aa51681ce33e6e8f",
+    "app/api/orders.py": "56ef2ccf08a2e8bc4d06d7c8eecdd9a084989d9bf842fd911148ec399db481b6",
+    "app/api/process.py": "21b3e4be1e642647e75b8aeabe741320c86ee08a32eb4317bb56dbec5b2fe24d",
+    "app/api/readiness.py": "c66887620bd387199b7f1f4caef278be7b639114bd69c9ff036c9bd08c356d6f",
+    "app/api/routes.py": "840f4fe9edf0e3619427ca8c6b836e06789c39ca5313c2eba25452ce6d496942",
+    "app/api/search.py": "e22a2846b798b5fc3f16493f3b067c9293a9c958639ca3a53653342d4e0dedaa",
+    "app/api/seed.py": "75a1e256c50d9574005b4afb6a8cb5cf75d219248102ffef2ae67b22e41bf6d9",
+    "app/api/widget.py": "815192947c32ad5f1af904851fca5f99cfd1bf1926d17f5e3a32a4cd89636a5d",
+    "app/api/workspace.py": "e0d9bea46f29c3d89cb3b949d30c54658913f78e5a43aca871deb46c0b36346a",
+    "app/backup.py": "2957f27bd846c22e30f0846f415e51d19cedd9d2be1226ec7e1440d9d5f6c852",
+    "app/core/auth.py": "84d7f305661ed38f1f41b28f984c709810f2dad1704f59933a4b79e1e20ce395",
+    "app/create_user.py": "2b39d12435e47316ba2d9de8bc6839bf32c4a154fbb3aa193d8e841cad7fe45f",
+    "app/db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/db/migrations.py": "a875e5654e8e43d73898a9e77a98f67d4eee7dfef59ab3982d121c461b63bb31",
+    "app/db/session.py": "c0f76e07a172363cbdbffdf19fe1a7b6146509c57db524b558af782c39297399",
+    "app/evaluate_rag.py": "72855945045556512e40c09a57cc288c88f0c2cddebe40c6e172c9dec6eecf39",
+    "app/main.py": "48ebbb6d21a492bca57564f4ce8cfd41425f1acbe30377ec868b69e471dcac31",
+    "app/measure_load.py": "895314e1a50ba9a563a433958d1241810eaee029ee73684e35b0128248b4f172",
+    "app/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/models/support.py": "716229b57cb18971fbee20a2adf67ef67597d1cd0045ceaa05b998256a0f3ad7",
+    "app/rag/answer_service.py": "17fd73c52adc8af64399e715f0b765eb004762f9cbe64f7c4165e21d1d0d5e08",
+    "app/rag/ollama.py": "ee867b89b1936e36ecf222a0be437188e78843c1904186a3a832a7f582e64f73",
+    "app/rag/vector_store.py": "b462df830e0ff1b1e90f39fe10563e3771d1ed54c59373aaadc1d0a7d93af86a",
+    "app/review_rag.py": "599dc7fd586b7b6b4c42d6b44d9355b298e6344e9fdf4e5d6fd1fd0f1abb5784",
+    "app/schemas/conversation.py": "f8665a1487e2cffbab90abe6999a75bc34385093fffaaf1ba6b21f60d7b35d51",
+    "app/services/document_service.py": "c2ad26ccf379d37a53de249e16cb97a357985820934eb173efea618eb51ad1b6",
+    "app/services/handoff_service.py": "c1faa474377e01cdac5aec2a90af8f9aa8db64f85c81a6f4d3b0ae492e2bef58",
+    "app/services/message_service.py": "3ce4c4980cdc4cc5c1a147c7aa296834832e89a004aeb34590d6d4ff4a2f9730",
+    "app/services/order_service.py": "6982ca51e13e3c0231161723a470a6615e8970e136a43098e68504e1a43d6560",
+    "app/services/sla_service.py": "0be6348eeea1325d5fe7f26eca025851830670afbd869e36ff2ec92ab5632ece",
+    "app/services/ticket_service.py": "9394b50a2b3e92c591ffd9c56bbfb1a2ac46f6aeef1a257cd177585b2b850196",
+    "app/services/tool_service.py": "0a72c56043f58f6eed0384099bf9feab63f54a0b615a14c75c6fc77bc6b7ecab",
+    "app/telegram.py": "403c29596bd8540d9a620a398d60848e5612a4e72367826c8608386e6545ffb5",
+    "app/tests/smoke_m4.py": "8326450261dc9d55b21ce2ba71f15e0442dd6c161d93bacf61d3b85285afa5a2",
+    "app/tests/smoke_ollama.py": "97bb5561f74ca8f2b4d9cc41997b0187d947e8caf8ef7f0a98739acb20900534",
+    "app/tests/smoke_tools.py": "103e1071c4558084e96163b526d0113c2bfe5f50d8a5a39b21de747a2bcad306",
+    "app/tests/test_auth_handoff.py": "3d433e53ef7387cd57c530f5328aee0e4bbad7f550ce48b4319b5fb69c9dce09",
+    "app/tests/test_backup.py": "892ac58b4d7841e403dd699a749d6596515dfcf3ba7c154d1a2835cec60fde10",
+    "app/tests/test_evaluate_rag.py": "52405c65da09ba76adfd5e3eabdc962e5f41bbb98d1806f66cc5ecd103dca026",
+    "app/tests/test_inbox.py": "334ba7a934a07f48b2beefa2e87ebcb25f52a78e2172a00f5a78d232c2a23b12",
+    "app/tests/test_order_access.py": "fd8767ef12211cb2a5bacfdeb0e2a74bf41201d90301c5bb758975ce3900854d",
+    "app/tests/test_order_service.py": "22cbf782878e3d6a13ed59ee9f768fb89e7f994e8e15b9c0b9c5f57df1df6a07",
+    "app/tests/test_rag.py": "bdc03624acc2348e76417fe8d35972440ab937dc8651d5755df29e62da2c16d1",
+    "app/tests/test_review_rag.py": "c32f94b2c61fc759a049a1d15f212204c1f61c7f9bb56feb460289d01c110e22",
+    "app/tests/test_serving.py": "5725b0dfcbb926e45046944dff2c6d0df97323e64fb60c6c48b2f021a0757a1c",
+    "app/tests/test_telegram.py": "f05ad25e04eb259f5e5122aa3ec9d40790a1579356db47650d571740398d6fbc",
+    "app/tests/test_tools.py": "2a759d8546be4d3dbb49d7f0642a3fd61d38b5b7a15b26960a55fc32c6296d87",
+    "app/tests/test_widget.py": "6c2d234fa4634f9e707922aecd61ab4753674a1c0be9391f7410bc3b5550266b",
+    "app/tests/test_workspace.py": "872745b7d9555424d721ad0f35d8b2057555d9e591beda0418cbdb189941e00c",
+    "app/web.py": "3e93bd16e3aee8cef2dd3118584a152418e73d5be06de3234aae647586890675"
+  },
+  "workload_seconds": 72.698,
+  "workload_requests_per_second": 13.755,
+  "invariants": "passed: distinct guests, UUID retries, one owner/ticket, handoff dedup, rate limit, no AI",
+  "operations": {
+    "accept_race": {
+      "requests": 10,
+      "unexpected": 0,
+      "statuses": {
+        "200": 1,
+        "409": 9
+      },
+      "p50_ms": 71.696,
+      "p95_ms": 83.624
+    },
+    "handoff": {
+      "requests": 1,
+      "unexpected": 0,
+      "statuses": {
+        "200": 1
+      },
+      "p50_ms": 47.988,
+      "p95_ms": 47.988
+    },
+    "handoff_retry_limit": {
+      "requests": 6,
+      "unexpected": 0,
+      "statuses": {
+        "200": 5,
+        "429": 1
+      },
+      "p50_ms": 18.102,
+      "p95_ms": 20.647
+    },
+    "inbox_detail": {
+      "requests": 200,
+      "unexpected": 0,
+      "statuses": {
+        "200": 200
+      },
+      "p50_ms": 556.661,
+      "p95_ms": 1131.879
+    },
+    "inbox_list": {
+      "requests": 200,
+      "unexpected": 0,
+      "statuses": {
+        "200": 200
+      },
+      "p50_ms": 783.327,
+      "p95_ms": 1371.878
+    },
+    "staff_retry": {
+      "requests": 200,
+      "unexpected": 0,
+      "statuses": {
+        "200": 200
+      },
+      "p50_ms": 502.347,
+      "p95_ms": 1992.962
+    },
+    "staff_send": {
+      "requests": 200,
+      "unexpected": 0,
+      "statuses": {
+        "200": 200
+      },
+      "p50_ms": 802.87,
+      "p95_ms": 2496.09
+    },
+    "widget_poll": {
+      "requests": 200,
+      "unexpected": 0,
+      "statuses": {
+        "200": 200
+      },
+      "p50_ms": 503.525,
+      "p95_ms": 1019.952
+    }
+  },
+  "samples": [
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.564082
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.593927
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.637023
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.708043
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.149791
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141651
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.106469
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.061503
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.807344
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.099419
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.957044
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.962094
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.021097
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.02863
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.325627
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.063362
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.335564
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.320171
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.303459
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.337524
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.136327
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.145969
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.231415
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.231918
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.119005
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141919
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.10717
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.178725
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.203367
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.082972
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.14656
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.168917
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.153307
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.135658
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.174932
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.048839
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.204674
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.149305
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.105173
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.519023
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.522734
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.464411
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.75353
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.956309
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.466045
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.271382
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.043276
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.529219
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.856621
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.850187
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.076619
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.896202
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.07827
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.086214
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.664886
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.451908
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.831222
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.887926
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.293347
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.25329
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.25498
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.928889
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.969853
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.172396
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.090647
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.604302
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.146561
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.069054
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.629397
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.252428
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.093857
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.230472
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.388072
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.485528
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.393424
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.463887
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.844204
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.876092
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.943911
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.515902
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.206307
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.218564
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.852813
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.882556
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.492357
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.543692
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.459745
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.499347
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.113116
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.089917
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.103759
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.430664
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.549808
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.642677
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.905441
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.891012
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.410288
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.913584
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.556661
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.02254
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.041521
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.503411
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.006239
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.081849
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.498133
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.283595
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.498434
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.624391
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.53941
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.645676
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.498896
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.45141
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.821792
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.863989
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.434398
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.929632
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.450697
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.468768
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.522459
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.823332
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.872283
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.414878
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.517986
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.514429
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.06042
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.545661
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.462258
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.479716
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.12817
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.456977
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.987475
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.486434
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.877572
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.930618
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.982455
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.010757
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.89777
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 4.8601
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.522628
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.600495
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.087448
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.492872
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.933541
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.932996
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.05256
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.432078
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.95488
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.086172
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.065271
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.03636
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.035148
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.64429
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.95447
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.573454
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.489224
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.514062
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.482444
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.528313
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.798991
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.777246
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.843061
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.825691
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.551759
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.585817
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.617592
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.239197
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.567958
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.016677
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.02865
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.626665
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.034161
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.521789
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.526739
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.602464
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.561522
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.452185
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.611624
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.606209
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.949501
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.970053
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.512965
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.587087
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.201825
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.130217
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.098737
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.01932
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.37248
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.442304
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.367508
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.423649
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.92308
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.422606
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.22231
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.467028
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.455228
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.110909
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.193355
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.474292
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.523849
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.595619
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.573388
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.005339
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.390724
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.859174
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.47458
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.887135
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.980016
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.477485
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.05944
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.038741
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.410353
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.848851
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.926794
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.452783
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.464865
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.518268
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.478594
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.901341
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.915936
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.547208
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.350711
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.937636
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.031695
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.06641
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.080175
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.59136
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.428262
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.893645
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.919167
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.416998
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.956184
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.804362
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.789481
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.421659
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.791511
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.824517
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.456448
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.422309
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.799029
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.441547
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.872203
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.450993
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.45572
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.928721
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 4.232513
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.006209
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.597791
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.91769
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.921634
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.480603
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.460964
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.007694
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.310409
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.807748
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.433883
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.803161
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.233384
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.292372
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.298946
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.485619
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.918065
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.911539
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.228292
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.845223
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.870636
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.465469
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.458315
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.737362
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.429251
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.791966
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.436402
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.844544
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.037167
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.406768
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.461153
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.512778
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.09672
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.201794
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.427971
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.488154
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.336729
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.454493
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.816284
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.747229
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.789031
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.914281
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.398929
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.899971
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.756716
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.468985
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.985505
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.529461
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.578788
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.583542
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.984097
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.589754
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.097225
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.076672
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.193598
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.054236
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.453013
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.033889
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.943414
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.812841
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.801444
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.849262
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.249224
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.467095
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.568116
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.982775
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.334219
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.337922
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.552966
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.133128
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.460117
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.505336
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.521232
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.528988
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.486864
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.56289
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.566325
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.990842
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.965503
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.957056
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.439827
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.419688
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.02124
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.520969
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.890582
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.563883
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.515314
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.583304
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.907502
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.37441
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.863742
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.409633
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.380697
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.791419
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.421973
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.403542
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.9284
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.820394
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.417841
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.058719
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.071124
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.045407
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.075016
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.174166
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.561912
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.077461
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.487591
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.466919
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.685152
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.772603
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.6733
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.70051
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.17435
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.710862
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.728599
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.061423
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.090714
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.106332
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.015808
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.396452
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.348414
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.275688
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.618901
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.325955
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.303414
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.437244
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.473832
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.23769
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.153096
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.261573
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.677544
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.795494
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.517308
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.511603
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.486798
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.52806
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.29447
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.312792
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.498067
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.214371
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.256295
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.26984
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.557015
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.268279
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.536233
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.005294
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.526962
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.296946
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.587346
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.343629
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.886881
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.95832
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.61578
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.698856
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.691011
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.033632
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.033101
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.009408
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.017905
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.008592
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.438645
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.288068
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.662706
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.005142
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.665958
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.335285
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.361627
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.533113
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.273172
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.575968
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.02388
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.02882
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.988804
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.602122
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.312345
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.041159
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.340488
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.004791
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.290156
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.302657
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.617576
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.528138
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.219813
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.670118
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.91281
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.603957
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.965293
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.786777
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.794088
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.820999
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.915875
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.950246
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.984498
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.59893
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.573254
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.067421
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.641857
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.153887
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.549191
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.593832
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.040136
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.073948
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.133695
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.096559
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.108943
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.588564
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.562702
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.560457
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.642617
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.856022
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.974113
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.205552
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.781589
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.305566
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.879964
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.835986
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.348421
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.833687
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.456597
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.451392
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.270397
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.910117
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.442864
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.754365
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.062316
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.448029
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.808008
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.436453
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.442105
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.970444
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.447127
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.518415
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.471123
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.82875
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.496287
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.987328
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.556447
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.622438
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.54258
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.43588
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.323015
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.942661
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.247117
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.308883
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.749593
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.759338
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.78715
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.804516
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.892591
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.415914
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.014671
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.467363
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.065184
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.132207
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.52919
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.083067
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.427896
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.515951
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.636437
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.67636
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.680123
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.595957
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.17428
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.701568
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.590793
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.427398
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.908023
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.454007
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.539819
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.969916
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.945031
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.955979
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.070404
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.529952
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.779304
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.227236
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.80287
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.382424
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.747193
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.757524
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.334352
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.758803
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.462162
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.42334
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.484902
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.063864
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.453694
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.460977
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.455016
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.31799
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.536789
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.584458
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.61951
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.628588
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.972385
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.080483
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.602435
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.537868
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.94332
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.955035
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.952341
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.522869
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.542808
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.608345
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.932565
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.452905
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.642197
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.511494
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141392
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.61563
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.571749
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.620786
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.56335
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.086716
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.264049
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.580511
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.603916
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.962
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.002204
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.399161
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.905654
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.096144
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.783327
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.688788
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.292987
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.834033
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.402339
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.939295
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.411777
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.125134
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.495219
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.392863
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.429822
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.427083
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.405141
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.413557
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.940503
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.530208
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.842735
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.531358
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.4591
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.506126
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.557735
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.954618
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.589111
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.926048
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.519243
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.612764
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.474421
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.520551
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.558304
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.637865
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.562271
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.644343
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.479237
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.067489
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.659379
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.627765
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.089499
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.577398
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.578607
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.137243
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.562052
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.116549
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.070525
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.105644
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.206978
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.152821
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.481575
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.521064
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.557607
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.023246
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.96402
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.505387
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.952339
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.032546
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.061031
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.645091
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.178025
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.5042
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.495579
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.051839
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.000071
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.926768
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.095709
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.558032
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.533007
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.949536
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.5585
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.166516
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.251257
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.49205
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.539713
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.557334
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.573405
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.083866
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.071575
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.008443
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.351021
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.39306
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.96538
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.590776
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.049445
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.052567
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.032117
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.10183
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.130922
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.543715
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.667162
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.002591
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.015976
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.609635
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.445571
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.854131
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.429776
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.474034
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.27474
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.23925
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.847833
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.831741
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.806551
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.276293
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.323828
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.877491
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.339681
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.453638
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.999992
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.036626
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.066907
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.978249
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.934378
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.551707
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.475917
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.062437
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.407265
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.484916
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.479935
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087708
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.088449
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.102461
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.480876
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.931194
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.523956
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.548074
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.500298
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.042983
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.529034
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.136162
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.637954
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.495327
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.004861
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.531749
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.094145
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.503525
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.463023
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.180522
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.442389
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.970726
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.551841
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.497424
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.131042
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.388373
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.839238
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.366014
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.39745
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.007486
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.978266
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.553342
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.880293
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.967716
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.500484
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.567075
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.406069
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.960348
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.04534
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.971581
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.079512
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.551481
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.562492
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087158
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.536908
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.141093
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.278905
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.13908
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.421921
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.486965
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.549162
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.700665
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.162647
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.657041
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.036515
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.535525
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.067394
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.554728
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.220332
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.504168
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.441353
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.881118
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.874608
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.446858
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.916068
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.094724
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.949517
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.570276
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.47375
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.431255
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.567658
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.512843
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.515351
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.653259
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.164526
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.572718
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.961555
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.511683
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.581305
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.491661
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.594518
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.868979
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.992962
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.799035
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.795068
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.935885
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.33129
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.88867
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.925235
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.421394
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.847258
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.501018
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.57324
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.990532
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.529883
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.625555
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.440436
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.444911
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.485817
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.435404
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.434059
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 5.508748
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.436326
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.521078
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.845427
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.507028
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.300956
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.582205
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.565057
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.952452
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.026097
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.029281
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.503178
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.537814
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.589247
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.042719
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.109168
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.655356
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.545445
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.05424
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.425825
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.531446
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.516968
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.96544
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.010009
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.988004
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.38146
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.49609
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.431695
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.493879
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.030686
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.134206
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.131879
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.571447
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.636896
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.497188
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.466517
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.488937
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.793788
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.821823
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.792975
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.771929
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.889661
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.070195
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.122326
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.422375
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.819965
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.528371
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.890232
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.986701
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.328854
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.96194
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.507352
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.554511
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.613197
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.071505
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.548997
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.449268
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.925773
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.499635
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.55641
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.524446
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.549405
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.674381
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.561559
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.642567
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.234626
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.763538
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.502347
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.068642
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.181856
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.766517
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.130264
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.462772
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.536386
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.212222
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.649877
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.776196
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.565803
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.060901
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.371318
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.135426
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.469748
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.01633
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.650505
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.055401
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.532105
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.033801
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.554845
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.55787
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.136124
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.151947
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.455842
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.454712
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.103212
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.956851
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 3.424846
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.019122
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.007536
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.63369
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.159469
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.0657
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.260291
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.459488
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.584591
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.16665
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.479859
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.097696
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.068336
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.567396
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.585092
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.375086
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.612651
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.145137
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.220182
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.593896
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.093595
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.531005
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.078302
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.876375
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.845995
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.843064
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.835495
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.865481
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.393928
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.398559
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.387121
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.066205
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.371878
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.403637
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.503559
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.474405
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.450127
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.488039
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.901375
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.972002
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.600301
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.570867
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.429081
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.401933
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.019952
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.089827
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.052832
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.528898
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.962724
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.521132
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.030914
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.518144
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.55716
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.081645
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.116588
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.567977
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.061606
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.087547
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.632095
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.618895
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.186972
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.477433
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.546363
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.507141
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.574516
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.486329
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.190078
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.921566
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.954105
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.436167
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.888384
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.48691
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.199929
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.358491
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.222664
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.396473
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.416043
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.074934
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.427757
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 1.300989
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.029785
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.094503
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.500753
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.472728
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.594848
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.595535
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.695183
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.064298
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.1181
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.499269
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 2.35771
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.408785
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.520212
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.501841
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.041969
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.107004
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.130641
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.140824
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.044224
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.030301
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.145067
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.507416
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.505344
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.486345
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.067589
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.459747
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.493083
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.447181
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.067621
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.433856
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.490601
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.471913
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.034981
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.03029
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.138655
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.026751
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.035247
+    },
+    {
+      "operation": "inbox_list",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.373939
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.354363
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.038804
+    },
+    {
+      "operation": "inbox_detail",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.06482
+    },
+    {
+      "operation": "widget_poll",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.016256
+    },
+    {
+      "operation": "staff_send",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.021684
+    },
+    {
+      "operation": "staff_retry",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.018127
+    },
+    {
+      "operation": "handoff",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.047988
+    },
+    {
+      "operation": "accept_race",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.04691
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.054727
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.061355
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.066933
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.071696
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.08334
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.079066
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.08281
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.080869
+    },
+    {
+      "operation": "accept_race",
+      "status": 409,
+      "expected": true,
+      "seconds": 0.083624
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.018686
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.020647
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.017817
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.018433
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 200,
+      "expected": true,
+      "seconds": 0.018102
+    },
+    {
+      "operation": "handoff_retry_limit",
+      "status": 429,
+      "expected": true,
+      "seconds": 0.006068
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "cases": 48,
+  "errors": 0,
+  "answerable_cases": 32,
+  "abstention_cases": 16,
+  "retrieval_cases_with_gold": 36,
+  "recall_at_k": {
+    "1": 0.944444,
+    "3": 1.0,
+    "5": 1.0
+  },
+  "gold_source_citation_precision": 0.870968,
+  "answerable_citation_coverage": 0.8125,
+  "correct_abstention_rate": 0.875,
+  "false_abstention_rate": 0.1875,
+  "decision_accuracy": 0.833333,
+  "fact_pattern_pass_rate": 0.833333,
+  "forbidden_text_cases": 0,
+  "latency_seconds_successful": {
+    "n": 48,
+    "p50": 13.484,
+    "p95": 15.081
+  },
+  "human_reviewed_cases": 0,
+  "by_category": {
+    "ambiguous": {
+      "cases": 4,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 4,
+      "retrieval_cases_with_gold": 0,
+      "recall_at_k": {
+        "1": null,
+        "3": null,
+        "5": null
+      },
+      "gold_source_citation_precision": 0.0,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 0.75,
+      "false_abstention_rate": null,
+      "decision_accuracy": 0.75,
+      "fact_pattern_pass_rate": 0.75,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 4,
+        "p50": 14.146,
+        "p95": 15.25
+      },
+      "human_reviewed_cases": 0
+    },
+    "answerable": {
+      "cases": 24,
+      "errors": 0,
+      "answerable_cases": 24,
+      "abstention_cases": 0,
+      "retrieval_cases_with_gold": 24,
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": 0.96,
+      "answerable_citation_coverage": 0.958333,
+      "correct_abstention_rate": null,
+      "false_abstention_rate": 0.041667,
+      "decision_accuracy": 0.958333,
+      "fact_pattern_pass_rate": 0.958333,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 24,
+        "p50": 13.299,
+        "p95": 13.974
+      },
+      "human_reviewed_cases": 0
+    },
+    "conflict": {
+      "cases": 4,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 4,
+      "retrieval_cases_with_gold": 4,
+      "recall_at_k": {
+        "1": 0.5,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": null,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": null,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 4,
+        "p50": 14.037,
+        "p95": 14.07
+      },
+      "human_reviewed_cases": 0
+    },
+    "followup": {
+      "cases": 6,
+      "errors": 0,
+      "answerable_cases": 6,
+      "abstention_cases": 0,
+      "retrieval_cases_with_gold": 6,
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": 1.0,
+      "answerable_citation_coverage": 0.5,
+      "correct_abstention_rate": null,
+      "false_abstention_rate": 0.5,
+      "decision_accuracy": 0.5,
+      "fact_pattern_pass_rate": 0.5,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 6,
+        "p50": 13.912,
+        "p95": 14.854
+      },
+      "human_reviewed_cases": 0
+    },
+    "injection": {
+      "cases": 4,
+      "errors": 0,
+      "answerable_cases": 2,
+      "abstention_cases": 2,
+      "retrieval_cases_with_gold": 2,
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": null,
+      "answerable_citation_coverage": 0.0,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": 1.0,
+      "decision_accuracy": 0.5,
+      "fact_pattern_pass_rate": 0.5,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 4,
+        "p50": 13.814,
+        "p95": 14.961
+      },
+      "human_reviewed_cases": 0
+    },
+    "unanswerable": {
+      "cases": 6,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 6,
+      "retrieval_cases_with_gold": 0,
+      "recall_at_k": {
+        "1": null,
+        "3": null,
+        "5": null
+      },
+      "gold_source_citation_precision": 0.0,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 0.833333,
+      "false_abstention_rate": null,
+      "decision_accuracy": 0.833333,
+      "fact_pattern_pass_rate": 0.833333,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 6,
+        "p50": 10.423,
+        "p95": 13.179
+      },
+      "human_reviewed_cases": 0
+    }
+  }
+}
