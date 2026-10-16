@@ -1,0 +1,40 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title Cấp quyền và tra đơn chỉ đọc
+participant "Quản lý Admin\n(Client)" as A
+participant "Website khách\n(Client)" as W
+participant "Workspace/Widget\n(Controller)" as C
+participant "MessageService\n(Service)" as M
+participant "ToolService\n(Service)" as T
+participant "OrderService\n(Service)" as S
+participant "SQLite\n(Database)" as DB
+participant "Ollama\n(Local API)" as O
+note over A, O
+Admin xác minh qua kênh tin cậy ngoài ứng dụng; mã bí mật không đi vào model
+end note
+A -> C: 1. Cấp access-code sau xác minh; quyền admin
+C -> DB: 2. Khóa Order; xoay mã hash/hạn 15 phút; COMMIT
+C --> A: 3. Mã chỉ hiện cho admin để giao kênh tin cậy
+W -> C: 4. Nhập mã qua biểu mẫu riêng
+C -> DB: 5. Kiểm tra hash/chủ/hạn/phiên; ràng buộc; COMMIT
+W -> C: 6. Hỏi trạng thái một đơn; UUID
+C -> M: 7. process_message theo danh tính server
+M -> DB: 8. Lưu tin, mã từ tin/lịch sử khách; COMMIT
+M -> T: 9. select_order_tool với mã server chọn
+T -> O: 10. JSON Schema: lookup_order/handoff/rag
+T --> M: 11. Lựa chọn đã kiểm tra schema
+critical [Nhánh lookup_order còn là tin hiện tại]
+M -> DB: 12. Khóa hội thoại; kiểm tra status và tin cuối
+M -> S: 13. lookup_order theo customer_id server
+S -> DB: 14. Kiểm tra chủ hoặc quyền hiện tại; đọc đơn
+alt [Có quyền và tìm thấy]
+S --> M: 15. Chỉ status và tracking_code
+M -> DB: 16. Lưu phản hồi chỉ đọc; COMMIT
+else [Không đủ quyền hoặc không tìm thấy]
+M -> DB: 17. Queue handoff, không lộ đơn; COMMIT
+end
+end
+M --> C: 18. Phản hồi hoặc hàng chờ
+C --> W: 19. Snapshot công khai
+@enduml

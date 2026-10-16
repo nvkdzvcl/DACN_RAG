@@ -2,6 +2,10 @@
 
 Ngày đối chiếu: 21/09/2026. Tài liệu mô tả chức năng đang có trên FastAPI/SQLite, React/Vite, Qdrant embedded và Ollama local. Đây là hồ sơ kỹ thuật để người dùng/GVHD duyệt sau; chưa phải xác nhận nghiệm thu. M3 còn chờ người duyệt chất lượng, M4 mới kiểm chứng chức năng local. API chi tiết tại [API.md](API.md), bằng chứng tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md).
 
+Bổ sung ngày 15/10/2026: [hồ sơ tuần 04](week04/README.md) và Chương 3–4 của [báo cáo](report/BaoCao.md) có hiện trạng giả lập được người dùng cho phép, nguồn tham khảo công khai, 14 FR, 10 NFR, 12 quy tắc nghiệp vụ, BFD cập nhật và bốn file BPMN 2.0 có DI. Bộ BPMN có pool/lane, message flow, nhánh điều kiện và lỗi dịch vụ; là mô hình phân tích không thực thi, không thay nghiệm thu. Các Mermaid và ERD bên dưới giữ mốc đối chiếu kỹ thuật cũ; dùng bộ tuần 04 cho phần nghiệp vụ hiện tại.
+
+[Hồ sơ tuần 05](week05/README.md) bổ sung vào báo cáo tại mục 3.10–3.12 và 4.6: 20 Use Case thuộc sáu mô đun, 10 đặc tả, bảy hình Use Case và năm Sequence có phân tầng, transaction, nhánh lỗi và kiểm soát đồng thời. Mô hình đối chiếu triển khai một worker, SQLite, Qdrant embedded, Ollama và Telegram polling; các SQL nghiệp vụ còn nằm trong Controller được ghi rõ. Ngày 15/10/2026, theo yêu cầu người dùng, bộ này được đưa vào đề cương tại mục 3.6–3.7, 4.1–4.2; không thay nghiệm thu chức năng.
+
 ## Phân rã chức năng BFD
 
 ```mermaid
@@ -33,7 +37,7 @@ M5 đã bổ sung model chọn công cụ đơn hàng bằng JSON Schema, backen
 
 ## Luồng nghiệp vụ mức 0
 
-Sơ đồ phân làn dưới đây diễn tả nhiệm vụ, điều kiện rẽ nhánh và trao đổi giữa khách, hệ thống, nhân viên. Đây là biểu diễn luồng nghiệp vụ bằng Mermaid để rà soát; chưa phải file BPMN 2.0 có thể nhập vào công cụ mô hình hóa hoặc thực thi.
+Sơ đồ phân làn dưới đây diễn tả nhiệm vụ, điều kiện rẽ nhánh và trao đổi giữa khách, hệ thống, nhân viên. Đây là biểu diễn Mermaid tại mốc cũ, không phải BPMN. Bộ BPMN 2.0 có thể chỉnh sửa đã bổ sung tại [week04/diagrams](week04/README.md#sử-dụng-bộ-hồ-sơ), process đặt isExecutable=false.
 
 ```mermaid
 flowchart TD
@@ -348,7 +352,7 @@ Tin mới thắng khóa trước finish khiến finish bị 409; finish resolved
 
 Màn hình hiện có gồm đăng nhập, Inbox ba vùng, Kho tri thức, trang chat và widget iframe. Inbox polling mỗi ba giây khi hiển thị, giữ bản nháp/lựa chọn, dừng khi tab ẩn hoặc thao tác ghi. Form hoàn tất chỉ hiện cho người phụ trách có ticket hoạt động; xác nhận giải thích hành vi nhắn tiếp. Widget sau resolved cho gửi, sau closed khóa composer và hướng dẫn bắt đầu phiên mới.
 
-QA giao diện ngày 14/09 đã kiểm tra desktop/mobile 390px; các ảnh trong data/runtime là bằng chứng local, không thuộc gói nguồn bắt buộc. Các mockup do người dùng tạo chưa được duyệt hoặc chỉnh sửa trong đợt này. Cần chốt mẫu thiết kế với GVHD, bổ sung BPMN chuẩn nếu biểu mẫu yêu cầu, nghiệm thu người dùng và đo tải trước tuyên bố hoàn tất toàn bộ M2/M4.
+QA giao diện ngày 14/09 đã kiểm tra desktop/mobile 390px; các ảnh trong data/runtime là bằng chứng local, không thuộc gói nguồn bắt buộc. Các mockup do người dùng tạo chưa được duyệt hoặc chỉnh sửa trong đợt này. BPMN chuẩn đã bổ sung ngày 15/10/2026; còn cần duyệt nghiệp vụ, chốt mẫu thiết kế với GVHD, nghiệm thu người dùng và đo tải trước tuyên bố hoàn tất toàn bộ M2/M4.
 
 ## Các trang quản lý theo mockup
 

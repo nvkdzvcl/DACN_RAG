@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="990" viewBox="0 0 1700 990">
+  <rect width="100%" height="100%" fill="white" />
+  <text x="850" y="28.0" fill="#111111" font-family="Arial" font-size="25" text-anchor="middle" dominant-baseline="central">BFD Phân rã chức năng nền tảng hỗ trợ khách hàng</text>
+  <rect x="575" y="65" width="550" height="75" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="850" y="89.08" fill="#111111" font-family="Arial" font-size="24" text-anchor="middle" dominant-baseline="central">Hỗ trợ khách hàng đa kênh</text>
+  <text x="850" y="116.91999999999999" fill="#111111" font-family="Arial" font-size="24" text-anchor="middle" dominant-baseline="central">Website và Telegram</text>
+  <polyline points="850,140 850,175" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="145,175 1555,175" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="145,175 145,215" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="139.78041359066523,204.19463477176788 145,215 150.21958640933477,204.19463477176788" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="20" y="215" width="250" height="100" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="145" y="252.24" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">BFD01</text>
+  <text x="145" y="277.76" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">Truy cập và danh tính</text>
+  <polyline points="145,315 145,340 25,340 25,860" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="25,441 39,441" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="28.194634771767877,446.21958640933474 39,441 28.194634771767877,435.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="39" y="375" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="151" y="429.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Tài khoản và phiên</text>
+  <text x="151" y="452.59999999999997" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Khách, staff, FastAPI]</text>
+  <polyline points="25,631 39,631" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="28.194634771767877,636.2195864093347 39,631 28.194634771767877,625.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="39" y="565" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="151" y="596.2" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Xác minh email và</text>
+  <text x="151" y="619.4000000000001" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">reset</text>
+  <text x="151" y="642.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Khách, FastAPI,</text>
+  <text x="151" y="665.8000000000001" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">SMTP]</text>
+  <polyline points="25,821 39,821" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="28.194634771767877,826.2195864093347 39,821 28.194634771767877,815.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="39" y="755" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="151" y="809.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Cấp quyền từng đơn</text>
+  <text x="151" y="832.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Admin, FastAPI]</text>
+  <polyline points="427,175 427,215" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="421.78041359066526,204.19463477176788 427,215 432.21958640933474,204.19463477176788" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="302" y="215" width="250" height="100" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="427" y="252.24" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">BFD02</text>
+  <text x="427" y="277.76" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">Kho tri thức</text>
+  <polyline points="427,315 427,340 307,340 307,860" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="307,441 321,441" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="310.1946347717679,446.21958640933474 321,441 310.1946347717679,435.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="321" y="375" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="433" y="429.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Upload và lập chỉ mục</text>
+  <text x="433" y="452.59999999999997" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Admin, FastAPI, RAG]</text>
+  <polyline points="307,631 321,631" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="310.1946347717679,636.2195864093347 321,631 310.1946347717679,625.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="321" y="565" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="433" y="619.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Xem nguồn và vị trí</text>
+  <text x="433" y="642.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Staff, FastAPI]</text>
+  <polyline points="307,821 321,821" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="310.1946347717679,826.2195864093347 321,821 310.1946347717679,815.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="321" y="755" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="433" y="809.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Lập lại và xóa nguồn</text>
+  <text x="433" y="832.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Admin, FastAPI, RAG]</text>
+  <polyline points="709,175 709,215" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="703.7804135906653,204.19463477176788 709,215 714.2195864093347,204.19463477176788" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="584" y="215" width="250" height="100" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="709" y="252.24" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">BFD03</text>
+  <text x="709" y="277.76" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">Hội thoại đa kênh</text>
+  <polyline points="709,315 709,340 589,340 589,860" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="589,441 603,441" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="592.1946347717678,446.21958640933474 603,441 592.1946347717678,435.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="603" y="375" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="715" y="417.8" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Nhận, lưu và giao tin</text>
+  <text x="715" y="441.0" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Khách, FastAPI,</text>
+  <text x="715" y="464.2" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Telegram]</text>
+  <polyline points="589,631 603,631" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="592.1946347717678,636.2195864093347 603,631 592.1946347717678,625.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="603" y="565" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="715" y="607.8" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Hỏi chính sách và tra</text>
+  <text x="715" y="631.0" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">đơn</text>
+  <text x="715" y="654.1999999999999" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Khách, FastAPI, RAG]</text>
+  <polyline points="589,821 603,821" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="592.1946347717678,826.2195864093347 603,821 592.1946347717678,815.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="603" y="755" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="715" y="809.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Khôi phục và lịch sử</text>
+  <text x="715" y="832.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Khách, staff, FastAPI]</text>
+  <polyline points="991,175 991,215" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="985.7804135906653,204.19463477176788 991,215 996.2195864093347,204.19463477176788" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="866" y="215" width="250" height="100" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="991" y="252.24" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">BFD04</text>
+  <text x="991" y="277.76" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">Ticket và chuyển giao</text>
+  <polyline points="991,315 991,340 871,340 871,860" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="871,441 885,441" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="874.1946347717678,446.21958640933474 885,441 874.1946347717678,435.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="885" y="375" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="997" y="429.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Handoff và nhận việc</text>
+  <text x="997" y="452.59999999999997" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Khách, staff, FastAPI]</text>
+  <polyline points="871,631 885,631" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="874.1946347717678,636.2195864093347 885,631 874.1946347717678,625.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="885" y="565" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="997" y="607.8" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Trả lời và hoàn tất</text>
+  <text x="997" y="631.0" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Staff phụ trách,</text>
+  <text x="997" y="654.1999999999999" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">FastAPI]</text>
+  <polyline points="871,821 885,821" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="874.1946347717678,826.2195864093347 885,821 874.1946347717678,815.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="885" y="755" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="997" y="809.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">SLA và lượt hỗ trợ mới</text>
+  <text x="997" y="832.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Staff, FastAPI]</text>
+  <polyline points="1273,175 1273,215" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1267.7804135906651,204.19463477176788 1273,215 1278.2195864093349,204.19463477176788" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1148" y="215" width="250" height="100" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="1273" y="252.24" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">BFD05</text>
+  <text x="1273" y="277.76" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">Quản lý và báo cáo</text>
+  <polyline points="1273,315 1273,340 1153,340 1153,860" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1153,441 1167,441" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1156.1946347717678,446.21958640933474 1167,441 1156.1946347717678,435.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1167" y="375" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="1279" y="429.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Hồ sơ và đơn giả lập</text>
+  <text x="1279" y="452.59999999999997" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Admin, staff, FastAPI]</text>
+  <polyline points="1153,631 1167,631" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1156.1946347717678,636.2195864093347 1167,631 1156.1946347717678,625.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1167" y="565" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="1279" y="607.8" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Tìm kiếm và phân</text>
+  <text x="1279" y="631.0" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">trang</text>
+  <text x="1279" y="654.1999999999999" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Staff, FastAPI]</text>
+  <polyline points="1153,821 1167,821" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1156.1946347717678,826.2195864093347 1167,821 1156.1946347717678,815.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1167" y="755" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="1279" y="809.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Thống kê và phân tích</text>
+  <text x="1279" y="832.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Staff, FastAPI]</text>
+  <polyline points="1555,175 1555,215" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1549.7804135906651,204.19463477176788 1555,215 1560.2195864093349,204.19463477176788" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1430" y="215" width="250" height="100" rx="8" fill="#e9edf1" stroke="#222222" stroke-width="2" />
+  <text x="1555" y="252.24" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">BFD06</text>
+  <text x="1555" y="277.76" fill="#111111" font-family="Arial" font-size="22" text-anchor="middle" dominant-baseline="central">Đánh giá và vận hành</text>
+  <polyline points="1555,315 1555,340 1435,340 1435,860" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1435,441 1449,441" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1438.1946347717678,446.21958640933474 1449,441 1438.1946347717678,435.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1449" y="375" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="1561" y="417.8" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Phiếu và chất lượng</text>
+  <text x="1561" y="441.0" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">RAG</text>
+  <text x="1561" y="464.2" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Người duyệt]</text>
+  <polyline points="1435,631 1449,631" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1438.1946347717678,636.2195864093347 1449,631 1438.1946347717678,625.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1449" y="565" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="1561" y="619.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Đo tải và sẵn sàng</text>
+  <text x="1561" y="642.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Người vận hành]</text>
+  <polyline points="1435,821 1449,821" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1438.1946347717678,826.2195864093347 1449,821 1438.1946347717678,815.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <rect x="1449" y="755" width="225" height="132" rx="8" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="1561" y="809.4" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">Backup và restore</text>
+  <text x="1561" y="832.6" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">[Người vận hành]</text>
+  <text x="850" y="958.0" fill="#111111" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="central">RAG = Ollama và Qdrant local. Nhãn trong ngoặc vuông chỉ vai trò; cây không thể hiện thứ tự thời gian.</text>
+</svg>

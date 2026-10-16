@@ -1,0 +1,186 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="940" viewBox="0 0 1700 940">
+  <rect width="100%" height="100%" fill="white" />
+  <text x="850" y="22.0" fill="#111111" font-family="Arial" font-size="24" text-anchor="middle" dominant-baseline="central">BPMN04 Quản lý và lập chỉ mục tri thức</text>
+  <rect x="45" y="55" width="1600" height="835" rx="0" fill="white" stroke="#222222" stroke-width="2" />
+  <text x="64" y="472.5" transform="rotate(-90 64 472.5)" font-family="Arial" font-size="19" text-anchor="middle">Cửa hàng giả lập</text>
+  <rect x="75" y="55" width="1570" height="225" rx="0" fill="white" stroke="#222222" stroke-width="2" />
+  <polyline points="110,55 110,280" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="96" y="167.5" transform="rotate(-90 96 167.5)" font-family="Arial" font-size="18" text-anchor="middle">Quản trị viên</text>
+  <rect x="75" y="280" width="1570" height="375" rx="0" fill="white" stroke="#222222" stroke-width="2" />
+  <polyline points="110,280 110,655" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="96" y="467.5" transform="rotate(-90 96 467.5)" font-family="Arial" font-size="18" text-anchor="middle">Ứng dụng FastAPI</text>
+  <rect x="75" y="655" width="1570" height="235" rx="0" fill="white" stroke="#222222" stroke-width="2" />
+  <polyline points="110,655 110,890" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="96" y="772.5" transform="rotate(-90 96 772.5)" font-family="Arial" font-size="18" text-anchor="middle">Ollama và Qdrant local</text>
+  <polyline points="182,141.0 208.5,141.0 208.5,141.0 235,141.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="224.19463477176788,146.21958640933477 235,141.0 224.19463477176788,135.78041359066523" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="325.0,179 325.0,335" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="319.78041359066526,324.1946347717679 325.0,335 330.21958640933474,324.1946347717679" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="415,373.0 442.5,373.0 442.5,373.0 470,373.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="459.1946347717679,378.21958640933474 470,373.0 459.1946347717679,367.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="528,373.0 576.5,373.0 576.5,373.0 625,373.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="614.1946347717678,378.21958640933474 625,373.0 614.1946347717678,367.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="499,402 499,480 325,480 325,525" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="319.78041359066526,514.1946347717678 325,525 330.21958640933474,514.1946347717678" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="493.0,415.0 505.0,423.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="415,563.0 442.5,563.0 442.5,563.0 470,563.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="459.1946347717679,568.2195864093347 470,563.0 459.1946347717679,557.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="805,373.0 842.5,373.0 842.5,373.0 880,373.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="869.1946347717678,378.21958640933474 880,373.0 869.1946347717678,367.78041359066526" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="725.0,426 725.0,475.5 715.0,475.5 715.0,525" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="709.7804135906653,514.1946347717678 715.0,525 720.2195864093347,514.1946347717678" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="909,402 1040,402 1040,680 940,680 940,720" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="934.7804135906653,709.1946347717678 940,720 945.2195864093347,709.1946347717678" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="909,402 909,480 780,480 780,525" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="774.7804135906653,514.1946347717678 780,525 785.2195864093347,514.1946347717678" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="903.0,415.0 915.0,423.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="805,563.0 832.5,563.0 832.5,563.0 860,563.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="849.1946347717678,568.2195864093347 860,563.0 849.1946347717678,557.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="930,796 575,796 575,563 625,563" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="614.1946347717678,568.2195864093347 625,563 614.1946347717678,557.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="1030,758 1200,758 1200,411" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1205.2195864093349,421.8053652282321 1200,411 1194.7804135906651,421.8053652282321" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="1290,373 1329,373 1329,170" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1334.2195864093349,180.80536522823212 1329,170 1323.7804135906651,180.80536522823212" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="1358,141.0 1434.0,141.0 1434.0,141.0 1510,141.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1499.1946347717678,146.21958640933477 1510,141.0 1499.1946347717678,135.78041359066523" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="1371.0,147.0 1379.0,135.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1300,141 1030,141" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1040.8053652282322,135.78041359066523 1030,141 1040.8053652282322,146.21958640933477" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="940,179 940,235 715,235 715,335" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="709.7804135906653,324.1946347717679 715,335 720.2195864093347,324.1946347717679" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="1329,170 1585,170 1585,480 1410,480 1410,525" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1404.7804135906651,514.1946347717678 1410,525 1415.2195864093349,514.1946347717678" fill="#333333" stroke="#222222" stroke-width="2" />
+  <polyline points="1500,563.0 1525.0,563.0 1525.0,563.0 1550,563.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polygon points="1539.1946347717678,568.2195864093347 1550,563.0 1539.1946347717678,557.7804135906653" fill="#333333" stroke="#222222" stroke-width="2" />
+  <circle cx="161.0" cy="141.0" r="21.0" fill="white" stroke="#222222" stroke-width="2" />
+  <rect x="117.0" y="177.1" width="88.0" height="20.88" fill="white" />
+  <text x="161.0" y="187.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Có tài liệu</text>
+  <rect x="235" y="103" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="250" cy="115" r="4" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="243,129 245,122 255,122 257,129" fill="none" stroke="#333333" stroke-width="1" />
+  <text x="325.0" y="138.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Chọn tài liệu và</text>
+  <text x="325.0" y="159.44" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">yêu cầu tải lên</text>
+  <rect x="235" y="335" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="252" cy="351" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="252" cy="351" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="258.5,351.0 262,351" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="245.5,351.0 242,351" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="252.0,357.5 252,361" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="252.0,344.5 252,341" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="325.0" y="370.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Kiểm tra loại,</text>
+  <text x="325.0" y="391.44" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">10 MB và hash</text>
+  <polygon points="499.0,344 528,373.0 499.0,402 470,373.0" fill="white" stroke="#222222" stroke-width="2" />
+  <polyline points="491.0,365.0 507.0,381.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="507.0,365.0 491.0,381.0" fill="none" stroke="#333333" stroke-width="2" />
+  <rect x="447.5" y="421.1" width="103.0" height="20.88" fill="white" />
+  <text x="499.0" y="431.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">File hợp lệ?</text>
+  <rect x="235" y="525" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="252" cy="541" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="252" cy="541" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="258.5,541.0 262,541" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="245.5,541.0 242,541" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="252.0,547.5 252,551" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="252.0,534.5 252,531" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="325.0" y="560.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Từ chối; thông báo</text>
+  <text x="325.0" y="581.4399999999999" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">lỗi hoặc trùng file</text>
+  <circle cx="491.0" cy="563.0" r="21.0" fill="white" stroke="#222222" stroke-width="4" />
+  <rect x="416.5" y="599.1" width="149.0" height="20.88" fill="white" />
+  <text x="491.0" y="609.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Chưa lập chỉ mục</text>
+  <rect x="625" y="335" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="642" cy="351" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="642" cy="351" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="648.5,351.0 652,351" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="635.5,351.0 632,351" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="642.0,357.5 642,361" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="642.0,344.5 642,341" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="715.0" y="370.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Lưu nguồn; đọc và</text>
+  <text x="715.0" y="391.44" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">chia đoạn có vị trí</text>
+  <circle cx="725.0" cy="411.0" r="15.0" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="725.0" cy="411.0" r="11.0" fill="white" stroke="#222222" stroke-width="1" />
+  <polygon points="720.0,404.0 725.0,409.0 723.0,413.0 730.0,418.0 726.0,411.0 729.0,408.0" fill="#222222" stroke="#222222" stroke-width="1" />
+  <rect x="678.0" y="441.1" width="94.0" height="20.88" fill="white" />
+  <text x="725.0" y="451.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Lỗi đọc file</text>
+  <polygon points="909.0,344 938,373.0 909.0,402 880,373.0" fill="white" stroke="#222222" stroke-width="2" />
+  <polyline points="901.0,365.0 917.0,381.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="917.0,365.0 901.0,381.0" fill="none" stroke="#333333" stroke-width="2" />
+  <rect x="839.5" y="410.66" width="139.0" height="41.76" fill="white" />
+  <text x="909.0" y="420.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Có nội dung đọc</text>
+  <text x="909.0" y="441.44" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">được?</text>
+  <rect x="850" y="720" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="867" cy="736" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="867" cy="736" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="873.5,736.0 877,736" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="860.5,736.0 857,736" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="867.0,742.5 867,746" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="867.0,729.5 867,726" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="940.0" y="755.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Tạo embedding;</text>
+  <text x="940.0" y="776.4399999999999" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">ghi vector mới</text>
+  <circle cx="945.0" cy="796.0" r="15.0" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="945.0" cy="796.0" r="11.0" fill="white" stroke="#222222" stroke-width="1" />
+  <polygon points="940.0,789.0 945.0,794.0 943.0,798.0 950.0,803.0 946.0,796.0 949.0,793.0" fill="#222222" stroke="#222222" stroke-width="1" />
+  <rect x="895.5" y="826.1" width="99.0" height="20.88" fill="white" />
+  <text x="945.0" y="836.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Lỗi chỉ mục</text>
+  <rect x="625" y="525" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="642" cy="541" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="642" cy="541" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="648.5,541.0 652,541" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="635.5,541.0 632,541" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="642.0,547.5 642,551" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="642.0,534.5 642,531" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="715.0" y="560.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Đánh dấu lỗi;</text>
+  <text x="715.0" y="581.4399999999999" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">cho phép lập lại</text>
+  <circle cx="881.0" cy="563.0" r="21.0" fill="white" stroke="#222222" stroke-width="4" />
+  <rect x="815.5" y="599.1" width="131.0" height="20.88" fill="white" />
+  <text x="881.0" y="609.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Chưa sẵn sàng</text>
+  <rect x="1110" y="335" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="1127" cy="351" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="1127" cy="351" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="1133.5,351.0 1137,351" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1120.5,351.0 1117,351" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1127.0,357.5 1127,361" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1127.0,344.5 1127,341" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="1200.0" y="370.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Đánh dấu sẵn sàng;</text>
+  <text x="1200.0" y="391.44" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">cho phép truy hồi</text>
+  <polygon points="1329.0,112 1358,141.0 1329.0,170 1300,141.0" fill="white" stroke="#222222" stroke-width="2" />
+  <polyline points="1321.0,133.0 1337.0,149.0" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1337.0,133.0 1321.0,149.0" fill="none" stroke="#333333" stroke-width="2" />
+  <rect x="1268.0" y="189.1" width="122.0" height="20.88" fill="white" />
+  <text x="1329.0" y="199.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Thao tác tiếp?</text>
+  <rect x="850" y="103" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="865" cy="115" r="4" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="858,129 860,122 870,122 872,129" fill="none" stroke="#333333" stroke-width="1" />
+  <text x="940.0" y="138.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Lập chỉ mục lại</text>
+  <text x="940.0" y="159.44" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">phiên bản mới</text>
+  <rect x="1320" y="525" width="180" height="76" rx="10" fill="#fafafa" stroke="#222222" stroke-width="2" />
+  <circle cx="1337" cy="541" r="7" fill="white" stroke="#222222" stroke-width="2" />
+  <circle cx="1337" cy="541" r="2" fill="white" stroke="#222222" stroke-width="1" />
+  <polyline points="1343.5,541.0 1347,541" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1330.5,541.0 1327,541" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1337.0,547.5 1337,551" fill="none" stroke="#333333" stroke-width="2" />
+  <polyline points="1337.0,534.5 1337,531" fill="none" stroke="#333333" stroke-width="2" />
+  <text x="1410.0" y="560.56" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Ngừng truy hồi rồi</text>
+  <text x="1410.0" y="581.4399999999999" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">dọn file / vector</text>
+  <circle cx="1571.0" cy="563.0" r="21.0" fill="white" stroke="#222222" stroke-width="4" />
+  <rect x="1477.0" y="599.1" width="188.0" height="20.88" fill="white" />
+  <text x="1571.0" y="609.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Đã ngừng dùng nguồn</text>
+  <circle cx="1531.0" cy="141.0" r="21.0" fill="white" stroke="#222222" stroke-width="4" />
+  <rect x="1445.5" y="177.1" width="171.0" height="20.88" fill="white" />
+  <text x="1531.0" y="187.0" fill="#111111" font-family="Arial" font-size="18" text-anchor="middle" dominant-baseline="central">Giữ nguồn sẵn sàng</text>
+  <rect x="538.0" y="350.2" width="28.5" height="18.56" fill="white" />
+  <text x="552.25" y="359.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Có</text>
+  <rect x="384.75" y="457.2" width="54.5" height="18.56" fill="white" />
+  <text x="412.0" y="466.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Không</text>
+  <rect x="1025.75" y="518.2" width="28.5" height="18.56" fill="white" />
+  <text x="1040.0" y="527.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Có</text>
+  <rect x="840.75" y="481.2" width="178.5" height="18.56" fill="white" />
+  <text x="930" y="490.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Không; scan chưa OCR</text>
+  <rect x="1378.75" y="118.2" width="34.5" height="18.56" fill="white" />
+  <text x="1396.0" y="127.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Giữ</text>
+  <rect x="1137.25" y="118.2" width="55.5" height="18.56" fill="white" />
+  <text x="1165.0" y="127.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Lập lại</text>
+  <rect x="1566.75" y="302.2" width="36.5" height="18.56" fill="white" />
+  <text x="1585.0" y="311.0" fill="#111111" font-family="Arial" font-size="16" text-anchor="middle" dominant-baseline="central">Xóa</text>
+  <text x="850" y="916.0" fill="#111111" font-family="Arial" font-size="17" text-anchor="middle" dominant-baseline="central">Nét liền: sequence flow | Nét đứt: message flow | X: chọn một nhánh | Vạch chéo: nhánh mặc định</text>
+</svg>

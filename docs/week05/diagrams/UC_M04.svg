@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="740" viewBox="0 0 1800 740"><rect width="100%" height="100%" fill="white"/>
+<title>M04 Chuyển giao nhân viên</title>
+<text x="900.0" y="54" text-anchor="middle" font-family="Arial" font-size="34" font-weight="bold" fill="#111111">M04 Chuyển giao nhân viên</text>
+<rect x="310" y="100" width="1180" height="540" fill="white" stroke="#333333" stroke-width="2"/>
+<text x="900.0" y="136" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">M04 Chuyển giao nhân viên</text>
+<polyline points="190,215 335,215 335,255 630,255" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="190,465 353,465 353,255 630,255" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="1540,215 1441,215 1441,255 1170,255" fill="none" stroke="#333333" stroke-width="2"/>
+<ellipse cx="900.0" cy="255.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="232" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC06</text>
+<text x="900" y="265" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Yêu cầu hỗ trợ từ nhân viên</text>
+<ellipse cx="150.0" cy="168.0" rx="18.0" ry="18.0" fill="white" stroke="#333333" stroke-width="2"/>
+<polyline points="150,186 150,246" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="116,208 184,208" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="120,280 150,246 180,280" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="150" y="312" text-anchor="middle" font-family="Arial" font-size="27" font-weight="bold" fill="#111111">Khách hàng</text>
+<ellipse cx="150.0" cy="418.0" rx="18.0" ry="18.0" fill="white" stroke="#333333" stroke-width="2"/>
+<polyline points="150,436 150,496" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="116,458 184,458" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="120,530 150,496 180,530" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="150" y="562" text-anchor="middle" font-family="Arial" font-size="27" font-weight="bold" fill="#111111">Nhân viên</text>
+<rect x="1540" y="150" width="220" height="100" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="1650" y="183" text-anchor="middle" font-family="Arial" font-size="25" font-weight="normal" fill="#111111">&lt;&lt;actor&gt;&gt;</text>
+<text x="1650" y="214" text-anchor="middle" font-family="Arial" font-size="25" font-weight="normal" fill="#111111">Telegram Bot API</text>
+<text x="900.0" y="720" text-anchor="middle" font-family="Arial" font-size="24" font-weight="normal" fill="#111111">Association: tham gia mục tiêu | Quyền cụ thể theo đặc tả | Không dùng include/extend</text>
+</svg>

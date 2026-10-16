@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1210" viewBox="0 0 1800 1210"><rect width="100%" height="100%" fill="white"/>
+<title>M01 Unified Inbox và ticket</title>
+<text x="900.0" y="54" text-anchor="middle" font-family="Arial" font-size="34" font-weight="bold" fill="#111111">M01 Unified Inbox và ticket</text>
+<rect x="310" y="100" width="1180" height="1010" fill="white" stroke="#333333" stroke-width="2"/>
+<text x="900.0" y="136" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">M01 Unified Inbox và ticket</text>
+<polyline points="190,215 335,215 335,705 630,705" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="190,465 353,465 353,255 630,255" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="190,465 353,465 353,405 630,405" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="190,465 353,465 353,555 630,555" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="190,465 353,465 353,855 630,855" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="190,465 353,465 353,1005 630,1005" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="1540,215 1441,215 1441,405 1170,405" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="1540,215 1441,215 1441,705 1170,705" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="1540,215 1441,215 1441,1005 1170,1005" fill="none" stroke="#333333" stroke-width="2"/>
+<ellipse cx="900.0" cy="255.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="232" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC07</text>
+<text x="900" y="265" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Tiếp nhận yêu cầu đang chờ</text>
+<ellipse cx="900.0" cy="405.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="382" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC08</text>
+<text x="900" y="415" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Phản hồi khách đang phụ trách</text>
+<ellipse cx="900.0" cy="555.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="532" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC09</text>
+<text x="900" y="565" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Hoàn tất lượt hỗ trợ</text>
+<ellipse cx="900.0" cy="705.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="682" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC10</text>
+<text x="900" y="715" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Tiếp tục hỗ trợ sau giải quyết</text>
+<ellipse cx="900.0" cy="855.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="832" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC11</text>
+<text x="900" y="865" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Theo dõi Inbox và SLA</text>
+<ellipse cx="900.0" cy="1005.0" rx="270.0" ry="60.0" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="900" y="982" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">UC14</text>
+<text x="900" y="1015" text-anchor="middle" font-family="Arial" font-size="27" font-weight="normal" fill="#111111">Xử lý phản hồi Telegram gửi lỗi</text>
+<ellipse cx="150.0" cy="168.0" rx="18.0" ry="18.0" fill="white" stroke="#333333" stroke-width="2"/>
+<polyline points="150,186 150,246" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="116,208 184,208" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="120,280 150,246 180,280" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="150" y="312" text-anchor="middle" font-family="Arial" font-size="27" font-weight="bold" fill="#111111">Khách hàng</text>
+<ellipse cx="150.0" cy="418.0" rx="18.0" ry="18.0" fill="white" stroke="#333333" stroke-width="2"/>
+<polyline points="150,436 150,496" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="116,458 184,458" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="120,530 150,496 180,530" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="150" y="562" text-anchor="middle" font-family="Arial" font-size="27" font-weight="bold" fill="#111111">Nhân viên</text>
+<rect x="1540" y="150" width="220" height="100" fill="#F4F5F6" stroke="#333333" stroke-width="2"/>
+<text x="1650" y="183" text-anchor="middle" font-family="Arial" font-size="25" font-weight="normal" fill="#111111">&lt;&lt;actor&gt;&gt;</text>
+<text x="1650" y="214" text-anchor="middle" font-family="Arial" font-size="25" font-weight="normal" fill="#111111">Telegram Bot API</text>
+<text x="900.0" y="1190" text-anchor="middle" font-family="Arial" font-size="24" font-weight="normal" fill="#111111">Association: tham gia mục tiêu | Quyền cụ thể theo đặc tả | Không dùng include/extend</text>
+</svg>

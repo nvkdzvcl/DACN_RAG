@@ -1,5 +1,17 @@
 # Công việc
 
+## 15/10/2026 - Hồ sơ tuần 04 và Chương 3–4
+
+- [x] Hiện trạng cửa hàng giả lập được người dùng cho phép, phân biệt dữ liệu giả định với quy trình công khai tham khảo từ FPT Shop; không bịa phỏng vấn hoặc số liệu kinh doanh.
+- [x] Mô tả bảy bước hiện trạng, bảy rủi ro, trách nhiệm tác nhân, 12 quy tắc nghiệp vụ, 14 FR và 10 NFR có tiêu chí kiểm chứng; ngưỡng hiệu năng/chất lượng/phục hồi ghi là đề xuất.
+- [x] BFD sáu nhóm và bốn BPMN 2.0 có DI, pool/lane, message flow, nhánh điều kiện và boundary error; XML kiểm tra schema OMG, đồ thị và ảnh. Không thực thi bằng engine BPMN.
+- [x] Tích hợp vào báo cáo Markdown/Word, giữ bảy chương; sửa Nhóm 5B thành Nhóm 2B, đồng bộ trạng thái hồ sơ thiết kế.
+- [x] Theo yêu cầu tiếp theo, bổ sung tuần 04 vào Chương 3 của đề cương tại mục 3.1–3.5, kèm BFD/bốn BPMN và sáu nguồn tham khảo. NFR10 giữ mức 80% đã đề xuất ở mục 6.4; Use Case/Sequence chi tiết chờ tuần 05. Bản Word 31 trang đã xuất và kiểm tra bố cục; đối chiếu nội dung gốc, mã yêu cầu, chín bảng và năm hình đạt.
+- [x] Bản Word 29 trang đã xuất bằng Word và kiểm tra ảnh từng trang; sửa nhãn chồng chữ, bảng và phân trang. Bốn XML đạt schema OMG; kiểm tra hồ sơ và git diff --check đạt.
+- [ ] Duyệt nghiệp vụ/ngưỡng NFR với GVHD, khảo sát thực tế nếu chuyển sang doanh nghiệp thật; nghiệm thu RAG độc lập, Telegram/SMTP thật và tải triển khai giữ phạm vi riêng.
+
+Nguồn, mô hình và lệnh kiểm tra tại [week04/README.md](week04/README.md). Không thay mã chạy ứng dụng, model, prompt hoặc dữ liệu người dùng.
+
 ## 09/10/2026 - Giữ UUID chờ và báo tin mới cho khách
 
 Sau push `8613c2f`, chặn nháp mới ghi đè tin chưa xác nhận trong Inbox/widget; cho xem và gửi lại đúng nội dung/UUID cũ, xác nhận xong vẫn giữ nháp mới. Widget báo tin mới khi cuộn lên, giữ vị trí đọc, thêm về tin mới nhất và trả focus vào log. Footer co/cuộn, cảnh báo nháp lỗi luôn hiện cùng ô soạn trong viewport thấp đã thử. Bốn kiểm thử trình duyệt, hai test backend liên quan, build và diff check đạt. Chỉ sửa frontend, không thêm dependency hoặc thay RAG; điện thoại/trình đọc màn hình thật vẫn chờ. Chi tiết: `docs/UI_UPGRADE_20261009.md`.
@@ -527,3 +539,16 @@ Kiểm chứng mốc chạy bản build: 103 unittest đạt trong 56,660 giây;
 Kịch bản không có think time, không phải lịch polling UI 3 giây; không đo login/tạo phiên hoặc năng lực tối đa. Inbox còn trả toàn bộ danh sách. Hướng dẫn và bằng chứng tại evals/load/README.md; chưa cần đổi kiến trúc hoặc thêm dependency từ phép đo này.
 
 Kiểm tra cuối: 12 test auth/migration/công cụ đo chạy lại đạt sau bổ sung trường hợp DB v7 thiếu index; git diff --check đạt. Báo cáo Word đồng bộ 80 đoạn với Markdown, giữ bảy chương và 12 trang; đã xuất bằng Word và kiểm tra đủ ảnh trang do renderer đóng gói thiếu LibreOffice. Các tiến trình đo tải riêng đã kết thúc.
+
+## 15/10/2026 - Hồ sơ tuần 05 trong báo cáo
+
+- [x] Thêm mục 3.10–3.12 và 4.6 vào báo cáo, giữ nội dung tuần 04 và các chương còn lại.
+- [x] Danh mục 20 Use Case, bảng phân rã sáu mô đun, sơ đồ tổng quát và sáu sơ đồ phân hệ; giữ ID UC01–UC12 của hồ sơ cũ.
+- [x] Mười đặc tả nghiệp vụ chính có tác nhân, tiền/hậu điều kiện, luồng chính, thay thế và ngoại lệ; truy vết FR/BR/NFR.
+- [x] Năm Sequence: hỏi chính sách, tra đơn được phép, vòng đời ticket, giao tin Telegram và lập chỉ mục nguồn. Có lớp UI/API/service/dữ liệu/dịch vụ ngoài theo mã hiện tại, kiểm tra quyền, transaction và nhánh lỗi.
+- [x] Lưu nguồn PNG/SVG/PlantUML, kiểm tra cấu trúc và đồng bộ Markdown/Word. Word 58 trang, 17 hình gồm tuần 04 và 05; xuất bằng Word và kiểm tra ảnh trang vì renderer đóng gói thiếu LibreOffice.
+- [x] Người dùng yêu cầu bổ sung tuần 05 vào đề cương: mục 3.6–3.7, bổ sung 4.1 và mở rộng 4.2; giữ nội dung cũ ngoài các vị trí cập nhật, đánh lại số hình và thêm nguồn UML [19].
+
+Hồ sơ: [week05/README.md](week05/README.md). Kiểm tra Week04/Week05 và git diff --check đạt. Đề cương đã bổ sung tuần 05 theo yêu cầu người dùng. Không chạy nghiệm thu ứng dụng, Telegram/SMTP thật hoặc benchmark mới; các giới hạn triển khai được ghi trong báo cáo.
+
+Đề cương sau tích hợp có 61 trang và 17 hình, đã xuất Word/PDF và kiểm tra bố cục. Đối chiếu xác nhận nội dung cũ, styles, header/footer và ảnh cũ được giữ; chỉ sửa hai câu hẹn bổ sung tuần 05, nâng cấp tiêu đề 4.1–4.2 và chỉnh khoảng cách mục 4.3–4.5 để tránh trang chỉ có hai dòng. Báo cáo Word không đổi trong lần tích hợp đề cương.

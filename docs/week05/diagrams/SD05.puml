@@ -1,0 +1,44 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title Lập chỉ mục nguồn và xử lý lỗi
+participant "Kho tri thức\n(Client)" as UI
+participant "DocumentsController\n(Controller)" as C
+participant "DocumentService\n(Service)" as S
+participant "File tài liệu\n(File store)" as F
+participant "SQLite\n(Database)" as DB
+participant "Ollama\n(Local API)" as O
+participant "Qdrant\n(Vector store)" as Q
+UI -> C: 1. Upload; admin/CSRF; tối đa 10 MB
+C -> S: 2. save_document(file, nội dung)
+critical [document_lock trong một tiến trình]
+S -> DB: 3. Kiểm tra SHA-256 chưa tồn tại
+S -> F: 4. Lưu file tài liệu
+S -> DB: 5. processing, index_version=null; COMMIT
+alt [Đọc và lập chỉ mục thành công]
+S -> F: 6. Đọc chữ và chia đoạn có vị trí nguồn
+S -> DB: 7. Lưu các đoạn nguồn; COMMIT
+S -> Q: 8. Dọn vector cũ của tài liệu
+loop [Từng lô tối đa 16 đoạn]
+S -> O: 9. Embedding lô với thông tin nguồn
+S -> Q: 10. Upsert vector + index_version mới
+end
+S -> DB: 11. indexed + version + model; COMMIT
+else [Trích xuất hoặc provider/vector lỗi]
+S -> DB: 12. ROLLBACK phần ghi dở; failed; COMMIT
+end
+end
+S --> C: 13. Thông tin trạng thái/số đoạn
+C --> UI: 14. Hiển thị indexed hoặc failed
+opt [Admin chọn xóa sau đó]
+UI -> C: 15. DELETE tài liệu; admin/CSRF
+C -> S: 16. delete_document dưới document_lock
+S -> DB: 17. deleting + version=null; COMMIT để ẩn
+S -> Q: 18. Dọn vector
+S -> F: 19. Dọn file
+S -> DB: 20. Xóa đoạn/bản ghi; COMMIT
+note over UI, Q
+Dọn dở: trả 503, nguồn vẫn bị ẩn; thử xóa lại. Reindex tạo phiên bản mới.
+end note
+end
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title S02 Quản lý đánh giá và vận hành
+actor "Nhân viên" as NV
+actor "Quản trị viên" as AD
+actor "Người duyệt" as RV
+actor "Người vận hành" as OP
+rectangle "Nền tảng CSKH" {
+  usecase "UC12\nDuyệt chất lượng câu trả lời" as UC12
+  usecase "UC16\nXem hồ sơ đơn và báo cáo" as UC16
+  usecase "UC17\nSao lưu và khôi phục dữ liệu" as UC17
+  usecase "UC20\nQuản lý dữ liệu bán lẻ giả lập" as UC20
+}
+NV -- UC16
+AD -- UC20
+RV -- UC12
+OP -- UC17
+@enduml

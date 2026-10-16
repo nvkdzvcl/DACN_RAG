@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1715" viewBox="0 0 1800 1715"><rect width="100%" height="100%" fill="white"/>
+<title>Tiếp nhận phản hồi và hoàn tất ticket</title>
+<text x="900.0" y="52" text-anchor="middle" font-family="Arial" font-size="34" font-weight="bold" fill="#111111">SD03 Tiếp nhận phản hồi và hoàn tất ticket</text>
+<polyline points="140.0,195 140.0,1630" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="15.0" y="85" width="250.0" height="105" fill="#E8EDF2" stroke="#333333" stroke-width="2"/>
+<text x="140.0" y="117" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Client</text>
+<text x="140.0" y="148" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Inbox nhân viên</text>
+<polyline points="444.0,195 444.0,1630" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="319.0" y="85" width="250.0" height="105" fill="#E8EDF2" stroke="#333333" stroke-width="2"/>
+<text x="444.0" y="117" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Controller</text>
+<text x="444.0" y="148" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">InboxController</text>
+<polyline points="748.0,195 748.0,1630" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="623.0" y="85" width="250.0" height="105" fill="#E8EDF2" stroke="#333333" stroke-width="2"/>
+<text x="748.0" y="117" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Service</text>
+<text x="748.0" y="148" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Ticket/SLA</text>
+<polyline points="1052.0,195 1052.0,1630" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="927.0" y="85" width="250.0" height="105" fill="#E8EDF2" stroke="#333333" stroke-width="2"/>
+<text x="1052.0" y="117" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Database</text>
+<text x="1052.0" y="148" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">SQLite</text>
+<polyline points="1356.0,195 1356.0,1630" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="1231.0" y="85" width="250.0" height="105" fill="#E8EDF2" stroke="#333333" stroke-width="2"/>
+<text x="1356.0" y="117" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Controller</text>
+<text x="1356.0" y="148" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">WidgetController</text>
+<polyline points="1660.0,195 1660.0,1630" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="1535.0" y="85" width="250.0" height="105" fill="#E8EDF2" stroke="#333333" stroke-width="2"/>
+<text x="1660.0" y="117" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Client</text>
+<text x="1660.0" y="148" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold" fill="#111111">Website khách</text>
+<polyline points="140.0,261 444.0,261" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="444.0,261 430.0,254 430.0,268" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="230.515625" y="215" width="458.96875" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="247" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">1. Tiếp nhận; phiên staff và CSRF</text>
+<polyline points="444.0,317 1052.0,317" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,317 1038.0,310 1038.0,324" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="437.265625" y="271" width="621.46875" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="303" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">2. UPDATE chờ + chưa phụ trách -&gt; assigned</text>
+<polyline points="25,327 1775,327" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="155,327 155,351 140,363 25,363" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="71.0" y="328" width="38.0" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="90" y="356" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">alt</text>
+<rect x="807.25" y="328" width="185.5" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="356" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">[rowcount = 1]</text>
+<polyline points="444.0,413 1052.0,413" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,413 1038.0,406 1038.0,420" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="477.25" y="367" width="541.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="399" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">3. Đổi ticket open -&gt; assigned; COMMIT</text>
+<polyline points="444.0,469 140.0,469" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<polyline points="153.0,462 140.0,469 153.0,476" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="295.01171875" y="423" width="329.9765625" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="455" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">4. Tiếp nhận thành công</text>
+<polyline points="25,479 1775,479" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="761.0" y="480" width="278.0" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="508" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">[Người khác đã nhận]</text>
+<polyline points="444.0,565 1052.0,565" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,565 1038.0,558 1038.0,572" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="647.5" y="519" width="201.0" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="551" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">5. ROLLBACK</text>
+<polyline points="444.0,621 140.0,621" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<polyline points="153.0,614 140.0,621 153.0,628" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="229.0" y="575" width="462.0" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="607" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">6. 409; đọc lại trước thao tác khác</text>
+<polyline points="25,327 25,653 1775,653 1775,327" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="25,655 1775,655" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="155,655 155,679 140,691 25,691" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="65.75" y="656" width="48.5" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="90" y="684" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">opt</text>
+<rect x="752.0" y="656" width="296.0" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="684" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">[Đã là người phụ trách]</text>
+<polyline points="140.0,741 444.0,741" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="444.0,741 430.0,734 430.0,748" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="234.5" y="695" width="451.0" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="727" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">7. Gửi phản hồi với UUID ổn định</text>
+<polyline points="444.0,797 1052.0,797" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,797 1038.0,790 1038.0,804" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="428.25" y="751" width="639.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="783" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">8. Kiểm tra phụ trách; tái dùng/lưu tin; COMMIT</text>
+<polyline points="1660.0,853 1356.0,853" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1356.0,853 1370.0,846 1370.0,860" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="1162.75" y="807" width="354.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="1340" y="839" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">9. Polling lấy lịch sử phiên</text>
+<polyline points="1356.0,909 1052.0,909" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,909 1066.0,902 1066.0,916" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="905.5" y="863" width="597.0" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="1204.0" y="895" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">10. Đọc đúng hội thoại; lọc dữ liệu công khai</text>
+<polyline points="1356.0,965 1660.0,965" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<polyline points="1647.0,958 1660.0,965 1647.0,972" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="1205.765625" y="919" width="268.46875" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="1340" y="951" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">11. Phản hồi đã lưu</text>
+<polyline points="140.0,1021 444.0,1021" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="444.0,1021 430.0,1014 430.0,1028" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="171.25" y="975" width="577.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="1007" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">12. Finish: ticket, tin cuối, status và ghi chú</text>
+<polyline points="43,1031 1757,1031" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="173,1031 173,1055 158,1067 43,1067" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="62.5" y="1032" width="91.0" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="108" y="1060" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">critical</text>
+<rect x="759.76171875" y="1032" width="280.4765625" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="1060" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">[Transaction hoàn tất]</text>
+<polyline points="444.0,1117 1052.0,1117" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,1117 1038.0,1110 1038.0,1124" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="493.25" y="1071" width="509.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="1103" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">13. Khóa ghi; đọc ticket/người/tin cuối</text>
+<polyline points="61,1127 1739,1127" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="191,1127 191,1151 176,1163 61,1163" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="107.0" y="1128" width="38.0" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="126" y="1156" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">alt</text>
+<rect x="690.25" y="1128" width="419.5" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="1156" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">[Đúng lượt, phụ trách và tin cuối]</text>
+<polyline points="444.0,1213 748.0,1213" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="748.0,1213 734.0,1206 734.0,1220" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="309.25" y="1167" width="573.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="596.0" y="1199" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">14. complete_tickets và tính snapshot SLA</text>
+<polyline points="748.0,1269 1052.0,1269" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,1269 1038.0,1262 1038.0,1276" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="623.5" y="1223" width="553.0" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="1255" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">15. Ghi kết quả, người, thời điểm và SLA</text>
+<polyline points="444.0,1325 1052.0,1325" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,1325 1038.0,1318 1038.0,1332" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="487.75" y="1279" width="520.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="1311" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">16. Đổi status + tin hệ thống; COMMIT</text>
+<polyline points="444.0,1381 140.0,1381" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<polyline points="153.0,1374 140.0,1381 153.0,1388" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="305.75" y="1335" width="308.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="1367" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">17. Hoàn tất đúng lượt</text>
+<polyline points="61,1391 1739,1391" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<rect x="641.50390625" y="1392" width="516.9921875" height="31" fill="white" stroke="white" stroke-width="1"/>
+<text x="900.0" y="1420" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#111111">[Tin mới hoặc điều kiện không còn đúng]</text>
+<polyline points="444.0,1477 1052.0,1477" fill="none" stroke="#333333" stroke-width="2"/>
+<polygon points="1052.0,1477 1038.0,1470 1038.0,1484" fill="#333333" stroke="#333333" stroke-width="2"/>
+<rect x="639.25" y="1431" width="217.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="748.0" y="1463" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">18. ROLLBACK</text>
+<polyline points="444.0,1533 140.0,1533" fill="none" stroke="#333333" stroke-width="2" stroke-dasharray="6 6"/>
+<polyline points="153.0,1526 140.0,1533 153.0,1540" fill="none" stroke="#333333" stroke-width="2"/>
+<rect x="325.75" y="1487" width="268.5" height="35" fill="white" stroke="white" stroke-width="1"/>
+<text x="460" y="1519" text-anchor="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#111111">19. 409/404; đọc lại</text>
+<polyline points="61,1127 61,1565 1739,1565 1739,1127" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="43,1031 43,1589 1757,1589 1757,1031" fill="none" stroke="#333333" stroke-width="2"/>
+<polyline points="25,655 25,1613 1775,1613 1775,655" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="900.0" y="1699" text-anchor="middle" font-family="Arial" font-size="24" font-weight="normal" fill="#111111">Thời gian từ trên xuống | Nét đứt: phản hồi | Khung có điều kiện: nhánh/lặp/vùng ghi</text>
+</svg>

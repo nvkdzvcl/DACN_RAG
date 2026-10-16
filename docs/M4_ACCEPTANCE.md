@@ -53,7 +53,7 @@ Tên kiểm thử nằm trong app/tests; UC tham chiếu [DESIGN.md](DESIGN.md).
 
 ## Điều kiện còn mở
 
-Hồ sơ Mermaid đã có BFD, luồng phân làn, ERD, trạng thái và Sequence, kèm Use Case và hợp đồng API. Chưa có file BPMN 2.0, mockup được duyệt, nguồn tham khảo học thuật hoàn chỉnh hoặc xác nhận GVHD. Cần người dùng duyệt nghiệp vụ khi có thời gian; phần này không chặn tiếp tục M5.
+Tại mốc kiểm chứng M4, hồ sơ Mermaid đã có BFD, luồng phân làn, ERD, trạng thái và Sequence, kèm Use Case và hợp đồng API; khi đó chưa có BPMN 2.0. Ngày 15/10/2026 đã bổ sung [hồ sơ tuần 04](week04/README.md), BFD và bốn file BPMN 2.0 có DI cùng đặc tả FR/NFR. Chưa có mockup được duyệt, nguồn tham khảo học thuật hoàn chỉnh hoặc xác nhận GVHD. Cần người dùng/GVHD duyệt nghiệp vụ; mô hình mới không thay nghiệm thu M4.
 
 M4 chưa nghiệm thu toàn bộ: polling cùng origin chưa phải push realtime; chưa kiểm thử tải, lịch làm việc, SLA giải quyết, phân trang hoặc triển khai cloud. M3 vẫn chờ chấm nhãn/đáp án và nguồn/câu hỏi độc lập. M5 tiếp theo cần tool calling với schema và quyền xác định bởi server; không để LLM tự khai customer_id hoặc tự thực hiện hành động ghi. Kênh thứ hai chỉ tính hoàn tất khi có tài khoản/tích hợp thật và kiểm chứng gửi nhận.
 

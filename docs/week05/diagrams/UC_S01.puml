@@ -1,0 +1,22 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title S01 Truy cập và danh tính
+actor "Khách hàng" as KH
+actor "Nhân viên" as NV
+actor "Quản trị viên" as AD
+actor "SMTP" as SMTP
+rectangle "Nền tảng CSKH" {
+  usecase "UC01\nCấp tài khoản nhân viên" as UC01
+  usecase "UC02\nĐăng nhập và kết thúc phiên nhân viên" as UC02
+  usecase "UC03\nSử dụng hội thoại Website riêng" as UC03
+  usecase "UC15\nQuản lý tài khoản khách" as UC15
+  usecase "UC19\nCấp hoặc thu hồi quyền tra đơn" as UC19
+}
+KH -- UC03
+KH -- UC15
+NV -- UC02
+AD -- UC01
+AD -- UC19
+SMTP -- UC15
+@enduml

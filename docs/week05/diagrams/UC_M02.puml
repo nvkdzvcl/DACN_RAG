@@ -1,0 +1,13 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title M02 Kho tri thức
+actor "Nhân viên" as NV
+actor "Quản trị viên" as AD
+rectangle "Nền tảng CSKH" {
+  usecase "UC05\nQuản lý kho tri thức" as UC05
+  usecase "UC18\nĐọc nguồn và hỏi thử nội bộ" as UC18
+}
+NV -- UC18
+AD -- UC05
+@enduml
