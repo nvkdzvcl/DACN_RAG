@@ -1,0 +1,43 @@
+flowchart TD
+    subgraph KH[Khách hàng]
+        Start([Bắt đầu]) --> Session[Tạo hoặc khôi phục phiên]
+        Send[Gửi yêu cầu]
+        Read[Đọc phản hồi và nguồn]
+        More{Cần hỗ trợ thêm?}
+        EndSession[Kết thúc phiên]
+    end
+    subgraph HT[Hệ thống]
+        Valid{Phiên và dữ liệu hợp lệ?}
+        Error[Báo lỗi và giữ bản nháp tại trang]
+        Save[Lưu tin khách, kiểm tra UUID]
+        Route{Trạng thái và yêu cầu}
+        Rag[Truy xuất, chọn câu và kiểm định]
+        Guard{Trạng thái, tin cuối, nguồn còn đúng?}
+        Answer[Trả lời có nguồn hoặc từ chối]
+        Queue[Tạo ticket và đưa vào hàng chờ]
+        Keep[Lưu tin, không gọi AI]
+        Close[Đóng ticket hoạt động và thu hồi phiên]
+    end
+    subgraph NV[Nhân viên]
+        Accept[Tiếp nhận độc quyền]
+        Reply[Đọc và trả lời]
+        Finish{Kết quả xử lý}
+        Resolve[Giải quyết với ghi chú nội bộ]
+        Closed[Đóng với ghi chú nội bộ]
+    end
+    Session --> Send --> Valid
+    Valid -->|Không| Error --> Send
+    Valid -->|Có| Save --> Route
+    Route -->|Đang mở, hỏi chính sách| Rag --> Guard
+    Guard -->|Có| Answer --> Read
+    Guard -->|Không| Keep
+    Route -->|Yêu cầu người thật hoặc nhắn sau giải quyết| Queue
+    Route -->|Đang chờ hoặc đã tiếp nhận| Keep
+    Route -->|Đã đóng| Error
+    Queue --> Accept --> Reply --> Finish
+    Keep --> Reply
+    Reply --> Read --> More
+    More -->|Có| Send
+    More -->|Không| EndSession --> Close
+    Finish -->|Đã xử lý| Resolve --> More
+    Finish -->|Kết thúc hội thoại| Closed --> EndSession

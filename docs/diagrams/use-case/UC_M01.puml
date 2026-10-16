@@ -1,0 +1,25 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title M01 Unified Inbox và ticket
+actor "Khách hàng" as KH
+actor "Nhân viên" as NV
+actor "Telegram Bot API" as TG
+rectangle "Nền tảng CSKH" {
+  usecase "UC07\nTiếp nhận yêu cầu đang chờ" as UC07
+  usecase "UC08\nPhản hồi khách đang phụ trách" as UC08
+  usecase "UC09\nHoàn tất lượt hỗ trợ" as UC09
+  usecase "UC10\nTiếp tục hỗ trợ sau giải quyết" as UC10
+  usecase "UC11\nTheo dõi Inbox và SLA" as UC11
+  usecase "UC14\nXử lý phản hồi Telegram gửi lỗi" as UC14
+}
+KH -- UC10
+NV -- UC07
+NV -- UC08
+NV -- UC09
+NV -- UC11
+NV -- UC14
+TG -- UC08
+TG -- UC10
+TG -- UC14
+@enduml

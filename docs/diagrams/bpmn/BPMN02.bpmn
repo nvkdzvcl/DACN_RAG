@@ -1,0 +1,385 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="BPMN02_Definitions" targetNamespace="https://dacn-rag.local/week04" exporter="DACN RAG Week04" exporterVersion="1">
+  <bpmn:error id="Error_Service" name="Lỗi dịch vụ" errorCode="service_error" />
+  <bpmn:process id="Process" name="Xác minh và tra cứu đơn hàng" isExecutable="false">
+    <bpmn:laneSet id="LaneSet">
+      <bpmn:lane id="Lane_app" name="Ứng dụng FastAPI">
+        <bpmn:flowNodeRef>start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>scope</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>access</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issue</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>receive</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>code</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>lookup</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>guard</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reply</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_ok</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>handoff</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_queue</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_admin" name="Quản trị viên">
+        <bpmn:flowNodeRef>verify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>verified</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>deliver</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start" name="Yêu cầu tra đơn">
+      <bpmn:outgoing>F_1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="start_MessageEvent" />
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="scope" name="Widget và chỉ yêu cầu tra cứu?" default="F_3">
+      <bpmn:incoming>F_1</bpmn:incoming>
+      <bpmn:outgoing>F_2</bpmn:outgoing>
+      <bpmn:outgoing>F_3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="access" name="Đã có quyền còn hiệu lực?" default="F_5">
+      <bpmn:incoming>F_2</bpmn:incoming>
+      <bpmn:outgoing>F_4</bpmn:outgoing>
+      <bpmn:outgoing>F_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="verify" name="Xác minh qua kênh liên hệ tin cậy">
+      <bpmn:incoming>F_5</bpmn:incoming>
+      <bpmn:outgoing>F_6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="verified" name="Xác minh đạt?" default="F_8">
+      <bpmn:incoming>F_6</bpmn:incoming>
+      <bpmn:outgoing>F_7</bpmn:outgoing>
+      <bpmn:outgoing>F_8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="issue" name="Cấp mã một đơn; hạn 15 phút">
+      <bpmn:incoming>F_7</bpmn:incoming>
+      <bpmn:outgoing>F_9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="deliver" name="Giao mã qua kênh đã xác minh">
+      <bpmn:incoming>F_9</bpmn:incoming>
+      <bpmn:outgoing>F_10</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:receiveTask id="receive" name="Nhận mã tại biểu mẫu riêng">
+      <bpmn:incoming>F_10</bpmn:incoming>
+      <bpmn:outgoing>F_11</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="code" name="Mã và quyền hợp lệ?" default="F_13">
+      <bpmn:incoming>F_11</bpmn:incoming>
+      <bpmn:outgoing>F_12</bpmn:outgoing>
+      <bpmn:outgoing>F_13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="lookup" name="Tra trạng thái và vận đơn được phép">
+      <bpmn:incoming>F_4</bpmn:incoming>
+      <bpmn:incoming>F_12</bpmn:incoming>
+      <bpmn:outgoing>F_14</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="guard" name="Quyền và chủ đơn còn đúng?" default="F_17">
+      <bpmn:incoming>F_14</bpmn:incoming>
+      <bpmn:outgoing>F_15</bpmn:outgoing>
+      <bpmn:outgoing>F_17</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="reply" name="Chỉ trả trạng thái và vận đơn">
+      <bpmn:incoming>F_15</bpmn:incoming>
+      <bpmn:outgoing>F_16</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="end_ok" name="Kết thúc lượt">
+      <bpmn:incoming>F_16</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="handoff" name="Handoff; không lộ dữ liệu đơn">
+      <bpmn:incoming>F_3</bpmn:incoming>
+      <bpmn:incoming>F_8</bpmn:incoming>
+      <bpmn:incoming>F_13</bpmn:incoming>
+      <bpmn:incoming>F_17</bpmn:incoming>
+      <bpmn:outgoing>F_18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="end_queue" name="Chờ xử lý">
+      <bpmn:incoming>F_18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_1" sourceRef="start" targetRef="scope" name="" />
+    <bpmn:sequenceFlow id="F_2" sourceRef="scope" targetRef="access" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_3" sourceRef="scope" targetRef="handoff" name="Telegram / hủy / đổi trả" />
+    <bpmn:sequenceFlow id="F_4" sourceRef="access" targetRef="lookup" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_5" sourceRef="access" targetRef="verify" name="Chưa" />
+    <bpmn:sequenceFlow id="F_6" sourceRef="verify" targetRef="verified" name="" />
+    <bpmn:sequenceFlow id="F_7" sourceRef="verified" targetRef="issue" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_8" sourceRef="verified" targetRef="handoff" name="Không" />
+    <bpmn:sequenceFlow id="F_9" sourceRef="issue" targetRef="deliver" name="" />
+    <bpmn:sequenceFlow id="F_10" sourceRef="deliver" targetRef="receive" name="" />
+    <bpmn:sequenceFlow id="F_11" sourceRef="receive" targetRef="code" name="" />
+    <bpmn:sequenceFlow id="F_12" sourceRef="code" targetRef="lookup" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_13" sourceRef="code" targetRef="handoff" name="Sai / hết hạn" />
+    <bpmn:sequenceFlow id="F_14" sourceRef="lookup" targetRef="guard" name="" />
+    <bpmn:sequenceFlow id="F_15" sourceRef="guard" targetRef="reply" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_16" sourceRef="reply" targetRef="end_ok" name="" />
+    <bpmn:sequenceFlow id="F_17" sourceRef="guard" targetRef="handoff" name="Thu hồi / hết hạn" />
+    <bpmn:sequenceFlow id="F_18" sourceRef="handoff" targetRef="end_queue" name="" />
+  </bpmn:process>
+  <bpmn:collaboration id="Collaboration">
+    <bpmn:participant id="Store" name="Cửa hàng giả lập" processRef="Process" />
+    <bpmn:participant id="customer" name="Khách hàng widget" />
+    <bpmn:messageFlow id="M_1" sourceRef="customer" targetRef="start" name="Yêu cầu" />
+    <bpmn:messageFlow id="M_2" sourceRef="deliver" targetRef="customer" name="Mã qua kênh tin cậy" />
+    <bpmn:messageFlow id="M_3" sourceRef="customer" targetRef="receive" name="Nhập mã tại biểu mẫu" />
+    <bpmn:messageFlow id="M_4" sourceRef="reply" targetRef="customer" name="Kết quả được phép" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="BPMN02_Diagram">
+    <bpmndi:BPMNPlane id="Plane" bpmnElement="Collaboration">
+      <bpmndi:BPMNShape id="Shape_Store" bpmnElement="Store" isHorizontal="true">
+        <dc:Bounds x="45" y="165" width="1600" height="690" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_app" bpmnElement="Lane_app" isHorizontal="true">
+        <dc:Bounds x="75" y="165" width="1570" height="420" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_admin" bpmnElement="Lane_admin" isHorizontal="true">
+        <dc:Bounds x="75" y="585" width="1570" height="270" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_customer" bpmnElement="customer" isHorizontal="true">
+        <dc:Bounds x="45" y="45" width="1600" height="65" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_start" bpmnElement="start">
+        <dc:Bounds x="155" y="202" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="61.0" y="248" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_scope" bpmnElement="scope">
+        <dc:Bounds x="260" y="194" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="174.0" y="256" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_access" bpmnElement="access">
+        <dc:Bounds x="465" y="194" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="379.0" y="256" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_verify" bpmnElement="verify">
+        <dc:Bounds x="350" y="650" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_verified" bpmnElement="verified">
+        <dc:Bounds x="625" y="659" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="539.0" y="721" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_issue" bpmnElement="issue">
+        <dc:Bounds x="755" y="385" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_deliver" bpmnElement="deliver">
+        <dc:Bounds x="755" y="650" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_receive" bpmnElement="receive">
+        <dc:Bounds x="1040" y="385" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_code" bpmnElement="code">
+        <dc:Bounds x="1300" y="394" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1204" y="463" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_lookup" bpmnElement="lookup">
+        <dc:Bounds x="755" y="194" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_guard" bpmnElement="guard">
+        <dc:Bounds x="1040" y="203" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="954.0" y="265" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_reply" bpmnElement="reply">
+        <dc:Bounds x="1200" y="194" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_ok" bpmnElement="end_ok">
+        <dc:Bounds x="1500" y="211" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1406.0" y="257" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_handoff" bpmnElement="handoff">
+        <dc:Bounds x="1380" y="470" width="160" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_queue" bpmnElement="end_queue">
+        <dc:Bounds x="1590" y="487" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1496.0" y="533" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_1" bpmnElement="F_1">
+        <di:waypoint x="197" y="223.0" />
+        <di:waypoint x="228.5" y="223.0" />
+        <di:waypoint x="228.5" y="223.0" />
+        <di:waypoint x="260" y="223.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_2" bpmnElement="F_2">
+        <di:waypoint x="318" y="223.0" />
+        <di:waypoint x="391.5" y="223.0" />
+        <di:waypoint x="391.5" y="223.0" />
+        <di:waypoint x="465" y="223.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="259.75" y="197.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_3" bpmnElement="F_3">
+        <di:waypoint x="289" y="194" />
+        <di:waypoint x="289" y="177" />
+        <di:waypoint x="1600" y="177" />
+        <di:waypoint x="1600" y="450" />
+        <di:waypoint x="1460" y="450" />
+        <di:waypoint x="1460" y="470" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="735" y="151" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_4" bpmnElement="F_4">
+        <di:waypoint x="523" y="223.0" />
+        <di:waypoint x="639.0" y="223.0" />
+        <di:waypoint x="639.0" y="232.0" />
+        <di:waypoint x="755" y="232.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="486.0" y="197.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_5" bpmnElement="F_5">
+        <di:waypoint x="494" y="252" />
+        <di:waypoint x="494" y="305" />
+        <di:waypoint x="440" y="305" />
+        <di:waypoint x="440" y="650" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="345.0" y="451.5" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_6" bpmnElement="F_6">
+        <di:waypoint x="530" y="688.0" />
+        <di:waypoint x="577.5" y="688.0" />
+        <di:waypoint x="577.5" y="688.0" />
+        <di:waypoint x="625" y="688.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_7" bpmnElement="F_7">
+        <di:waypoint x="683" y="688" />
+        <di:waypoint x="715" y="688" />
+        <di:waypoint x="715" y="423" />
+        <di:waypoint x="755" y="423" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="643" y="561" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_8" bpmnElement="F_8">
+        <di:waypoint x="654" y="717" />
+        <di:waypoint x="654" y="795" />
+        <di:waypoint x="1460" y="795" />
+        <di:waypoint x="1460" y="546" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="962.0" y="769.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_9" bpmnElement="F_9">
+        <di:waypoint x="845.0" y="461" />
+        <di:waypoint x="845.0" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_10" bpmnElement="F_10">
+        <di:waypoint x="935" y="688" />
+        <di:waypoint x="985" y="688" />
+        <di:waypoint x="985" y="423" />
+        <di:waypoint x="1040" y="423" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_11" bpmnElement="F_11">
+        <di:waypoint x="1220" y="423.0" />
+        <di:waypoint x="1260.0" y="423.0" />
+        <di:waypoint x="1260.0" y="423.0" />
+        <di:waypoint x="1300" y="423.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_12" bpmnElement="F_12">
+        <di:waypoint x="1329" y="394" />
+        <di:waypoint x="1329" y="325" />
+        <di:waypoint x="845" y="325" />
+        <di:waypoint x="845" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="775" y="298" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_13" bpmnElement="F_13">
+        <di:waypoint x="1358" y="423" />
+        <di:waypoint x="1370" y="423" />
+        <di:waypoint x="1370" y="508" />
+        <di:waypoint x="1380" y="508" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1365" y="401" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_14" bpmnElement="F_14">
+        <di:waypoint x="935" y="232.0" />
+        <di:waypoint x="987.5" y="232.0" />
+        <di:waypoint x="987.5" y="232.0" />
+        <di:waypoint x="1040" y="232.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_15" bpmnElement="F_15">
+        <di:waypoint x="1098" y="232.0" />
+        <di:waypoint x="1149.0" y="232.0" />
+        <di:waypoint x="1149.0" y="232.0" />
+        <di:waypoint x="1200" y="232.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1028.5" y="206.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_16" bpmnElement="F_16">
+        <di:waypoint x="1380" y="232.0" />
+        <di:waypoint x="1440.0" y="232.0" />
+        <di:waypoint x="1440.0" y="232.0" />
+        <di:waypoint x="1500" y="232.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_17" bpmnElement="F_17">
+        <di:waypoint x="1069" y="261" />
+        <di:waypoint x="1069" y="295" />
+        <di:waypoint x="1550" y="295" />
+        <di:waypoint x="1550" y="460" />
+        <di:waypoint x="1485" y="460" />
+        <di:waypoint x="1485" y="470" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1295" y="271" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_18" bpmnElement="F_18">
+        <di:waypoint x="1540" y="508.0" />
+        <di:waypoint x="1565.0" y="508.0" />
+        <di:waypoint x="1565.0" y="508.0" />
+        <di:waypoint x="1590" y="508.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_1" bpmnElement="M_1">
+        <di:waypoint x="176" y="110" />
+        <di:waypoint x="176" y="202" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="81.0" y="130.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_2" bpmnElement="M_2">
+        <di:waypoint x="845" y="650" />
+        <di:waypoint x="700" y="650" />
+        <di:waypoint x="700" y="120" />
+        <di:waypoint x="700" y="110" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="605.0" y="359.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_3" bpmnElement="M_3">
+        <di:waypoint x="1130" y="110" />
+        <di:waypoint x="1130" y="385" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1025" y="131" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_M_4" bpmnElement="M_4">
+        <di:waypoint x="1290" y="194" />
+        <di:waypoint x="1290" y="110" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1195.0" y="126.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

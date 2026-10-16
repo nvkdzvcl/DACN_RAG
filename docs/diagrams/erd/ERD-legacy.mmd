@@ -1,0 +1,136 @@
+erDiagram
+    users ||--o{ auth_sessions : owns
+    users o|--o{ conversations : assigned
+    users o|--o{ messages : sends
+    users o|--o{ tickets : completes
+    customers ||--o{ conversations : starts
+    customers ||--o{ orders : owns
+    orders ||--o| order_access : grants
+    users ||--o{ order_access : issues
+    customers ||--o{ order_access : scoped_owner
+    conversations o|--o{ order_access : redeems
+    conversations ||--o| widget_sessions : has
+    conversations ||--o{ messages : contains
+    conversations ||--o{ tickets : tracks
+    knowledge_documents ||--o{ document_chunks : contains
+    customers ||--o| telegram_peers : identifies
+    conversations o|--o{ telegram_peers : current_chat
+    telegram_peers ||--o{ telegram_updates : receives
+    conversations o|--o{ telegram_updates : processes
+    messages ||--o| telegram_deliveries : delivers
+    telegram_cursors {
+        string bot_id PK
+        bigint next_update_id
+    }
+    telegram_peers {
+        string id PK
+        string bot_id
+        string chat_id
+        string customer_id FK,UK
+        string conversation_id FK
+    }
+    telegram_updates {
+        string id PK
+        string bot_id
+        bigint update_id
+        string peer_id FK
+        string conversation_id FK
+        text content
+        string state
+    }
+    telegram_deliveries {
+        string message_id PK,FK
+        string state
+        string error
+        string external_message_id
+        datetime sent_at
+    }
+    users {
+        string id PK
+        string username UK
+        string role
+        boolean active
+        string password_hash
+    }
+    auth_sessions {
+        string token_hash PK
+        string user_id FK
+        int expires_at
+    }
+    customers {
+        string id PK
+        string display_name
+        string email
+    }
+    conversations {
+        string id PK
+        string customer_id FK
+        string assigned_agent_id FK
+        string last_customer_message_id
+        string channel
+        string status
+        string priority
+        datetime created_at
+    }
+    widget_sessions {
+        string token_hash PK
+        string conversation_id FK,UK
+        int expires_at
+    }
+    messages {
+        string id PK
+        string conversation_id FK
+        string agent_id FK
+        string sender_type
+        string external_message_id
+        string reply_to_id
+        text content
+        json citations
+        json tool_trace
+        datetime created_at
+    }
+    tickets {
+        string id PK
+        string conversation_id FK
+        string status
+        string priority
+        text summary
+        datetime created_at
+        datetime completed_at
+        string completed_by_id FK
+        text completion_note
+        datetime first_response_at
+    }
+    order_access {
+        string order_id PK,FK
+        string customer_id FK
+        string token_hash UK
+        string issued_by_id FK
+        int expires_at
+        string conversation_id FK
+    }
+    orders {
+        string id PK
+        string customer_id FK
+        string status
+        string tracking_code
+    }
+    knowledge_documents {
+        string id PK
+        string filename
+        string status
+        string file_hash UK
+        string index_version
+        string embedding_model
+        text error_message
+        datetime created_at
+    }
+    document_chunks {
+        string id PK
+        string document_id FK
+        int chunk_index
+        text content
+        string source
+        int page
+        string location
+    }

@@ -1,0 +1,14 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title M04 Chuyển giao nhân viên
+actor "Khách hàng" as KH
+actor "Nhân viên" as NV
+actor "Telegram Bot API" as TG
+rectangle "Nền tảng CSKH" {
+  usecase "UC06\nYêu cầu hỗ trợ từ nhân viên" as UC06
+}
+KH -- UC06
+NV -- UC06
+TG -- UC06
+@enduml

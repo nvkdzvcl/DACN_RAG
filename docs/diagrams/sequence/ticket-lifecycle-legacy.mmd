@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant N as Nhân viên
+    participant A as API
+    participant D as SQLite
+    participant K as Khách
+    N->>A: finish với ticket và tin khách cuối đã xem
+    A->>D: Khóa hội thoại
+    alt Cùng ticket, người, trạng thái và ghi chú đã hoàn tất
+        A-->>N: 200 duplicate, không ghi thêm
+    else Chưa hoàn tất
+        A->>D: Kiểm tra phụ trách và tin khách cuối
+        alt Có tin mới hoặc sai người phụ trách
+            A-->>N: 409, đọc lại trước khi hoàn tất
+        else Hợp lệ
+            A->>D: Chốt phản hồi, lưu kết quả và ghi chú nội bộ
+            A->>D: Đổi trạng thái, thêm thông báo chung, commit
+            A-->>N: 200
+        end
+    end
+    K->>A: Tin mới sau resolved
+    A->>D: Khóa, lưu tin, tạo ticket, bỏ phân công, commit
+    A-->>K: handoff_requested, AI vẫn dừng
+    N->>A: Tiếp nhận lượt mới
+    A->>D: UPDATE có điều kiện, chỉ một người thắng

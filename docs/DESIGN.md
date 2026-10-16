@@ -1,10 +1,12 @@
 # Thiết kế hệ thống hỗ trợ khách hàng
 
+Tra cứu sơ đồ theo loại tại [docs/diagrams](diagrams/README.md): BFD, BPMN, Use Case, Sequence, ERD, kiến trúc, trạng thái, luồng nghiệp vụ và UI Mockup. Thư mục giữ bản sao để đọc; nguồn chính và cách cập nhật được ghi trong danh mục.
+
 Ngày đối chiếu: 21/09/2026. Tài liệu mô tả chức năng đang có trên FastAPI/SQLite, React/Vite, Qdrant embedded và Ollama local. Đây là hồ sơ kỹ thuật để người dùng/GVHD duyệt sau; chưa phải xác nhận nghiệm thu. M3 còn chờ người duyệt chất lượng, M4 mới kiểm chứng chức năng local. API chi tiết tại [API.md](API.md), bằng chứng tại [M4_ACCEPTANCE.md](M4_ACCEPTANCE.md).
 
 Bổ sung ngày 15/10/2026: [hồ sơ tuần 04](week04/README.md) và Chương 3–4 của [báo cáo](report/BaoCao.md) có hiện trạng giả lập được người dùng cho phép, nguồn tham khảo công khai, 14 FR, 10 NFR, 12 quy tắc nghiệp vụ, BFD cập nhật và bốn file BPMN 2.0 có DI. Bộ BPMN có pool/lane, message flow, nhánh điều kiện và lỗi dịch vụ; là mô hình phân tích không thực thi, không thay nghiệm thu. Các Mermaid và ERD bên dưới giữ mốc đối chiếu kỹ thuật cũ; dùng bộ tuần 04 cho phần nghiệp vụ hiện tại.
 
-[Hồ sơ tuần 05](week05/README.md) bổ sung vào báo cáo tại mục 3.10–3.12 và 4.6: 20 Use Case thuộc sáu mô đun, 10 đặc tả, bảy hình Use Case và năm Sequence có phân tầng, transaction, nhánh lỗi và kiểm soát đồng thời. Mô hình đối chiếu triển khai một worker, SQLite, Qdrant embedded, Ollama và Telegram polling; các SQL nghiệp vụ còn nằm trong Controller được ghi rõ. Ngày 15/10/2026, theo yêu cầu người dùng, bộ này được đưa vào đề cương tại mục 3.6–3.7, 4.1–4.2; không thay nghiệm thu chức năng.
+[Hồ sơ tuần 05](week05/README.md) bổ sung vào báo cáo tại mục 3.10–3.12 và 4.6: 20 Use Case thuộc sáu mô đun, 10 đặc tả, bảy hình Use Case và năm Sequence có phân tầng, transaction, nhánh lỗi và kiểm soát đồng thời. Mô hình đối chiếu triển khai một worker, SQLite, Qdrant embedded, Ollama và Telegram polling; các SQL nghiệp vụ còn nằm trong Controller được ghi rõ. Ngày 15/10/2026, bộ này từng được đưa chi tiết vào đề cương. Ngày 16/10/2026, đề cương được rút về mục tiêu, phương pháp, kế hoạch và dàn ý bảy chương; mô hình chi tiết tiếp tục được lưu trong báo cáo và hồ sơ tuần 04–05, không thay nghiệm thu chức năng.
 
 ## Phân rã chức năng BFD
 

@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title Telegram nhận giao và phục hồi tin
+participant "Inbox nhân viên\n(Client)" as UI
+participant "InboxController\n(Controller)" as C
+participant "TelegramWorker\n(Adapter)" as W
+participant "MessageService\n(Service)" as M
+participant "SQLite\n(Database)" as DB
+participant "Telegram Bot API\n(Third party)" as TG
+W -> TG: 1. getUpdates(offset đã commit)
+W -> DB: 2. Lưu update theo bot:ID và cursor; COMMIT
+W -> M: 3. process_next -> process_message, cùng ID
+note over UI, TG
+RAG dùng SD01; /human đi handoff. Update lặp không nhân bản tin/ticket.
+end note
+W -> DB: 4. Update done; queue_outgoing pending; COMMIT
+loop [Tin đầu chưa hoàn tất của từng peer]
+W -> DB: 5. CAS pending -> sending; kiểm tra AI; COMMIT
+W -> TG: 6. sendMessage; không giữ SQL transaction
+alt [Xác nhận message_id hợp lệ]
+W -> DB: 7. sent + external ID + sent_at; COMMIT
+else [Lỗi xác định hoặc kết quả không chắc]
+W -> DB: 8. failed/uncertain; handoff khi open; COMMIT
+note over UI, TG
+failed/uncertain chặn tin sau cùng peer. AI stale -> skipped trước gọi API.
+end note
+end
+end
+opt [Khởi động lại sau sending dở]
+W -> DB: 9. recover_sends: sending -> uncertain; COMMIT
+end
+opt [Nhân viên quyết định retry hoặc skip]
+UI -> C: 10. retry-delivery; xác nhận uncertain nếu retry
+C -> DB: 11. Kiểm tra phụ trách/trạng thái; pending/skipped; COMMIT
+C --> UI: 12. Trạng thái mới; retry chưa có nghĩa đã giao
+end
+@enduml

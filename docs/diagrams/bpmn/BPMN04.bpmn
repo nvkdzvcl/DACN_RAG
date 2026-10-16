@@ -1,0 +1,375 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="BPMN04_Definitions" targetNamespace="https://dacn-rag.local/week04" exporter="DACN RAG Week04" exporterVersion="1">
+  <bpmn:error id="Error_Service" name="Lỗi dịch vụ" errorCode="service_error" />
+  <bpmn:process id="Process" name="Quản lý và lập chỉ mục tri thức" isExecutable="false">
+    <bpmn:laneSet id="LaneSet">
+      <bpmn:lane id="Lane_admin" name="Quản trị viên">
+        <bpmn:flowNodeRef>start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>upload</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>action</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reindex</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_ready</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_app" name="Ứng dụng FastAPI">
+        <bpmn:flowNodeRef>validate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>valid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reject</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_invalid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>extract</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>parse_error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>content</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_error</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ready</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>delete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_deleted</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_rag" name="Ollama và Qdrant local">
+        <bpmn:flowNodeRef>index</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>index_error</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start" name="Có tài liệu">
+      <bpmn:outgoing>F_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="upload" name="Chọn tài liệu và yêu cầu tải lên">
+      <bpmn:incoming>F_1</bpmn:incoming>
+      <bpmn:outgoing>F_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="validate" name="Kiểm tra loại, 10 MB và hash">
+      <bpmn:incoming>F_2</bpmn:incoming>
+      <bpmn:outgoing>F_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="valid" name="File hợp lệ?" default="F_5">
+      <bpmn:incoming>F_3</bpmn:incoming>
+      <bpmn:outgoing>F_4</bpmn:outgoing>
+      <bpmn:outgoing>F_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="reject" name="Từ chối; thông báo lỗi hoặc trùng file">
+      <bpmn:incoming>F_5</bpmn:incoming>
+      <bpmn:outgoing>F_6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="end_invalid" name="Chưa lập chỉ mục">
+      <bpmn:incoming>F_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="extract" name="Lưu nguồn; đọc và chia đoạn có vị trí">
+      <bpmn:incoming>F_4</bpmn:incoming>
+      <bpmn:incoming>F_17</bpmn:incoming>
+      <bpmn:outgoing>F_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="parse_error" name="Lỗi đọc file" attachedToRef="extract" cancelActivity="true">
+      <bpmn:outgoing>F_8</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="parse_error_ErrorEvent" errorRef="Error_Service" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="content" name="Có nội dung đọc được?" default="F_10">
+      <bpmn:incoming>F_7</bpmn:incoming>
+      <bpmn:outgoing>F_9</bpmn:outgoing>
+      <bpmn:outgoing>F_10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="index" name="Tạo embedding; ghi vector mới">
+      <bpmn:incoming>F_9</bpmn:incoming>
+      <bpmn:outgoing>F_13</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="index_error" name="Lỗi chỉ mục" attachedToRef="index" cancelActivity="true">
+      <bpmn:outgoing>F_12</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="index_error_ErrorEvent" errorRef="Error_Service" />
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="error" name="Đánh dấu lỗi; cho phép lập lại">
+      <bpmn:incoming>F_8</bpmn:incoming>
+      <bpmn:incoming>F_10</bpmn:incoming>
+      <bpmn:incoming>F_12</bpmn:incoming>
+      <bpmn:outgoing>F_11</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="end_error" name="Chưa sẵn sàng">
+      <bpmn:incoming>F_11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ready" name="Đánh dấu sẵn sàng; cho phép truy hồi">
+      <bpmn:incoming>F_13</bpmn:incoming>
+      <bpmn:outgoing>F_14</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="action" name="Thao tác tiếp?" default="F_15">
+      <bpmn:incoming>F_14</bpmn:incoming>
+      <bpmn:outgoing>F_15</bpmn:outgoing>
+      <bpmn:outgoing>F_16</bpmn:outgoing>
+      <bpmn:outgoing>F_18</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="reindex" name="Lập chỉ mục lại phiên bản mới">
+      <bpmn:incoming>F_16</bpmn:incoming>
+      <bpmn:outgoing>F_17</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="delete" name="Ngừng truy hồi rồi dọn file / vector">
+      <bpmn:incoming>F_18</bpmn:incoming>
+      <bpmn:outgoing>F_19</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="end_deleted" name="Đã ngừng dùng nguồn">
+      <bpmn:incoming>F_19</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="end_ready" name="Giữ nguồn sẵn sàng">
+      <bpmn:incoming>F_15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_1" sourceRef="start" targetRef="upload" name="" />
+    <bpmn:sequenceFlow id="F_2" sourceRef="upload" targetRef="validate" name="" />
+    <bpmn:sequenceFlow id="F_3" sourceRef="validate" targetRef="valid" name="" />
+    <bpmn:sequenceFlow id="F_4" sourceRef="valid" targetRef="extract" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_5" sourceRef="valid" targetRef="reject" name="Không" />
+    <bpmn:sequenceFlow id="F_6" sourceRef="reject" targetRef="end_invalid" name="" />
+    <bpmn:sequenceFlow id="F_7" sourceRef="extract" targetRef="content" name="" />
+    <bpmn:sequenceFlow id="F_8" sourceRef="parse_error" targetRef="error" name="" />
+    <bpmn:sequenceFlow id="F_9" sourceRef="content" targetRef="index" name="Có">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Có</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_10" sourceRef="content" targetRef="error" name="Không; scan chưa OCR" />
+    <bpmn:sequenceFlow id="F_11" sourceRef="error" targetRef="end_error" name="" />
+    <bpmn:sequenceFlow id="F_12" sourceRef="index_error" targetRef="error" name="" />
+    <bpmn:sequenceFlow id="F_13" sourceRef="index" targetRef="ready" name="" />
+    <bpmn:sequenceFlow id="F_14" sourceRef="ready" targetRef="action" name="" />
+    <bpmn:sequenceFlow id="F_15" sourceRef="action" targetRef="end_ready" name="Giữ" />
+    <bpmn:sequenceFlow id="F_16" sourceRef="action" targetRef="reindex" name="Lập lại">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Lập lại</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_17" sourceRef="reindex" targetRef="extract" name="" />
+    <bpmn:sequenceFlow id="F_18" sourceRef="action" targetRef="delete" name="Xóa">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="text/plain">Xóa</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F_19" sourceRef="delete" targetRef="end_deleted" name="" />
+  </bpmn:process>
+  <bpmn:collaboration id="Collaboration">
+    <bpmn:participant id="Store" name="Cửa hàng giả lập" processRef="Process" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="BPMN04_Diagram">
+    <bpmndi:BPMNPlane id="Plane" bpmnElement="Collaboration">
+      <bpmndi:BPMNShape id="Shape_Store" bpmnElement="Store" isHorizontal="true">
+        <dc:Bounds x="45" y="55" width="1600" height="835" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_admin" bpmnElement="Lane_admin" isHorizontal="true">
+        <dc:Bounds x="75" y="55" width="1570" height="225" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_app" bpmnElement="Lane_app" isHorizontal="true">
+        <dc:Bounds x="75" y="280" width="1570" height="375" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_rag" bpmnElement="Lane_rag" isHorizontal="true">
+        <dc:Bounds x="75" y="655" width="1570" height="235" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_start" bpmnElement="start">
+        <dc:Bounds x="140" y="120" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="46.0" y="166" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_upload" bpmnElement="upload">
+        <dc:Bounds x="235" y="103" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_validate" bpmnElement="validate">
+        <dc:Bounds x="235" y="335" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_valid" bpmnElement="valid">
+        <dc:Bounds x="470" y="344" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="384.0" y="406" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_reject" bpmnElement="reject">
+        <dc:Bounds x="235" y="525" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_invalid" bpmnElement="end_invalid">
+        <dc:Bounds x="470" y="542" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="376.0" y="588" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_extract" bpmnElement="extract">
+        <dc:Bounds x="625" y="335" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_parse_error" bpmnElement="parse_error">
+        <dc:Bounds x="710" y="396" width="30" height="30" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="610.0" y="430" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_content" bpmnElement="content">
+        <dc:Bounds x="880" y="344" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="794.0" y="406" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_index" bpmnElement="index">
+        <dc:Bounds x="850" y="720" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_index_error" bpmnElement="index_error">
+        <dc:Bounds x="930" y="781" width="30" height="30" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="830.0" y="815" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_error" bpmnElement="error">
+        <dc:Bounds x="625" y="525" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_error" bpmnElement="end_error">
+        <dc:Bounds x="860" y="542" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="766.0" y="588" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ready" bpmnElement="ready">
+        <dc:Bounds x="1110" y="335" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_action" bpmnElement="action">
+        <dc:Bounds x="1300" y="112" width="58" height="58" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1214.0" y="174" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_reindex" bpmnElement="reindex">
+        <dc:Bounds x="850" y="103" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_delete" bpmnElement="delete">
+        <dc:Bounds x="1320" y="525" width="180" height="76" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_deleted" bpmnElement="end_deleted">
+        <dc:Bounds x="1550" y="542" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1456.0" y="588" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_end_ready" bpmnElement="end_ready">
+        <dc:Bounds x="1510" y="120" width="42" height="42" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1416.0" y="166" width="230" height="50" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_1" bpmnElement="F_1">
+        <di:waypoint x="182" y="141.0" />
+        <di:waypoint x="208.5" y="141.0" />
+        <di:waypoint x="208.5" y="141.0" />
+        <di:waypoint x="235" y="141.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_2" bpmnElement="F_2">
+        <di:waypoint x="325.0" y="179" />
+        <di:waypoint x="325.0" y="335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_3" bpmnElement="F_3">
+        <di:waypoint x="415" y="373.0" />
+        <di:waypoint x="442.5" y="373.0" />
+        <di:waypoint x="442.5" y="373.0" />
+        <di:waypoint x="470" y="373.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_4" bpmnElement="F_4">
+        <di:waypoint x="528" y="373.0" />
+        <di:waypoint x="576.5" y="373.0" />
+        <di:waypoint x="576.5" y="373.0" />
+        <di:waypoint x="625" y="373.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="457.25" y="347.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_5" bpmnElement="F_5">
+        <di:waypoint x="499" y="402" />
+        <di:waypoint x="499" y="480" />
+        <di:waypoint x="325" y="480" />
+        <di:waypoint x="325" y="525" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="317.0" y="454.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_6" bpmnElement="F_6">
+        <di:waypoint x="415" y="563.0" />
+        <di:waypoint x="442.5" y="563.0" />
+        <di:waypoint x="442.5" y="563.0" />
+        <di:waypoint x="470" y="563.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_7" bpmnElement="F_7">
+        <di:waypoint x="805" y="373.0" />
+        <di:waypoint x="842.5" y="373.0" />
+        <di:waypoint x="842.5" y="373.0" />
+        <di:waypoint x="880" y="373.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_8" bpmnElement="F_8">
+        <di:waypoint x="725.0" y="426" />
+        <di:waypoint x="725.0" y="475.5" />
+        <di:waypoint x="715.0" y="475.5" />
+        <di:waypoint x="715.0" y="525" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_9" bpmnElement="F_9">
+        <di:waypoint x="909" y="402" />
+        <di:waypoint x="1040" y="402" />
+        <di:waypoint x="1040" y="680" />
+        <di:waypoint x="940" y="680" />
+        <di:waypoint x="940" y="720" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="945.0" y="515.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_10" bpmnElement="F_10">
+        <di:waypoint x="909" y="402" />
+        <di:waypoint x="909" y="480" />
+        <di:waypoint x="780" y="480" />
+        <di:waypoint x="780" y="525" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="835" y="478" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_11" bpmnElement="F_11">
+        <di:waypoint x="805" y="563.0" />
+        <di:waypoint x="832.5" y="563.0" />
+        <di:waypoint x="832.5" y="563.0" />
+        <di:waypoint x="860" y="563.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_12" bpmnElement="F_12">
+        <di:waypoint x="930" y="796" />
+        <di:waypoint x="575" y="796" />
+        <di:waypoint x="575" y="563" />
+        <di:waypoint x="625" y="563" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_13" bpmnElement="F_13">
+        <di:waypoint x="1030" y="758" />
+        <di:waypoint x="1200" y="758" />
+        <di:waypoint x="1200" y="411" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_14" bpmnElement="F_14">
+        <di:waypoint x="1290" y="373" />
+        <di:waypoint x="1329" y="373" />
+        <di:waypoint x="1329" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_15" bpmnElement="F_15">
+        <di:waypoint x="1358" y="141.0" />
+        <di:waypoint x="1434.0" y="141.0" />
+        <di:waypoint x="1434.0" y="141.0" />
+        <di:waypoint x="1510" y="141.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1301.0" y="115.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_16" bpmnElement="F_16">
+        <di:waypoint x="1300" y="141" />
+        <di:waypoint x="1030" y="141" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1070.0" y="115.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_17" bpmnElement="F_17">
+        <di:waypoint x="940" y="179" />
+        <di:waypoint x="940" y="235" />
+        <di:waypoint x="715" y="235" />
+        <di:waypoint x="715" y="335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_18" bpmnElement="F_18">
+        <di:waypoint x="1329" y="170" />
+        <di:waypoint x="1585" y="170" />
+        <di:waypoint x="1585" y="480" />
+        <di:waypoint x="1410" y="480" />
+        <di:waypoint x="1410" y="525" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1490.0" y="299.0" width="190" height="26" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_19" bpmnElement="F_19">
+        <di:waypoint x="1500" y="563.0" />
+        <di:waypoint x="1525.0" y="563.0" />
+        <di:waypoint x="1525.0" y="563.0" />
+        <di:waypoint x="1550" y="563.0" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

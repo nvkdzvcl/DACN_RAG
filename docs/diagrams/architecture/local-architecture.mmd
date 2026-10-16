@@ -1,0 +1,12 @@
+flowchart LR
+    W[Widget iframe và trang chat] --> F[Origin frontend và proxy API]
+    I[Inbox và Kho tri thức] --> F
+    F --> A[FastAPI một worker]
+    TG[Telegram Bot API] <--> P[Polling một luồng, opt-in]
+    P --> A
+    A --> S[(SQLite)]
+    A --> D[File tài liệu]
+    A --> Q[(Qdrant embedded)]
+    A --> O[Ollama local]
+    O --> L[qwen3:4b]
+    O --> E[embeddinggemma:300m]

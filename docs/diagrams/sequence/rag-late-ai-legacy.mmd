@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant K as Khách
+    participant A as API
+    participant D as SQLite
+    participant R as RAG và Ollama
+    K->>A: Tin nhắn và UUID
+    A->>D: Khóa hội thoại, kiểm tra UUID và trạng thái
+    A->>D: Lưu tin khách, cập nhật tin cuối, commit
+    A->>R: Truy xuất, chọn câu, kiểm định khi còn open
+    Note over A,D: Không giữ transaction trong lúc model chạy
+    opt Khách chuyển nhân viên khi model chờ
+        K->>A: Handoff
+        A->>D: Khóa, tạo ticket, đổi trạng thái, commit
+    end
+    R-->>A: Kết quả hoặc lỗi provider
+    A->>D: Khóa lại, kiểm tra trạng thái, tin cuối và nguồn
+    alt Còn open, đúng tin cuối, nguồn hợp lệ
+        A->>D: Lưu AI và citation, commit
+    else Trạng thái hoặc dữ liệu đã đổi
+        A->>D: Không lưu AI muộn
+    end
+    A-->>K: Snapshot riêng của phiên hoặc lỗi phiên hết hạn

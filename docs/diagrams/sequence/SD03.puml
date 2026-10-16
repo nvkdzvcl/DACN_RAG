@@ -1,0 +1,40 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title Tiếp nhận phản hồi và hoàn tất ticket
+participant "Inbox nhân viên\n(Client)" as UI
+participant "InboxController\n(Controller)" as C
+participant "Ticket/SLA\n(Service)" as T
+participant "SQLite\n(Database)" as DB
+participant "WidgetController\n(Controller)" as W
+participant "Website khách\n(Client)" as KH
+UI -> C: 1. Tiếp nhận; phiên staff và CSRF
+C -> DB: 2. UPDATE chờ + chưa phụ trách -> assigned
+alt [rowcount = 1]
+C -> DB: 3. Đổi ticket open -> assigned; COMMIT
+C --> UI: 4. Tiếp nhận thành công
+else [Người khác đã nhận]
+C -> DB: 5. ROLLBACK
+C --> UI: 6. 409; đọc lại trước thao tác khác
+end
+opt [Đã là người phụ trách]
+UI -> C: 7. Gửi phản hồi với UUID ổn định
+C -> DB: 8. Kiểm tra phụ trách; tái dùng/lưu tin; COMMIT
+KH -> W: 9. Polling lấy lịch sử phiên
+W -> DB: 10. Đọc đúng hội thoại; lọc dữ liệu công khai
+W --> KH: 11. Phản hồi đã lưu
+UI -> C: 12. Finish: ticket, tin cuối, status và ghi chú
+critical [Transaction hoàn tất]
+C -> DB: 13. Khóa ghi; đọc ticket/người/tin cuối
+alt [Đúng lượt, phụ trách và tin cuối]
+C -> T: 14. complete_tickets và tính snapshot SLA
+T -> DB: 15. Ghi kết quả, người, thời điểm và SLA
+C -> DB: 16. Đổi status + tin hệ thống; COMMIT
+C --> UI: 17. Hoàn tất đúng lượt
+else [Tin mới hoặc điều kiện không còn đúng]
+C -> DB: 18. ROLLBACK
+C --> UI: 19. 409/404; đọc lại
+end
+end
+end
+@enduml

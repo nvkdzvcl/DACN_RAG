@@ -390,4 +390,4 @@ Các sơ đồ sau là năm luồng trên. Bản SVG có thể phóng to; file P
 - Mỗi hình có PNG, SVG và PlantUML. PlantUML là nguồn logic chỉnh sửa; bố cục khi render bằng công cụ khác có thể khác ảnh trong báo cáo.
 - Chạy `python docs/week05/build.py --check` để kiểm tra nguồn/hình và bản tích hợp; chạy không tham số để dựng hình và đồng bộ báo cáo. Cần runtime tài liệu có Pillow và python-docx.
 
-Ngày 15/10/2026, theo yêu cầu người dùng, nội dung tuần 05 được tích hợp vào [đề cương](../decuong/262701-DACN-07-Nhom2B_DeCuong_ChinhSua.docx): mục 3.6–3.7, bổ sung 4.1 và mở rộng 4.2. Hình Use Case đánh số 3.6–3.12 sau năm hình tuần 04; Sequence đánh số 4.1–4.5, nguồn UML là [19]. Báo cáo giữ cách đánh số riêng.
+Ngày 15/10/2026, nội dung tuần 05 từng được tích hợp chi tiết vào đề cương. Ngày 16/10/2026, [đề cương hiện tại](../decuong/262701-DACN-07-Nhom2B_DeCuong.docx) được rút về mục tiêu, phương pháp, kế hoạch và dàn ý các chương; Use Case, đặc tả và Sequence chi tiết vẫn lưu trong báo cáo và hồ sơ này. Có thể tra cứu bản sao sơ đồ theo loại tại [danh mục sơ đồ](../diagrams/README.md).

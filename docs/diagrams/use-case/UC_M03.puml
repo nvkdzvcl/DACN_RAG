@@ -1,0 +1,15 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+title M03 Hỏi đáp và tra đơn
+actor "Khách hàng" as KH
+actor "Telegram Bot API" as TG
+rectangle "Nền tảng CSKH" {
+  usecase "UC04\nHỏi chính sách có nguồn" as UC04
+  usecase "UC13\nTra cứu đơn được phép" as UC13
+}
+KH -- UC04
+KH -- UC13
+TG -- UC04
+TG -- UC13
+@enduml

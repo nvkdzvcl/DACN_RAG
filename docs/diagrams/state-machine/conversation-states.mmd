@@ -1,0 +1,13 @@
+stateDiagram-v2
+    [*] --> open: Tạo hội thoại
+    open --> open: Hỏi đáp hoặc tra đơn
+    open --> handoff_requested: Yêu cầu nhân viên
+    handoff_requested --> assigned: Tiếp nhận thành công
+    assigned --> resolved: Người phụ trách giải quyết
+    assigned --> closed: Người phụ trách đóng
+    resolved --> handoff_requested: Tin khách mới tạo lượt hỗ trợ
+    open --> closed: Khách kết thúc phiên
+    handoff_requested --> closed: Khách kết thúc phiên
+    assigned --> closed: Khách kết thúc phiên
+    resolved --> closed: Khách kết thúc phiên
+    closed --> [*]: Chỉ xem lịch sử hoặc bắt đầu phiên mới
