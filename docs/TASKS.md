@@ -1,6 +1,17 @@
 # Công việc
 
-## 21/10/2026 - Hoàn tất lượt sửa an toàn và chất lượng RAG
+## 21/10/2026 - Sửa xong bốn ca RAG còn lỗi
+
+- [x] Người dùng đã duyệt ba thay đổi nhãn customer-024/048/051; lưu phê duyệt riêng gắn hash manifest, giữ nguyên nhãn/corpus/bằng chứng lịch sử. Không coi đây là người duyệt độc lập hoặc nghiệm thu toàn bộ đáp án.
+- [x] Sửa customer-022: hỏi thông số/model trước xác nhận tương thích. Sửa customer-053: nói rõ giới hạn dữ liệu và chưa tra cứu trạng thái mã; cùng hàng rào chặn xác nhận trạng thái giao dịch riêng bằng chính sách chung.
+- [x] Sửa context-005/008 bằng chọn nguồn và review có phạm vi báo giá/phí hoàn; giữ điều kiện trước sửa chữa, phân biệt khách chọn sai và cửa hàng giao sai. Không bỏ review, không tăng giới hạn ba lời gọi model.
+- [x] 236 test backend, một test báo cáo đạt. Bốn ca mục tiêu cộng ba ca kiểm soát đạt 21/21 trong ba lượt lặp trên bản cuối.
+- [x] Hồi quy cuối `four-fixes-verified-20261021`: 60/60 theo nhãn v2 và 180/180 ca cũ, tổng 240/240; không lỗi dịch vụ, không ca thoái lui so với quality-final. 198/198 quote khớp đoạn truy hồi. Chấm lại cùng đáp án theo nhãn v1 được 58/60; không coi thay nhãn là cải thiện runtime. Lượt thử prompt toàn cục có lỗi đã ngắt và được giữ riêng.
+- [ ] Nghiệm thu RAG độc lập vẫn cần người khác duyệt đáp án và bộ kín mới, chốt tiêu chí trước đo. Không dùng điểm hồi quy để tự đóng hạng mục nghiệm thu.
+
+Chi tiết: `evals/independent-v1/followup-20261021/README.md` và `KET_QUA.md`. Chưa khởi động lại backend đang chạy không có reload; cần restart để nhận mã. Chưa bắt đầu lượt kiểm thử tool calling/handoff mới.
+
+## 21/10/2026 - Lượt quality-final trước sửa bốn ca
 
 - [x] Giữ lớp chặn khối giả mạo vai trò system/developer/assistant, ID câu bị lọc và quy định đối lập trực tiếp cùng phạm vi; không bỏ kiểm định để tăng điểm.
 - [x] Hoàn tất phần đang dở: thu hẹp hỏi loại mã, hỏi rõ đối tượng chưa xác định, giữ điều kiện đứng trước câu trích trong đoạn có tiêu đề; giữ bản prompt review được chọn từ đối chứng 54 lượt đã lưu.

@@ -1,0 +1,34 @@
+[
+  {
+    "source": "test-conflict-a.txt",
+    "sha256": "594593c0832d856c31d9ccf162f74cdab0763a61790ad7a55b16ce11b43c9508",
+    "seconds": 0.797,
+    "status": "indexed",
+    "chunks": 2,
+    "error_message": null
+  },
+  {
+    "source": "test-conflict-b.txt",
+    "sha256": "7ea4010b2339684940ffaa2017d1f9187ce1e54391c683e5bca33285717ad864",
+    "seconds": 0.747,
+    "status": "indexed",
+    "chunks": 2,
+    "error_message": null
+  },
+  {
+    "source": "test-policy.txt",
+    "sha256": "faba86f356fa600776173408f09c94f282668f78d13a6eec8cbda5b3a31408d0",
+    "seconds": 1.194,
+    "status": "indexed",
+    "chunks": 6,
+    "error_message": null
+  },
+  {
+    "source": "test-untrusted-notes.txt",
+    "sha256": "3a9ca5b3f04554443b6a381a609c9b194703ab45062c3d31119691bab0dcefc0",
+    "seconds": 1.074,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  }
+]

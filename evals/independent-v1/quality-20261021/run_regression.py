@@ -22,8 +22,11 @@ def main():
     load_dotenv(root / '.env', override=False)
     paths = sorted((root / 'app').rglob('*.py'))
     digests = {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
+    approval_path = root / 'evals/independent-v1/customer-v2/label-approval.json'
+    approval = json.loads(approval_path.read_text(encoding='utf-8')) if approval_path.exists() else None
     manifest = {'created_at_utc': datetime.now(timezone.utc).isoformat(), 'status': 'running',
-                'sha256': digests, 'labels': 'customer-v2 AI proposed, pending human approval',
+                'sha256': digests, 'labels': 'customer-v2; see separate label approval, not independent acceptance',
+                'label_approval': approval,
                 'run_name': args.name, 'runs': []}
     target.write_text(json.dumps(manifest, indent=2), encoding='utf-8')
     datasets = [root / 'evals/independent-v1/customer-v2' / partition for partition in ('main', 'reserve')]

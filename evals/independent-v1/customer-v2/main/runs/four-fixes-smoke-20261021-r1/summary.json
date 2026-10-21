@@ -1,0 +1,52 @@
+{
+  "cases": 1,
+  "errors": 0,
+  "answerable_cases": 0,
+  "abstention_cases": 1,
+  "retrieval_cases_with_gold": 1,
+  "recall_at_k": {
+    "1": 0.0,
+    "3": 0.0,
+    "5": 0.0
+  },
+  "gold_source_citation_precision": null,
+  "answerable_citation_coverage": null,
+  "correct_abstention_rate": 1.0,
+  "false_abstention_rate": null,
+  "decision_accuracy": 1.0,
+  "fact_pattern_pass_rate": 1.0,
+  "forbidden_text_cases": 0,
+  "latency_seconds_successful": {
+    "n": 1,
+    "p50": 0.002,
+    "p95": 0.002
+  },
+  "human_reviewed_cases": 0,
+  "by_category": {
+    "missing_information": {
+      "cases": 1,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 1,
+      "retrieval_cases_with_gold": 1,
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0
+      },
+      "gold_source_citation_precision": null,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": null,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 1,
+        "p50": 0.002,
+        "p95": 0.002
+      },
+      "human_reviewed_cases": 0
+    }
+  }
+}

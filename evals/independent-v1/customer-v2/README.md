@@ -1,5 +1,13 @@
 # customer-v2 — đề xuất sửa ba nhãn
 
+## Cập nhật phê duyệt ngày 21/10/2026
+
+Người dùng dự án đã đồng ý ba đề xuất customer-024/048/051 trong hội thoại và yêu cầu xử lý tiếp bốn lỗi runtime. Phê duyệt được ghi riêng tại `label-approval.json`, gắn SHA-256 của manifest đề xuất. Chỉ phê duyệt ba thay đổi nhãn đã trình bày, không phê duyệt toàn bộ đáp án, không thay vai trò người kiểm thử độc lập và không phải nghiệm thu RAG.
+
+Manifest, trường review_status trong cases và nội dung đề xuất bên dưới giữ nguyên trạng thái tại thời điểm tạo để bảo toàn hash/bằng chứng lịch sử. Không sửa câu hỏi, corpus, nhãn hoặc số liệu các lượt cũ sau phê duyệt.
+
+## Đề xuất gốc trước phê duyệt
+
 **AI đề xuất sau khi đã xem kết quả v1; chưa có người duyệt độc lập.** Không gọi v2 là tập kín mới hoặc lấy thay điểm lịch sử v1.
 
 Giữ nguyên 60 câu, lịch sử và toàn bộ corpus. Chỉ sửa các trường trong bảng; không thay kỳ vọng ngữ nghĩa để hợp thức hóa câu trả lời sai.

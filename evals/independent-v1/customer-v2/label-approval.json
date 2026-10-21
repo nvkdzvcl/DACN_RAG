@@ -1,0 +1,11 @@
+{
+  "approved_by": "project_user",
+  "approval_date_local": "2026-10-21",
+  "timezone": "Asia/Bangkok",
+  "source": "Explicit user approval in this conversation",
+  "approved_case_ids": ["customer-024", "customer-048", "customer-051"],
+  "dataset_manifest_sha256": "bcdeaf654b366fa3c4ba991d4c3521a6f33ce4c47f5282a5f175527e5fd71605",
+  "scope": "Only the three proposed label changes in the frozen customer-v2 dataset manifest",
+  "approves_test_results": false,
+  "independent_acceptance": false
+}

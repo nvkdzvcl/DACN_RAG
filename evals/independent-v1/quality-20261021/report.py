@@ -38,8 +38,10 @@ def passed(rows):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', required=True)
+    parser.add_argument('--baseline', default='safety-final-20261021')
+    parser.add_argument('--output', type=Path, default=DIRECTORY)
     args = parser.parse_args()
-    if not re.fullmatch(r'[a-z0-9-]+', args.name):
+    if not all(re.fullmatch(r'[a-z0-9-]+', name) for name in (args.name, args.baseline)):
         raise ValueError('Invalid run name')
     runtime = read_json(DIRECTORY / (args.name + '-runtime.json'))
     datasets = [ROOT / 'evals/independent-v1/customer-v2' / part for part in ('main', 'reserve')]
@@ -47,7 +49,8 @@ def main():
     expected = [(dataset / 'runs' / args.name).relative_to(ROOT).as_posix() for dataset in datasets]
     if runtime['status'] != 'complete' or runtime['runs'] != expected:
         raise ValueError('All seven datasets must finish before reporting')
-    report = {'run_name': args.name, 'human_approved': False, 'datasets': [], 'label_comparison': []}
+    report = {'run_name': args.name, 'baseline': args.baseline, 'human_approved': False,
+              'label_approval': runtime.get('label_approval'), 'datasets': [], 'label_comparison': []}
     all_rows = []
     for dataset in datasets:
         cases = [case for case in load_cases(dataset / 'cases.jsonl') if case['split'] == 'test']
@@ -58,7 +61,8 @@ def main():
         for name, digest in manifest['sha256'].items():
             if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest:
                 raise ValueError('Frozen input changed: ' + name)
-        previous = load_run(Path(str(dataset).replace('customer-v2', 'customer-v1')), 'safety-final-20261021', cases)
+        previous_dataset = dataset if (dataset / 'runs' / args.baseline).exists() else Path(str(dataset).replace('customer-v2', 'customer-v1'))
+        previous = load_run(previous_dataset, args.baseline, cases)
         mismatches = []
         for row in rows:
             answer = row['answer'] or {}
@@ -86,21 +90,24 @@ def main():
     report['summary'] = summarize(all_rows)
     report['by_category'] = {category: summarize([row for row in all_rows if row['category'] == category])
                              for category in sorted({row['category'] for row in all_rows})}
-    for run_name in ('baseline-20261021', 'safety-final-20261021', args.name):
+    for run_name in dict.fromkeys(('baseline-20261021', 'safety-final-20261021', args.baseline, args.name)):
         scores = {}
         for version in ('customer-v1', 'customer-v2'):
             rescored = []
             for part in ('main', 'reserve'):
                 cases = load_cases(ROOT / 'evals/independent-v1' / version / part / 'cases.jsonl')
-                source_version = 'customer-v2' if run_name == args.name else 'customer-v1'
+                source_version = 'customer-v2' if (ROOT / 'evals/independent-v1/customer-v2' / part / 'runs' / run_name).exists() else 'customer-v1'
                 rescored.extend(load_run(ROOT / 'evals/independent-v1' / source_version / part, run_name, cases))
             scores[version] = passed(rescored)
         report['label_comparison'].append({'run': run_name, **scores})
     lines = ['# RAG quality regression - 2026-10-21', '',
-             '240 real Ollama cases in temporary DB/Qdrant stores, not customer data. Labels v2 are AI proposals awaiting human approval.',
+             '240 pipeline cases in temporary DB/Qdrant stores, not customer data. Ollama is used for model-dependent branches.',
+             'Three v2 label edits were approved by the project user; answers are not independently approved.' if report['label_approval'] else
+             'Labels v2 are AI proposals awaiting human approval at the time of this run.',
              'Regression only, not independent acceptance. Model unchanged; answer review remains mandatory.', '',
              '## Same-label comparison', '',
-             '| Dataset | Safety (rescored on same labels) | This run | Service errors | p50 / p95 (s) |',
+             f"Previous run: {args.baseline}.", '',
+             '| Dataset | Previous (rescored on same labels) | This run | Service errors | p50 / p95 (s) |',
              '|---|---:|---:|---:|---:|']
     for item in report['datasets']:
         summary = item['summary']
@@ -122,13 +129,14 @@ def main():
                       'Expected: ' + failure['expected'], '', 'Actual:', '',
                       (failure['answer'] or {}).get('answer', str(failure['error'])), '']
     lines += ['## Limits and next steps', '',
-              '- Human review is still required for failures and three proposed labels; human-review.jsonl remains blank.',
+              '- Independent answer review is still required; human-review.jsonl remains blank. Label-only approval is recorded separately.',
               '- Freeze code/model/corpus and thresholds before another team authors a new held-out set; these 60 cases are development data.',
               '- Regex and role-block filters cover tested patterns, not arbitrary prompt injection.',
               '- Verbatim quotes do not prove semantic correctness/completeness. One run does not prove model stability.',
               '- Interrupted quality-v1-20261021 results are excluded from final counts.', '']
-    (DIRECTORY / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    (DIRECTORY / 'KET_QUA.md').write_text('\n'.join(lines), encoding='utf-8')
+    args.output.mkdir(parents=True, exist_ok=True)
+    (args.output / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    (args.output / 'KET_QUA.md').write_text('\n'.join(lines), encoding='utf-8')
     print(json.dumps({'passed': passed(all_rows), 'cases': len(all_rows), 'errors': report['summary']['errors'],
                       'label_comparison': report['label_comparison']}, ensure_ascii=False))
 

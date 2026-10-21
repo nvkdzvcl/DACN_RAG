@@ -28,7 +28,14 @@ def main():
         revised_files = {path.name: path.read_bytes() for path in (base / 'customer-v2' / partition / 'corpus').iterdir()}
         assert original_files == revised_files
     assert changed == set(allowed) == {'customer-024', 'customer-048', 'customer-051'}
-    print('PASS: exactly three declared label edits; 60 questions and corpus unchanged; no human approval claimed.')
+    approval_path = base / 'customer-v2/label-approval.json'
+    if approval_path.exists():
+        approval = json.loads(approval_path.read_text(encoding='utf-8'))
+        assert set(approval['approved_case_ids']) == changed
+        assert approval['dataset_manifest_sha256'] == hashlib.sha256((base / 'customer-v2/dataset-manifest.json').read_bytes()).hexdigest()
+        assert approval['approved_by'] == 'project_user'
+        assert approval['independent_acceptance'] is False and approval['approves_test_results'] is False
+    print('PASS: exactly three declared label edits; 60 questions and corpus unchanged; original proposal preserved, later label approval tracked separately.')
 
 
 if __name__ == '__main__':

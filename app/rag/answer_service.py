@@ -13,6 +13,7 @@ from app.rag.vector_store import document_lock, vector_store
 ABSTENTION = "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên."
 CLARIFICATION = "Bạn đang hỏi về vấn đề nào và trong trường hợp cụ thể nào? Vui lòng nêu rõ để tôi tra đúng chính sách."
 CONFLICT = "Tài liệu có quy định mâu thuẫn cho cùng trường hợp. Tôi chưa thể xác nhận quy định áp dụng; bạn vui lòng yêu cầu nhân viên kiểm tra."
+FEE_POLICY = re.compile(r"báo (?:giá|chi phí)|(?:hoàn|trả).{0,30}(?:phí|ship)|(?:phí|ship).{0,30}(?:hoàn|trả)", re.IGNORECASE)
 INSTRUCTION = re.compile(
     r"(?i)(?:<\s*/?\s*(?:system|developer|assistant)\b|"
     r"&lt;\s*/?\s*(?:system|developer|assistant)\b|"
@@ -69,6 +70,11 @@ class AnswerReview(BaseModel):
 def clarification_prompt(query, history):
     context = " ".join([*(item['content'] for item in history if item['role'] == 'user'), query])
     context = " ".join(unicodedata.normalize('NFC', context).casefold().split())
+    current = " ".join(unicodedata.normalize('NFC', query).casefold().split())
+    if re.search(r"không (?:còn|có|rõ|biết) (?:nhãn|model|thông số)|mất (?:nhãn|tem thông số)", current) and re.search(
+            r"xác nhận|tương thích|hỗ trợ|dùng (?:được|chung)", current) and not re.search(
+            r"model\s*(?:là|:)\s*\S+|\b\d+(?:[.,]\d+)?\s*(?:w|v|a)\b", context):
+        return 'Chưa có thông số nên tôi chưa thể xác nhận tương thích. Bạn có thể cung cấp model hoặc ảnh thông số kỹ thuật để kiểm tra không?'
     # ponytail: explicit unresolved Vietnamese referents only; broader dialogue resolution needs separate evaluation.
     if re.search(r"(?:hai|các|mấy) (?:cái )?mã\b|\bmã (?:này|đó|cũ)\b|\bmã\b.{0,35}gửi nhầm", context) and not re.search(
             r"giảm giá|ưu đãi|voucher|quà tặng|mã quà|giao dịch|đơn|vận đơn|xác nhận|đăng nhập|mở khóa|otp|tủ|kiện|truy cập|sản phẩm|mã lô|mã số", context):
@@ -250,6 +256,10 @@ def review_answer(query, history, sources, answer, choice_schema, retry=False):
             "A missing requested phone number is an unresolved contact request, not an unconfirmed product specification. "
             "Keep reason under 200 characters; do not repeat the input or list all sources."
         )
+    if FEE_POLICY.search(query):
+        system += (" A mandatory prerequisite answers whether an action may happen without it; do not require a duration "
+                   "unless the customer asks how long. An explicit non-refundable fee answers a yes/no refund question "
+                   "when the customer's reason matches. Customer choosing the wrong option is not seller delivering the wrong item.")
     payload = {"SOURCES": sources, "CANDIDATE": answer.model_dump(), "HISTORY": history,
                "QUESTION": query if retry else "\n".join([*(item["content"] for item in history if item["role"] == "user"), query])}
     if len(answer.citations) > 1 and re.search(r"\bcó\b.*\bkhông\b", query, re.IGNORECASE):
@@ -283,6 +293,18 @@ def answer_question(query, top_k=5, history=None, db=None):
             return answer_question(query, top_k, history, session)
     history = [{"role": m["role"], "content": m["content"][:300]} for m in (history or [])[-4:]
                if not INSTRUCTION.search(unicodedata.normalize("NFC", m["content"]))]
+    current = " ".join(unicodedata.normalize('NFC', query).casefold().split())
+    context = unicodedata.normalize('NFC', ' '.join([*(item['content'].casefold() for item in history if item['role'] == 'user'), current]))
+    private_status = ''
+    if re.search(r"mã quà|thẻ quà|voucher|mã giảm giá", context) and re.search(r"(?:dùng|sử dụng).{0,12}chưa", current):
+        private_status = 'sử dụng mã'
+    elif re.search(r"giao dịch|thanh toán", context) and re.search(r"(?:về|nhận|thành công).{0,15}chưa", current):
+        private_status = 'thanh toán'
+    if (private_status and re.search(r"kiểm tra|tra cứu|xác nhận", current)
+            and not re.search(r"nếu|trường hợp|quy trình|chính sách|làm sao|cách nào|ở đâu", current)):
+        return {"answer": f"Tôi chưa có dữ liệu {private_status} của bạn để xác nhận. "
+                          "Bạn vui lòng yêu cầu nhân viên kiểm tra sau khi xác thực chủ sở hữu; tôi chưa thực hiện tra cứu trạng thái này.",
+                "grounded": False, "citations": [], "results": []}
     if needs_clarification(query, history):
         return {"answer": clarification_prompt(query, history) or CLARIFICATION,
                 "grounded": False, "citations": [], "results": [], "needs_clarification": True}
@@ -335,6 +357,8 @@ def answer_question(query, top_k=5, history=None, db=None):
         "Không lấy HISTORY làm chính sách. Câu khách chọn sai màu khác cửa hàng giao sai mẫu. "
         "Chọn đúng THÔNG TIN ĐƯỢC HỎI: hoàn tiền khác đổi trả, hạn gửi yêu cầu khác thời gian xử lý, "
         "mốc giao hàng khác mốc hoàn tiền. Nếu hỏi thời điểm bắt đầu hoàn tiền, chọn nguồn nói về hoàn tiền. "
+        + ("Chỉ chọn nguồn đúng lý do và điều kiện khách nêu; không thêm quy định cho tình huống khác chỉ vì cùng sản phẩm. "
+           if FEE_POLICY.search(query) else "") +
         "Ưu tiên sentence_id=1 để giữ đủ điều kiện, loại trừ, mốc bắt đầu và bước tiếp theo. "
         "Chọn câu riêng khi đoạn có ý không liên quan. Chọn tối đa 3 ID, không lặp, thường chỉ cần 1 đoạn. "
         "Chính sách phủ định hoặc thông số chưa công bố là bằng chứng hợp lệ; không cần hỏi lại nếu khách không đủ điều kiện. "

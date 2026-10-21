@@ -33,6 +33,60 @@ ACCEPT_REVIEW = {'reason': 'The cited policy supports the complete answer.', 'qu
 
 
 class RagTests(unittest.TestCase):
+    def test_fee_guidance_does_not_change_unrelated_review_prompts(self):
+        self.upload('Nhân viên báo giá trước khi sửa. Khách mang giấy tờ của chính mình.'.encode('utf-8'))
+        for query, scoped in [('Có sửa khi chưa báo giá không?', True),
+                              ('Phí gửi hàng có được hoàn không?', True),
+                              ('Người nhận hộ cần giấy tờ gì?', False),
+                              ('Chính sách xác nhận thanh toán là gì?', False)]:
+            with self.subTest(query=query), Session(self.engine) as db, patch(
+                    'app.rag.vector_store.embed', return_value=[[1.0, 0.0]]), patch(
+                    'app.rag.answer_service.chat', side_effect=[json.dumps(SELECTION), json.dumps(ACCEPT_REVIEW)]) as chat:
+                answer_question(query, db=db)
+                self.assertEqual(len(chat.call_args_list), 2)
+                self.assertEqual('Chỉ chọn nguồn đúng lý do' in chat.call_args_list[0].args[0][0]['content'], scoped)
+                self.assertEqual('A mandatory prerequisite' in chat.call_args_list[1].args[0][0]['content'], scoped)
+
+    def test_unknown_specifications_require_clarification_before_retrieval(self):
+        for query in ['Bộ nguồn mất nhãn, xác nhận dùng chung với màn hình được không?',
+                      'Không biết model, bạn xác nhận thiết bị tương thích được không?']:
+            with self.subTest(query=query), Session(self.engine) as db, patch.object(self.store, 'search') as search, patch(
+                    'app.rag.answer_service.chat') as chat:
+                result = answer_question(query, db=db)
+                self.assertTrue(result['needs_clarification'])
+                self.assertFalse(result['grounded'])
+                self.assertEqual(result['citations'], [])
+                self.assertIn('model', result['answer'])
+                search.assert_not_called()
+                chat.assert_not_called()
+        for query, history in [
+                ('Không có nhãn, xác nhận giúp tương thích không?', [{'role': 'user', 'content': 'Thông số bộ nguồn là 12 V 2 A.'}]),
+                ('Thiết bị không còn nhãn nhưng model là DEMO-X, xác nhận tương thích?', []),
+                ('Không có nhãn thì xem model ở đâu?', [])]:
+            self.assertEqual(clarification_prompt(query, history), '')
+
+    def test_live_code_status_is_not_inferred_from_policy_or_assistant_history(self):
+        for query, history in [
+                ('Kiểm tra voucher của tôi đã sử dụng chưa?', []),
+                ('Kiểm tra giao dịch GD-TEST, tiền đã về shop chưa?', []),
+                ('Xác nhận thẻ quà này đã dùng chưa?', [{'role': 'assistant', 'content': 'Mã đã được sử dụng.'}]),
+                ('Kiểm tra nó đã được dùng chưa?', [{'role': 'user', 'content': 'Tôi hỏi về mã quà gửi nhầm.'}])]:
+            with self.subTest(query=query), Session(self.engine) as db, patch.object(self.store, 'search') as search, patch(
+                    'app.rag.answer_service.chat') as chat:
+                result = answer_question(query, history=history, db=db)
+                self.assertFalse(result['grounded'])
+                self.assertEqual(result['citations'], [])
+                self.assertIn('chưa thực hiện tra cứu', result['answer'])
+                self.assertIn('xác thực', result['answer'])
+                search.assert_not_called()
+                chat.assert_not_called()
+        for query in ['Làm sao kiểm tra voucher đã dùng chưa?', 'Nếu mã quà chưa dùng thì nhân viên kiểm tra thế nào?',
+                      'Quy trình kiểm tra mã quà đã sử dụng chưa gồm gì?', 'Hồ sơ REF-X đã hoàn tiền thành công chưa?',
+                      'Quy trình kiểm tra giao dịch đã thành công chưa gồm gì?']:
+            with self.subTest(query=query), Session(self.engine) as db, patch.object(self.store, 'search', return_value=[]) as search:
+                answer_question(query, db=db)
+                search.assert_called_once()
+
     def test_unknown_customer_referents_are_clarified_without_retrieval(self):
         queries = ['Hai mã này dùng chung được không?', 'Email này đủ để em ra nhận chưa?',
                    'Em nhờ người thân làm hộ được chứ?', 'Bỏ cái đó ra thì còn được ưu đãi không?',

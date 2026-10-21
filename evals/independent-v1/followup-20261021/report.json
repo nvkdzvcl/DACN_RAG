@@ -1,0 +1,491 @@
+{
+  "run_name": "four-fixes-verified-20261021",
+  "baseline": "quality-final-20261021",
+  "human_approved": false,
+  "label_approval": {
+    "approved_by": "project_user",
+    "approval_date_local": "2026-10-21",
+    "timezone": "Asia/Bangkok",
+    "source": "Explicit user approval in this conversation",
+    "approved_case_ids": [
+      "customer-024",
+      "customer-048",
+      "customer-051"
+    ],
+    "dataset_manifest_sha256": "bcdeaf654b366fa3c4ba991d4c3521a6f33ce4c47f5282a5f175527e5fd71605",
+    "scope": "Only the three proposed label changes in the frozen customer-v2 dataset manifest",
+    "approves_test_results": false,
+    "independent_acceptance": false
+  },
+  "datasets": [
+    {
+      "dataset": "evals/independent-v1/customer-v2/main",
+      "summary": {
+        "cases": 48,
+        "errors": 0,
+        "answerable_cases": 32,
+        "abstention_cases": 16,
+        "retrieval_cases_with_gold": 47,
+        "recall_at_k": {
+          "1": 0.755319,
+          "3": 0.851064,
+          "5": 0.851064
+        },
+        "gold_source_citation_precision": 1.0,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 48,
+          "p50": 5.675,
+          "p95": 7.844
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 48,
+      "previous_passed_same_labels": 47,
+      "quote_mismatch_cases": [],
+      "gained": [
+        "customer-022"
+      ],
+      "regressed": [],
+      "failures": []
+    },
+    {
+      "dataset": "evals/independent-v1/customer-v2/reserve",
+      "summary": {
+        "cases": 12,
+        "errors": 0,
+        "answerable_cases": 7,
+        "abstention_cases": 5,
+        "retrieval_cases_with_gold": 12,
+        "recall_at_k": {
+          "1": 0.708333,
+          "3": 0.75,
+          "5": 0.75
+        },
+        "gold_source_citation_precision": 0.875,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 12,
+          "p50": 5.159,
+          "p95": 7.762
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 12,
+      "previous_passed_same_labels": 11,
+      "quote_mismatch_cases": [],
+      "gained": [
+        "customer-053"
+      ],
+      "regressed": [],
+      "failures": []
+    },
+    {
+      "dataset": "evals/rag",
+      "summary": {
+        "cases": 48,
+        "errors": 0,
+        "answerable_cases": 32,
+        "abstention_cases": 16,
+        "retrieval_cases_with_gold": 36,
+        "recall_at_k": {
+          "1": 0.944444,
+          "3": 1.0,
+          "5": 1.0
+        },
+        "gold_source_citation_precision": 0.969697,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 48,
+          "p50": 5.304,
+          "p95": 7.683
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 48,
+      "previous_passed_same_labels": 48,
+      "quote_mismatch_cases": [],
+      "gained": [],
+      "regressed": [],
+      "failures": []
+    },
+    {
+      "dataset": "evals/bt20",
+      "summary": {
+        "cases": 60,
+        "errors": 0,
+        "answerable_cases": 46,
+        "abstention_cases": 14,
+        "retrieval_cases_with_gold": 50,
+        "recall_at_k": {
+          "1": 0.886667,
+          "3": 1.0,
+          "5": 1.0
+        },
+        "gold_source_citation_precision": 0.7,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 60,
+          "p50": 6.66,
+          "p95": 9.585
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 60,
+      "previous_passed_same_labels": 60,
+      "quote_mismatch_cases": [],
+      "gained": [],
+      "regressed": [],
+      "failures": []
+    },
+    {
+      "dataset": "evals/rag-context",
+      "summary": {
+        "cases": 24,
+        "errors": 0,
+        "answerable_cases": 18,
+        "abstention_cases": 6,
+        "retrieval_cases_with_gold": 20,
+        "recall_at_k": {
+          "1": 0.9,
+          "3": 1.0,
+          "5": 1.0
+        },
+        "gold_source_citation_precision": 0.857143,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 24,
+          "p50": 5.066,
+          "p95": 7.12
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 24,
+      "previous_passed_same_labels": 22,
+      "quote_mismatch_cases": [],
+      "gained": [
+        "context-005",
+        "context-008"
+      ],
+      "regressed": [],
+      "failures": []
+    },
+    {
+      "dataset": "evals/rag-documents",
+      "summary": {
+        "cases": 24,
+        "errors": 0,
+        "answerable_cases": 14,
+        "abstention_cases": 10,
+        "retrieval_cases_with_gold": 16,
+        "recall_at_k": {
+          "1": 1.0,
+          "3": 1.0,
+          "5": 1.0
+        },
+        "gold_source_citation_precision": 0.933333,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 24,
+          "p50": 5.78,
+          "p95": 8.999
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 24,
+      "previous_passed_same_labels": 24,
+      "quote_mismatch_cases": [],
+      "gained": [],
+      "regressed": [],
+      "failures": []
+    },
+    {
+      "dataset": "evals/rag-policy",
+      "summary": {
+        "cases": 24,
+        "errors": 0,
+        "answerable_cases": 17,
+        "abstention_cases": 7,
+        "retrieval_cases_with_gold": 17,
+        "recall_at_k": {
+          "1": 0.941176,
+          "3": 1.0,
+          "5": 1.0
+        },
+        "gold_source_citation_precision": 0.894737,
+        "answerable_citation_coverage": 1.0,
+        "correct_abstention_rate": 1.0,
+        "false_abstention_rate": 0.0,
+        "decision_accuracy": 1.0,
+        "fact_pattern_pass_rate": 1.0,
+        "forbidden_text_cases": 0,
+        "latency_seconds_successful": {
+          "n": 24,
+          "p50": 5.803,
+          "p95": 9.257
+        },
+        "human_reviewed_cases": 0
+      },
+      "passed": 24,
+      "previous_passed_same_labels": 24,
+      "quote_mismatch_cases": [],
+      "gained": [],
+      "regressed": [],
+      "failures": []
+    }
+  ],
+  "label_comparison": [
+    {
+      "run": "baseline-20261021",
+      "customer-v1": 43,
+      "customer-v2": 46
+    },
+    {
+      "run": "safety-final-20261021",
+      "customer-v1": 44,
+      "customer-v2": 47
+    },
+    {
+      "run": "quality-final-20261021",
+      "customer-v1": 56,
+      "customer-v2": 58
+    },
+    {
+      "run": "four-fixes-verified-20261021",
+      "customer-v1": 58,
+      "customer-v2": 60
+    }
+  ],
+  "summary": {
+    "cases": 240,
+    "errors": 0,
+    "answerable_cases": 166,
+    "abstention_cases": 74,
+    "retrieval_cases_with_gold": 198,
+    "recall_at_k": {
+      "1": 0.87037,
+      "3": 0.949495,
+      "5": 0.949495
+    },
+    "gold_source_citation_precision": 0.853535,
+    "answerable_citation_coverage": 1.0,
+    "correct_abstention_rate": 1.0,
+    "false_abstention_rate": 0.0,
+    "decision_accuracy": 1.0,
+    "fact_pattern_pass_rate": 1.0,
+    "forbidden_text_cases": 0,
+    "latency_seconds_successful": {
+      "n": 240,
+      "p50": 5.763,
+      "p95": 9.1
+    },
+    "human_reviewed_cases": 0
+  },
+  "by_category": {
+    "ambiguous": {
+      "cases": 23,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 23,
+      "retrieval_cases_with_gold": 7,
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0
+      },
+      "gold_source_citation_precision": null,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": null,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 23,
+        "p50": 0.001,
+        "p95": 0.598
+      },
+      "human_reviewed_cases": 0
+    },
+    "answerable": {
+      "cases": 122,
+      "errors": 0,
+      "answerable_cases": 122,
+      "abstention_cases": 0,
+      "retrieval_cases_with_gold": 122,
+      "recall_at_k": {
+        "1": 0.949454,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": 0.816993,
+      "answerable_citation_coverage": 1.0,
+      "correct_abstention_rate": null,
+      "false_abstention_rate": 0.0,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 122,
+        "p50": 5.899,
+        "p95": 7.883
+      },
+      "human_reviewed_cases": 0
+    },
+    "conflict": {
+      "cases": 19,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 19,
+      "retrieval_cases_with_gold": 18,
+      "recall_at_k": {
+        "1": 0.555556,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": null,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": null,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 19,
+        "p50": 5.693,
+        "p95": 7.585
+      },
+      "human_reviewed_cases": 0
+    },
+    "followup": {
+      "cases": 27,
+      "errors": 0,
+      "answerable_cases": 27,
+      "abstention_cases": 0,
+      "retrieval_cases_with_gold": 27,
+      "recall_at_k": {
+        "1": 0.981481,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": 1.0,
+      "answerable_citation_coverage": 1.0,
+      "correct_abstention_rate": null,
+      "false_abstention_rate": 0.0,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 27,
+        "p50": 5.994,
+        "p95": 10.174
+      },
+      "human_reviewed_cases": 0
+    },
+    "injection": {
+      "cases": 23,
+      "errors": 0,
+      "answerable_cases": 16,
+      "abstention_cases": 7,
+      "retrieval_cases_with_gold": 16,
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "gold_source_citation_precision": 0.941176,
+      "answerable_citation_coverage": 1.0,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": 0.0,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 23,
+        "p50": 6.112,
+        "p95": 10.316
+      },
+      "human_reviewed_cases": 0
+    },
+    "missing_information": {
+      "cases": 8,
+      "errors": 0,
+      "answerable_cases": 1,
+      "abstention_cases": 7,
+      "retrieval_cases_with_gold": 8,
+      "recall_at_k": {
+        "1": 0.5,
+        "3": 0.625,
+        "5": 0.625
+      },
+      "gold_source_citation_precision": 1.0,
+      "answerable_citation_coverage": 1.0,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": 0.0,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 8,
+        "p50": 6.636,
+        "p95": 9.786
+      },
+      "human_reviewed_cases": 0
+    },
+    "unanswerable": {
+      "cases": 18,
+      "errors": 0,
+      "answerable_cases": 0,
+      "abstention_cases": 18,
+      "retrieval_cases_with_gold": 0,
+      "recall_at_k": {
+        "1": null,
+        "3": null,
+        "5": null
+      },
+      "gold_source_citation_precision": null,
+      "answerable_citation_coverage": null,
+      "correct_abstention_rate": 1.0,
+      "false_abstention_rate": null,
+      "decision_accuracy": 1.0,
+      "fact_pattern_pass_rate": 1.0,
+      "forbidden_text_cases": 0,
+      "latency_seconds_successful": {
+        "n": 18,
+        "p50": 2.861,
+        "p95": 8.732
+      },
+      "human_reviewed_cases": 0
+    }
+  }
+}
