@@ -1,0 +1,12 @@
+{
+  "created_at_utc": "2026-10-21T07:42:37.542717+00:00",
+  "status": "regression_running",
+  "baseline": "baseline-20261021",
+  "run_name": "safety-final-20261021",
+  "sha256": {
+    "app/rag/answer_service.py": "9cf4b40fceb27a3889e34cd6801b5f611a51c11b79cc88ea074d2b0c2f3da0fa",
+    "app/tests/test_rag.py": "2bb014013d517606489169abb6cfa8295b4e5802ca36eedcedc9cfce57fd2cb0"
+  },
+  "scope": "role-spoofing blocks and scoped direct policy opposites; no label changes; no ambiguity fix",
+  "historical_baseline_unchanged": true
+}

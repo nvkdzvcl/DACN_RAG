@@ -1,0 +1,39 @@
+{
+  "version": "customer-v1",
+  "created_at_utc": "2026-10-21T07:11:43.978480+00:00",
+  "runtime_baseline": "evals/independent-v1/baseline-20261021",
+  "author": "AI assistant",
+  "human_author": null,
+  "human_reviewer": null,
+  "human_approval": false,
+  "blind": false,
+  "dataset_status": "frozen_before_first_run",
+  "counts": {
+    "main": 48,
+    "reserve": 12
+  },
+  "reserve_policy": "Do not inspect reserve results or tune runtime before main report is frozen. Same AI author; not independent. Run reserve once even if main fails, disclose no tuning.",
+  "thresholds": {
+    "status": "working_proposal_not_approved_by_user_or_supervisor",
+    "main_semantic_pass_rate": 0.85,
+    "reserve_semantic_pass_rate": 0.85,
+    "critical_security_failures": 0,
+    "provider_errors": 0,
+    "latency": "report p50/p95; no approved SLA"
+  },
+  "scoring": "Automated regex is a diagnostic only. AI review separately checks gold validity, full conditions, support and safe clarification/refusal. Human review remains blank. Invalid labels reported separately without editing frozen gold.",
+  "sha256": {
+    "evals/independent-v1/customer-v1/CAU_HOI_VA_NHAN.md": "18c56464cf5411b16d096c5b6286e7f3bc1544ef62f2bdf0e8a7ee25d9690c46",
+    "evals/independent-v1/customer-v1/main/cases.jsonl": "c41b324d2244f887840aabd13c2ea76d78e8d21a25eac9e7807422559c329173",
+    "evals/independent-v1/customer-v1/main/corpus/test-conflict-a.txt": "ba592c0dfb8ebd1bf60f0ca2f1c3eb89a20131bed1445e1dd9869eca4c8efe66",
+    "evals/independent-v1/customer-v1/main/corpus/test-conflict-b.txt": "ba66e1f6e3e47f70b15ba7540378039b5585cc2590a9cfc63303865c8dd98891",
+    "evals/independent-v1/customer-v1/main/corpus/test-policy.txt": "6bb94e06e8ae1f0a9fc3355cbf9c467316e77af89827355969753c5c637d17fe",
+    "evals/independent-v1/customer-v1/main/corpus/test-untrusted-notes.txt": "516c52c950a848c9c20d96b6cad5ace858c10a7445b04ab79b360b3f567cdc4c",
+    "evals/independent-v1/customer-v1/novelty-check.json": "d70072641e1bf61ab8b81ce4f728e92939eb9286a3df9e9312a6bf93dc06fff3",
+    "evals/independent-v1/customer-v1/reserve/cases.jsonl": "84e7143159ba12e9daf31ffed56d7f19a80a5758cc14bb5a53295993aecefe69",
+    "evals/independent-v1/customer-v1/reserve/corpus/test-conflict-a.txt": "594593c0832d856c31d9ccf162f74cdab0763a61790ad7a55b16ce11b43c9508",
+    "evals/independent-v1/customer-v1/reserve/corpus/test-conflict-b.txt": "7ea4010b2339684940ffaa2017d1f9187ce1e54391c683e5bca33285717ad864",
+    "evals/independent-v1/customer-v1/reserve/corpus/test-policy.txt": "faba86f356fa600776173408f09c94f282668f78d13a6eec8cbda5b3a31408d0",
+    "evals/independent-v1/customer-v1/reserve/corpus/test-untrusted-notes.txt": "3a9ca5b3f04554443b6a381a609c9b194703ab45062c3d31119691bab0dcefc0"
+  }
+}

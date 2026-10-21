@@ -1,5 +1,17 @@
 # Công việc
 
+## 21/10/2026 - Hoàn tất lượt sửa an toàn và chất lượng RAG
+
+- [x] Giữ lớp chặn khối giả mạo vai trò system/developer/assistant, ID câu bị lọc và quy định đối lập trực tiếp cùng phạm vi; không bỏ kiểm định để tăng điểm.
+- [x] Hoàn tất phần đang dở: thu hẹp hỏi loại mã, hỏi rõ đối tượng chưa xác định, giữ điều kiện đứng trước câu trích trong đoạn có tiêu đề; giữ bản prompt review được chọn từ đối chứng 54 lượt đã lưu.
+- [x] Chạy 233 test backend và một test báo cáo; kiểm tra hash bộ câu gốc và phạm vi đúng ba nhãn v2 đề xuất. Không thay câu hỏi/corpus, model hoặc dữ liệu ứng dụng.
+- [x] Chạy lại 240 ca Ollama thật trong DB/Qdrant tạm: bộ 60 câu đạt 56/60 theo nhãn gốc (trước sửa chất lượng 44/60), 58/60 theo nhãn v2 đề xuất (cùng nhãn, lượt trước 47/60); 180 ca cũ đạt 178/180 (lượt trước 176/180). Không lỗi dịch vụ; 198/198 quote khớp đoạn truy hồi. Tất cả 19 ca mâu thuẫn, 23 ca chỉ dẫn giả và 23 ca mơ hồ đạt rubric trong lượt này, không phải bảo đảm tổng quát.
+- [ ] Sửa/đối chứng tiếp bốn ca: customer-022 và customer-053 trả chính sách thay làm rõ giới hạn xác nhận thông số/trạng thái riêng; context-005 và context-008 từ chối dù có nguồn. context-005 là ca thoái lui so với lượt safety; không che bằng chạy lại lấy điểm cao.
+- [ ] Nhóm kiểm thử duyệt ba nhãn customer-024/048/051, chấm thủ công đáp án và nguồn; v2 vẫn là AI đề xuất, phiếu người duyệt để trống. Cả 60 ca đã dùng phát triển, không còn là tập kín.
+- [ ] Sau sửa, chốt runtime/ngưỡng và dùng bộ kín mới do người khác soạn trước nghiệm thu; kiểm thử Telegram/SMTP đầy đủ và tải triển khai vẫn là công việc riêng. Người dùng đã báo chat Telegram và gửi SMTP thật hoạt động, chưa thay thế biên bản nghiệm thu toàn luồng.
+
+Chi tiết và bốn đáp án còn lỗi: `evals/independent-v1/quality-20261021/KET_QUA.md`; tổng kết tiếng Việt và lệnh tái lập: `evals/independent-v1/quality-20261021/README.md`. Lượt `quality-v1-20261021` bị ngắt giữ nguyên làm bằng chứng trung gian; chỉ `quality-final-20261021` dùng cho số liệu cuối. Backend đang chạy không có reload cần khởi động lại để nhận mã mới. Chưa commit/push; thay đổi sẵn ở `frontend/package-lock.json` được giữ nguyên.
+
 ## 15/10/2026 - Hồ sơ tuần 04 và Chương 3–4
 
 - [x] Hiện trạng cửa hàng giả lập được người dùng cho phép, phân biệt dữ liệu giả định với quy trình công khai tham khảo từ FPT Shop; không bịa phỏng vấn hoặc số liệu kinh doanh.

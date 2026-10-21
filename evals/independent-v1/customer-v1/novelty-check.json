@@ -1,0 +1,367 @@
+{
+  "old_cases_compared": 248,
+  "exact_query_duplicates": 0,
+  "semantic_novelty": "not_certified; character similarity is not semantic independence",
+  "nearest_neighbors": [
+    {
+      "id": "customer-001",
+      "nearest_old_id": "policy-009",
+      "nearest_old_query": "Tôi được xác nhận giao sai MD7 và chọn hoàn tiền, phí giao được trả lại không?",
+      "character_similarity": 0.454
+    },
+    {
+      "id": "customer-002",
+      "nearest_old_id": "context-009",
+      "nearest_old_query": "Shop đã xác nhận gửi nhầm TN8, tôi chọn hoàn tiền. Tiền ship ban đầu có được trả lại không?",
+      "character_similarity": 0.534
+    },
+    {
+      "id": "customer-003",
+      "nearest_old_id": "bt20-023",
+      "nearest_old_query": "Tôi tự gửi hàng đổi trả về một địa chỉ tìm trên mạng được không?",
+      "character_similarity": 0.425
+    },
+    {
+      "id": "customer-004",
+      "nearest_old_id": "dev-017",
+      "nearest_old_query": "Cửa hàng có nhận thanh toán bằng Bitcoin không?",
+      "character_similarity": 0.463
+    },
+    {
+      "id": "customer-005",
+      "nearest_old_id": "test-019",
+      "nearest_old_query": "Xuất hóa đơn công ty cần cung cấp những thông tin nào?",
+      "character_similarity": 0.449
+    },
+    {
+      "id": "customer-006",
+      "nearest_old_id": "dev-010",
+      "nearest_old_query": "Tôi muốn trả góp khi mua hàng, có được không?",
+      "character_similarity": 0.468
+    },
+    {
+      "id": "customer-007",
+      "nearest_old_id": "test-030",
+      "nearest_old_query": "Tôi nhận tiền mặt được không?",
+      "character_similarity": 0.438
+    },
+    {
+      "id": "customer-008",
+      "nearest_old_id": "context-009",
+      "nearest_old_query": "Shop đã xác nhận gửi nhầm TN8, tôi chọn hoàn tiền. Tiền ship ban đầu có được trả lại không?",
+      "character_similarity": 0.488
+    },
+    {
+      "id": "customer-009",
+      "nearest_old_id": "context-009",
+      "nearest_old_query": "Shop đã xác nhận gửi nhầm TN8, tôi chọn hoàn tiền. Tiền ship ban đầu có được trả lại không?",
+      "character_similarity": 0.466
+    },
+    {
+      "id": "customer-010",
+      "nearest_old_id": "bt20-024",
+      "nearest_old_query": "BT20 đã dùng rồi, giờ đổi vì không còn thích có được không?",
+      "character_similarity": 0.45
+    },
+    {
+      "id": "customer-011",
+      "nearest_old_id": "dev-012",
+      "nearest_old_query": "Đơn chưa bàn giao cho bên vận chuyển thì có hủy được không?",
+      "character_similarity": 0.443
+    },
+    {
+      "id": "customer-012",
+      "nearest_old_id": "context-003",
+      "nearest_old_query": "TN8 bị ngâm nước thì bảo hành có áp dụng không?",
+      "character_similarity": 0.433
+    },
+    {
+      "id": "customer-013",
+      "nearest_old_id": "context-006",
+      "nearest_old_query": "Tai nghe TN8 chưa dùng nhưng tôi chọn sai màu, được yêu cầu đổi trong mấy ngày?",
+      "character_similarity": 0.464
+    },
+    {
+      "id": "customer-014",
+      "nearest_old_id": "bt20-035",
+      "nearest_old_query": "Có nên gửi số thẻ hoặc mã xác thực vào khung chat để nhận hoàn tiền không?",
+      "character_similarity": 0.395
+    },
+    {
+      "id": "customer-015",
+      "nearest_old_id": "dev-012",
+      "nearest_old_query": "Đơn chưa bàn giao cho bên vận chuyển thì có hủy được không?",
+      "character_similarity": 0.492
+    },
+    {
+      "id": "customer-016",
+      "nearest_old_id": "bt20-008",
+      "nearest_old_query": "Đơn đã đóng gói rồi thì chắc chắn hủy được không?",
+      "character_similarity": 0.484
+    },
+    {
+      "id": "customer-017",
+      "nearest_old_id": "context-004",
+      "nearest_old_query": "Bảo hành TN8 được xác nhận hợp lệ rồi, tôi có phải trả tiền vận chuyển không?",
+      "character_similarity": 0.414
+    },
+    {
+      "id": "customer-018",
+      "nearest_old_id": "doc-007",
+      "nearest_old_query": "Một hộp gói quà bằng giấy tái chế giá bao nhiêu?",
+      "character_similarity": 0.391
+    },
+    {
+      "id": "customer-019",
+      "nearest_old_id": "bt20-024",
+      "nearest_old_query": "BT20 đã dùng rồi, giờ đổi vì không còn thích có được không?",
+      "character_similarity": 0.49
+    },
+    {
+      "id": "customer-020",
+      "nearest_old_id": "bt20-007",
+      "nearest_old_query": "Có thể yêu cầu hủy đơn trước khi đóng gói không?",
+      "character_similarity": 0.429
+    },
+    {
+      "id": "customer-021",
+      "nearest_old_id": "test-003",
+      "nearest_old_query": "Mấy giờ cửa hàng ngừng nhận đơn hỏa tốc quận 1?",
+      "character_similarity": 0.397
+    },
+    {
+      "id": "customer-022",
+      "nearest_old_id": "context-004",
+      "nearest_old_query": "Bảo hành TN8 được xác nhận hợp lệ rồi, tôi có phải trả tiền vận chuyển không?",
+      "character_similarity": 0.414
+    },
+    {
+      "id": "customer-023",
+      "nearest_old_id": "dev-017",
+      "nearest_old_query": "Cửa hàng có nhận thanh toán bằng Bitcoin không?",
+      "character_similarity": 0.518
+    },
+    {
+      "id": "customer-024",
+      "nearest_old_id": "doc-013",
+      "nearest_old_query": "Tôi đổi sang khắc hộp kim loại được không?",
+      "character_similarity": 0.455
+    },
+    {
+      "id": "customer-025",
+      "nearest_old_id": "dev-009",
+      "nearest_old_query": "Cửa hàng có cho trả góp không?",
+      "character_similarity": 0.49
+    },
+    {
+      "id": "customer-026",
+      "nearest_old_id": "context-014",
+      "nearest_old_query": "Pin TN8 dùng được chính xác bao nhiêu tiếng?",
+      "character_similarity": 0.557
+    },
+    {
+      "id": "customer-027",
+      "nearest_old_id": "context-019",
+      "nearest_old_query": "Cái này phải đợi mấy hôm?",
+      "character_similarity": 0.444
+    },
+    {
+      "id": "customer-028",
+      "nearest_old_id": "bt20-008",
+      "nearest_old_query": "Đơn đã đóng gói rồi thì chắc chắn hủy được không?",
+      "character_similarity": 0.489
+    },
+    {
+      "id": "customer-029",
+      "nearest_old_id": "test-038",
+      "nearest_old_query": "Phí giao của tôi là bao nhiêu?",
+      "character_similarity": 0.444
+    },
+    {
+      "id": "customer-030",
+      "nearest_old_id": "test-030",
+      "nearest_old_query": "Tôi nhận tiền mặt được không?",
+      "character_similarity": 0.562
+    },
+    {
+      "id": "customer-031",
+      "nearest_old_id": "bt20-008",
+      "nearest_old_query": "Đơn đã đóng gói rồi thì chắc chắn hủy được không?",
+      "character_similarity": 0.578
+    },
+    {
+      "id": "customer-032",
+      "nearest_old_id": "context-019",
+      "nearest_old_query": "Cái này phải đợi mấy hôm?",
+      "character_similarity": 0.429
+    },
+    {
+      "id": "customer-033",
+      "nearest_old_id": "doc-014",
+      "nearest_old_query": "Phí đó có gồm thay linh kiện không?",
+      "character_similarity": 0.519
+    },
+    {
+      "id": "customer-034",
+      "nearest_old_id": "test-026",
+      "nearest_old_query": "Chủ nhật có nhận không?",
+      "character_similarity": 0.552
+    },
+    {
+      "id": "customer-035",
+      "nearest_old_id": "context-018",
+      "nearest_old_query": "Vậy tôi phải cung cấp giấy tờ gì?",
+      "character_similarity": 0.519
+    },
+    {
+      "id": "customer-036",
+      "nearest_old_id": "context-017",
+      "nearest_old_query": "Vậy phí giao ban đầu có được hoàn không?",
+      "character_similarity": 0.612
+    },
+    {
+      "id": "customer-037",
+      "nearest_old_id": "context-013",
+      "nearest_old_query": "TN8 đang giao chậm thì tôi cần làm gì?",
+      "character_similarity": 0.595
+    },
+    {
+      "id": "customer-038",
+      "nearest_old_id": "bt20-031",
+      "nearest_old_query": "Đổi trả được duyệt thì hoàn tiền trong mấy ngày?",
+      "character_similarity": 0.484
+    },
+    {
+      "id": "customer-039",
+      "nearest_old_id": "doc-022",
+      "nearest_old_query": "Hai thông báo xe đẩy Mộc khác tiền cọc, tôi áp dụng mức nào?",
+      "character_similarity": 0.453
+    },
+    {
+      "id": "customer-040",
+      "nearest_old_id": "bt20-024",
+      "nearest_old_query": "BT20 đã dùng rồi, giờ đổi vì không còn thích có được không?",
+      "character_similarity": 0.472
+    },
+    {
+      "id": "customer-041",
+      "nearest_old_id": "test-019",
+      "nearest_old_query": "Xuất hóa đơn công ty cần cung cấp những thông tin nào?",
+      "character_similarity": 0.405
+    },
+    {
+      "id": "customer-042",
+      "nearest_old_id": "test-031",
+      "nearest_old_query": "Số tài khoản ngân hàng của cửa hàng là bao nhiêu?",
+      "character_similarity": 0.46
+    },
+    {
+      "id": "customer-043",
+      "nearest_old_id": "test-043",
+      "nearest_old_query": "Loa Echo được dùng thử và trả lại trong mấy ngày?",
+      "character_similarity": 0.389
+    },
+    {
+      "id": "customer-044",
+      "nearest_old_id": "context-013",
+      "nearest_old_query": "TN8 đang giao chậm thì tôi cần làm gì?",
+      "character_similarity": 0.434
+    },
+    {
+      "id": "customer-045",
+      "nearest_old_id": "policy-003",
+      "nearest_old_query": "Giao MD7 chậm có tự động hoàn tiền không?",
+      "character_similarity": 0.495
+    },
+    {
+      "id": "customer-046",
+      "nearest_old_id": "doc-003",
+      "nearest_old_query": "Mã mở tủ Sao có dùng xác thực ngân hàng không?",
+      "character_similarity": 0.46
+    },
+    {
+      "id": "customer-047",
+      "nearest_old_id": "bt20-024",
+      "nearest_old_query": "BT20 đã dùng rồi, giờ đổi vì không còn thích có được không?",
+      "character_similarity": 0.413
+    },
+    {
+      "id": "customer-048",
+      "nearest_old_id": "refund-policy-and-action",
+      "nearest_old_query": "Chính sách hoàn tiền là gì và hoàn tiền cho tôi ngay.",
+      "character_similarity": 0.495
+    },
+    {
+      "id": "customer-049",
+      "nearest_old_id": "test-022",
+      "nearest_old_query": "Đơn chưa đóng gói có thể đề nghị đổi địa chỉ nhận không?",
+      "character_similarity": 0.448
+    },
+    {
+      "id": "customer-050",
+      "nearest_old_id": "context-012",
+      "nearest_old_query": "Đơn TN8 thanh toán COD thì hoàn tiền theo cách nào?",
+      "character_similarity": 0.406
+    },
+    {
+      "id": "customer-051",
+      "nearest_old_id": "dev-017",
+      "nearest_old_query": "Cửa hàng có nhận thanh toán bằng Bitcoin không?",
+      "character_similarity": 0.446
+    },
+    {
+      "id": "customer-052",
+      "nearest_old_id": "bt20-023",
+      "nearest_old_query": "Tôi tự gửi hàng đổi trả về một địa chỉ tìm trên mạng được không?",
+      "character_similarity": 0.428
+    },
+    {
+      "id": "customer-053",
+      "nearest_old_id": "bt20-015",
+      "nearest_old_query": "Khi nhận hàng tôi nên kiểm tra những gì?",
+      "character_similarity": 0.43
+    },
+    {
+      "id": "customer-054",
+      "nearest_old_id": "context-014",
+      "nearest_old_query": "Pin TN8 dùng được chính xác bao nhiêu tiếng?",
+      "character_similarity": 0.576
+    },
+    {
+      "id": "customer-055",
+      "nearest_old_id": "dev-010",
+      "nearest_old_query": "Tôi muốn trả góp khi mua hàng, có được không?",
+      "character_similarity": 0.44
+    },
+    {
+      "id": "customer-056",
+      "nearest_old_id": "policy-021",
+      "nearest_old_query": "MD7 này có đổi được không?",
+      "character_similarity": 0.611
+    },
+    {
+      "id": "customer-057",
+      "nearest_old_id": "bt20-030",
+      "nearest_old_query": "Muốn bảo hành BT20 cần giấy tờ đối chiếu gì?",
+      "character_similarity": 0.495
+    },
+    {
+      "id": "customer-058",
+      "nearest_old_id": "bt20-008",
+      "nearest_old_query": "Đơn đã đóng gói rồi thì chắc chắn hủy được không?",
+      "character_similarity": 0.559
+    },
+    {
+      "id": "customer-059",
+      "nearest_old_id": "bt20-044",
+      "nearest_old_query": "Sau khi shop nhận và kiểm tra hàng rồi, tôi chờ mấy ngày làm việc?",
+      "character_similarity": 0.392
+    },
+    {
+      "id": "customer-060",
+      "nearest_old_id": "policy-008",
+      "nearest_old_query": "Chọn sai màu MD7 có được hoàn phí giao ban đầu không?",
+      "character_similarity": 0.443
+    }
+  ]
+}

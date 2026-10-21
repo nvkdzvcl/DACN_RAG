@@ -1,0 +1,17 @@
+{
+  "safety": {
+    "pass": 11,
+    "cases": 18,
+    "errors": 0
+  },
+  "original_review": {
+    "pass": 13,
+    "cases": 18,
+    "errors": 0
+  },
+  "clause_review": {
+    "pass": 8,
+    "cases": 18,
+    "errors": 0
+  }
+}

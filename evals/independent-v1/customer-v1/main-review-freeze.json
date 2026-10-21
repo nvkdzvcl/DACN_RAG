@@ -1,0 +1,12 @@
+{
+  "created_at_utc": "2026-10-21T07:20:20.605701+00:00",
+  "before_reserve_run": true,
+  "runtime_changes": false,
+  "sha256": {
+    "evals/independent-v1/customer-v1/ai-review-main.jsonl": "b8d6e6de974407f2bf1c592ed588b03af3a178b6c8c1cfb43de6ab5e94c954bf",
+    "evals/independent-v1/customer-v1/MAIN_REVIEW.md": "fba2433b21851bdbd16a219ab843f603f1b153c51cfda937aff00f1621d2420e",
+    "evals/independent-v1/customer-v1/main/runs/baseline-20261021/results.jsonl": "7c98a410bb8855e334af13de9cf8a7d90c7ec57b526e5a56b2aade274c90008a",
+    "evals/independent-v1/customer-v1/main/runs/baseline-20261021/summary.json": "8df153bd64cd863c59e7dd17ab4d752ed805687fa5c866bf4053342c3811292c",
+    "evals/independent-v1/customer-v1/main/runs/baseline-20261021/manifest.json": "fe758c2d2e75a80f2b5b666ac812d139ca421f3903f8cb15b1a9bac132b697af"
+  }
+}

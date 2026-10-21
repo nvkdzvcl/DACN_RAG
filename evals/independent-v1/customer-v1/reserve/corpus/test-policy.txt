@@ -1,0 +1,6 @@
+Đây là phụ lục giả lập An Nhiên Lab cho bộ giữ riêng, không phải điều khoản của doanh nghiệp thật. Không dùng phụ lục này để chỉnh prompt trước khi đo bộ chính.
+Gói bảo dưỡng định kỳ: Hủy gia hạn chỉ dừng kỳ thu phí tiếp theo, không hủy buổi bảo dưỡng đã đặt của kỳ đang sử dụng. Muốn bỏ buổi đã đặt, khách gửi yêu cầu hủy lịch riêng cho nhân viên; không coi hủy gia hạn là hoàn tiền kỳ hiện tại.
+Mã quà điện tử gửi nhầm email: Nếu mã chưa được sử dụng, chủ đơn đã xác thực yêu cầu nhân viên vô hiệu hóa mã cũ rồi phát lại tới email đúng. Nếu mã đã được sử dụng, chuyển kiểm tra riêng và không hứa phát lại. Chỉ biết email nhận không đủ quyền đổi mã.
+Hỗ trợ tiếp cận điểm nhận: Khách sử dụng xe lăn có thể yêu cầu quầy bố trí bàn giao tại sảnh tầng trệt. Khách đăng ký nhu cầu khi đặt lịch nhận; không phải cung cấp hồ sơ y tế hoặc giấy chứng nhận khuyết tật để yêu cầu hỗ trợ này.
+Đặt số lượng lớn: Đơn từ 12 sản phẩm cùng mã cần nhân viên báo giá riêng và xác nhận số lượng. Giá bán lẻ trên trang không tự động trở thành giá sỉ; tài liệu không công bố mức chiết khấu sỉ cố định.
+Phạm vi dịch vụ định kỳ: Hủy gia hạn, hủy một buổi đã đặt và yêu cầu hoàn tiền là ba thao tác khác nhau. Yêu cầu liên quan tới một mã điện tử cần xác định mã quà tặng hay mã xác nhận lịch trước khi áp dụng quy tắc.

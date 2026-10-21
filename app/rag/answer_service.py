@@ -12,12 +12,22 @@ from app.rag.vector_store import document_lock, vector_store
 
 ABSTENTION = "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên."
 CLARIFICATION = "Bạn đang hỏi về vấn đề nào và trong trường hợp cụ thể nào? Vui lòng nêu rõ để tôi tra đúng chính sách."
+CONFLICT = "Tài liệu có quy định mâu thuẫn cho cùng trường hợp. Tôi chưa thể xác nhận quy định áp dụng; bạn vui lòng yêu cầu nhân viên kiểm tra."
 INSTRUCTION = re.compile(
-    r"(?i)(?:system\s+(?:update|override)|dữ liệu không đáng tin|"
+    r"(?i)(?:<\s*/?\s*(?:system|developer|assistant)\b|"
+    r"&lt;\s*/?\s*(?:system|developer|assistant)\b|"
+    r"\[/?INST\]|<\|(?:im_start|im_end|start_header_id|end_header_id)\|>|"
+    r"system\s+(?:update|override)|dữ liệu không đáng tin|"
     r"\b(?:bỏ qua|phớt lờ|ignore|disregard)\b[^.!?\n]{0,160}"
     r"\b(?:chỉ dẫn|hướng dẫn|quy tắc|hệ thống|câu hỏi|instructions?|rules?|system|prompts?|questions?)\b|"
     r"\b(?:trợ lý|chatbot|assistant|AI)\b[^.!?\n]{0,100}\b(?:phải|hãy|must|should)\b|"
     r"bỏ nguồn|(?:luôn|mọi)\s+(?:trả lời|đáp án)|chế độ quản trị)"
+)
+ROLE_BLOCK = re.compile(
+    r"(?is)(?:<\s*(system|developer|assistant)\b[^>]*>.*?(?:<\s*/\s*\1\s*>|$)|"
+    r"&lt;\s*(system|developer|assistant)\b.*?&gt;.*?(?:&lt;\s*/\s*\2\s*&gt;|$)|"
+    r"\[INST\].*?(?:\[/INST\]|$)|<\|im_start\|>.*?(?:<\|im_end\|>|$)|"
+    r"<\|start_header_id\|>.*?(?:<\|eot_id\|>|$))"
 )
 
 
@@ -56,7 +66,28 @@ class AnswerReview(BaseModel):
     needs_clarification: bool
     repair_citations: list[SentenceChoice] = Field(max_length=3)
 
+def clarification_prompt(query, history):
+    context = " ".join([*(item['content'] for item in history if item['role'] == 'user'), query])
+    context = " ".join(unicodedata.normalize('NFC', context).casefold().split())
+    # ponytail: explicit unresolved Vietnamese referents only; broader dialogue resolution needs separate evaluation.
+    if re.search(r"(?:hai|các|mấy) (?:cái )?mã\b|\bmã (?:này|đó|cũ)\b|\bmã\b.{0,35}gửi nhầm", context) and not re.search(
+            r"giảm giá|ưu đãi|voucher|quà tặng|mã quà|giao dịch|đơn|vận đơn|xác nhận|đăng nhập|mở khóa|otp|tủ|kiện|truy cập|sản phẩm|mã lô|mã số", context):
+        return 'Bạn đang nói tới mã giảm giá, thẻ quà tặng hay loại mã nào khác? Mã đó đã được sử dụng chưa?'
+    if re.search(r"email|thư này", context) and re.search(r"ra (?:lấy|nhận)|đến (?:lấy|nhận)", context) and not re.search(
+            r"sẵn sàng|đặt hàng|đặt đơn|xác nhận|nhận hộ", context):
+        return 'Email bạn nhận là xác nhận đặt hàng hay thông báo sẵn sàng nhận hàng tại quầy?'
+    if re.search(r"(?:làm|thực hiện) hộ", context) and not re.search(
+            r"nhận hàng|thanh toán|tài khoản|hoàn tiền|lấy hàng|đặt hàng", context):
+        return 'Bạn muốn người nhà nhận hàng, thanh toán hay thực hiện thao tác nào hộ?'
+    if re.search(r"cái (?:này|đó)|gói này|khoản (?:bị trừ|trừ) này", context) and not re.search(
+            r"sản phẩm|thiết bị|đơn|thanh toán|ngân hàng|thẻ|chuyển khoản|hóa đơn|bảo hành|bảo dưỡng|gia hạn|"
+            r"lịch|phí giao|tiền ship|giao hàng|quà tặng|mã giảm giá|đổi trả|hoàn tiền", context):
+        return 'Bạn đang nói tới sản phẩm, giao dịch hay dịch vụ nào? Bạn muốn kiểm tra hoặc thay đổi điều gì?'
+    return ''
+
 def needs_clarification(query, history, sources=()):
+    if clarification_prompt(query, history):
+        return True
     current = " ".join(unicodedata.normalize("NFC", query).casefold().split())
     context = " ".join([*(item["content"] for item in history if item["role"] == "user"), query])
     context = " ".join(unicodedata.normalize("NFC", context).casefold().split())
@@ -95,7 +126,7 @@ def needs_clarification(query, history, sources=()):
 
 def source_sentences(text):
     parts = re.split(r"(?<=[.!?])\s+", text)
-    scoped = re.match(r"^\*\*[^*]+:\*\*", text) is not None
+    scoped = re.match(r"^(?:\*\*)?[^.!?:\n]{1,80}:(?:\*\*)?\s", text) is not None
     # ponytail: explicit paragraph scopes and anaphora only; broader coreference needs independently evaluated parsing.
     return [" ".join(parts[:index + 1]) if scoped or re.match(
         r"(?i)^(trường hợp (này|đó)|khi đó|sau đó|điều này|đây là|this (case|condition)|in (this|that) case)\b", part) or re.search(
@@ -114,6 +145,18 @@ def unresolved_notices(text):
     for number, unit in re.findall(r"\b(\d[\d.,]*)\s*(đồng|tháng|ngày|giờ)\b", text):
         values.setdefault(unit, set()).add(number)
     return any(len(numbers) > 1 for numbers in values.values())
+
+def opposing_policy(evidence, texts):
+    # ponytail: exact scoped permission opposites only; semantic conflicts still require model/human review.
+    def clauses(text):
+        for sentence in re.split(r"(?<=[.!?])\s+", unicodedata.normalize("NFC", text).casefold()):
+            sentence = re.sub(r"\[\d+\]\s*", "", sentence).strip().rstrip(".!?")
+            if ":" not in sentence or re.search(r"thay thế|ưu tiên|ngoại lệ|trước ngày|từ ngày", sentence):
+                continue
+            positive = re.sub(r"\bkhông\s+(?=được\b|cho phép\b|bao gồm\b|áp dụng\b)", "", sentence)
+            yield " ".join(positive.split()), positive != sentence
+    selected = {clause for item in evidence for clause in clauses(item.quote)}
+    return any((key, not negative) in selected for text in texts for key, negative in clauses(text))
 
 def render_answer(query, evidence):
     answer = "\n\n".join(item.quote for item in evidence)
@@ -241,7 +284,8 @@ def answer_question(query, top_k=5, history=None, db=None):
     history = [{"role": m["role"], "content": m["content"][:300]} for m in (history or [])[-4:]
                if not INSTRUCTION.search(unicodedata.normalize("NFC", m["content"]))]
     if needs_clarification(query, history):
-        return {"answer": CLARIFICATION, "grounded": False, "citations": [], "results": [], "needs_clarification": True}
+        return {"answer": clarification_prompt(query, history) or CLARIFICATION,
+                "grounded": False, "citations": [], "results": [], "needs_clarification": True}
     # History helps resolve follow-up subjects; it is never evidence for policy facts.
     previous = " ".join(m["content"][:240] for m in history if m["role"] == "user")
     results = vector_store.search((previous + "\n" + query).strip(), top_k, db)
@@ -256,16 +300,25 @@ def answer_question(query, top_k=5, history=None, db=None):
     if bank_request and not any(bank_number.search(source["text"]) for source in sources):
         return fallback
     sentences = [[source["text"], *re.split(r"(?<=[.!?])\s+", source["text"])] for source in sources]
-    for parts in sentences:
+    choices = []
+    for source_id, parts in enumerate(sentences, 1):
+        blocked = [match.span() for match in ROLE_BLOCK.finditer(parts[0])]
+        unsafe = set()
+        offset = 0
+        for sentence_id, part in enumerate(parts[1:], 2):
+            start = parts[0].find(part, offset)
+            offset = start + len(part)
+            if INSTRUCTION.search(unicodedata.normalize("NFC", part)) or any(
+                    start < end and offset > begin for begin, end in blocked):
+                unsafe.add(sentence_id)
         clean_prefix = []
-        for part in parts[1:]:
-            if INSTRUCTION.search(unicodedata.normalize("NFC", part)):
+        for sentence_id, part in enumerate(parts[1:], 2):
+            if sentence_id in unsafe:
                 break
             clean_prefix.append(part)
         parts[0] = " ".join(clean_prefix)
-    choices = [{"source_id": i + 1, "sentences": [{"sentence_id": j + 1, "text": text}
-               for j, text in enumerate(parts) if text and not INSTRUCTION.search(unicodedata.normalize("NFC", text))]}
-               for i, parts in enumerate(sentences)]
+        choices.append({"source_id": source_id, "sentences": [{"sentence_id": sentence_id, "text": text}
+                        for sentence_id, text in enumerate(parts, 1) if text and sentence_id not in unsafe]})
     for source, choice in zip(sources, choices):
         source["text"] = " ".join(f"[{part['sentence_id']}] {part['text']}" for part in choice["sentences"] if part['sentence_id'] != 1)
     if needs_clarification(query, history, sources):
@@ -349,12 +402,15 @@ def answer_question(query, top_k=5, history=None, db=None):
         answer = GroundedAnswer(supported=bool(evidence), answer=render_answer(query, evidence), citations=evidence)
         if bank_request and not bank_number.search(answer.answer):
             return fallback
-        if any(unresolved_notices(item.quote) for item in evidence):
-            return fallback
+        if any(unresolved_notices(item.quote) for item in evidence) or opposing_policy(
+                evidence, [source['text'] for source in sources]):
+            return fallback | {"answer": CONFLICT}
         if re.search(r"số điện thoại|hotline|phone number", query, re.IGNORECASE) and not re.search(
                 r"(?:\d[ .()-]*){6,}", answer.answer):
             return fallback
         review = review_answer(query, history, sources, answer, schema["$defs"]["SentenceChoice"], retry=semantic_retry)
+        if review and not review.sources_consistent:
+            return fallback if review.needs_clarification else fallback | {"answer": CONFLICT}
         if review and any((item.source_id, item.sentence_id) not in allowed for item in review.repair_citations):
             return fallback
         repair_sources = {item.source_id for item in review.repair_citations} if review else set()
