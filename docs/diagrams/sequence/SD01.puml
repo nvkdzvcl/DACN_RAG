@@ -1,39 +1,52 @@
 @startuml
+autonumber
 skinparam monochrome true
 skinparam defaultFontName Arial
-title Hỏi chính sách và kiểm tra AI lỗi thời
-participant "Widget\n(Client)" as UI
-participant "WidgetController\n(Controller)" as C
-participant "MessageService\n(Service)" as M
-participant "RAGService\n(Service)" as R
-participant "SQLite\n(Database)" as DB
-participant "Ollama\n(Local API)" as O
-participant "Qdrant\n(Vector store)" as Q
-UI -> C: 1. Gửi câu hỏi và UUID; phiên/CSRF/rate limit
-C -> M: 2. process_message sau khi có slot AI
-M -> DB: 3. Khóa ghi; kiểm tra UUID; lưu tin; COMMIT
-M -> R: 4. answer_question với lịch sử đúng hội thoại
-R -> DB: 5. Đọc phiên bản indexed; COMMIT
-R -> O: 6. Embedding câu hỏi
-R -> Q: 7. Truy hồi theo phiên bản được phép
-R -> O: 8. Chọn ID bằng chứng và kiểm định có giới hạn
-alt [ProviderError]
-R --> M: 9. Lỗi provider; tin khách đã lưu
-M --> C: 10. ai_error; giữ tin khách
-else [Có đáp án hoặc từ chối có kiểm soát]
-R --> M: 11. Ứng viên, citations, reviewed_sources
-critical [Kiểm tra lại sau model]
-note over UI, Q
-document_lock khi có đáp án; transaction ghi SQLite ngắn
-end note
-M -> DB: 12. Đọc lại status, tin cuối và nguồn hiện tại
-alt [open; đúng tin cuối; nguồn hợp lệ]
-M -> DB: 13. Lưu AI + reply_to_id; COMMIT
-else [Handoff, tin mới hoặc nguồn đổi]
-M -> DB: 14. Bỏ AI cũ; COMMIT, giữ lịch sử
+
+title Hỏi đáp RAG và Kiểm định nguồn (SD01)
+
+actor "Khách hàng / Widget" as Customer
+participant "WidgetController" as Ctrl
+participant "MessageService" as MsgSvc
+participant "RAGService" as RAG
+participant "Qdrant\n(Vector Store)" as Vec
+participant "Local API\nOllama" as LLM
+participant "SQLite\n(Relational DB)" as DB
+
+Customer -> Ctrl: POST /api/v1/widget/messages (content, client_message_id)
+Ctrl -> MsgSvc: process_message()
+
+group Lưu tin khách trước khi gọi AI (Chống mất dữ liệu)
+    MsgSvc -> DB: Kiểm tra UUID & INSERT Message (sender_type='customer')
+    DB --> MsgSvc: COMMIT
 end
+
+group Truy xuất Vector & Sinh câu trả lời có kiểm định
+    MsgSvc -> RAG: answer_question(query, history)
+    RAG -> Vec: Embedding câu hỏi & Truy xuất Qdrant (ngưỡng score >= 0.35)
+    Vec --> RAG: Trả danh sách ứng viên (sentence_id, text, score)
+    alt Không tìm thấy đoạn nào đạt ngưỡng score >= 0.35
+        RAG --> MsgSvc: Từ chối trả lời (Không đủ bằng chứng trong kho tri thức)
+    else Có đoạn ứng viên đạt yêu cầu
+        RAG -> LLM: Gọi sinh đáp án (Ràng buộc JSON Schema chỉ chọn ID câu thực tế)
+        LLM --> RAG: Trả về ID câu nguồn đã chọn
+        RAG -> RAG: Backend kiểm định: Xác minh ID nguyên văn & Kiểm tra mâu thuẫn
+    end
 end
-M --> C: 15. Kết quả đã lọc thông tin nội bộ
+
+group Kiểm tra trạng thái lại trước khi lưu đáp án
+    MsgSvc -> DB: Đọc lại status hội thoại, tin nhắn cuối & index_version tài liệu
+    alt Hội thoại vẫn OPEN và nguồn chưa bị xóa/thay đổi
+        MsgSvc -> DB: INSERT Message (sender_type='ai', citations)
+        DB --> MsgSvc: COMMIT
+        MsgSvc --> Ctrl: Trả về Snapshot hội thoại kèm tin AI & Dẫn nguồn
+        Ctrl --> Customer: HTTP 200 OK (Đáp án + Citations)
+    else Hội thoại đã HANDOFF sang nhân viên / Nguồn tài liệu đã đổi
+        MsgSvc -> MsgSvc: Bỏ đáp án AI cũ, giữ nguyên lịch sử hiện tại
+        MsgSvc --> Ctrl: Trả về trạng thái chờ nhân viên / bỏ qua AI
+        Ctrl --> Customer: HTTP 200 OK (Không kèm tin AI cũ)
+    else Lỗi Provider Ollama / Timeout
+        MsgSvc --> Ctrl: Trả về ai_error=true (Giữ nguyên tin khách đã lưu)
+        Ctrl --> Customer: HTTP 200 OK (ai_error: true)
+    end
 end
-C --> UI: 16. Snapshot hoặc lỗi; giải phóng slot
-@enduml
