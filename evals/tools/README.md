@@ -1,5 +1,11 @@
 # Đánh giá điều phối công cụ M5
 
+## Cập nhật 22/10/2026
+
+Hồi quy 44 ca từ 42/44 lên 44/44 sau sửa hai mẫu trung tính/phủ định; không lỗi dịch vụ, không marker riêng bị lộ hay đơn bị sửa quan sát được. Ba test tích hợp backend với RAG/selector thật đạt; vòng đời handoff thử cho channel website/telegram nhưng không gửi Bot API hoặc chạy trình duyệt. Nhãn vẫn chờ người duyệt; chưa nghiệm thu độc lập/toàn kênh. Chi tiết, giới hạn tóm tắt và phiếu duyệt mới tại [KET_QUA_20261022.md](KET_QUA_20261022.md).
+
+## Lịch sử 26/09/2026
+
 Ngày đo: 26/09/2026. Bộ 24 ca giả lập, tám ca biên nối tiếp và 12 ca ngữ cảnh có nhãn nháp, chưa được người duyệt. Đây là tập phát triển/regression đã dùng chỉnh prompt và luồng điều phối, không phải tập đánh giá độc lập hoặc nghiệm thu M5. Kết quả mới nhất: 24/24, 8/8 và 10/12; hai cách nói tự do vẫn chuyển nhân viên nhầm.
 
 ## Chạy phép đo

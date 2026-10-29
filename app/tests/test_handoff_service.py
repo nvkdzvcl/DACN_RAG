@@ -26,6 +26,10 @@ class HandoffServiceTests(unittest.TestCase):
                 'Điều kiện hoàn tiền theo chính sách cửa hàng là gì?',
                 'Cho tôi hỏi chính sách hoàn tiền của cửa hàng như thế nào?',
                 'Quy trình hoàn tiền ra sao?', 'Chính sách hoàn tiền?',
+                'Mình chỉ hỏi về chính sách hoàn tiền của cửa hàng thôi.',
+                'Em chỉ muốn biết quy trình hoàn tiền của shop.',
+                'Hiện tại tôi chưa cần gặp nhân viên, tra DH78216 giúp tôi.',
+                'Bây giờ mình không muốn gặp người thật.',
                 'Không cần gặp nhân viên, chỉ kiểm tra trạng thái DH78216.',
                 'Mình chưa muốn nói chuyện với người thật.',
                 'Xin chào; tôi không muốn gặp người thật.'):
@@ -47,6 +51,10 @@ class HandoffServiceTests(unittest.TestCase):
                 'Tôi không cần hỏi chính sách, hoàn tiền ngay.',
                 'Chính sách hoàn tiền cho tôi ngay là gì?',
                 'Tôi muốn hoàn tiền theo chính sách cửa hàng.',
+                'Mình chỉ hỏi về chính sách hoàn tiền của cửa hàng thôi. Hoàn tiền cho tôi ngay.',
+                'Mình chỉ hỏi chính sách hoàn tiền và muốn hoàn tiền ngay.',
+                'Hiện tại tôi chưa cần gặp nhân viên, nhưng dịch vụ tệ!',
+                'Không phải hiện tại tôi chưa cần gặp nhân viên.',
                 'Hoàn tiền', 'Gặp nhân viên', 'Người thật'):
             with self.subTest(content=content):
                 self.assertEqual(classify_message(content), ('negative', True))

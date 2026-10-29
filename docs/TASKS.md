@@ -1,5 +1,16 @@
 # Công việc
 
+## 22/10/2026 - Kiểm thử tool calling và handoff
+
+- [x] Chạy baseline ba bộ 44 ca: 42/44; sửa hai ca chuyển nhân viên nhầm khi chỉ hỏi chính sách hoàn tiền hoặc phủ định có tiền tố thời gian. Giữ kiểm tra câu hỗn hợp, phủ định kép và quyền đơn; không sửa nhãn/câu hỏi.
+- [x] Lượt final đạt 44/44 với selector thật, 0 lỗi dịch vụ, 0 marker riêng bị lộ hoặc đơn bị sửa quan sát được; nhánh RAG trong bộ điều phối vẫn stub, không gọi là toàn luồng.
+- [x] Bổ sung ba test tích hợp backend trong SQLite/Qdrant tạm: RAG/embedding thật, lookup chủ đơn/đơn người khác, yêu cầu hủy chỉ handoff, vòng đời ticket và API nhân viên cho channel website/telegram; bot im lặng khi chờ/đã phân công; hoàn tất, idempotency, tin mới và reentry; phục hồi handoff sau lỗi model. Cả ba đạt. Không gọi Telegram thật; dependency staff dùng fixture.
+- [x] 236 test backend đạt; 18 test tập trung đạt; snapshot source và summary của các lượt final khớp mã/kết quả lưu. Tạo phiếu duyệt JSON/HTML trống cho cả 44 ca.
+- [ ] Nhóm kiểm thử duyệt nhãn, đáp án và chất lượng bàn giao; tóm tắt hiện chỉ trích tám tin gần nhất, mỗi tin 400 ký tự, không tự cập nhật khi có tin bổ sung vào ticket đang mở. Nhân viên đọc hội thoại đầy đủ; chưa có chấm độc lập độ đủ/đúng của tóm tắt.
+- [ ] Kiểm thử Website/Telegram thật hai khách/hai nhân viên, giao nhận, mất mạng/restart và hội thoại mới sau closed; bộ kín mới và người duyệt trước khi đóng nghiệm thu. Chưa đánh dấu nghiệm thu tool/handoff hoàn tất.
+
+Chi tiết, cách tái lập và giới hạn: `evals/tools/KET_QUA_20261022.md`. Chưa commit/push trong lượt này; giữ thay đổi có sẵn ở frontend/package-lock.json, chưa restart backend không có reload.
+
 ## 21/10/2026 - Sửa xong bốn ca RAG còn lỗi
 
 - [x] Người dùng đã duyệt ba thay đổi nhãn customer-024/048/051; lưu phê duyệt riêng gắn hash manifest, giữ nguyên nhãn/corpus/bằng chứng lịch sử. Không coi đây là người duyệt độc lập hoặc nghiệm thu toàn bộ đáp án.

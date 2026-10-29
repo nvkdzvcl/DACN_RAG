@@ -5,8 +5,11 @@ COMPLAINT_TERMS = ("khiếu nại", "bức xúc", "tệ", "lừa đảo", "hoàn
 COMPLAINT_PATTERN = re.compile(r'(?<!\w)(?:' + '|'.join(map(re.escape, COMPLAINT_TERMS)) + r')(?!\w)')
 NEUTRAL_CONTEXT_PATTERN = re.compile(
     r'(?<!\w)tiền tệ(?!\w)|'
-    r'(?:^|[.!?;,] )(?:(?:tôi|mình|em) )?(?:không|chưa) (?:cần|muốn) '
+    r'(?:^|[.!?;,] )(?:(?:hiện tại|bây giờ|lúc này) )?(?:(?:tôi|mình|em) )?(?:không|chưa) (?:cần|muốn) '
     r'(?:gặp nhân viên|(?:gặp |nói chuyện với )?người thật)(?!\w)|'
+    r'(?:^|[.!?;,] )(?:(?:tôi|mình|em) )?chỉ (?:hỏi|muốn biết)(?: về)? '
+    r'(?:điều kiện|chính sách|quy định|quy trình|thủ tục) hoàn tiền'
+    r'(?: của (?:cửa hàng|shop))?(?: thôi)?(?=\s*(?:[.!?;,]|$))|'
     r'(?<!\w)(?:điều kiện|chính sách|quy định|quy trình|thủ tục) hoàn tiền'
     r'(?=\s*\?| (?:theo (?:chính sách|quy định)(?: cửa hàng)? |của (?:cửa hàng|shop) )?'
     r'(?:là gì|như thế nào|thế nào|ra sao)(?!\w))')

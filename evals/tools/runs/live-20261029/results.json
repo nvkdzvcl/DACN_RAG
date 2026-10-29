@@ -1,0 +1,348 @@
+[
+  {
+    "test": "__main__.LiveFlowTests.test_provider_failure_keeps_customer_message_and_allows_handoff",
+    "conversation": "failure",
+    "query": "Tôi muốn gặp nhân viên.",
+    "result": {
+      "message_id": "dc04c654-2849-431b-8a86-e5b0475588f5",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "negative",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.03303809999488294
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "website",
+    "query": "Giao hàng tiêu chuẩn trong bao lâu?",
+    "result": {
+      "message_id": "3af45e45-3676-4da5-a056-9415a338f5b1",
+      "ai_message_id": "85c7a8fa-9187-405f-b041-f825ae7ee022",
+      "status": "open",
+      "sentiment": "neutral",
+      "needs_handoff": false,
+      "order_lookup": null,
+      "rag": {
+        "answer": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11_0000",
+            "document_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11",
+            "index_version": "0a5923c7-4a70-480f-a34e-6bb3d2680154",
+            "source": "policy.txt",
+            "score": 0.59162,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11_0000",
+            "document_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11",
+            "index_version": "0a5923c7-4a70-480f-a34e-6bb3d2680154",
+            "content": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.59162
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11",
+            "index_version": "0a5923c7-4a70-480f-a34e-6bb3d2680154"
+          }
+        ]
+      },
+      "ai_error": null
+    },
+    "answer": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.",
+    "seconds": 53.50228139990941
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "website",
+    "query": "Giao hàng tiêu chuẩn trong bao lâu?",
+    "result": {
+      "message_id": "3af45e45-3676-4da5-a056-9415a338f5b1",
+      "status": "open",
+      "duplicate": true
+    },
+    "answer": null,
+    "seconds": 0.012844699900597334
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "website",
+    "query": "Tôi cần gặp nhân viên, đơn chưa giao.",
+    "result": {
+      "message_id": "dfd15c31-6e0c-4099-83c9-af3aa8372da1",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "negative",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.019574300153180957
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "website",
+    "query": "Bổ sung: vui lòng gọi lại sau.",
+    "result": {
+      "message_id": "4c7099c4-2204-45ed-8df4-e469ceb22c21",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.013639899902045727
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "channel": "website",
+    "summary": "customer: Giao hàng tiêu chuẩn trong bao lâu?\nai: Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.\ncustomer: Tôi cần gặp nhân viên, đơn chưa giao."
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "website",
+    "query": "Cảm ơn, đây là thông tin bổ sung.",
+    "result": {
+      "message_id": "dfd8710c-3670-469b-a4a6-9ab301ad2483",
+      "ai_message_id": null,
+      "status": "assigned",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.021873800083994865
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "website",
+    "query": "Tôi cần hỗ trợ thêm.",
+    "result": {
+      "message_id": "c871d28a-e1ba-4c9e-a25b-0a8587b1b2ec",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.015441899886354804
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "telegram",
+    "query": "Giao hàng tiêu chuẩn trong bao lâu?",
+    "result": {
+      "message_id": "05d69ef2-0521-4ef3-b001-f8929845cdd9",
+      "ai_message_id": "48bacb9c-c91a-4906-b82c-dbcfab02ae49",
+      "status": "open",
+      "sentiment": "neutral",
+      "needs_handoff": false,
+      "order_lookup": null,
+      "rag": {
+        "answer": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.",
+        "grounded": true,
+        "citations": [
+          {
+            "chunk_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11_0000",
+            "document_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11",
+            "index_version": "0a5923c7-4a70-480f-a34e-6bb3d2680154",
+            "source": "policy.txt",
+            "score": 0.59162,
+            "page": null,
+            "location": "Dòng 1",
+            "quote": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn."
+          }
+        ],
+        "results": [
+          {
+            "chunk_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11_0000",
+            "document_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11",
+            "index_version": "0a5923c7-4a70-480f-a34e-6bb3d2680154",
+            "content": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.",
+            "source": "policy.txt",
+            "page": null,
+            "location": "Dòng 1",
+            "score": 0.59162
+          }
+        ],
+        "reviewed_sources": [
+          {
+            "document_id": "591d0e2a-51cb-4b1f-b6b1-2859a1a40e11",
+            "index_version": "0a5923c7-4a70-480f-a34e-6bb3d2680154"
+          }
+        ]
+      },
+      "ai_error": null
+    },
+    "answer": "Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.",
+    "seconds": 5.040577500127256
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "telegram",
+    "query": "Giao hàng tiêu chuẩn trong bao lâu?",
+    "result": {
+      "message_id": "05d69ef2-0521-4ef3-b001-f8929845cdd9",
+      "status": "open",
+      "duplicate": true
+    },
+    "answer": null,
+    "seconds": 0.004569000098854303
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "telegram",
+    "query": "Tôi cần gặp nhân viên, đơn chưa giao.",
+    "result": {
+      "message_id": "f9ca8b05-b871-4251-99b2-21c488026ef8",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "negative",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.02088620001450181
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "telegram",
+    "query": "Bổ sung: vui lòng gọi lại sau.",
+    "result": {
+      "message_id": "66cdf41a-f91e-42b9-a6b7-c477df27cfd4",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.013278900180011988
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "channel": "telegram",
+    "summary": "customer: Giao hàng tiêu chuẩn trong bao lâu?\nai: Chính sách giao hàng thử nghiệm: Giao hàng tiêu chuẩn trong 3 ngày làm việc kể từ khi xác nhận đơn.\ncustomer: Tôi cần gặp nhân viên, đơn chưa giao."
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "telegram",
+    "query": "Cảm ơn, đây là thông tin bổ sung.",
+    "result": {
+      "message_id": "7f1f96f1-8766-44f3-a751-ae651a0b76e9",
+      "ai_message_id": null,
+      "status": "assigned",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.013055700110271573
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_rag_handoff_agent_completion_and_reentry",
+    "conversation": "telegram",
+    "query": "Tôi cần hỗ trợ thêm.",
+    "result": {
+      "message_id": "cf811692-adc6-4193-b572-09df2ef74c55",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 0.0198212000541389
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_real_selector_permissions_and_no_order_mutation",
+    "conversation": "owned",
+    "query": "Tra trạng thái đơn DH78216",
+    "result": {
+      "message_id": "80f29f2f-af4b-4a1c-b7ae-52486bd1e795",
+      "ai_message_id": "e784b73d-10ff-454b-bd7b-3c4432c1a988",
+      "status": "open",
+      "sentiment": "neutral",
+      "needs_handoff": false,
+      "order_lookup": {
+        "found": true,
+        "order_id": "DH78216",
+        "status": "shipped",
+        "tracking_code": "OWN-TRACK"
+      },
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": "Đơn hàng DH78216: shipped. Mã vận đơn: OWN-TRACK.",
+    "seconds": 1.290509699843824
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_real_selector_permissions_and_no_order_mutation",
+    "conversation": "foreign",
+    "query": "Tra trạng thái đơn ORD-93427",
+    "result": {
+      "message_id": "a462f2af-ea2a-4bc0-ab9d-58a477b4cfca",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": {
+        "found": false,
+        "reason": "order_not_found_or_not_owned"
+      },
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 1.181382399983704
+  },
+  {
+    "test": "__main__.LiveFlowTests.test_real_selector_permissions_and_no_order_mutation",
+    "conversation": "cancel",
+    "query": "Tra DH78216, nếu chưa giao thì hủy giúp tôi.",
+    "result": {
+      "message_id": "e14bcc63-afd7-4af6-970e-6862f4772aaa",
+      "ai_message_id": null,
+      "status": "handoff_requested",
+      "sentiment": "neutral",
+      "needs_handoff": true,
+      "order_lookup": null,
+      "rag": null,
+      "ai_error": null
+    },
+    "answer": null,
+    "seconds": 1.209018100053072
+  }
+]

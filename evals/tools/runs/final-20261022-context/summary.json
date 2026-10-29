@@ -1,0 +1,19 @@
+{
+  "cases": 12,
+  "passed": 12,
+  "accuracy_against_draft_labels": 1.0,
+  "errors": 0,
+  "private_data_leaks": 0,
+  "order_mutations": 0,
+  "selector_calls": 3,
+  "failed_ids": [],
+  "routing_seconds_median": 0.017,
+  "by_category": {
+    "handoff-context": {
+      "n": 12,
+      "passed": 12
+    }
+  },
+  "human_reviewed_cases": 0,
+  "rag_is_stubbed": true
+}
