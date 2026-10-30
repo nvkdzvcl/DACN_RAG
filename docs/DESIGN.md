@@ -91,20 +91,20 @@ Khi hội thoại còn mở và có đúng một mã đơn, model chọn lookup_
 
 ## Use Case và quyền
 
-| ID | Tác nhân | Mục tiêu | Điều kiện và kết quả |
-|---|---|---|---|
-| UC01 | Admin | Cấp tài khoản | Đã đăng nhập; username duy nhất, mật khẩu ít nhất 12 ký tự |
-| UC02 | Admin, agent | Đăng nhập, đăng xuất | Tài khoản hoạt động; phiên nhân viên tối đa 8 giờ |
-| UC03 | Khách | Bắt đầu, khôi phục, kết thúc chat | Phiên khách tối đa 24 giờ, chỉ một hội thoại; không xác minh chủ đơn |
-| UC04 | Khách | Hỏi chính sách có nguồn | Hội thoại open; tin lưu trước model; thiếu bằng chứng trả từ chối |
-| UC05 | Admin | Quản lý tài liệu | Tải/lập chỉ mục lại/xóa; staff được xem tài liệu, đoạn nguồn và hỏi thử |
-| UC06 | Khách, staff | Chuyển nhân viên | Ticket hoạt động được tái sử dụng; AI ngừng trả lời |
-| UC07 | Admin, agent | Tiếp nhận | Hội thoại đang chờ, chưa có người phụ trách; tranh chấp chỉ một người thắng |
-| UC08 | Người phụ trách | Trả lời | Hội thoại assigned và assigned_agent_id khớp người đăng nhập |
-| UC09 | Người phụ trách | Giải quyết hoặc đóng | Ghi chú bắt buộc, tin khách cuối không đổi; chốt SLA và ghi người/thời điểm |
-| UC10 | Khách | Nhắn sau giải quyết | Giữ lịch sử, tạo ticket mới, bỏ phân công cũ và chờ tiếp nhận lại |
-| UC11 | Admin, agent | Xem Inbox và SLA | Thấy tất cả hội thoại nội bộ; chưa có tenant/team isolation |
-| UC12 | Người duyệt | Chấm chất lượng | Điền bản sao phiếu; CLI chỉ tính nhãn đã duyệt và câu thực chấm |
+| ID   | Tác nhân        | Mục tiêu                          | Điều kiện và kết quả                                                        |
+| ---- | --------------- | --------------------------------- | --------------------------------------------------------------------------- |
+| UC01 | Admin           | Cấp tài khoản                     | Đã đăng nhập; username duy nhất, mật khẩu ít nhất 12 ký tự                  |
+| UC02 | Admin, agent    | Đăng nhập, đăng xuất              | Tài khoản hoạt động; phiên nhân viên tối đa 8 giờ                           |
+| UC03 | Khách           | Bắt đầu, khôi phục, kết thúc chat | Phiên khách tối đa 24 giờ, chỉ một hội thoại; không xác minh chủ đơn        |
+| UC04 | Khách           | Hỏi chính sách có nguồn           | Hội thoại open; tin lưu trước model; thiếu bằng chứng trả từ chối           |
+| UC05 | Admin           | Quản lý tài liệu                  | Tải/lập chỉ mục lại/xóa; staff được xem tài liệu, đoạn nguồn và hỏi thử     |
+| UC06 | Khách, staff    | Chuyển nhân viên                  | Ticket hoạt động được tái sử dụng; AI ngừng trả lời                         |
+| UC07 | Admin, agent    | Tiếp nhận                         | Hội thoại đang chờ, chưa có người phụ trách; tranh chấp chỉ một người thắng |
+| UC08 | Người phụ trách | Trả lời                           | Hội thoại assigned và assigned_agent_id khớp người đăng nhập                |
+| UC09 | Người phụ trách | Giải quyết hoặc đóng              | Ghi chú bắt buộc, tin khách cuối không đổi; chốt SLA và ghi người/thời điểm |
+| UC10 | Khách           | Nhắn sau giải quyết               | Giữ lịch sử, tạo ticket mới, bỏ phân công cũ và chờ tiếp nhận lại           |
+| UC11 | Admin, agent    | Xem Inbox và SLA                  | Thấy tất cả hội thoại nội bộ; chưa có tenant/team isolation                 |
+| UC12 | Người duyệt     | Chấm chất lượng                   | Điền bản sao phiếu; CLI chỉ tính nhãn đã duyệt và câu thực chấm             |
 
 UC09 dùng kết quả UC07; UC10 phát sinh UC06 mới và không bật lại UC04. Admin có quyền quản lý nhưng UC08/UC09 vẫn yêu cầu phụ trách. Khách không được gọi API nội bộ, không xem ghi chú ticket hoặc retrieval thô. Giao diện dùng luồng trên, backend kiểm tra quyền độc lập.
 
@@ -272,6 +272,22 @@ ERD phản ánh liên kết khai báo trong SQLAlchemy và migration v5. SQLite 
 
 Citation là snapshot JSON trong Message, không có FK tới chunk; quote lịch sử được giữ khi tài liệu bị xóa, mở nguồn có thể trả 404/409. Hash file có unique index; vector dùng ID chunk và phiên bản chỉ mục để đối chiếu với SQL. Không đồng nhất file, chunk và lịch sử hội thoại thành một nguồn dữ liệu.
 
+
+## Cơ chế lưu trữ và Phân tách trách nhiệm giữa SQLite và Qdrant
+
+1. **Phân định ranh giới lưu trữ:**
+   - **SQLite (CSDL Quan hệ):** Chịu trách nhiệm quản lý cấu trúc dữ liệu nghiệp vụ có tính toàn vẹn cao (ACID), bao gồm: tài khoản, hồ sơ khách hàng, đơn hàng, hội thoại, tin nhắn, ticket SLA, và metadata tài liệu (`Document`, `DocumentChunk`).
+   - **Qdrant (Embedded Vector Database):** Chịu trách nhiệm lưu trữ các điểm vector mảng số thực (Dense Embeddings 300 chiều từ mô hình `embeddinggemma:300m`) phục vụ tìm kiếm tương đồng ngữ nghĩa (Cosine Similarity Search). Qdrant **không phải là bảng SQL** và không quản lý quan hệ bảng.
+
+2. **Cơ chế liên kết liên kho (Application-level Referencing):**
+   - **Khẳng định không có Khóa ngoại (Foreign Key) xuyên kho:** Giữa SQLite và Qdrant tuyệt đối không tồn tại ràng buộc khóa ngoại tầng CSDL.
+   - **Mã tham chiếu tầng ứng dụng:** Mỗi điểm Vector trong Qdrant lưu trữ thuộc tính metadata (`payload`) bao gồm: `source_id` (tương ứng với `Document.id`), `sentence_id` (tương ứng với `DocumentChunk.sentence_id`), `index_version` và đoạn văn bản trích dẫn `quote`. Đồng bộ dữ liệu giữa hai kho do backend (`DocumentService`) điều phối thông qua `document_lock`.
+
+3. **Vòng đời dữ liệu Vector (Reindex / Delete / Retrieval):**
+   - **Truy hồi (Retrieval):** Khi tìm kiếm, Qdrant thực hiện Cosine Search và lọc (`filter`) theo cờ `index_version` đang có hiệu lực. Backend nhận danh sách `sentence_id` ứng viên có `score >= 0.35` để gửi sang LLM.
+   - **Lập chỉ mục lại (Reindex):** Khi admin yêu cầu reindex, hệ thống sinh một `index_version` mới, ghi các vector mới vào Qdrant, sau đó cập nhật `index_version` trong SQLite. Các vector mang phiên bản cũ sẽ bị loại bỏ khỏi luồng truy xuất.
+   - **Xóa tài liệu (Delete):** Khi xóa nguồn, backend cập nhật trạng thái `Document.status = 'deleting'` trong SQLite để chặn truy hồi ngay lập tức, sau đó thực hiện lệnh xóa các điểm vector tương ứng trong Qdrant bằng truy vấn Payload Filter `source_id`.
+
 ## Trạng thái hội thoại
 
 ```mermaid
@@ -292,32 +308,23 @@ stateDiagram-v2
 
 Ticket hoạt động đi từ open sang assigned rồi resolved/closed. Khách kết thúc trước tiếp nhận có thể chuyển trực tiếp open sang closed. Lượt sau tạo ticket mới, không đổi trạng thái ticket cũ. Resolved giữ thông tin phân công cho tới khi tin khách mới bỏ phân công; closed không mở lại. Retry tin cũ sau resolved không làm phát sinh chuyển trạng thái.
 
-## Sequence hỏi đáp và chống AI muộn
+## Sequence Diagram chi tiết (Task TV2-04)
 
-```mermaid
-sequenceDiagram
-    participant K as Khách
-    participant A as API
-    participant D as SQLite
-    participant R as RAG và Ollama
-    K->>A: Tin nhắn và UUID
-    A->>D: Khóa hội thoại, kiểm tra UUID và trạng thái
-    A->>D: Lưu tin khách, cập nhật tin cuối, commit
-    A->>R: Truy xuất, chọn câu, kiểm định khi còn open
-    Note over A,D: Không giữ transaction trong lúc model chạy
-    opt Khách chuyển nhân viên khi model chờ
-        K->>A: Handoff
-        A->>D: Khóa, tạo ticket, đổi trạng thái, commit
-    end
-    R-->>A: Kết quả hoặc lỗi provider
-    A->>D: Khóa lại, kiểm tra trạng thái, tin cuối và nguồn
-    alt Còn open, đúng tin cuối, nguồn hợp lệ
-        A->>D: Lưu AI và citation, commit
-    else Trạng thái hoặc dữ liệu đã đổi
-        A->>D: Không lưu AI muộn
-    end
-    A-->>K: Snapshot riêng của phiên hoặc lỗi phiên hết hạn
-```
+### 1. Luồng Nạp tài liệu vào Kho tri thức (SD05)
+
+![Sequence Nạp tài liệu](diagrams/sequence/SD05.png)
+
+- **Xử lý chính:** `DocumentService` nhận file, kiểm tra định dạng/dung lượng (<=10MB) và mã SHA-256[cite: 15]. Nếu hợp lệ, tạo bản ghi `Document` trong SQLite với trạng thái `processing`[cite: 15].
+- **Chia đoạn & Tạo Vector:** File được phân tách thành các `DocumentChunk`[cite: 15]. Hệ thống gọi `embeddinggemma` qua Ollama theo từng batch (tối đa 16 chunks) để lấy vector Float 300D và đẩy vào `Qdrant Vector Store`[cite: 15].
+- **Xử lý lỗi:** Khi hoàn tất toàn bộ lô, trạng thái chuyển thành `indexed`[cite: 15]. Nếu xảy ra lỗi trích xuất hoặc ngắt kết nối Ollama/Qdrant, hệ thống cập nhật `failed`, giữ nguyên file đầu vào và trả lỗi HTTP 503/500[cite: 15].
+
+### 2. Luồng Hỏi đáp RAG và Kiểm định nguồn (SD01)
+
+![Sequence Hỏi đáp RAG](diagrams/sequence/SD01.png)
+
+- **Bảo toàn dữ liệu:** `MessageService` lưu tin nhắn khách vào SQLite trước khi gọi AI.
+- **Lọc ngưỡng & Kiểm định:** `RAGService` truy xuất Qdrant với ngưỡng `score >= 0.35`. Nếu không đạt ngưỡng, hệ thống chủ động từ chối trả lời. Nếu có nguồn, Ollama (`qwen3:4b`) sinh đáp án với ràng buộc JSON Schema.
+- **Chống race-condition AI muộn:** Trước khi ghi câu trả lời AI vào CSDL, hệ thống kiểm tra lại trạng thái hội thoại. Nếu khách đã `handoff` sang nhân viên trong lúc AI đang chạy, đáp án AI bị loại bỏ. Nếu Ollama timeout, trả về `ai_error=true` và giữ nguyên tin khách.
 
 ## Sequence hoàn tất và tiếp nhận lại
 

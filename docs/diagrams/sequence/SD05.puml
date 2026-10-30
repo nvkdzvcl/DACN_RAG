@@ -1,44 +1,50 @@
 @startuml
+autonumber
 skinparam monochrome true
 skinparam defaultFontName Arial
-title Lập chỉ mục nguồn và xử lý lỗi
-participant "Kho tri thức\n(Client)" as UI
-participant "DocumentsController\n(Controller)" as C
-participant "DocumentService\n(Service)" as S
-participant "File tài liệu\n(File store)" as F
-participant "SQLite\n(Database)" as DB
-participant "Ollama\n(Local API)" as O
-participant "Qdrant\n(Vector store)" as Q
-UI -> C: 1. Upload; admin/CSRF; tối đa 10 MB
-C -> S: 2. save_document(file, nội dung)
-critical [document_lock trong một tiến trình]
-S -> DB: 3. Kiểm tra SHA-256 chưa tồn tại
-S -> F: 4. Lưu file tài liệu
-S -> DB: 5. processing, index_version=null; COMMIT
-alt [Đọc và lập chỉ mục thành công]
-S -> F: 6. Đọc chữ và chia đoạn có vị trí nguồn
-S -> DB: 7. Lưu các đoạn nguồn; COMMIT
-S -> Q: 8. Dọn vector cũ của tài liệu
-loop [Từng lô tối đa 16 đoạn]
-S -> O: 9. Embedding lô với thông tin nguồn
-S -> Q: 10. Upsert vector + index_version mới
+
+title Nạp tài liệu vào Kho tri thức (SD05)
+
+actor "Admin" as Admin
+participant "DocumentsController" as Ctrl
+participant "DocumentService" as Svc
+participant "SQLite\n(Relational DB)" as DB
+participant "Ollama\n(embeddinggemma)" as Embed
+participant "Qdrant\n(Vector Store)" as Vec
+
+Admin -> Ctrl: POST /api/v1/documents/upload (File multipart)
+Ctrl -> Svc: save_document(file)
+
+group Kiểm tra tính hợp lệ & Lưu vết ban đầu
+    Svc -> Svc: Kiểm tra dung lượng (<=10MB), định dạng (PDF/DOCX/TXT/MD) & SHA-256
+    alt File không hợp lệ hoặc trùng SHA-256
+        Svc --> Ctrl: Ném lỗi 400 Bad Request / 409 Conflict
+        Ctrl --> Admin: Trả mã lỗi HTTP tương ứng
+    end
+    Svc -> DB: INSERT Document (status='processing', index_version=null)
+    DB --> Svc: COMMIT
 end
-S -> DB: 11. indexed + version + model; COMMIT
-else [Trích xuất hoặc provider/vector lỗi]
-S -> DB: 12. ROLLBACK phần ghi dở; failed; COMMIT
+
+group Đọc chữ, Tách đoạn & Tạo Vector
+    Svc -> Svc: Trích xuất văn bản & Chia đoạn (Chunks) kèm vị trí (source_id, sentence_id)
+    Svc -> DB: INSERT DocumentChunks
+    DB --> Svc: COMMIT
+    loop Theo từng lô (Batch max 16 chunks)
+        Svc -> Embed: Lấy vector embedding cho danh sách đoạn
+        Embed --> Svc: Trả về danh sách Vector Float (300D)
+        Svc -> Vec: Upsert Vector + Payload (source_id, sentence_id, text, index_version)
+        Vec --> Svc: Xóa/Ghi nhận vector thành công
+    end
 end
+
+alt Xử lý thành công toàn bộ lô
+    Svc -> DB: UPDATE Document SET status='indexed', index_version='v_timestamp'
+    DB --> Svc: COMMIT
+    Svc --> Ctrl: Trả về kết quả Document sẵn sàng
+    Ctrl --> Admin: HTTP 201 Created (status: indexed)
+else Lỗi trích xuất / Lỗi Ollama / Lỗi Qdrant
+    Svc -> DB: UPDATE Document SET status='failed'
+    DB --> Svc: COMMIT
+    Svc --> Ctrl: Báo lỗi dịch vụ nạp tài liệu
+    Ctrl --> Admin: HTTP 503 / 500 kèm tin nhắn giữ đầu vào
 end
-S --> C: 13. Thông tin trạng thái/số đoạn
-C --> UI: 14. Hiển thị indexed hoặc failed
-opt [Admin chọn xóa sau đó]
-UI -> C: 15. DELETE tài liệu; admin/CSRF
-C -> S: 16. delete_document dưới document_lock
-S -> DB: 17. deleting + version=null; COMMIT để ẩn
-S -> Q: 18. Dọn vector
-S -> F: 19. Dọn file
-S -> DB: 20. Xóa đoạn/bản ghi; COMMIT
-note over UI, Q
-Dọn dở: trả 503, nguồn vẫn bị ẩn; thử xóa lại. Reindex tạo phiên bản mới.
-end note
-end
-@enduml
