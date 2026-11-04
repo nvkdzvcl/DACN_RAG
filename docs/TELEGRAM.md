@@ -50,7 +50,7 @@ Test mới tái hiện lỗi trước sửa; 20 test Telegram đạt sau sửa, 
 
 `python -m unittest app.tests.test_telegram -v` kiểm tra danh tính, nhận trùng, con trỏ bền, phục hồi sau gián đoạn, tranh chấp đóng, AI lỗi thời, gửi thất bại/không rõ, quyền gửi lại/bỏ qua, UUID, SLA, webhook đang tồn tại và che token trong lỗi. Transport Telegram và model được mock trong nhóm test này; không dùng kết quả giả lập để tuyên bố kết nối thật.
 
-Một luồng polling xử lý tuần tự trong một API worker. Lời gọi model làm chậm nhận tin mới, `/human` và phản hồi nhân viên; chưa có giới hạn backlog, điều phối nhiều worker, webhook, retry tự động theo Retry-After hoặc kiểm thử tải. Cần worker có lease/queue trước khi mở rộng. SQLite chưa bật cưỡng chế khóa ngoại; dữ liệu cũ giữ nguyên qua migration v7.
+Một luồng polling xử lý tuần tự trong một API worker. Lời gọi model làm chậm nhận tin mới, `/human` và phản hồi nhân viên; chưa có giới hạn backlog, điều phối nhiều worker, webhook, retry tự động theo Retry-After hoặc kiểm thử tải. Cần worker có lease/queue trước khi mở rộng. SQLite bật cưỡng chế khóa ngoại cho kết nối mới; migration v11 bổ sung enforcement state/priority và liên kết tin cuối cho dữ liệu cũ.
 
 Trước nghiệm thu M6 còn cần bot thật, gửi/nhận từ hai người dùng độc lập, RAG có nguồn, handoff, nhân viên trả lời, khởi động lại và thử lỗi mạng có kiểm soát. Ghi rõ thời điểm và bằng chứng; không chụp token hoặc dữ liệu khách thật.
 

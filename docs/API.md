@@ -1,6 +1,6 @@
 # Đặc tả API local
 
-Đối chiếu mã và OpenAPI ngày 21/09/2026: 47 cặp method/path dưới /api/v1. Swagger tại /docs, schema tại /openapi.json trên backend đang chạy là nguồn tham chiếu kiểu dữ liệu. Các route trả dict hiện chưa khai báo đầy đủ response_model hoặc lỗi runtime trong OpenAPI; bảng dưới bổ sung hợp đồng nghiệp vụ thực có, không tuyên bố OpenAPI đã mô tả hết bảo mật/lỗi.
+Đối chiếu mã và OpenAPI ngày 21/09/2026: 61 operation (method/path) dưới /api/v1. Swagger tại /docs, schema tại /openapi.json trên backend đang chạy là nguồn tham chiếu kiểu dữ liệu. Các route trả dict hiện chưa khai báo đầy đủ response_model hoặc lỗi runtime trong OpenAPI; bảng dưới bổ sung hợp đồng nghiệp vụ thực có, không tuyên bố OpenAPI đã mô tả hết bảo mật/lỗi.
 
 ## Phiên và quyền truy cập
 
@@ -259,7 +259,7 @@ Cùng prefix `/api/v1/widget/account`, POST yêu cầu CSRF. GET/POST không tr�
 
 Hai endpoint yêu cầu gửi trả 503 khi cấu hình mail không hợp lệ; 202 chỉ là tiếp nhận yêu cầu, không xác nhận thư đã giao. Payload thừa/sai kiểu trả 422, vượt giới hạn IP trả 429. Token verify hạn 60 phút, reset 15 phút; chỉ POST hợp lệ mới tiêu thụ token, mở GET không đổi dữ liệu. Xác minh không đăng nhập tự động và không cấp quyền đơn. Snapshot trả cờ email_verified thực từ DB. Chi tiết giới hạn, cấu hình và retry tại [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).
 
-## Đặc tả chi tiết các API luồng chính (Task TV2-02)
+## Đặc tả chi tiết các API luồng chính
 
 Dưới đây là đặc tả chi tiết 6 luồng API cốt lõi của hệ thống, bao gồm hợp đồng request/response, ví dụ dữ liệu giả lập và các mã lỗi cần xử lý.
 
@@ -571,7 +571,7 @@ Trạng thái hội thoại chuyển sang handoff_requested, hệ thống dừng
 - **401 Unauthorized:** Phiên khách hàng hết hạn.
 - **409 Conflict:** Yêu cầu handoff bị lặp hoặc hội thoại đã ở trạng thái closed.
 
-## Minh chứng và Hướng dẫn truy cập Swagger UI (Task TV2-03)
+## Minh chứng và Hướng dẫn truy cập Swagger UI
 
 ### 1. Hướng dẫn mở Swagger UI
 

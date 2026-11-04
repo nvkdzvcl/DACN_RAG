@@ -143,7 +143,7 @@ Các ngưỡng hiệu năng và phục hồi dưới đây là mục tiêu đề
 | NFR06 | Phục hồi dữ liệu | Đề xuất backup offline hằng ngày, RPO ≤ 24 giờ và RTO ≤ 60 phút trong buổi diễn tập; đối chiếu hash nguồn, số tin/ticket và việc thu hồi phiên sau restore | Có công cụ local; lịch backup và mục tiêu RPO/RTO chưa kiểm chứng |
 | NFR07 | Độ bền kênh ngoài | Lỗi Telegram phải phân biệt failed/uncertain, không tự gửi lại uncertain; khởi động lại không trùng update/ticket; SMTP TLS và lỗi không lộ bí mật | Có mock/local; bot/hộp thư thật và hàng gửi SMTP bền còn chờ |
 | NFR08 | Khả dụng giao diện | Đề xuất dùng được ở 320–1536 px, không tràn ngang trang; mọi thao tác chính bằng bàn phím, focus rõ, trạng thái tải/lỗi/rỗng và giữ bản nháp khi mất mạng | Có QA trình duyệt; điện thoại thật và trình đọc màn hình còn chờ |
-| NFR09 | Quan sát và khả năng bảo trì | Ghi lỗi theo ID tin/yêu cầu, chỉ báo sẵn sàng có quyền staff; migration v1–v10 chạy lặp giữ dữ liệu; tài liệu quy trình có mã yêu cầu và phiên bản | Có local; chưa có audit quản trị đầy đủ hoặc giám sát production |
+| NFR09 | Quan sát và khả năng bảo trì | Ghi lỗi theo ID tin/yêu cầu, chỉ báo sẵn sàng có quyền staff; migration v1–v11 chạy lặp giữ dữ liệu; tài liệu quy trình có mã yêu cầu và phiên bản | Có local; chưa có audit quản trị đầy đủ hoặc giám sát production |
 | NFR10 | Chất lượng và truy xuất nguồn | Đề xuất tối thiểu 60 câu độc lập được người duyệt chốt nhãn trước đo; tỷ lệ đáp án đúng ≥ 85%, từ chối đúng ≥ 90%, citation hỗ trợ đủ ≥ 95%; lỗi provider tính riêng, không bỏ khỏi báo cáo | Ngưỡng đề xuất chưa được duyệt; regression hiện có không thay bộ độc lập |
 
 RPO là lượng dữ liệu có thể mất tính theo thời gian kể từ bản sao gần nhất; RTO là thời gian khôi phục để dịch vụ dùng được. Đáp án đúng được tính trên câu có đủ thông tin trả lời và bao gồm từ chối sai trong các ca không đạt. Từ chối đúng tính trên câu được duyệt là không đủ căn cứ; citation hỗ trợ đủ tính trên câu có đáp án nội dung được người duyệt đọc cả nguồn và điều kiện. Mỗi chỉ số phải có mẫu số, trường hợp lỗi/chưa chấm và cấu hình đầu vào; chưa có mẫu thì để null.
@@ -515,11 +515,30 @@ Phạm vi FR05 và BR11. Admin tải tài liệu; ứng dụng kiểm tra loại
 
 ### 4.4 Kiến trúc và dữ liệu
 
-Backend FastAPI dùng SQLAlchemy/SQLite; frontend React/Vite chạy cùng origin qua proxy hoặc bản build do backend phục vụ. Qdrant embedded lưu vector, Ollama local chạy qwen3:4b và embeddinggemma:300m. Một API worker điều phối polling Telegram; cấu hình mặc định tắt. SMTP dùng TLS cho thư xác minh/khôi phục. Không tích hợp thanh toán, vận chuyển hoặc hệ thống đơn hàng sản xuất; Order là dữ liệu nội bộ giả lập.
+Backend FastAPI sử dụng SQLAlchemy/SQLite; frontend React/Vite vận hành cùng origin qua proxy hoặc bản build do backend phục vụ. Qdrant embedded quản lý cơ sở dữ liệu vector; Ollama local vận hành mô hình `qwen3:4b` và `embeddinggemma:300m`. Một API worker điều phối polling Telegram (mặc định tắt). Dịch vụ SMTP sử dụng TLS cho thư xác minh và khôi phục mật khẩu. Hệ thống không tích hợp thanh toán, vận chuyển hay đơn hàng sản xuất; `Order` là dữ liệu nội bộ giả lập.
 
-Nhóm thực thể truy cập gồm User, AuthSession, WidgetSession, CustomerAccount, CustomerSession và CustomerEmailToken. Nhóm nghiệp vụ gồm Customer, Conversation, Message, Ticket, Order và OrderAccess. Nhóm tích hợp gồm TelegramCursor, TelegramPeer, TelegramUpdate, TelegramDelivery; nhóm tri thức gồm KnowledgeDocument và DocumentChunk. Conversation lưu người phụ trách và tin khách cuối; Message giữ citation và tool_trace nội bộ; Ticket lưu kết quả, ghi chú và snapshot SLA. Schema đã có migration v1–v10; phần v10 lưu trạng thái đọc Inbox riêng nhân viên.
+Hệ thống thực thể được phân thành các nhóm chính:
+- **Quản lý truy cập:** `User`, `AuthSession`, `WidgetSession`, `CustomerAccount`, `CustomerSession`, `CustomerEmailToken`.
+- **Nghiệp vụ cốt lõi:** `Customer`, `Conversation`, `Message`, `Ticket`, `Order`, `OrderAccess`.
+- **Kênh tích hợp:** `TelegramCursor`, `TelegramPeer`, `TelegramUpdate`, `TelegramDelivery`.
+- **Tri thức RAG:** `KnowledgeDocument`, `DocumentChunk`.
+- **Hạ tầng:** `schema_migrations` (phiên bản v1–v11).
 
-Token phiên và mã quyền lưu hash, cookie tách khách/nhân viên, thao tác ghi kiểm tra CSRF. Transaction lưu tin kết thúc trước lời gọi model/Telegram; sau model phải khóa và kiểm tra lại điều kiện. SQLite hiện chưa bật cưỡng chế khóa ngoại; tính toàn vẹn còn phụ thuộc kiểm tra của ứng dụng và kiểm thử. Mở rộng nhiều worker cần kiểm chứng lại khóa, giới hạn tốc độ, Qdrant và quyền sở hữu worker Telegram. ERD và Sequence chi tiết giữ tại docs/DESIGN.md, hợp đồng endpoint tại docs/API.md.
+Cơ chế bảo mật và toàn vẹn dữ liệu được thực thi đồng bộ từ tầng ứng dụng đến cơ sở dữ liệu:
+- **Xác thực và phân quyền:** Token phiên và mã quyền lưu dạng hash; cookie phân tách độc lập giữa khách hàng và nhân viên; mọi thao tác ghi bắt buộc kiểm tra CSRF.
+- **Giao dịch và đồng bộ:** Transaction SQL lưu tin nhắn được commit trước khi gọi dịch vụ bên ngoài (Ollama/Telegram) và được khóa để kiểm tra lại điều kiện trạng thái trước khi lưu đáp án cuối.
+- **Ràng buộc CSDL (ACID):** Hệ thống kích hoạt `PRAGMA foreign_keys=ON` trên mọi kết nối CSDL, cưỡng chế toàn bộ quan hệ khóa ngoại bao gồm liên kết từ `conversations.last_customer_message_id` đến `messages.id`.
+- **Cưỡng chế miền giá trị:** Các trường trạng thái và độ ưu tiên (`status`, `state`, `priority`) được kiểm soát giá trị hợp lệ bằng `CheckConstraint` và cơ chế Trigger dưới CSDL.
+- **Ranh giới SQL – Qdrant:** Mối liên kết giữa SQLite và Qdrant được quản lý ở tầng ứng dụng thông qua payload metadata (`document_id`, `chunk_id`, `index_version`, `content`, `source`, `page`, `location`), giữ độc lập tuyệt đối giữa CSDL quan hệ ACID và Vector Store.
+
+#### Từ điển dữ liệu RAG
+
+| Thành phần | Trường chính | Ý nghĩa |
+|---|---|---|
+| `knowledge_documents` | `id`, `filename`, `status`, `file_hash`, `index_version`, `embedding_model` | Nguồn tài liệu trong SQLite; chỉ bản ghi `indexed` và đúng model embedding được truy hồi. |
+| `document_chunks` | `id`, `document_id`, `chunk_index`, `content`, `source`, `page`, `location` | Đoạn văn bản có FK tới tài liệu, giữ thứ tự và vị trí trong file. |
+| Qdrant point/payload | `chunk_id`, `document_id`, `index_version`, `content`, `source`, `page`, `location` | Bản sao phục vụ tìm kiếm cosine và hiển thị nguồn; không phải bảng SQL và không có FK xuyên kho. |
+| Citation trong `Message` | `document_id`, `chunk_id`, `index_version`, `source`, `score`, `page`, `location` | Snapshot nguồn tại lúc trả lời, vẫn giữ được lịch sử khi tài liệu bị xóa hoặc reindex. |
 
 ### 4.5 Kiểm tra mô hình và giới hạn
 
@@ -614,11 +633,26 @@ Bộ tuần 05 hoàn thành phần mô hình và đặc tả để đọc/duyệ
 
 Các sơ đồ sau là năm luồng trên. Bản SVG có thể phóng to; file PlantUML cùng tên lưu actor, participant, thông điệp và fragment để chỉnh sửa.
 
-![Hình 4.6 SD01 Hỏi chính sách và kiểm tra AI lỗi thời](../week05/diagrams/SD01.png)
+![Hình 4.6 SD01 Hỏi chính sách và kiểm tra AI lỗi thời](../diagrams/sequence/SD01.png)
 ![Hình 4.7 SD02 Cấp quyền và tra đơn chỉ đọc](../week05/diagrams/SD02.png)
 ![Hình 4.8 SD03 Tiếp nhận phản hồi và hoàn tất ticket](../week05/diagrams/SD03.png)
 ![Hình 4.9 SD04 Telegram nhận giao và phục hồi tin](../week05/diagrams/SD04.png)
-![Hình 4.10 SD05 Lập chỉ mục nguồn và xử lý lỗi](../week05/diagrams/SD05.png)
+![Hình 4.10 SD05 Lập chỉ mục nguồn và xử lý lỗi](../diagrams/sequence/SD05.png)
+
+### 4.7 Danh mục và đặc tả API
+
+Danh mục API được đối chiếu từ route FastAPI và OpenAPI xuất từ backend, không tự đặt endpoint. Bản OpenAPI hiện có 61 operation (method/path), được gom theo các nhóm:
+
+| Nhóm | Phạm vi route tiêu biểu | Use Case liên quan |
+|---|---|---|
+| Xác thực và quản trị tài khoản | `/api/v1/auth/*`, workspace users/password | UC01–UC02 |
+| Widget, hội thoại và tài khoản khách | `/api/v1/widget/session`, `/messages`, `/handoff`, `/account/*` | UC03, UC06, UC15 |
+| Kho tri thức và RAG | `/api/v1/documents/*`, `/api/v1/rag/search`, `/api/v1/rag/answer` | UC04–UC05 |
+| Inbox, ticket và giao tin | `/api/v1/inbox/conversations/*`, `/api/v1/inbox/messages/*` | UC07–UC09, UC11, UC14 |
+| Đơn hàng và quyền tra cứu | `/api/v1/widget/orders/*`, `/order-access`, `/workspace/orders/*` | UC13, UC16/UC20, UC19 |
+| Vận hành và route nội bộ | `/api/v1/health`, `/ready`, `/demo/seed`, các route conversation/order nội bộ | Không gán UC nếu không có trong danh sách |
+
+Đặc tả request, response thành công, lỗi, xác thực và ví dụ dữ liệu cho các luồng chính được lưu tại [API.md](../API.md); schema máy đọc được tại [openapi.json](../openapi.json). Các chức năng nội bộ như xử lý hội thoại, worker Telegram và truy hồi vector không được trình bày thành endpoint công khai nếu mã nguồn không có route tương ứng. Swagger tại `/docs` có ba ảnh minh chứng trong báo cáo; không chứa token hoặc dữ liệu khách thật.
 
 ## Chương 5 Triển khai và thực hiện
 

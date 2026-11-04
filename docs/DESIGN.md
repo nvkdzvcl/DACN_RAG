@@ -198,7 +198,7 @@ erDiagram
         string id PK
         string customer_id FK
         string assigned_agent_id FK
-        string last_customer_message_id
+        string last_customer_message_id FK
         string channel
         string status
         string priority
@@ -268,20 +268,33 @@ erDiagram
     }
 ```
 
-ERD phản ánh liên kết khai báo trong SQLAlchemy và migration v5. SQLite hiện chưa bật PRAGMA foreign_keys trong cấu hình kết nối; không coi ký hiệu FK là bằng chứng DB cưỡng chế toàn bộ quan hệ. last_customer_message_id là con trỏ logic, không có FK. UUID tin ngoài không có UNIQUE index; chống trùng trong process_message dựa trên khóa ghi hội thoại và tra UUID theo hội thoại. Các state/priority là chuỗi, chưa có CHECK constraint. schema_migrations là bảng hạ tầng với version làm khóa chính.
+ERD phản ánh đầy đủ mô hình quan hệ thực thể khai báo trong SQLAlchemy và hệ thống migration v1–v11. Cơ sở dữ liệu cưỡng chế toàn vẹn toàn bộ mối quan hệ khóa ngoại (kích hoạt `PRAGMA foreign_keys=ON` trên mọi kết nối), bao gồm ràng buộc từ `conversations.last_customer_message_id` tới `messages.id`. Miền giá trị cho các trường trạng thái và độ ưu tiên (`status`, `state`, `priority`) được bảo đảm bằng `CheckConstraint` và Trigger CSDL.
+
+Khả năng chống trùng lặp tin nhắn ngoài (`external_message_id`) dựa trên khóa ghi hội thoại và truy vấn tra cứu UUID theo phiên làm việc. Mối liên kết giữa dữ liệu quan hệ (SQLite) và dữ liệu mảng vector (Qdrant) thực hiện qua cơ chế tham chiếu metadata tầng ứng dụng (`document_id`, `chunk_id`, `index_version`), không tồn tại khóa ngoại liên kho.
 
 Citation là snapshot JSON trong Message, không có FK tới chunk; quote lịch sử được giữ khi tài liệu bị xóa, mở nguồn có thể trả 404/409. Hash file có unique index; vector dùng ID chunk và phiên bản chỉ mục để đối chiếu với SQL. Không đồng nhất file, chunk và lịch sử hội thoại thành một nguồn dữ liệu.
+
+### Từ điển dữ liệu RAG
+
+| Thành phần | Trường chính | Ý nghĩa và ràng buộc |
+|---|---|---|
+| `knowledge_documents` | `id`, `filename`, `status`, `file_hash`, `index_version`, `embedding_model` | Nguồn tài liệu trong SQLite. `status` chỉ nhận `uploaded`, `processing`, `indexed`, `failed` hoặc `deleting`; `file_hash` dùng phát hiện bản trùng; chỉ tài liệu `indexed` và đúng `embedding_model` được truy hồi. |
+| `document_chunks` | `id`, `document_id`, `chunk_index`, `content`, `source`, `page`, `location` | Các đoạn văn bản đã tách, có FK tới `knowledge_documents.id`; `chunk_index` giữ thứ tự; `page` và `location` có thể rỗng tùy định dạng file. |
+| Qdrant point ID | `uuid5(NAMESPACE_URL, chunk_id)` | Định danh ổn định của điểm vector, suy ra từ `chunk_id`; không phải khóa ngoại SQL. |
+| Qdrant vector | vector cosine, kích thước do Ollama trả về cho `embedding_model` | Embedding được tạo theo batch tối đa 16 chunk. Kích thước vector được lấy từ batch đầu tiên khi tạo collection, không hard-code trong schema SQL. |
+| Qdrant payload | `chunk_id`, `document_id`, `index_version`, `content`, `source`, `page`, `location` | Bản sao phục vụ truy hồi và hiển thị nguồn. Backend lọc theo `index_version` đang hiệu lực rồi kiểm tra lại trạng thái/version trong SQLite trước khi lưu đáp án. |
+| Message citation | `document_id`, `chunk_id`, `index_version`, `source`, `score`, `page`, `location` | Snapshot nguồn tại thời điểm trả lời; không tạo FK tới chunk để vẫn giữ lịch sử khi tài liệu bị xóa hoặc lập chỉ mục lại. |
 
 
 ## Cơ chế lưu trữ và Phân tách trách nhiệm giữa SQLite và Qdrant
 
 1. **Phân định ranh giới lưu trữ:**
    - **SQLite (CSDL Quan hệ):** Chịu trách nhiệm quản lý cấu trúc dữ liệu nghiệp vụ có tính toàn vẹn cao (ACID), bao gồm: tài khoản, hồ sơ khách hàng, đơn hàng, hội thoại, tin nhắn, ticket SLA, và metadata tài liệu (`Document`, `DocumentChunk`).
-   - **Qdrant (Embedded Vector Database):** Chịu trách nhiệm lưu trữ các điểm vector mảng số thực (Dense Embeddings 300 chiều từ mô hình `embeddinggemma:300m`) phục vụ tìm kiếm tương đồng ngữ nghĩa (Cosine Similarity Search). Qdrant **không phải là bảng SQL** và không quản lý quan hệ bảng.
+   - **Qdrant (Embedded Vector Database):** Chịu trách nhiệm lưu trữ các điểm vector mảng số thực từ mô hình `embeddinggemma:300m` phục vụ tìm kiếm tương đồng ngữ nghĩa (Cosine Similarity Search). Kích thước vector do Ollama trả về và được dùng khi tạo collection; Qdrant **không phải là bảng SQL** và không quản lý quan hệ bảng.
 
 2. **Cơ chế liên kết liên kho (Application-level Referencing):**
    - **Khẳng định không có Khóa ngoại (Foreign Key) xuyên kho:** Giữa SQLite và Qdrant tuyệt đối không tồn tại ràng buộc khóa ngoại tầng CSDL.
-   - **Mã tham chiếu tầng ứng dụng:** Mỗi điểm Vector trong Qdrant lưu trữ thuộc tính metadata (`payload`) bao gồm: `source_id` (tương ứng với `Document.id`), `sentence_id` (tương ứng với `DocumentChunk.sentence_id`), `index_version` và đoạn văn bản trích dẫn `quote`. Đồng bộ dữ liệu giữa hai kho do backend (`DocumentService`) điều phối thông qua `document_lock`.
+   - **Mã tham chiếu tầng ứng dụng:** Mỗi điểm Vector trong Qdrant lưu trữ payload gồm `document_id`, `chunk_id`, `index_version`, `content`, `source`, `page` và `location`. Đồng bộ dữ liệu giữa hai kho do backend (`DocumentService`) điều phối thông qua `document_lock`.
 
 3. **Vòng đời dữ liệu Vector (Reindex / Delete / Retrieval):**
    - **Truy hồi (Retrieval):** Khi tìm kiếm, Qdrant thực hiện Cosine Search và lọc (`filter`) theo cờ `index_version` đang có hiệu lực. Backend nhận danh sách `sentence_id` ứng viên có `score >= 0.35` để gửi sang LLM.
@@ -308,7 +321,7 @@ stateDiagram-v2
 
 Ticket hoạt động đi từ open sang assigned rồi resolved/closed. Khách kết thúc trước tiếp nhận có thể chuyển trực tiếp open sang closed. Lượt sau tạo ticket mới, không đổi trạng thái ticket cũ. Resolved giữ thông tin phân công cho tới khi tin khách mới bỏ phân công; closed không mở lại. Retry tin cũ sau resolved không làm phát sinh chuyển trạng thái.
 
-## Sequence Diagram chi tiết (Task TV2-04)
+## Sequence Diagram chi tiết
 
 ### 1. Luồng Nạp tài liệu vào Kho tri thức (SD05)
 

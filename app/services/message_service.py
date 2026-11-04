@@ -50,8 +50,8 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
         message = Message(id=message_id, conversation_id=conversation_id, sender_type="customer", content=content,
                           external_message_id=external_message_id)
         db.add(message)
-        conversation.last_customer_message_id = message_id
         db.flush()
+        conversation.last_customer_message_id = message_id
         sentiment, handoff = classify_message(content)
         order_result = rag = None
         answer = error = None

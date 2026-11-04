@@ -478,7 +478,7 @@ Task tiếp theo: bổ sung BFD/BPMN, Use Case, ERD, Sequence, API spec và ma t
 ## Hồ sơ thiết kế và kiểm chứng M4 - 15/09/2026
 
 - [x] Bổ sung BFD, luồng phân làn, Use Case/quyền, ERD, trạng thái, kiến trúc và hai Sequence tại docs/DESIGN.md, đối chiếu với mã hiện có.
-- [x] docs/API.md bao phủ 31 cặp method/path, cookie/quyền/CSRF, snapshot riêng tư, payload finish, retry/SLA và lỗi runtime ngoài OpenAPI.
+- [x] docs/API.md bao phủ 61 operation (method/path), cookie/quyền/CSRF, snapshot riêng tư, payload finish, retry/SLA và lỗi runtime ngoài OpenAPI.
 - [x] docs/M4_ACCEPTANCE.md nối UC với kiểm thử và giới hạn; giữ người dùng/GVHD duyệt sau, không coi quyền tiếp tục làm là nghiệm thu M3/M4.
 - [x] Lệnh python -m app.tests.smoke_m4 chạy login/upload/chat/handoff/giải quyết/tiếp nhận lại/đóng qua HTTP ASGI với Ollama thật, store tạm và mật khẩu ngẫu nhiên. Đạt: câu hỏi 16,217 giây, toàn luồng 28,088 giây; không sửa .env hoặc DB người dùng.
 - [x] 53 unittest đạt trong 25,597 giây; Vite build đạt, assets không đổi. Không chạy lại QA giao diện hoặc benchmark khi UI/RAG không đổi.
@@ -559,7 +559,7 @@ Kiểm chứng mốc sao lưu: 96 unittest đạt trong 52,638 giây; git diff -
 
 Smoke dùng DB/vector/tài liệu tạm, tài khoản ngẫu nhiên, Telegram tắt; không sửa dữ liệu/config người dùng. Frontend không đổi, dùng bản build hiện có để kiểm tra HTTP.
 
-Kiểm chứng mốc chạy bản build: 103 unittest đạt trong 56,660 giây; bảy test liên quan chạy lại đạt sau chỉnh trạng thái unchecked khi bận. OpenAPI có 47 method/path; git diff --check đạt.
+Kiểm chứng mốc chạy bản build: 103 unittest đạt trong 56,660 giây; bảy test liên quan chạy lại đạt sau chỉnh trạng thái unchecked khi bận. Bản OpenAPI tại thời điểm kiểm chứng cũ có 47 method/path; danh mục hiện tại đã được đối chiếu lại với 61 operation. git diff --check đạt.
 
 ## 21/09/2026 - Đo tải HTTP local và index Inbox
 

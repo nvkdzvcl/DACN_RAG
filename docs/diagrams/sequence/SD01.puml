@@ -20,17 +20,27 @@ group Lưu tin khách trước khi gọi AI (Chống mất dữ liệu)
     MsgSvc -> DB: Kiểm tra UUID & INSERT Message (sender_type='customer')
     DB --> MsgSvc: COMMIT
 end
+@enduml
 
 group Truy xuất Vector & Sinh câu trả lời có kiểm định
     MsgSvc -> RAG: answer_question(query, history)
-    RAG -> Vec: Embedding câu hỏi & Truy xuất Qdrant (ngưỡng score >= 0.35)
-    Vec --> RAG: Trả danh sách ứng viên (sentence_id, text, score)
-    alt Không tìm thấy đoạn nào đạt ngưỡng score >= 0.35
-        RAG --> MsgSvc: Từ chối trả lời (Không đủ bằng chứng trong kho tri thức)
-    else Có đoạn ứng viên đạt yêu cầu
-        RAG -> LLM: Gọi sinh đáp án (Ràng buộc JSON Schema chỉ chọn ID câu thực tế)
-        LLM --> RAG: Trả về ID câu nguồn đã chọn
-        RAG -> RAG: Backend kiểm định: Xác minh ID nguyên văn & Kiểm tra mâu thuẫn
+    alt Câu hỏi thiếu chủ thể hoặc điều kiện áp dụng
+        RAG --> MsgSvc: Trả lời hỏi rõ (needs_clarification=true)
+    else Câu hỏi đủ điều kiện truy hồi
+        RAG -> Vec: Embedding câu hỏi & Truy xuất Qdrant (ngưỡng score >= 0.35)
+        Vec --> RAG: Trả ứng viên (chunk_id, document_id, index_version, content, score)
+        alt Không tìm thấy đoạn nào đạt ngưỡng
+            RAG --> MsgSvc: Từ chối trả lời (Không đủ bằng chứng trong kho tri thức)
+        else Có đoạn ứng viên đạt yêu cầu
+            RAG -> LLM: Chọn bằng chứng và sinh đáp án theo JSON Schema
+            LLM --> RAG: Trả về ID câu nguồn đã chọn
+            RAG -> RAG: Backend kiểm định ID, quote và dữ kiện
+            alt Nguồn mâu thuẫn hoặc không hỗ trợ đủ claim
+                RAG --> MsgSvc: Từ chối trả lời (CONFLICT/ABSTENTION)
+            else Nguồn nhất quán và hỗ trợ đầy đủ
+                RAG --> MsgSvc: Đáp án grounded kèm citation snapshot
+            end
+        end
     end
 end
 
