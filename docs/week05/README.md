@@ -382,6 +382,21 @@ Các sơ đồ sau là năm luồng trên. Bản SVG có thể phóng to; file P
 ![Hình 4.9 SD04 Telegram nhận giao và phục hồi tin](diagrams/SD04.png)
 ![Hình 4.10 SD05 Lập chỉ mục nguồn và xử lý lỗi](diagrams/SD05.png)
 
+### 4.7 Danh mục và đặc tả API
+
+Danh mục API được đối chiếu từ route FastAPI và OpenAPI xuất từ backend, không tự đặt endpoint. Bản OpenAPI hiện có 61 operation (method/path), được gom theo các nhóm:
+
+| Nhóm | Phạm vi route tiêu biểu | Use Case liên quan |
+|---|---|---|
+| Xác thực và quản trị tài khoản | `/api/v1/auth/*`, workspace users/password | UC01–UC02 |
+| Widget, hội thoại và tài khoản khách | `/api/v1/widget/session`, `/messages`, `/handoff`, `/account/*` | UC03, UC06, UC15 |
+| Kho tri thức và RAG | `/api/v1/documents/*`, `/api/v1/rag/search`, `/api/v1/rag/answer` | UC04–UC05 |
+| Inbox, ticket và giao tin | `/api/v1/inbox/conversations/*`, `/api/v1/inbox/messages/*` | UC07–UC09, UC11, UC14 |
+| Đơn hàng và quyền tra cứu | `/api/v1/widget/orders/*`, `/order-access`, `/workspace/orders/*` | UC13, UC16/UC20, UC19 |
+| Vận hành và route nội bộ | `/api/v1/health`, `/ready`, `/demo/seed`, các route conversation/order nội bộ | Không gán UC nếu không có trong danh sách |
+
+Đặc tả request, response thành công, lỗi, xác thực và ví dụ dữ liệu cho các luồng chính được lưu tại [API.md](../API.md); schema máy đọc được tại [openapi.json](../openapi.json). Các chức năng nội bộ như xử lý hội thoại, worker Telegram và truy hồi vector không được trình bày thành endpoint công khai nếu mã nguồn không có route tương ứng. Swagger tại `/docs` có ba ảnh minh chứng trong báo cáo; không chứa token hoặc dữ liệu khách thật.
+
 ## Sử dụng hồ sơ
 
 - Bản tích hợp: [BaoCao.docx](../report/BaoCao.docx), [BaoCao.md](../report/BaoCao.md).

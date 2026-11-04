@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Index, JSON, String, Text
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
@@ -29,16 +29,22 @@ class Customer(Base):
 
 class Conversation(Base):
     __tablename__ = "conversations"
+    __table_args__ = (
+        CheckConstraint("status IN ('open', 'handoff_requested', 'assigned', 'resolved', 'closed')", name="ck_conversations_status"),
+        CheckConstraint("priority IN ('low', 'normal', 'high', 'urgent')", name="ck_conversations_priority"),
+    )
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"))
     channel: Mapped[str] = mapped_column(String(32), default="website")
     status: Mapped[str] = mapped_column(String(32), default="open")
     assigned_agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    last_customer_message_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_customer_message_id: Mapped[str | None] = mapped_column(ForeignKey("messages.id"), nullable=True)
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     customer: Mapped[Customer] = relationship(back_populates="conversations")
-    messages: Mapped[list["Message"]] = relationship(back_populates="conversation", cascade="all, delete-orphan")
+    messages: Mapped[list["Message"]] = relationship(
+        back_populates="conversation", cascade="all, delete-orphan",
+        foreign_keys="Message.conversation_id")
 
 class ConversationRead(Base):
     __tablename__ = "conversation_reads"
@@ -91,11 +97,16 @@ class Message(Base):
     tool_trace: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     reply_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
-    conversation: Mapped[Conversation] = relationship(back_populates="messages")
+    conversation: Mapped[Conversation] = relationship(
+        back_populates="messages", foreign_keys=[conversation_id])
 
 class Ticket(Base):
     __tablename__ = "tickets"
-    __table_args__ = (Index('ix_tickets_conversation_created', 'conversation_id', 'created_at'),)
+    __table_args__ = (
+        Index('ix_tickets_conversation_created', 'conversation_id', 'created_at'),
+        CheckConstraint("status IN ('open', 'assigned', 'resolved', 'closed')", name="ck_tickets_status"),
+        CheckConstraint("priority IN ('low', 'normal', 'high', 'urgent')", name="ck_tickets_priority"),
+    )
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"))
     status: Mapped[str] = mapped_column(String(32), default="open")
@@ -109,6 +120,9 @@ class Ticket(Base):
 
 class Order(Base):
     __tablename__ = "orders"
+    __table_args__ = (
+        CheckConstraint("status IN ('processing', 'paid', 'shipping', 'shipped', 'delivered', 'cancelled')", name="ck_orders_status"),
+    )
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"))
     status: Mapped[str] = mapped_column(String(32), default="processing")
@@ -138,6 +152,9 @@ class TelegramPeer(Base):
 
 class TelegramUpdate(Base):
     __tablename__ = "telegram_updates"
+    __table_args__ = (
+        CheckConstraint("state IN ('pending', 'processing', 'done')", name="ck_telegram_updates_state"),
+    )
     id: Mapped[str] = mapped_column(String(80), primary_key=True)
     bot_id: Mapped[str] = mapped_column(String(32), index=True)
     update_id: Mapped[int] = mapped_column(BigInteger)
@@ -148,6 +165,9 @@ class TelegramUpdate(Base):
 
 class TelegramDelivery(Base):
     __tablename__ = "telegram_deliveries"
+    __table_args__ = (
+        CheckConstraint("state IN ('pending', 'sending', 'sent', 'failed', 'uncertain', 'skipped')", name="ck_telegram_deliveries_state"),
+    )
     message_id: Mapped[str] = mapped_column(ForeignKey("messages.id"), primary_key=True)
     state: Mapped[str] = mapped_column(String(16), default="pending")
     error: Mapped[str | None] = mapped_column(String(80), nullable=True)
@@ -156,6 +176,9 @@ class TelegramDelivery(Base):
 
 class KnowledgeDocument(Base):
     __tablename__ = "knowledge_documents"
+    __table_args__ = (
+        CheckConstraint("status IN ('uploaded', 'processing', 'indexed', 'failed', 'deleting')", name="ck_knowledge_documents_status"),
+    )
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     filename: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(String(32), default="uploaded")
