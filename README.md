@@ -42,6 +42,8 @@ Quên mật khẩu tài khoản đã tồn tại: chạy `python -m app.reset_pa
 
 Kiểm tra: `python -m unittest discover -s app/tests -v`; frontend: `npm --prefix frontend run build`. Tiến độ thực tế trong `docs/TASKS.md`, kế hoạch trong `ROADMAP.md`.
 
+Mỗi pull request và mỗi lần push vào `main` chạy CI tại `.github/workflows/ci.yml`, gồm unit test backend, kiểm tra tài liệu/sơ đồ và build frontend. CI không gọi Ollama hoặc dữ liệu runtime thật; các smoke test cần provider local chạy riêng theo hướng dẫn trong `docs/DEMO.md`.
+
 ## Website chat widget
 
 Mở `http://localhost:5173/widget-demo.html`, chọn Hỗ trợ và nhập tên; `/chat` là trang khách hàng gồm Tin nhắn, Tra đơn và Hỏi đáp; widget nhúng dùng giao diện gọn của cùng luồng chat. Widget gọi RAG hiện có, hiển thị trích dẫn đã lưu, cho phép Gặp nhân viên và nhận phản hồi qua polling mỗi 3 giây khi tab hiển thị, không có thao tác đang chờ. Inbox nhân viên cũng tự cập nhật mỗi 3 giây; nút Làm mới tải lại cả danh sách và hội thoại.
