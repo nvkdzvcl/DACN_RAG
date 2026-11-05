@@ -89,7 +89,7 @@ function RecordForm({ kind, record, request, onExpired, onSaved }) {
   }
   return <form className="recordForm" onSubmit={save}><fieldset disabled={busy}>
     {customer ? <><label>Tên khách hàng<input name="display_name" defaultValue={record?.display_name || ''} required maxLength={160} /></label><label>Email<input name="email" type="email" defaultValue={record?.email || ''} maxLength={255} /></label></> : <>
-      {!record && <><label>Mã đơn<input name="id" required maxLength={64} pattern="(DH|ORD)[-_]?[A-Za-z0-9]{4,}" placeholder="ORD-DEMO03" /></label><CustomerPicker request={request} onExpired={onExpired} /></>}
+      {!record && <><label>Mã đơn<input name="id" required maxLength={64} pattern="(DH|ORD)[-_]?[A-Za-z0-9]{4,}" title="Bắt đầu bằng DH hoặc ORD, theo sau là ít nhất 4 chữ hoặc số; ví dụ DH1122, ORD-DEMO03." placeholder="ORD-DEMO03" /><small>Ví dụ: DH1122 hoặc ORD-DEMO03. Mã chỉ có số không hợp lệ.</small></label><CustomerPicker request={request} onExpired={onExpired} /></>}
       <label>Trạng thái<select name="status" defaultValue={record?.status || 'processing'}>{Object.entries(orderLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>Mã vận đơn<input name="tracking_code" maxLength={100} defaultValue={record?.tracking_code || ''} /></label>
     </>}
     {error && <p role="alert" className="workspaceError">{error}</p>}<button className="primary" type="submit">{busy ? 'Đang lưu...' : record ? 'Lưu thay đổi' : customer ? 'Tạo khách hàng' : 'Tạo đơn hàng'}</button>

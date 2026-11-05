@@ -41,7 +41,7 @@ async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}/api/v1${path}`, { ...options, credentials: 'same-origin', headers: { ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), 'X-CSRF-Protection': '1', ...options.headers } });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(response.status === 401 ? 'Phiên đăng nhập hết hạn hoặc thông tin đăng nhập không đúng.' : response.status === 403 ? 'Tài khoản không có quyền thực hiện thao tác.' : response.status === 429 ? 'Thử đăng nhập quá nhiều lần. Chờ một phút rồi thử lại.' : typeof data.detail === 'string' ? data.detail : `Yêu cầu thất bại (HTTP ${response.status}).`);
+    const error = new Error(response.status === 401 ? 'Phiên đăng nhập hết hạn hoặc thông tin đăng nhập không đúng.' : response.status === 403 ? 'Tài khoản không có quyền thực hiện thao tác.' : response.status === 429 ? 'Gửi yêu cầu quá nhiều lần. Vui lòng chờ rồi thử lại.' : typeof data.detail === 'string' ? data.detail : response.status === 422 && Array.isArray(data.detail) ? `Dữ liệu không hợp lệ: ${data.detail.map(item => item.loc?.at(-1)).filter(Boolean).join(', ') || 'kiểm tra các trường đã nhập'}.` : `Yêu cầu thất bại (HTTP ${response.status}).`);
     error.status = response.status;
     throw error;
   }
