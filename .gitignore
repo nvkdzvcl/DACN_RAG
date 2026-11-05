@@ -18,6 +18,7 @@ data/*.db*
 *.db-wal
 *.db-shm
 data/runtime/
+data/demo/
 data/vectors/
 data/knowledge_base/
 data/backups/

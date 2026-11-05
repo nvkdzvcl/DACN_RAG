@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120">
+  <defs>
+    <style>
+      .ink{fill:#172554}.muted{fill:#64748b}.purple{fill:#6246ea}.line{stroke:#dbe2ef}.panel{fill:#fff;stroke:#dbe2ef}.small{font:13px Arial,sans-serif}.body{font:15px Arial,sans-serif}.title{font:700 19px Arial,sans-serif}.label{font:700 12px Arial,sans-serif}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6246ea"/></marker>
+  </defs>
+  <rect width="1600" height="1120" fill="#f3f5fb"/>
+  <text x="44" y="46" class="ink" style="font:700 25px Arial,sans-serif">MOCKUP THIẾT KẾ · LUỒNG HỖ TRỢ KHÁCH HÀNG</text>
+  <text x="44" y="73" class="muted body">Bản đề xuất để mô tả nghiệp vụ — không phải ảnh chụp giao diện đang chạy. Trạng thái minh họa, không phải dữ liệu thật.</text>
+  <rect x="1190" y="24" width="365" height="42" rx="8" fill="#fff1d6" stroke="#f1c97a"/>
+  <text x="1210" y="50" style="font:700 14px Arial,sans-serif;fill:#8a4b08">MOCKUP THIẾT KẾ · KHÔNG PHẢI BẢN TRIỂN KHAI</text>
+
+  <!-- Screen 1 -->
+  <g transform="translate(40 112)">
+    <rect width="285" height="420" rx="14" class="panel"/>
+    <text x="18" y="30" class="purple label">01 · XÁC THỰC KHÁCH</text>
+    <text x="18" y="58" class="ink title">Bắt đầu hỗ trợ</text>
+    <text x="18" y="81" class="muted small">Tác nhân: Khách hàng · UC03, UC15</text>
+    <rect x="18" y="104" width="249" height="43" rx="7" fill="#f6f7fb" stroke="#dbe2ef"/>
+    <text x="32" y="131" class="muted body">Email hoặc chọn khách vãng lai</text>
+    <rect x="18" y="159" width="249" height="43" rx="7" fill="#f6f7fb" stroke="#dbe2ef"/>
+    <text x="32" y="186" class="muted body">Mật khẩu</text>
+    <rect x="18" y="218" width="249" height="42" rx="8" fill="#6246ea"/>
+    <text x="89" y="245" style="font:700 15px Arial,sans-serif;fill:#fff">Đăng nhập</text>
+    <text x="18" y="291" class="purple small">Đăng ký · Quên mật khẩu?</text>
+    <rect x="18" y="312" width="249" height="40" rx="8" fill="#f3f1ff" stroke="#d9d2ff"/>
+    <text x="83" y="337" class="purple body">Tiếp tục vãng lai</text>
+    <text x="18" y="382" class="muted small">Lỗi: thông tin sai / phiên hết hạn</text>
+    <text x="18" y="402" class="muted small">Tải: đang xác thực · Rỗng: form nhập</text>
+  </g>
+
+  <!-- Screen 2 -->
+  <g transform="translate(355 112)">
+    <rect width="365" height="420" rx="14" class="panel"/>
+    <text x="18" y="30" class="purple label">02 · CHAT KHÁCH + RAG</text>
+    <text x="18" y="58" class="ink title">Hỏi chính sách đổi trả</text>
+    <text x="18" y="81" class="muted small">Tác nhân: Khách, trợ lý AI · UC04</text>
+    <rect x="86" y="105" width="255" height="55" rx="10" fill="#eeeaff"/>
+    <text x="101" y="129" class="ink body">Tôi có thể đổi trả trong</text><text x="101" y="149" class="ink body">bao lâu kể từ khi nhận hàng?</text>
+    <rect x="18" y="174" width="320" height="137" rx="10" fill="#f2f5fb"/>
+    <text x="34" y="199" class="purple label">TRỢ LÝ AI</text>
+    <text x="34" y="226" class="ink body">Có thể yêu cầu trong vòng</text>
+    <text x="34" y="249" class="ink body">7 ngày kể từ ngày nhận hàng.</text>
+    <rect x="34" y="265" width="286" height="31" rx="6" fill="#fff" stroke="#dbe2ef"/>
+    <text x="46" y="286" class="purple small">Nguồn: Chính sách đổi trả · Dòng 2</text>
+    <rect x="18" y="326" width="272" height="42" rx="8" fill="#fff" stroke="#dbe2ef"/>
+    <text x="32" y="353" class="muted body">Nhập tin nhắn...</text>
+    <rect x="299" y="326" width="45" height="42" rx="8" fill="#6246ea"/>
+    <text x="312" y="353" style="font:700 15px Arial,sans-serif;fill:#fff">➤</text>
+    <text x="18" y="395" class="muted small">Thiếu bằng chứng: AI nêu chưa đủ thông tin</text>
+  </g>
+
+  <!-- Screen 3 -->
+  <g transform="translate(750 112)">
+    <rect width="285" height="420" rx="14" class="panel"/>
+    <text x="18" y="30" class="purple label">03 · BÀN GIAO</text>
+    <text x="18" y="58" class="ink title">Yêu cầu người hỗ trợ</text>
+    <text x="18" y="81" class="muted small">Tác nhân: Khách hàng · UC06</text>
+    <rect x="18" y="108" width="249" height="63" rx="10" fill="#eeeaff"/>
+    <text x="34" y="134" class="ink body">Tôi muốn gặp nhân viên</text>
+    <text x="34" y="155" class="ink body">để được tư vấn thêm.</text>
+    <rect x="18" y="190" width="249" height="82" rx="10" fill="#fef8e7" stroke="#f2df9e"/>
+    <text x="34" y="216" class="ink label">ĐÃ CHUYỂN YÊU CẦU</text>
+    <text x="34" y="241" class="muted small">AI dừng phản hồi; đang chờ</text>
+    <text x="34" y="260" class="muted small">nhân viên tiếp nhận.</text>
+    <rect x="18" y="295" width="249" height="45" rx="8" fill="#f6f7fb" stroke="#dbe2ef"/>
+    <text x="32" y="323" class="muted body">Tin nhắn bổ sung...</text>
+    <text x="18" y="378" class="muted small">Lỗi: gửi thất bại / giới hạn 429</text>
+    <text x="18" y="400" class="muted small">Trạng thái: chờ / đã nhận / đã đóng</text>
+  </g>
+
+  <!-- Screen 4 -->
+  <g transform="translate(1065 112)">
+    <rect width="495" height="420" rx="14" class="panel"/>
+    <text x="18" y="30" class="purple label">04 · UNIFIED INBOX / TICKET CHỜ</text>
+    <text x="18" y="58" class="ink title">Hội thoại cần tiếp nhận</text>
+    <text x="18" y="81" class="muted small">Tác nhân: Nhân viên · UC07, UC11</text>
+    <rect x="18" y="101" width="155" height="293" rx="9" fill="#f7f8fc"/>
+    <text x="32" y="126" class="ink label">HỘP THƯ</text>
+    <rect x="28" y="141" width="135" height="65" rx="8" fill="#e9eaff" stroke="#c7c9ff"/>
+    <text x="39" y="164" class="ink label">Mai Anh · DEMO</text>
+    <text x="39" y="185" class="muted small">Chờ nhân viên · Web</text>
+    <text x="32" y="238" class="muted small">Minh An · DEMO</text>
+    <text x="32" y="259" class="muted small">Đã tiếp nhận · Web</text>
+    <text x="32" y="294" class="muted small">Thu Hà · DEMO</text>
+    <text x="32" y="315" class="muted small">Đã giải quyết · Web</text>
+    <rect x="190" y="101" width="287" height="293" rx="9" fill="#fff"/>
+    <text x="208" y="129" class="ink label">Mai Anh · DEMO</text>
+    <rect x="208" y="144" width="248" height="39" rx="7" fill="#fef8e7"/>
+    <text x="220" y="169" class="muted small">AI đã dừng · Chờ tiếp nhận</text>
+    <rect x="208" y="198" width="208" height="54" rx="9" fill="#f2f5fb"/>
+    <text x="221" y="221" class="ink small">Tôi cần nhân viên hỗ trợ</text>
+    <text x="221" y="240" class="ink small">về điều kiện đổi trả.</text>
+    <rect x="208" y="270" width="133" height="38" rx="8" fill="#6246ea"/>
+    <text x="227" y="294" style="font:700 14px Arial,sans-serif;fill:#fff">Tiếp nhận</text>
+    <text x="208" y="337" class="muted small">Ticket: ưu tiên · SLA · lịch sử</text>
+    <text x="208" y="360" class="muted small">Rỗng: không có hội thoại phù hợp</text>
+    <text x="208" y="381" class="muted small">Lỗi: quyền / tranh chấp / mất mạng</text>
+  </g>
+
+  <!-- Flow connectors -->
+  <path d="M326 322 H346" stroke="#6246ea" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M721 322 H741" stroke="#6246ea" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M1036 322 H1056" stroke="#6246ea" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Screen 5 -->
+  <g transform="translate(200 590)">
+    <rect width="1200" height="470" rx="14" class="panel"/>
+    <text x="24" y="36" class="purple label">05 · NHÂN VIÊN TRẢ LỜI VÀ HOÀN TẤT TICKET</text>
+    <text x="24" y="66" class="ink title">Một hội thoại, cùng lịch sử từ bàn giao đến giải quyết</text>
+    <text x="24" y="91" class="muted small">Tác nhân: Nhân viên phụ trách · UC08, UC09 · Ticket được xem trong chi tiết hội thoại, không có trang ticket độc lập.</text>
+    <rect x="24" y="118" width="1152" height="282" rx="10" fill="#f8f9fc" stroke="#dbe2ef"/>
+    <rect x="44" y="143" width="480" height="72" rx="10" fill="#fff" stroke="#e1e6f0"/>
+    <text x="62" y="169" class="ink label">KHÁCH HÀNG</text>
+    <text x="62" y="195" class="ink body">Tôi muốn gặp nhân viên để được tư vấn thêm.</text>
+    <rect x="650" y="232" width="500" height="85" rx="10" fill="#e9edff" stroke="#d8ddf5"/>
+    <text x="670" y="258" class="purple label">NHÂN VIÊN</text>
+    <text x="670" y="283" class="ink body">Mình sẽ kiểm tra chính sách và hướng dẫn bạn</text>
+    <text x="670" y="305" class="ink body">các bước cung cấp mã đơn, hóa đơn.</text>
+    <rect x="44" y="336" width="1110" height="45" rx="8" fill="#fff" stroke="#cfd8e8"/>
+    <text x="63" y="364" class="muted body">Ghi chú nội bộ bắt buộc khi giải quyết hoặc đóng ticket...</text>
+    <rect x="24" y="416" width="1152" height="36" rx="7" fill="#fff1d6"/>
+    <text x="42" y="440" style="font:14px Arial,sans-serif;fill:#8a4b08">Giải quyết: có thể nhắn tiếp và phát sinh lượt hỗ trợ mới · Đóng: kết thúc hội thoại hiện tại. Cả hai yêu cầu ghi chú nội bộ.</text>
+  </g>
+  <path d="M1312 540 C1312 566 1240 575 1170 590" fill="none" stroke="#6246ea" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="44" y="1090" class="muted small">Ghi chú thiết kế: các màn hình và dữ liệu trong sơ đồ là minh họa nghiệp vụ. Đối chiếu trạng thái thực tế tại `DanhMucManHinh_Mockup.md` và ảnh chụp bản đã triển khai.</text>
+</svg>
