@@ -1,6 +1,10 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History } from 'lucide-react';
+
+function GoogleIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
+}
 import './widget.css';
 import MessageInput from './MessageInput';
 import './portal.css';
@@ -40,9 +44,10 @@ export default function Widget() {
   const [error, setError] = useState('');
   const [connectionError, setConnectionError] = useState('');
   const [notice, setNotice] = useState('');
+  const [successModal, setSuccessModal] = useState(false);
   const [retry, setRetry] = useState(0);
   const [view, setView] = useState('messages');
-  const [authMode, setAuthMode] = useState(() => new URLSearchParams(window.location.search).get('embed') === '1' ? 'guest' : 'login');
+  const [authMode, setAuthMode] = useState('login');
   const [orderId, setOrderId] = useState('');
   const [orderResult, setOrderResult] = useState(null);
   const [orderError, setOrderError] = useState('');
@@ -66,7 +71,11 @@ export default function Widget() {
   }, []);
   function emailComplete(mode, message) {
     if (mode === 'reset') clearIdentity(message);
-    else setNotice(message);
+    else if (mode === 'register-code') {
+      setSuccessModal(true);
+      setEmailAction(null); setAuthMode('guest'); setView('messages'); setRetry(n => n + 1);
+      return;
+    } else setNotice(message);
     setEmailAction(null); setRetry(n => n + 1);
   }
   function apply(data, version) {
@@ -157,6 +166,7 @@ export default function Widget() {
     const submission = pending?.content === content ? pending : { content, client_message_id: crypto.randomUUID() };
     saveDrafts(previous => ({ ...previous, pending: { ...previous.pending, [targetId]: submission } }));
     const submitted = draft.trim() === content ? draft : null;
+    if (submitted !== null) setDraft('');
     const version = ++sequence.current;
     setBusy(true); setError(''); setNotice(''); nearBottom.current = true;
     try {
@@ -167,8 +177,10 @@ export default function Widget() {
         return { ...previous, pending: nextPending, drafts: previous.drafts[targetId] === submitted ? { ...previous.drafts, [targetId]: '' } : previous.drafts };
       });
       if (version === sequence.current && data.ai_error) setNotice('Tin nhắn đã được lưu nhưng AI chưa trả lời được. Bạn có thể chọn Gặp nhân viên.');
-    } catch (error) { fail(error, version); }
-    finally { setBusy(false); }
+    } catch (error) {
+      if (submitted !== null) saveDrafts(previous => previous.drafts[targetId] === '' ? { ...previous, drafts: { ...previous.drafts, [targetId]: submitted } } : previous);
+      fail(error, version);
+    } finally { setBusy(false); }
   }
   async function handoff() {
     if (handoffBusy || historyLoading) return;
@@ -194,7 +206,16 @@ export default function Widget() {
         email: fields.get('email').trim(), password: fields.get('password'),
         ...(authMode === 'register' && { display_name: fields.get('display_name').trim() })
       }) });
-      apply(data, version); setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
+      apply(data, version); setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : authMode === 'register' ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
+      if (authMode === 'register' && data.registration_email_pending) {
+        try {
+          await request('/account/registration-verification-request', { method: 'POST' });
+          setEmailAction({ mode: 'register-code' });
+        } catch (mailError) {
+          setNotice('Tạo tài khoản thành công, nhưng chưa gửi được mã xác minh. Kiểm tra cấu hình email rồi thử gửi lại.');
+          setError(mailError.message);
+        }
+      }
       handoffId.current = null;
     } catch (error) { setError(error.message); }
     finally { setBusy(false); }
@@ -263,19 +284,20 @@ export default function Widget() {
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
     <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
       {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}</header>
+    {successModal && <div className="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successTitle"><div className="successModal"><div className="successIcon">✓</div><h2 id="successTitle">Đăng ký tài khoản thành công</h2><p>Email đã được xác minh. Bạn có thể bắt đầu sử dụng tài khoản ngay.</p><button onClick={() => setSuccessModal(false)}>Tiếp tục</button></div></div>}
     {session && <div className="widgetAccountBar"><span>{session.account ? session.account.email : 'Khách vãng lai'}{session.account && !session.account.email_verified && !embedded && <button onClick={() => setView('account')}>Xác minh email</button>}</span>{session.account ? <button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button> : <button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button>}</div>}
     {loading ? <p className="widgetState" role="status">Đang kết nối...</p> : !session || authMode !== 'guest' ? <section className="widgetWelcome">
       <span className="widgetEyebrow">RAG SUPPORT · KHÁCH HÀNG</span><h2>{authMode === 'register' ? 'Tạo tài khoản' : authMode === 'login' ? 'Chào mừng trở lại' : 'Bạn cần hỗ trợ điều gì?'}</h2>
       <p>{authMode === 'guest' ? 'Hỏi chính sách hoặc kết nối với nhân viên. Bạn có thể trò chuyện ngay mà không cần tài khoản.' : 'Đăng nhập để giữ lịch sử và tiếp tục trò chuyện trên nhiều thiết bị.'}</p>
-      <div className="customerAuthTabs" aria-label="Cách bắt đầu">{[['guest', session ? 'Quay lại chat' : 'Khách vãng lai'], ['login', 'Đăng nhập'], ['register', 'Đăng ký']].map(([mode, label]) => <button type="button" key={mode} aria-pressed={authMode === mode} disabled={busy} onClick={() => openAuth(mode)}>{label}</button>)}</div>
-      {authMode === 'guest' ? <form onSubmit={start}><label htmlFor="widgetName">Tên bạn</label><input id="widgetName" autoComplete="given-name" maxLength={80} required value={name} onChange={e => setName(e.target.value)} disabled={busy} /><button disabled={busy || !name.trim()}>{busy ? 'Đang kết nối...' : 'Bắt đầu trò chuyện'}</button><small>Tên hiển thị không xác minh danh tính. Phiên khách giữ tối đa 24 giờ.</small></form> : <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
+      <div className="customerAuthTabs" aria-label="Cách bắt đầu">{[['login', 'Đăng nhập'], ['register', 'Đăng ký']].map(([mode, label]) => <button type="button" key={mode} aria-pressed={authMode === mode} disabled={busy} onClick={() => openAuth(mode)}>{label}</button>)}</div>
+      <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
         {authMode === 'register' && <label>Tên hiển thị<input name="display_name" autoComplete="name" required maxLength={80} /></label>}
         <label>Email<input name="email" type="email" required maxLength={254} autoComplete="username" placeholder="ban@example.com" /></label>
-        <label>Mật khẩu<input name="password" type="password" required minLength={authMode === 'register' ? 15 : 1} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} /></label>
-        {authMode === 'register' && <><label>Nhập lại mật khẩu<input name="confirm" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></label><small>Mật khẩu 15–128 ký tự. Email chưa được xác minh và không tự cấp quyền xem đơn.</small></>}
+        <label>Mật khẩu<input name="password" type="password" required minLength={authMode === 'register' ? 8 : 1} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} /></label>
+        {authMode === 'register' && <><label>Nhập lại mật khẩu<input name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" /></label><small>Mật khẩu: tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Email chưa được xác minh và không tự cấp quyền xem đơn.</small></>}
         <button>{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
-      </fieldset></form>}
-      {authMode === 'login' && <button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button>}{authMode !== 'guest' && <small>Xác minh email trong mục Tài khoản để dùng khôi phục mật khẩu. Lịch sử phiên khách không tự ghép vào tài khoản.</small>}
+      </fieldset></form>
+      {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button type="button" className="authGoogle" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.') }><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}{authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}{authMode !== 'guest' && <small>Xác minh email trong mục Tài khoản để dùng khôi phục mật khẩu. Lịch sử phiên khách không tự ghép vào tài khoản.</small>}
       {notice && <p role="status">{notice}</p>}{error && <div className="widgetError" role="alert"><p>{error}</p>{authMode === 'guest' && <button onClick={() => { setError(''); setRetry(n => n + 1); }} disabled={busy}>Thử kết nối lại</button>}</div>}
     </section> : <>
       <nav className="widgetHistory" aria-label="Phân trang tin nhắn" aria-busy={historyLoading}>
@@ -321,17 +343,18 @@ export default function Widget() {
   if (!loading && (!session || authMode !== 'guest')) return <AuthLayout>
     <h1>{authMode === 'register' ? 'Tạo tài khoản của bạn' : authMode === 'login' ? 'Chào mừng trở lại!' : 'Bạn cần hỗ trợ điều gì?'}</h1>
     <p className="authLead">{authMode === 'guest' ? 'Bắt đầu trò chuyện với AI hoặc kết nối với nhân viên.' : 'Đăng nhập để lưu lịch sử và tiếp tục trò chuyện trên mọi thiết bị.'}</p>
-    <div className="authTabs" aria-label="Cách bắt đầu">{[['login', 'Đăng nhập'], ['register', 'Đăng ký'], ['guest', session ? 'Quay lại chat' : 'Khách vãng lai']].map(([mode, label]) => <button type="button" key={mode} aria-pressed={authMode === mode} disabled={busy} onClick={() => openAuth(mode)}>{label}</button>)}</div>
-    {authMode === 'guest' ? <form onSubmit={start}><fieldset disabled={busy}><AuthInput label="Tên bạn" name="display_name" autoComplete="given-name" maxLength={80} required value={name} onChange={e => setName(e.target.value)} placeholder="Bạn muốn được gọi là gì?" /><button className="authSubmit" disabled={busy || !name.trim()}><ArrowRight size={18} />{busy ? 'Đang kết nối...' : 'Bắt đầu trò chuyện'}</button><small>Tên hiển thị không xác minh danh tính. Phiên khách giữ tối đa 24 giờ.</small></fieldset></form> : <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
+    <div className="authTabs" aria-label="Cách bắt đầu">{[['login', 'Đăng nhập'], ['register', 'Đăng ký']].map(([mode, label]) => <button type="button" key={mode} aria-pressed={authMode === mode} disabled={busy} onClick={() => openAuth(mode)}>{label}</button>)}</div>
+    <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
       {authMode === 'register' && <AuthInput label="Tên hiển thị" name="display_name" autoComplete="name" required maxLength={80} placeholder="Nhập tên của bạn" />}
       <AuthInput label="Email" name="email" type="email" required maxLength={254} autoComplete="username" placeholder="Nhập địa chỉ email của bạn" />
-      <AuthInput label="Mật khẩu" name="password" type="password" required minLength={authMode === 'register' ? 15 : 1} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} placeholder={authMode === 'register' ? 'Từ 15 đến 128 ký tự' : 'Nhập mật khẩu'} />
-      {authMode === 'register' && <><AuthInput label="Nhập lại mật khẩu" name="confirm" type="password" required minLength={15} maxLength={128} autoComplete="new-password" placeholder="Nhập lại mật khẩu của bạn" /><small>Email chưa được xác minh và không tự cấp quyền xem đơn. Lịch sử khách vãng lai không tự ghép vào tài khoản.</small></>}
+      <AuthInput label="Mật khẩu" name="password" type="password" required minLength={authMode === 'register' ? 8 : 1} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} placeholder={authMode === 'register' ? 'Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt' : 'Nhập mật khẩu'} />
+      {authMode === 'register' && <><AuthInput label="Nhập lại mật khẩu" name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" placeholder="Nhập lại mật khẩu của bạn" /><small>Email chưa được xác minh và không tự cấp quyền xem đơn. Lịch sử khách vãng lai không tự ghép vào tài khoản.</small></>}
       <button className="authSubmit"><ArrowRight size={18} />{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
-    </fieldset></form>}
+    </fieldset></form>
     {notice && <p className="authFeedback" role="status">{notice}</p>}{error && <p className="authFeedback" role="alert">{error}</p>}
-    {authMode === 'login' && <button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button>}
-    <div className="authNote"><ShieldCheck size={21} /><div>{authMode === 'guest' ? 'Trò chuyện nhanh, không cần tài khoản' : 'Lịch sử của bạn, luôn được kết nối'}<small>{authMode === 'guest' ? 'Đăng ký khi bạn muốn lưu lịch sử lâu dài và dùng trên nhiều thiết bị.' : 'Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.'}</small></div></div>
+    {authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}
+    {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button className="authGoogle" type="button" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.')}><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}
+    <div className="authNote"><ShieldCheck size={21} /><div>Lịch sử của bạn, luôn được kết nối<small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small></div></div>
     {authMode === 'register' && <p className="authHelp">Sau khi đăng ký, xác minh email trong mục Tài khoản để dùng khôi phục mật khẩu.</p>}
   </AuthLayout>;
   const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];

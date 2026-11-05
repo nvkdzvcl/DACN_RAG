@@ -39,15 +39,20 @@ def mail_settings():
 
 
 def send_link(settings, email, purpose, token):
-    action = 'Xác minh email' if purpose == 'verify' else 'Đặt lại mật khẩu'
-    minutes = 60 if purpose == 'verify' else 15
-    url = settings['origin'] + '/chat#' + purpose + '=' + token
+    if purpose == 'register':
+        subject = 'AI Support - Xác minh email đăng ký'
+        body = f'Mã xác minh email AI Support của bạn là: {token}\n\nMã có hạn 15 phút và chỉ dùng một lần. Không chia sẻ mã này. Nếu bạn không đăng ký tài khoản, hãy bỏ qua thư này.\n'
+    else:
+        action = 'Xác minh email' if purpose == 'verify' else 'Đặt lại mật khẩu'
+        minutes = 60 if purpose == 'verify' else 15
+        url = settings['origin'] + '/chat#' + purpose + '=' + token
+        extra = ('Bạn cần nhập mật khẩu hiện tại để xác minh. Nếu không tự tạo tài khoản, hãy bỏ qua thư này.'
+                 if purpose == 'verify' else 'Sau khi đặt lại mật khẩu, mọi phiên đăng nhập cũ sẽ hết hiệu lực.')
+        subject = 'AI Support - ' + action
+        body = f'{action} cho tài khoản AI Support.\n\n{url}\n\nLiên kết có hạn {minutes} phút, dùng một lần. {extra}\n\nKhông chia sẻ liên kết này. Nếu không yêu cầu, hãy bỏ qua thư.\n'
     message = EmailMessage()
-    message['Subject'] = 'AI Support - ' + action
-    message['From'], message['To'] = settings['sender'], email
-    extra = ('Bạn cần nhập mật khẩu hiện tại để xác minh. Nếu không tự tạo tài khoản, hãy bỏ qua thư này.'
-             if purpose == 'verify' else 'Sau khi đặt lại mật khẩu, mọi phiên đăng nhập cũ sẽ hết hiệu lực.')
-    message.set_content(f'{action} cho tài khoản AI Support.\n\n{url}\n\nLiên kết có hạn {minutes} phút, dùng một lần. {extra}\n\nKhông chia sẻ liên kết này. Nếu không yêu cầu, hãy bỏ qua thư.\n')
+    message['Subject'], message['From'], message['To'] = subject, settings['sender'], email
+    message.set_content(body)
     context = ssl.create_default_context()
     factory = smtplib.SMTP_SSL if settings['security'] == 'ssl' else smtplib.SMTP
     options = {'context': context} if settings['security'] == 'ssl' else {}
@@ -61,7 +66,6 @@ def send_link(settings, email, purpose, token):
         if smtp.send_message(message):
             raise smtplib.SMTPException('Mail not accepted')
 
-
 def deliver_challenge(engine, settings, purpose, *, account_id=None, email=None):
     # ponytail: in-process background delivery; use a durable outbox before multi-worker or guaranteed mail delivery.
     digest = None
@@ -73,7 +77,9 @@ def deliver_challenge(engine, settings, purpose, *, account_id=None, email=None)
                 return
             db.execute(update(CustomerAccount).where(CustomerAccount.id == account.id).values(email_verified=CustomerAccount.email_verified))
             db.refresh(account)
-            if (purpose == 'reset') != account.email_verified:
+            if purpose == 'reset' and not account.email_verified:
+                return
+            if purpose in {'verify', 'register'} and account.email_verified:
                 return
             now = int(time.time())
             recent = db.query(CustomerEmailToken).filter(CustomerEmailToken.account_id == account.id,
@@ -81,10 +87,10 @@ def deliver_challenge(engine, settings, purpose, *, account_id=None, email=None)
             if recent.count() >= 3 or recent.filter(CustomerEmailToken.created_at > now - 60).first():
                 return
             db.execute(delete(CustomerEmailToken).where(CustomerEmailToken.created_at < now - 86400))
-            token = secrets.token_urlsafe(32)
+            token = f'{secrets.randbelow(1000000):06d}' if purpose == 'register' else secrets.token_urlsafe(32)
             digest = token_hash(token)
             db.add(CustomerEmailToken(token_hash=digest, account_id=account.id, purpose=purpose,
-                   created_at=now, expires_at=now + (3600 if purpose == 'verify' else 900)))
+                   created_at=now, expires_at=now + (900 if purpose == 'register' else 3600 if purpose == 'verify' else 900)))
             recipient = account.email
             db.commit()
         send_link(settings, recipient, purpose, token)

@@ -67,6 +67,36 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertIn('HttpOnly', response.headers['set-cookie'])
         self.assertIn('SameSite=strict', response.headers['set-cookie'])
 
+    def test_registration_email_code_is_six_digits_and_single_use(self):
+        delivery = self.mail_config()
+        self.register()
+        response = self.client.post(ACCOUNT + '/registration-verification-request')
+        self.assertEqual(response.status_code, 202, response.text)
+        code = delivery.call_args.args[3]
+        self.assertRegex(code, r'^\d{6}$')
+        self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': '000000'}).status_code, 400)
+        self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': code}).status_code, 200)
+        self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': code}).status_code, 400)
+        self.assertTrue(self.client.get(COOKIE_PATH + '/session').json()['account']['email_verified'])
+
+    def test_registration_email_code_can_be_resent_with_rate_limit(self):
+        delivery = self.mail_config()
+        self.register()
+        self.assertEqual(self.client.post(ACCOUNT + '/registration-verification-request').status_code, 202)
+        self.assertEqual(self.client.post(ACCOUNT + '/registration-verification-request').status_code, 202)
+        self.assertEqual(self.client.post(ACCOUNT + '/registration-verification-request').status_code, 202)
+        self.assertEqual(self.client.post(ACCOUNT + '/registration-verification-request').status_code, 429)
+        self.assertEqual(delivery.call_count, 1)
+
+    def test_registration_requires_password_complexity(self):
+        for password in ('short', 'abcdefgh', 'ABCDEFGH', 'Abcdefgh', 'Abcdefg1'):
+            response = self.client.post(ACCOUNT + '/register', json={
+                'email': f'{password}@example.com', 'password': password, 'display_name': 'Test'})
+            self.assertEqual(response.status_code, 422, password)
+        valid = self.client.post(ACCOUNT + '/register', json={
+            'email': 'valid@example.com', 'password': 'Abcdefg1!', 'display_name': 'Test'})
+        self.assertEqual(valid.status_code, 201, valid.text)
+
     def test_validation_duplicate_csrf_and_rate_limit(self):
         payload = {'email': 'customer@example.com', 'password': PASSWORD, 'display_name': 'Test'}
         self.assertEqual(self.client.post(ACCOUNT + '/register', json=payload,

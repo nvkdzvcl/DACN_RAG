@@ -51,6 +51,10 @@ class Register(Credentials):
             raise ValueError('Vui lòng nhập tên hiển thị.')
         return value.strip()
 
+class RegistrationCode(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    code: str = Field(min_length=6, max_length=6, pattern=r'\d{6}')
+
 class ChangePassword(BaseModel):
     model_config = ConfigDict(extra='forbid')
     current_password: SecretStr
@@ -58,8 +62,17 @@ class ChangePassword(BaseModel):
 
 def password_text(secret, minimum=1):
     value = secret.get_secret_value()
-    if not minimum <= len(value) <= 128 or not value.strip():
-        raise HTTPException(422, f'Mật khẩu phải có {minimum}–128 ký tự và không chỉ gồm khoảng trắng.')
+    if not value.strip() or len(value) < minimum:
+        raise HTTPException(422, f'Mật khẩu phải có tối thiểu {minimum} ký tự và không chỉ gồm khoảng trắng.')
+    if len(value) > 128:
+        raise HTTPException(422, 'Mật khẩu không được vượt quá 128 ký tự.')
+    return value
+
+def new_password_text(secret):
+    value = password_text(secret, 8)
+    if not (re.search(r'[A-Z]', value) and re.search(r'[a-z]', value)
+            and re.search(r'\d', value) and re.search(r'[^A-Za-z0-9\s]', value)):
+        raise HTTPException(422, 'Mật khẩu phải có chữ hoa, chữ thường, chữ số và ký tự đặc biệt.')
     return value
 
 def require_account(session=Depends(require_session)):
@@ -92,7 +105,7 @@ def issue_session(db, request, response, account):
 @router.post('/register', status_code=201)
 def register(payload: Register, request: Request, response: Response, db: Session = Depends(get_db)):
     rate_limit(request, 'customer-register', 6)
-    password = password_text(payload.password, 15)
+    password = new_password_text(payload.password)
     customer = Customer(id=str(uuid4()), display_name=payload.display_name)
     account = CustomerAccount(id=str(uuid4()), customer_id=customer.id, email=payload.email,
                               password_hash=hash_password(password))
@@ -101,7 +114,9 @@ def register(payload: Register, request: Request, response: Response, db: Sessio
     db.add(account)
     try:
         db.flush()
-        return issue_session(db, request, response, account)
+        result = issue_session(db, request, response, account)
+        result['registration_email_pending'] = True
+        return result
     except IntegrityError:
         db.rollback()
         raise HTTPException(409, 'Không thể đăng ký bằng email này. Nếu đã có tài khoản, hãy đăng nhập.')
@@ -135,7 +150,7 @@ def change_password(payload: ChangePassword, request: Request, response: Respons
                     session=Depends(require_account), db: Session = Depends(get_db)):
     rate_limit(request, 'customer-password', 5)
     current = password_text(payload.current_password)
-    new = password_text(payload.new_password, 15)
+    new = new_password_text(payload.new_password)
     account = db.get(CustomerAccount, session.account_id)
     if not verify_password(current, account.password_hash):
         raise HTTPException(400, 'Mật khẩu hiện tại không đúng.')
@@ -227,6 +242,44 @@ def email_status():
     return {'configured': enabled}
 
 
+@router.post('/verify-registration')
+def verify_registration(payload: RegistrationCode, request: Request,
+                        session=Depends(require_account), db: Session = Depends(get_db)):
+    rate_limit(request, 'customer-register-verify', 10)
+    account = db.get(CustomerAccount, session.account_id)
+    if account.email_verified:
+        raise HTTPException(400, 'Email đã được xác minh hoặc mã đã được sử dụng.')
+    now = int(time.time())
+    challenge = db.query(CustomerEmailToken).filter(
+        CustomerEmailToken.account_id == session.account_id,
+        CustomerEmailToken.purpose == 'register',
+        CustomerEmailToken.used.is_(False),
+        CustomerEmailToken.expires_at > now,
+    ).order_by(CustomerEmailToken.created_at.desc()).first()
+    if not challenge or challenge.token_hash != token_hash(payload.code):
+        raise HTTPException(400, 'Mã xác minh không đúng hoặc đã hết hạn.')
+    consumed = db.execute(update(CustomerEmailToken).where(
+        CustomerEmailToken.token_hash == challenge.token_hash,
+        CustomerEmailToken.used.is_(False),
+    ).values(used=True))
+    if consumed.rowcount != 1:
+        raise HTTPException(400, 'Mã xác minh không còn hiệu lực.')
+    db.execute(update(CustomerAccount).where(CustomerAccount.id == session.account_id).values(email_verified=True))
+    db.execute(update(CustomerEmailToken).where(
+        CustomerEmailToken.account_id == session.account_id,
+        CustomerEmailToken.purpose.in_(['register', 'verify']),
+    ).values(used=True))
+    db.commit()
+    return {'message': 'Đã xác minh email thành công.'}
+
+@router.post('/registration-verification-request', status_code=202)
+def registration_verification_request(request: Request, background: BackgroundTasks,
+                                      session=Depends(require_account), db: Session = Depends(get_db)):
+    rate_limit(request, 'customer-register-verify-request', 3)
+    settings = configured_mail()
+    background.add_task(deliver_challenge, db.get_bind(), settings, 'register', account_id=session.account_id)
+    return {'message': 'Đã gửi mã xác minh 6 số. Kiểm tra hộp thư và thư rác.'}
+
 @router.post('/verification-request', status_code=202)
 def request_verification(request: Request, background: BackgroundTasks,
                          session=Depends(require_account), db: Session = Depends(get_db)):
@@ -263,7 +316,7 @@ def forgot_password(payload: EmailAddress, request: Request, background: Backgro
 @router.post('/reset-password')
 def reset_password(payload: ResetPassword, request: Request, response: Response, db: Session = Depends(get_db)):
     rate_limit(request, 'customer-reset', 10)
-    password = password_text(payload.new_password, 15)
+    password = new_password_text(payload.new_password)
     challenge, account = challenge_account(db, payload.token, 'reset')
     if not account.email_verified:
         raise HTTPException(400, 'Email chưa được xác minh.')

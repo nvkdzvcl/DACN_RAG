@@ -53,3 +53,4 @@
   .widgetFooter{padding-bottom:max(12px,env(safe-area-inset-bottom))}
   .widgetComposer textarea,.portalOrderForm input{font-size:16px}
 }
+.authRemember{display:flex;align-items:center;gap:8px;margin:14px 0;color:var(--auth-muted)}.authRemember input{width:16px;height:16px}.authDivider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--auth-muted)}.authDivider:before,.authDivider:after{content:"";height:1px;flex:1;background:#dfe3f0}.authGoogle{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 18px;border:1px solid #d6ddeb;border-radius:10px;background:white;color:#1f3560;font-weight:600;cursor:pointer}.authGoogle:first-letter{color:#4285f4;font-size:19px}.authGoogle:hover{background:#f7f8ff}

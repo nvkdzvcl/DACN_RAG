@@ -14,6 +14,7 @@ import { clearDrafts, useDrafts } from './drafts';
 import { Mail } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
+const fieldLabels = { id: 'Mã đơn', tracking_code: 'Mã vận đơn', customer_id: 'Khách hàng', status: 'Trạng thái' };
 const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
 const priorities = { normal: 'Bình thường', high: 'Cao', urgent: 'Khẩn cấp', low: 'Thấp' };
 const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Kết thúc trước phản hồi', none: 'Chưa có SLA' };
@@ -41,7 +42,7 @@ async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}/api/v1${path}`, { ...options, credentials: 'same-origin', headers: { ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), 'X-CSRF-Protection': '1', ...options.headers } });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(response.status === 401 ? 'Phiên đăng nhập hết hạn hoặc thông tin đăng nhập không đúng.' : response.status === 403 ? 'Tài khoản không có quyền thực hiện thao tác.' : response.status === 429 ? 'Gửi yêu cầu quá nhiều lần. Vui lòng chờ rồi thử lại.' : typeof data.detail === 'string' ? data.detail : response.status === 422 && Array.isArray(data.detail) ? `Dữ liệu không hợp lệ: ${data.detail.map(item => item.loc?.at(-1)).filter(Boolean).join(', ') || 'kiểm tra các trường đã nhập'}.` : `Yêu cầu thất bại (HTTP ${response.status}).`);
+    const error = new Error(response.status === 401 ? 'Phiên đăng nhập hết hạn hoặc thông tin đăng nhập không đúng.' : response.status === 403 ? 'Tài khoản không có quyền thực hiện thao tác.' : response.status === 429 ? 'Gửi yêu cầu quá nhiều lần. Vui lòng chờ rồi thử lại.' : typeof data.detail === 'string' ? data.detail : response.status === 422 && Array.isArray(data.detail) ? `Dữ liệu không hợp lệ: ${data.detail.map(item => fieldLabels[item.loc?.at(-1)] || item.loc?.at(-1)).filter(Boolean).join(', ') || 'kiểm tra các trường đã nhập'}.` : `Yêu cầu thất bại (HTTP ${response.status}).`);
     error.status = response.status;
     throw error;
   }
@@ -350,12 +351,14 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     const targetId = activeId;
     if (pendingReplies.current[targetId]?.content !== content) pendingReplies.current[targetId] = {content, client_message_id:crypto.randomUUID()};
     saveDrafts(previous => ({ ...previous, pending: { ...pendingReplies.current } }));
+    const submittedDraft = draft.trim() === content ? draft : null;
+    if (submittedDraft !== null) setDrafts(previous => previous[targetId] === submittedDraft ? { ...previous, [targetId]: '' } : previous);
     if (await postAction('/messages', pendingReplies.current[targetId])) {
       delete pendingReplies.current[targetId];
       saveDrafts(previous => ({ ...previous, pending: { ...pendingReplies.current } }));
       setMessageHistory({ id: targetId, cursors: [] });
       setDrafts(previous => previous[targetId] === draft && draft.trim() === content ? { ...previous, [targetId]: '' } : previous);
-    }
+    } else if (submittedDraft !== null) setDrafts(previous => previous[targetId] === '' ? { ...previous, [targetId]: submittedDraft } : previous);
   }
   function changeFilter(setter, value) { setter(value); setOffset(0); }
   function navigate(target, filters = {}) {

@@ -32,6 +32,7 @@ export function EmailVerification({ account, request, onExpired }) {
 
 export default function CustomerEmail({ action, request, onBack, onComplete }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
+  const [resendBusy, setResendBusy] = useState(false);
   const [configured, setConfigured] = useState(null);
   const mode = action.mode;
   useEffect(() => {
@@ -45,19 +46,26 @@ export default function CustomerEmail({ action, request, onBack, onComplete }) {
     event.preventDefault(); const fields = new FormData(event.currentTarget); setError(''); setNotice('');
     if (mode === 'reset' && fields.get('new_password') !== fields.get('confirm')) { setError('Mật khẩu nhập lại chưa khớp.'); return; }
     setBusy(true);
-    const endpoint = mode === 'forgot' ? 'forgot-password' : mode === 'verify' ? 'verify-email' : 'reset-password';
-    const payload = mode === 'forgot' ? { email: fields.get('email').trim() } : mode === 'verify' ? { token: action.token, password: fields.get('password') } : { token: action.token, new_password: fields.get('new_password') };
+    const endpoint = mode === 'forgot' ? 'forgot-password' : mode === 'verify' ? 'verify-email' : mode === 'register-code' ? 'verify-registration' : 'reset-password';
+    const payload = mode === 'forgot' ? { email: fields.get('email').trim() } : mode === 'verify' ? { token: action.token, password: fields.get('password') } : mode === 'register-code' ? { code: fields.get('code') } : { token: action.token, new_password: fields.get('new_password') };
     try {
       const data = await request('/account/' + endpoint, { method: 'POST', body: JSON.stringify(payload) });
       if (mode === 'forgot') setNotice(data.message); else onComplete(mode, data.message);
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
   }
-  return <AuthLayout><h1>{mode === 'forgot' ? 'Quên mật khẩu?' : mode === 'verify' ? 'Xác minh email của bạn' : 'Đặt lại mật khẩu'}</h1><p className="authLead">{mode === 'forgot' ? 'Nhập email đã xác minh để nhận liên kết đặt lại mật khẩu.' : mode === 'verify' ? 'Nhập mật khẩu của tài khoản đã yêu cầu xác minh để xác nhận quyền sở hữu email.' : 'Chọn mật khẩu mới. Mọi phiên đăng nhập cũ sẽ hết hiệu lực sau khi đổi.'}</p>
+  async function resendRegistrationCode() {
+    setResendBusy(true); setError(''); setNotice('');
+    try { const data = await request('/account/registration-verification-request', { method: 'POST' }); setNotice(data.message); }
+    catch (e) { setError(e.message); }
+    finally { setResendBusy(false); }
+  }
+  return <AuthLayout><h1>{mode === 'forgot' ? 'Quên mật khẩu?' : mode === 'verify' ? 'Xác minh email của bạn' : mode === 'register-code' ? 'Xác minh email đăng ký' : 'Đặt lại mật khẩu'}</h1><p className="authLead">{mode === 'forgot' ? 'Nhập email đã xác minh để nhận liên kết đặt lại mật khẩu.' : mode === 'verify' ? 'Nhập mật khẩu của tài khoản đã yêu cầu xác minh để xác nhận quyền sở hữu email.' : 'Chọn mật khẩu mới. Mọi phiên đăng nhập cũ sẽ hết hiệu lực sau khi đổi.'}</p>
     <form onSubmit={submit} aria-busy={busy}><fieldset disabled={busy}>
-      {mode === 'forgot' ? <AuthInput label="Email" name="email" type="email" required maxLength={254} autoComplete="email" placeholder="Email đã xác minh của bạn" /> : mode === 'verify' ? <AuthInput label="Mật khẩu hiện tại" name="password" type="password" required maxLength={128} autoComplete="current-password" /> : <><AuthInput label="Mật khẩu mới" name="new_password" type="password" required minLength={15} maxLength={128} autoComplete="new-password" placeholder="Từ 15 đến 128 ký tự" /><AuthInput label="Nhập lại mật khẩu mới" name="confirm" type="password" required minLength={15} maxLength={128} autoComplete="new-password" /></>}
-      <button className="authSubmit" disabled={busy || mode === 'forgot' && !configured}><ArrowRight size={18} />{busy ? 'Đang xử lý...' : mode === 'forgot' ? 'Gửi liên kết khôi phục' : mode === 'verify' ? 'Xác minh email' : 'Lưu mật khẩu mới'}</button>
+      {mode === 'register-code' ? <AuthInput label="Mã xác minh 6 số" name="code" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required autoComplete="one-time-code" placeholder="Nhập mã 6 số" /> : mode === 'forgot' ? <AuthInput label="Email" name="email" type="email" required maxLength={254} autoComplete="email" placeholder="Email đã xác minh của bạn" /> : mode === 'verify' ? <AuthInput label="Mật khẩu hiện tại" name="password" type="password" required maxLength={128} autoComplete="current-password" /> : <><AuthInput label="Mật khẩu mới" name="new_password" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" placeholder="Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt" /><AuthInput label="Nhập lại mật khẩu mới" name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" /></>}
+      <button className="authSubmit" disabled={busy || mode === 'forgot' && !configured}><ArrowRight size={18} />{busy ? 'Đang xử lý...' : mode === 'forgot' ? 'Gửi liên kết khôi phục' : mode === 'verify' ? 'Xác minh email' : mode === 'register-code' ? 'Xác minh email' : 'Lưu mật khẩu mới'}</button>
     </fieldset></form>
+    {mode === 'register-code' && <><p className="authFeedback" role="status">Mã xác minh có hạn 15 phút và chỉ dùng một lần.</p><button className="authBack" type="button" onClick={resendRegistrationCode} disabled={busy || resendBusy}>{resendBusy ? 'Đang gửi lại...' : 'Gửi lại mã xác minh'}</button></>}
     {mode === 'forgot' && configured === false && <p className="authFeedback" role="status">Chức năng gửi email chưa sẵn sàng. Vui lòng liên hệ cửa hàng hoặc thử lại sau.</p>}
     {error && <p className="authFeedback" role="alert">{error}</p>}{notice && <p className="authFeedback" role="status">{notice}</p>}
     <button className="authBack" type="button" onClick={onBack} disabled={busy}><ArrowLeft size={15} />Quay lại</button>
