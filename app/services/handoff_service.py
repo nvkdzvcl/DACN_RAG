@@ -25,6 +25,21 @@ def classify_message(content: str) -> tuple[str, bool]:
     return "neutral", False
 
 
+def refresh_handoff_summary(db, conversation):
+    from app.models.support import Message, Ticket
+
+    ticket = db.query(Ticket).filter(
+        Ticket.conversation_id == conversation.id,
+        Ticket.status.in_(['open', 'assigned']),
+    ).order_by(Ticket.created_at.desc(), Ticket.id.desc()).first()
+    if ticket is None:
+        return
+    recent = db.query(Message).filter(
+        Message.conversation_id == conversation.id,
+        Message.sender_type.in_(['customer', 'ai']),
+    ).order_by(Message.created_at.desc(), Message.id.desc()).limit(8).all()
+    ticket.summary = '\n'.join(f'{item.sender_type}: {item.content[:400]}' for item in reversed(recent))
+
 def queue_handoff(db, conversation):
     from uuid import uuid4
     from app.models.support import Message, Ticket
@@ -34,9 +49,9 @@ def queue_handoff(db, conversation):
     conversation.status, conversation.priority = 'handoff_requested', 'high'
     ticket = db.query(Ticket).filter(Ticket.conversation_id == conversation.id, Ticket.status.in_(['open', 'assigned'])).first()
     if ticket is None:
-        recent = db.query(Message).filter_by(conversation_id=conversation.id).order_by(Message.created_at.desc(), Message.id.desc()).limit(8).all()
-        summary = '\n'.join(f'{item.sender_type}: {item.content[:400]}' for item in reversed(recent))
-        db.add(Ticket(id=str(uuid4()), conversation_id=conversation.id, priority='high', summary=summary))
+        db.add(Ticket(id=str(uuid4()), conversation_id=conversation.id, priority='high'))
+        db.flush()
+    refresh_handoff_summary(db, conversation)
     # Commit the notice with the transition so an interrupted worker cannot lose it.
     if notify:
         db.add(Message(id=str(uuid4()), conversation_id=conversation.id, sender_type='system',

@@ -9,7 +9,7 @@ from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.models.support import Conversation, Message
-from app.services.handoff_service import classify_message, queue_handoff
+from app.services.handoff_service import classify_message, queue_handoff, refresh_handoff_summary
 from app.services.order_service import ORDER_PATTERN, lookup_order
 from app.services.tool_service import select_order_tool
 from app.rag.answer_service import answer_question, sources_current
@@ -52,6 +52,8 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
         db.add(message)
         db.flush()
         conversation.last_customer_message_id = message_id
+        if conversation.status == "handoff_requested":
+            refresh_handoff_summary(db, conversation)
         sentiment, handoff = classify_message(content)
         order_result = rag = None
         answer = error = None

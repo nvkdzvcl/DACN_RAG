@@ -101,6 +101,17 @@ class TelegramTests(unittest.TestCase):
         self.assertEqual(chats[0].status, 'handoff_requested')
         self.answer.assert_not_called()
 
+    def test_handoff_summary_refreshes_with_followup_customer_message(self):
+        chat = self.receive(incoming(content='Tôi mua máy ngày 10/10.'))[0]
+        self.receive(incoming(2, content='Sản phẩm bị lỗi màn hình'))
+        self.receive(incoming(3, content='Tôi muốn đổi sản phẩm'))
+        self.receive(incoming(4, content='/human'))
+        ticket = self.db.query(Ticket).filter_by(conversation_id=chat.id).one()
+        self.assertIn('Tôi muốn đổi sản phẩm', ticket.summary)
+        self.receive(incoming(5, content='Đơn hàng còn nguyên hộp và đủ phụ kiện'))
+        self.db.refresh(ticket)
+        self.assertIn('Đơn hàng còn nguyên hộp và đủ phụ kiện', ticket.summary)
+
     def test_start_handoff_and_closed_chat_new_conversation(self):
         chat = self.receive(incoming(content='/start'))[0]
         self.answer.assert_not_called()
