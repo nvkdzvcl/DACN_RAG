@@ -6,6 +6,7 @@
   font-display: swap;
 }
 :root { color-scheme: light; }
+html:has(.shell) { overflow: clip; }
 body { font-family: Inter, 'Segoe UI', sans-serif; color: #172443; background: #f5f7fc; }
 button, input, select, textarea { font-family: inherit; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #735dff; outline-offset: 2px; }
@@ -264,8 +265,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .shell[data-theme=dark] .management button:not(.primary):hover:not(:disabled){background:#2a3a50}
 .shell[data-theme=dark] :is(.management th,.management .quickLinks button,.management .workspaceStats .statIcon){background:#202d41;color:#cad8ed}
 .shell[data-theme=dark] :is(.management td,.management th,.metricRow,.summaryLine){border-color:var(--line)}
-.shell[data-theme=dark] .management .recordLink{color:#93c5fd;background:transparent;border:0}
+.shell[data-theme=dark] .management button.recordLink{color:#93c5fd;background:transparent;border:0}
 .shell[data-theme=dark] .management .selectedRecord{background:#203655!important}
+.shell[data-theme=dark] .management tbody tr:hover{background:#202d41}
 .shell[data-theme=dark] .management :is(.workspaceStats b,.slaNumbers b){color:#e2e8f0}
 .shell[data-theme=dark] .knowledge :is(.runtime,.uploadCard input[type=file],.ragAnswer){background:#202d41;color:#d4deed;border-color:#3c4a60}
 .shell[data-theme=dark] .knowledge .runtime.ready{background:#183d35;color:#a2e1c5}

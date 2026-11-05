@@ -352,6 +352,8 @@ def sync():
     ch4=source[source.index('### 4.6'):source.index('## Sử dụng hồ sơ')].strip()
     ch3=ch3.replace('](diagrams/','](../week05/diagrams/')
     ch4=ch4.replace('](diagrams/','](../week05/diagrams/')
+    ch4=ch4.replace('../week05/diagrams/SD01.png', '../diagrams/sequence/SD01.png')
+    ch4=ch4.replace('../week05/diagrams/SD05.png', '../diagrams/sequence/SD05.png')
     before=old[:old.index('## Chương 4')]
     if '### 3.10 ' in before: before=before[:before.index('### 3.10 ')]
     middle=old[old.index('## Chương 4'):old.index('## Chương 5')]
