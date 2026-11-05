@@ -145,6 +145,7 @@ def process_next(db, bot_id):
             message = Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='customer',
                               content=content, external_message_id=update_key)
             db.add(message)
+            db.flush()
             conversation.last_customer_message_id = message.id
             db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system',
                 content='Bạn có thể hỏi chính sách cửa hàng bằng văn bản. Gửi /human để gặp nhân viên. Không gửi mật khẩu hoặc mã truy cập đơn vào chat.'))
