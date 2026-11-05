@@ -136,6 +136,18 @@ class OrderAccessTests(unittest.TestCase):
         self.assertEqual(self.admin.delete(ACCESS_PATH).status_code, 200)
         self.assertEqual(self.client.get(path).status_code, 404)
 
+    def test_seed_style_order_id_can_redeem_access_code(self):
+        with Session(self.engine) as db:
+            db.add(Order(id='ORD-DEMO-001', customer_id='owner', status='shipped',
+                         tracking_code='PRIVATE-ORD-DEMO-001'))
+            db.commit()
+        response = self.admin.post('/api/v1/workspace/orders/ORD-DEMO-001/access-code')
+        self.assertEqual(response.status_code, 201, response.text)
+        code = response.json()['code']
+        redeemed = self.redeem(code, order_id='ORD-DEMO-001')
+        self.assertEqual(redeemed.status_code, 200, redeemed.text)
+        self.assertEqual(redeemed.json()['order_access'][0]['order_id'], 'ORD-DEMO-001')
+
     def test_rotation_expiry_owner_change_and_revocation(self):
         old = self.issue()
         self.assertEqual(self.redeem(old).status_code, 200)
