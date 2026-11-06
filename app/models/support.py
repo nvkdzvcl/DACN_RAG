@@ -38,7 +38,7 @@ class Conversation(Base):
     channel: Mapped[str] = mapped_column(String(32), default="website")
     status: Mapped[str] = mapped_column(String(32), default="open")
     assigned_agent_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    last_customer_message_id: Mapped[str | None] = mapped_column(ForeignKey("messages.id"), nullable=True)
+    last_customer_message_id: Mapped[str | None] = mapped_column(ForeignKey("messages.id", ondelete="SET NULL"), nullable=True)
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     customer: Mapped[Customer] = relationship(back_populates="conversations")

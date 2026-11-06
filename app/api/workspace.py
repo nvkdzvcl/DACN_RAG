@@ -49,7 +49,8 @@ class OrderFields(BaseModel):
 
 
 class OrderCreate(OrderFields):
-    id: str = Field(min_length=6, max_length=64, pattern=r'^(?:DH|ORD)[-_]?[A-Z0-9]{4,}$')
+    id: str = Field(min_length=6, max_length=64,
+                    pattern=r'^(?:DH(?:[-_]?)[A-Z0-9]{4,}|ORD(?:[-_]?[A-Z0-9]{4,})(?:[-_][A-Z0-9]+)*)$')
     customer_id: str = Field(min_length=1, max_length=64)
 
 
