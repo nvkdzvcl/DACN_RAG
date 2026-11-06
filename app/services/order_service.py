@@ -4,8 +4,8 @@ from app.models.support import Conversation, Order, OrderAccess, WidgetSession, 
 import re
 import time
 
-# Match a whole token up to the DB/API limit; only ASCII letters may ignore case.
-ORDER_PATTERN = re.compile(r"(?<![\w-])(?=[\w-]{6,64}(?![\w-]))(?ai:(?:DH|ORD)[-_]?[A-Z0-9]{4,})(?![\w-])")
+# Match a whole token up to the DB/API limit; ORD IDs may be compact or multi-segment.
+ORDER_PATTERN = re.compile(r"(?<![\w-])(?=[\w-]{6,64}(?![\w-]))(?ai:(?:DH(?:[-_]?)[A-Z0-9]{4,}|ORD(?:[-_]?[A-Z0-9]{4,})(?:[-_][A-Z0-9]+)*))(?![\w-])")
 
 def extract_order_id(content: str) -> str | None:
     match = ORDER_PATTERN.search(content)

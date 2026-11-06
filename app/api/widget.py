@@ -53,7 +53,8 @@ class WidgetAction(BaseModel):
 
 class RedeemOrderAccess(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
-    order_id: str = Field(min_length=6, max_length=64, pattern=r'^(?:DH|ORD)[-_]?[A-Z0-9]{4,}$')
+    order_id: str = Field(min_length=6, max_length=64,
+                          pattern=r'^(?:DH(?:[-_]?)[A-Z0-9]{4,}|ORD(?:[-_]?[A-Z0-9]{4,})(?:[-_][A-Z0-9]+)*)$')
     code: SecretStr = Field(min_length=43, max_length=43)
 
 
