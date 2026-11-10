@@ -33,7 +33,7 @@ Chạy lần đầu tại root repo:
 ```powershell
 python -m pip install -r requirements-dev.txt
 python -m app.create_user admin --role admin
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --env-file .env
 ```
 
 CLI yêu cầu nhập mật khẩu riêng (12-128 ký tự), không có tài khoản mặc định. Terminal thứ hai: `cd frontend`, rồi `npm run dev`. Xem `docs/DEMO.md` để tạo nhân viên và thử luồng handoff. API nội bộ yêu cầu phiên nhân viên; khách dùng `/chat` hoặc `/widget-demo.html` với phiên riêng, không cần tài khoản nhân viên.
