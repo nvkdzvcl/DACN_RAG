@@ -75,3 +75,70 @@
 .portalOrderForm fieldset h2 { margin:0; }
 
 .portalEmailCard{display:flex;align-items:flex-start;gap:13px;background:#f0efff;padding:18px;border-radius:10px;margin-top:20px}.portalEmailCard>svg{flex:none;color:#604cf3}.portalEmailCard h2{margin:0}.portalEmailCard p{font-size:12px}.portalEmailCard button{padding:10px 14px;border:1px solid #d9d4f9;border-radius:7px;background:white;color:#5140c3}.widgetAccountBar>span>button{margin-left:10px}
+
+
+/* Integrated customer portal visual layer: preserves existing API-driven markup. */
+.customerPortal { width: min(1600px, calc(100% - 28px)); height: calc(100dvh - 28px); margin: 14px auto; grid-template-columns: 224px minmax(0, 1fr) 292px; background: #f7f8fc; }
+.portalMain { background: #f7f8fc; }
+.portalPage { padding: clamp(24px, 3vw, 42px); }
+.portalPageHead { align-items: flex-start; padding-bottom: 24px; }
+.portalPageHead h1 { font-size: clamp(23px, 2vw, 30px); letter-spacing: -.04em; }
+.portalPageHead p { max-width: 620px; font-size: 13px; }
+.portalOrderForm, .portalOrderResult, .portalQuestions, .portalEmpty, .portalAccess { border-color: #e0e5f1; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
+.portalOrderForm { max-width: 760px; }
+.portalOrderResult { max-width: 760px; }
+.portalQuestions { max-width: 900px; }
+.portalQuestions h2 { font-size: 18px; }
+.portalQuestions button { min-height: 52px; padding: 14px 4px; font-size: 14px; }
+.portalContext { padding: 28px 20px; }
+.portalContextBlock { padding: 21px 0; }
+.portalContextBlock p { margin: 0; }
+.portalContextBlock button { transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+.portalContextBlock button:hover { border-color: #bcb0ff; background: #f1efff; transform: translateX(2px); }
+.customerHistory { display: grid; grid-template-columns: minmax(220px, .75fr) minmax(360px, 1.25fr); grid-template-rows: auto auto 1fr; gap: 0 20px; }
+.customerHistory .portalPageHead, .customerHistory > .widgetError { grid-column: 1 / -1; }
+.customerHistory .portalPageHead { grid-row: 1; }
+.customerHistory .accountHistoryList { grid-column: 1; grid-row: 2 / 4; align-content: start; max-height: 100%; overflow: auto; padding-right: 4px; }
+.customerHistory .accountPager { grid-column: 1; grid-row: 4; }
+.customerHistory .accountHistoryDetail { grid-column: 2; grid-row: 2 / 5; min-height: 0; margin-top: 20px; padding: 20px; border: 1px solid #e0e5f1; border-radius: 14px; background: #fff; overflow: auto; }
+.customerHistory .accountHistoryDetail .accountPager { margin-top: 0; }
+.customerHistory .accountMessages { padding-top: 8px; }
+.customerHistory .accountHistoryList button { transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.customerHistory .accountHistoryList button:hover { border-color: #bcb0ff; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(74, 61, 190, .08); }
+.customerProfile { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); align-content: start; gap: 0 20px; }
+.customerProfile .portalPageHead { grid-column: 1 / -1; }
+.customerProfile .portalEmailCard { grid-column: 1 / -1; }
+.customerProfile .portalOrderForm { grid-column: 2; grid-row: 3; margin-top: 20px; }
+.customerProfile .portalEmailCard + .portalOrderForm { margin-top: 20px; }
+.customerProfile .portalOrderForm { height: fit-content; }
+@media(max-width: 980px) {
+  .customerHistory { display: block; }
+  .customerHistory .accountHistoryDetail { margin-top: 20px; }
+  .customerProfile { display: block; }
+}
+@media(max-width: 700px) {
+  .customerPortal { width: 100%; height: 100dvh; margin: 0; }
+  .portalPage { padding: 20px 16px; }
+  .customerHistory .accountHistoryDetail { padding: 15px; }
+}
+
+.portalOrderGrid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(220px, .85fr); gap: 16px; max-width: 900px; }
+.portalOrderGrid .portalOrderForm { max-width: none; margin-top: 20px; }
+.portalOrderHelp { align-self: start; margin-top: 20px; padding: 22px; border: 1px solid #e0e5f1; border-radius: 13px; background: #fff; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
+.portalOrderHelp h2 { margin: 0 0 14px; font-size: 16px; }
+.portalOrderHelp ol { margin: 0; padding-left: 20px; color: #63718e; font-size: 12px; line-height: 1.8; }
+.portalSearchFake { display: flex; align-items: center; gap: 9px; width: 100%; max-width: 900px; cursor: pointer; text-align: left; font: inherit; margin-top: 20px; padding: 12px 14px; border: 1px solid #d8e0f0; border-radius: 9px; background: #fff; color: #8390aa; font-size: 13px; }
+.portalSearchFake:hover { border-color: #bcb0ff; }
+.portalPolicyGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 900px; margin-top: 12px; }
+.portalPolicyGrid button { min-height: 78px; padding: 14px; border: 1px solid #e0e5f1; border-radius: 12px; background: #fff; color: #263655; text-align: left; box-shadow: 0 6px 18px rgba(31, 42, 79, .04); }
+.portalPolicyGrid button:hover { border-color: #bcb0ff; background: #f8f7ff; }
+.portalPolicyGrid strong, .portalPolicyGrid small { display: block; }
+.portalPolicyGrid strong { font-size: 13px; }
+.portalPolicyGrid small { margin-top: 5px; color: #687795; font-size: 11px; line-height: 1.4; }
+@media(max-width:760px) { .portalOrderGrid, .portalPolicyGrid { grid-template-columns: 1fr; } .portalOrderGrid .portalOrderForm, .portalOrderHelp { margin-top: 14px; } }
+
+.portalSideFoot{flex-direction:column}.portalSideAccount{width:100%;padding-top:4px;overflow:hidden}.portalSideAccount b,.portalSideAccount small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.portalSideAccount b{color:#fff;font-size:12px}.portalSideAccount small{color:#a8b5d3;font-size:10px;margin-top:3px}.portalLogout{justify-content:center!important;margin-top:2px;padding:9px!important;border:1px solid #59698f!important;background:transparent!important;color:#fff!important;font-size:12px!important}.profileCard{display:flex;align-items:center;gap:14px;max-width:900px;margin-top:20px;padding:20px;border:1px solid #e0e5f1;border-radius:13px;background:#fff;box-shadow:0 8px 24px rgba(31,42,79,.05)}.profileAvatar{width:52px;height:52px;display:grid;place-items:center;border-radius:50%;background:#ebe8ff;color:#604cf3;flex:none}.profileCard h2{margin:0;font-size:17px;overflow-wrap:anywhere}.profileCard p{margin:4px 0 0;font-size:12px}.profileStatus{margin-left:auto;padding:7px 10px;border-radius:20px;background:#fff1d7;color:#9a6511;font-size:11px;white-space:nowrap}.profileStatus.verified{background:#e6f7ed;color:#187b5f}@media(max-width:700px){.portalSideFoot{display:none}.profileCard{align-items:flex-start;flex-wrap:wrap}.profileStatus{margin-left:66px}}
+
+.profileLayout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:20px;max-width:980px;margin-top:20px}.profileLeft{display:grid;align-content:start;gap:16px}.profileLayout .profileCard,.profileLayout .profileVerify,.profileLayout .profileSessions,.profileLayout .profilePassword{max-width:none;margin:0}.profileVerify .portalEmailCard{margin:0}.profileSessions{padding:20px;border:1px solid #e0e5f1;border-radius:13px;background:#fff;box-shadow:0 8px 24px rgba(31,42,79,.05)}.profileSessions h2{margin:0 0 16px;font-size:16px}.profileSession{display:flex;align-items:center;gap:13px;padding-top:14px;border-top:1px solid #edf0f7;color:#604cf3}.profileSession div{min-width:0;flex:1}.profileSession b,.profileSession small{display:block}.profileSession b{color:#263655;font-size:13px}.profileSession small{margin-top:4px;color:#687795;font-size:11px}.profileSession>span{padding:6px 9px;border-radius:16px;background:#e6f7ed;color:#187b5f;font-size:10px;white-space:nowrap}.profilePassword{align-self:start}.profilePassword h2{margin-bottom:2px}@media(max-width:900px){.profileLayout{grid-template-columns:1fr}.profilePassword{grid-row:auto}}@media(max-width:700px){.profileLayout{gap:14px}.profileCard{padding:16px}}
+
+.accountTheme{background:#0f1726;color:#eef2ff;border-color:#30405d}.accountTheme .portalMain{background:#0f1726}.accountTheme .portalPage{background:#0f1726}.accountTheme .portalPageHead{border-color:#5d6677}.accountTheme .portalPageHead h1{color:#f5f7ff}.accountTheme .portalPageHead p{color:#aab6cc}.accountTheme .portalContext{background:#1e2b3d;border-color:#44516a;color:#eef2ff}.accountTheme .portalContext h2,.accountTheme .portalContextBlock h3,.accountTheme .portalPerson b{color:#f5f7ff}.accountTheme .portalContextBlock{border-color:#596577}.accountTheme .portalPerson small,.accountTheme .portalContextBlock p{color:#b3c0d5}.accountTheme .portalSide{background:linear-gradient(160deg,#152b59,#0e1c3d)}.accountTheme .portalSide button{color:#d1dbed}.accountTheme .portalSide button:hover,.accountTheme .portalSide button.current{background:#304b96;color:#fff}.accountTheme .portalPageHead{padding-bottom:26px}.accountTheme .profileLayout{grid-template-columns:minmax(300px,1fr) minmax(360px,.92fr);gap:20px;max-width:960px;margin-top:20px}.accountTheme .profileCard,.accountTheme .profilePassword,.accountTheme .profileVerify .portalEmailCard{border-color:#3e4f69;background:#1e2b3d;color:#f1f4fb;box-shadow:none}.accountTheme .profileCard{min-height:90px}.accountTheme .profileCard h2,.accountTheme .profilePassword h2,.accountTheme .profileVerify h2{color:#f5f7ff}.accountTheme .profileCard p,.accountTheme .profilePassword p,.accountTheme .profileVerify p{color:#aebbd0}.accountTheme .profileAvatar{background:#e7e4ff;color:#7058f5}.accountTheme .profileStatus{background:#514622;color:#ffd978}.accountTheme .profileStatus.verified{background:#164c3c;color:#8df0c1}.accountTheme .profilePassword{grid-column:2;grid-row:1}.accountTheme .profileVerify{grid-column:1 / -1;grid-row:2}.accountTheme .profileVerify .portalEmailCard{margin:0;background:#352c57}.accountTheme .profileVerify .portalEmailCard>svg{color:#8065ff}.accountTheme .portalOrderForm label{color:#eef2ff}.accountTheme .portalOrderForm input{border-color:#52627a;background:#101927;color:#f5f7ff}.accountTheme .portalOrderForm input::placeholder{color:#8190a8}.accountTheme .portalOrderForm button{background:#684cf0}.accountTheme .portalSideFoot{border-color:#344665}.accountTheme .portalLogout{border-color:#55698f!important}.accountTheme .widgetAccountBar{background:#182438;border-color:#344665}.accountTheme .portalMobileNav{background:#182438;border-color:#344665}@media(max-width:900px){.accountTheme .profileLayout{grid-template-columns:1fr}.accountTheme .profilePassword,.accountTheme .profileVerify{grid-column:auto;grid-row:auto}}
