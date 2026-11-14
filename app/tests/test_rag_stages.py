@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from app.rag import answer_service
 from app.rag.answer_service import ABSTENTION, CLARIFICATION, CONFLICT, AnswerReview, SourceSelection, standalone_question
+from app.rag.lexical import BM25, fold, fuse, tokens
 from app.rag.evidence import SentenceChoice, allowed_ids, assemble_evidence, build_candidates, sentence_choice_schema
 from app.rag.safety import clean_history, has_instruction, required_contact_number
 
@@ -90,6 +91,28 @@ class EvidenceTests(unittest.TestCase):
         evidence, _ = assemble_evidence(choose((1, 3)), useful, sentences, choices)
         self.assertTrue(evidence[0].quote.startswith('**Đổi do đổi ý:**'))
         self.assertTrue(evidence[0].quote.endswith('Khách chịu phí gửi.'))
+
+
+class LexicalTests(unittest.TestCase):
+    def test_tokens_fold_accents_and_add_bigrams(self):
+        self.assertEqual(fold('Đổi trả ĐƠN'), 'doi tra don')
+        self.assertEqual(tokens('Phí giao hàng'), ['phi', 'giao', 'hang', 'phi_giao', 'giao_hang'])
+
+    def test_bm25_prefers_rare_phrase_matches(self):
+        bm25 = BM25(['Phí giao hàng tiêu chuẩn 30.000 đồng.', 'Không giao hàng ra nước ngoài.', 'Bảo hành 12 tháng.'])
+        scores = bm25.scores('Có giao ra nước ngoài không?')
+        self.assertEqual(max(range(3), key=scores.__getitem__), 1)
+        self.assertEqual(scores[2], 0)
+        self.assertEqual(BM25([]).idf, {})
+
+    def test_fusion_merges_lists_and_drops_chunks_without_cosine(self):
+        dense = [{'chunk_id': 'a', 'score': .8}, {'chunk_id': 'b', 'score': .7}]
+        lexical = [({'chunk_id': 'b', 'score': .7}, 4.0), ({'chunk_id': 'c', 'score': .3}, 2.0), ({'chunk_id': 'd'}, 1.0)]
+        fused = fuse(dense, lexical, 3)
+        self.assertEqual([item['chunk_id'] for item in fused], ['b', 'a', 'c'])
+        self.assertEqual((fused[0]['lexical_rank'], fused[0]['lexical_score']), (1, 1.0))
+        self.assertNotIn('lexical_rank', fused[1])
+        self.assertEqual(fuse([], [], 5), [])
 
 
 class ModelStageTests(unittest.TestCase):

@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.db.migrations import migrate
-from app.rag.answer_service import answer_question
+from app.rag.answer_service import answer_question, min_score
 from app.rag.ollama import CHAT_OPTIONS, CHAT_THINK, KEEP_ALIVE, call, chat, chat_model, embedding_model
 from app.rag.vector_store import VectorStore
 from app.services.document_service import ALLOWED_EXTENSIONS, CHUNK_OVERLAP, CHUNK_SIZE, chunk_text, extract_sections, save_document
@@ -159,7 +159,7 @@ def run(split, output, dataset=DATASET):
         "dataset": dataset.relative_to(ROOT).as_posix(),
         "case_ids": [c["id"] for c in cases], "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "sha256": {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
-        "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
+        "models": selected_models, "top_k": 5, "min_score": min_score(),
         "chunk_words": CHUNK_SIZE, "overlap_words": CHUNK_OVERLAP,
         **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": KEEP_ALIVE,
         "answer_pipeline": "standalone rewrite for follow-ups, bounded retrieval, sentence-ID selection with answer/ask_customer/sources_disagree/not_in_sources decision, verbatim assembly, structural conflict checks, same-model review with one re-reviewed repair, source-version recheck",

@@ -28,6 +28,8 @@ __all__ = ["ABSTENTION", "CLARIFICATION", "CONFLICT", "Evidence", "answer_questi
 
 ABSTENTION = "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên."
 CLARIFICATION = "Bạn đang hỏi về vấn đề nào và trong trường hợp cụ thể nào? Vui lòng nêu rõ để tôi tra đúng chính sách."
+# 0.30 was tried: more weak sources made the selector answer ambiguous questions (docs/RAG_RETRIEVAL.md).
+DEFAULT_MIN_SCORE = "0.35"
 CONFLICT = "Tài liệu có quy định mâu thuẫn cho cùng trường hợp. Tôi chưa thể xác nhận quy định áp dụng; bạn vui lòng yêu cầu nhân viên kiểm tra."
 
 
@@ -63,6 +65,10 @@ class AnswerReview(BaseModel):
     @property
     def accepted(self):
         return self.question_resolved and self.sources_consistent and self.claims_supported and not self.needs_clarification
+
+
+def min_score():
+    return float(os.getenv("RAG_MIN_SCORE", DEFAULT_MIN_SCORE))
 
 
 def ask_model(system, payload, schema, model):
@@ -121,7 +127,7 @@ def answer_question(query, top_k=5, history=None, db=None):
     # History resolves follow-up subjects; it is never evidence for policy facts.
     question = standalone_question(query, history)
     results = vector_store.search(question, top_k, db)
-    useful = [r for r in results if r["score"] >= float(os.getenv("RAG_MIN_SCORE", "0.35"))][:5]
+    useful = [r for r in results if r["score"] >= min_score()][:5]
     fallback = {"answer": ABSTENTION, "grounded": False, "citations": [], "results": results}
     clarify = fallback | {"answer": CLARIFICATION, "needs_clarification": True}
     conflict = fallback | {"answer": CONFLICT}
