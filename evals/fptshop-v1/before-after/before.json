@@ -1,0 +1,104 @@
+{
+  "label": "before",
+  "run_at_utc": "2026-11-14T17:26:34.131180+00:00",
+  "indexed_documents": [
+    "chinh-sach-mau-binh-giu-nhiet-BT20.md"
+  ],
+  "results": [
+    {
+      "id": "fpt-001",
+      "query": "Mua iPhone mới về được một tuần thì máy bị lỗi phần cứng, có được đổi máy mới không?",
+      "expected": "Lỗi NSX trong 30 ngày: đổi 1-1 cùng model, màu, dung lượng.",
+      "answer": "Hàng đã sử dụng không được đổi vì thay đổi nhu cầu; lỗi phát sinh sau thời hạn 7 ngày được xem xét theo bảo hành ở mục 5.\n\n**Giao sai, giao thiếu hoặc lỗi từ nhà sản xuất khi nhận:** Khách gửi yêu cầu trong vòng 7 ngày theo lịch sau ngày nhận, nêu mã đơn và tình trạng hàng; cung cấp ảnh/video nếu có. Sau khi nhân viên xác nhận lỗi hoặc sai sót, cửa hàng mẫu chịu phí vận chuyển hàng gửi về và chọn giao đúng hàng, đổi sản phẩm cùng mẫu hoặc hoàn tiền nếu không còn hàng phù hợp. Trường hợp này được hoàn cả phí giao ban đầu đã thu.",
+      "grounded": true,
+      "sources": [
+        "chinh-sach-mau-binh-giu-nhiet-BT20.md Dòng 27",
+        "chinh-sach-mau-binh-giu-nhiet-BT20.md Dòng 28"
+      ],
+      "seconds": 16.61
+    },
+    {
+      "id": "fpt-007",
+      "query": "Máy chống nước IP68 mà bị vào nước thì có được bảo hành không?",
+      "expected": "Không, kể cả máy IP68.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 3.02
+    },
+    {
+      "id": "fpt-010",
+      "query": "Đơn đặt online giao từ kho, mở ra thấy máy bị móp thì phải báo trong bao lâu?",
+      "expected": "Không quá 1 ngày kể từ khi nhận.",
+      "answer": "**Cách tính thời hạn:** “Ngày làm việc” là thứ Hai đến thứ Sáu, không gồm ngày nghỉ lễ. “Ngày theo lịch” gồm cả thứ Bảy, Chủ nhật và ngày lễ. Với thời hạn 7 ngày đổi trả, ngày nhận hàng là ngày 0; yêu cầu phải được gửi trước 23:59 của ngày thứ 7 sau ngày nhận.",
+      "grounded": true,
+      "sources": [
+        "chinh-sach-mau-binh-giu-nhiet-BT20.md Dòng 5"
+      ],
+      "seconds": 8.53
+    },
+    {
+      "id": "fpt-011",
+      "query": "Nhà mình cách cửa hàng 40km, giao tủ lạnh có mất phí không?",
+      "expected": "Quá 30 km phụ thu 5.000 đồng/km vượt.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 3.61
+    },
+    {
+      "id": "fpt-015",
+      "query": "Hoàn tiền về lại thẻ đã thanh toán thì mất mấy ngày?",
+      "expected": "5 đến 7 ngày, không tính T7, CN, lễ.",
+      "answer": "Tài liệu có quy định mâu thuẫn cho cùng trường hợp. Tôi chưa thể xác nhận quy định áp dụng; bạn vui lòng yêu cầu nhân viên kiểm tra.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 3.72
+    },
+    {
+      "id": "fpt-016",
+      "query": "Thẻ Visa debit có mua trả góp được không?",
+      "expected": "Không, thẻ ghi nợ không áp dụng.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 0.74
+    },
+    {
+      "id": "fpt-018",
+      "query": "Mua hết 400 nghìn thì được bao nhiêu điểm thành viên?",
+      "expected": "1 điểm mỗi 4.000 đồng: 100 điểm.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 0.78
+    },
+    {
+      "id": "fpt-020",
+      "query": "Muốn khiếu nại thì gọi số nào?",
+      "expected": "1800 6616, 8h-22h.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 3.5
+    },
+    {
+      "id": "fpt-022",
+      "query": "Mang iPhone cũ đi thu cũ đổi mới thì trước đó phải làm gì với iCloud?",
+      "expected": "Đăng xuất Apple ID, tắt Find My.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 0.76
+    },
+    {
+      "id": "fpt-023",
+      "query": "Giá niêm yết trên web đã có VAT chưa?",
+      "expected": "Đã gồm thuế, chưa gồm phí vận chuyển.",
+      "answer": "Tôi chưa tìm thấy đủ thông tin trong tài liệu để trả lời. Bạn có thể cung cấp thêm chi tiết hoặc yêu cầu gặp nhân viên.",
+      "grounded": false,
+      "sources": [],
+      "seconds": 2.8
+    }
+  ]
+}

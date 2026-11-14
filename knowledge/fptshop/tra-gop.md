@@ -1,0 +1,17 @@
+# Chính sách trả góp FPT Shop (bản diễn đạt lại cho đồ án)
+**Nguồn và phạm vi tài liệu:** Tài liệu này do nhóm đồ án diễn đạt lại từ trang Chính sách trả góp của FPT Shop (fptshop.com.vn/ho-tro/chinh-sach-tra-gop), bản có hiệu lực từ 01/7/2024, truy cập ngày 15/11/2026; đây không phải văn bản chính thức của FPT Shop, khách hàng cần xác nhận lại tại cửa hàng hoặc tổng đài trước khi giao dịch.
+**Trả góp – các hình thức:** FPT Shop có bốn hình thức trả góp: qua thẻ tín dụng, qua Kredivo, qua Home PayLater và qua công ty tài chính.
+**Trả góp qua thẻ tín dụng – hạn thẻ:** Thời hạn còn lại của thẻ tín dụng phải dài hơn kỳ hạn trả góp; riêng thẻ MB và Kiên Long Bank phải dài hơn kỳ hạn trả góp ít nhất 1 tháng.
+**Trả góp qua thẻ tín dụng – hạn mức và thông tin thẻ:** Hạn mức còn lại của thẻ phải lớn hơn hoặc bằng tổng giá trị trả góp, và khách phải nhập đúng số thẻ, ngày hết hạn và mã CVV khi giao dịch.
+**Trả góp qua thẻ tín dụng – kỳ hạn:** Kỳ hạn trả góp qua thẻ là 3, 6, 9, 12, 15, 18, 24 hoặc 36 tháng tùy ngân hàng.
+**Trả góp qua thẻ tín dụng – giá trị tối thiểu:** Giá trị trả góp tối thiểu là 500.000 đồng với Muadee by HDBank, 1.000.000 đồng với NCB và Sacombank, 2.000.000 đồng với Techcombank, VIB, Home Credit và Lotte Finance, và 3.000.000 đồng với các ngân hàng còn lại.
+**Trả góp qua thẻ tín dụng – loại thẻ không áp dụng:** Không trả góp được bằng thẻ phụ, thẻ ghi nợ (debit) hoặc thẻ tín dụng phát hành ở nước ngoài.
+**Trả góp qua thẻ tín dụng – ngân hàng không chuyển đổi sau sao kê:** Với Vietcombank, MB, SHB, LPBank, HDBank, PVcomBank, TPBank, Shinhan Finance, Mcredit, Woori Bank, Lotte Finance, Home Credit, Standard Chartered và Vietbank, giao dịch đã lên sao kê thì không được chuyển sang trả góp; các ngân hàng này còn khóa giao dịch trả góp vào những ngày gần kỳ sao kê.
+**Trả góp qua thẻ tín dụng – ngân hàng tự chuyển đổi:** Với các ngân hàng còn lại, hệ thống tự chuyển giao dịch sang trả góp sau 7 đến 10 ngày làm việc; nếu sao kê đến trước khi chuyển đổi xong, khách trừ khoản này ra khi thanh toán thẻ.
+**Trả góp qua thẻ tín dụng – lời khuyên về ngày sao kê:** Khách không nên thực hiện giao dịch trả góp vào sát ngày sao kê của thẻ.
+**Trả góp qua công ty tài chính – cách đăng ký:** Khách mang hồ sơ đến cửa hàng FPT Shop gần nhất để đăng ký trả góp qua công ty tài chính; khoản vay chỉ được giải ngân khi hồ sơ được công ty tài chính duyệt.
+**Trả góp qua công ty tài chính – độ tuổi:** Home Credit, FE Credit và Samsung Finance+ nhận khách từ 18 đến 60 tuổi; Shinhan Finance nhận khách từ 19 đến 60 tuổi; Mirae Asset nhận nam từ 21 đến 60 tuổi và nữ từ 18 đến 60 tuổi.
+**Trả góp qua công ty tài chính – giấy tờ:** FE Credit chỉ cần căn cước công dân; Home Credit, Shinhan Finance và Mirae Asset cần căn cước công dân kèm bằng lái xe hoặc sổ hộ khẩu; Samsung Finance+ cần thêm email, SIM chính chủ và thu nhập từ 4.000.000 đồng mỗi tháng.
+**Trả góp qua Kredivo:** Khách từ 18 đến 60 tuổi, có căn cước công dân và tài khoản Kredivo đã xác thực trên ứng dụng; hạn mức từ 1.500.000 đến 50.000.000 đồng, được xét duyệt tự động trong vài phút, kỳ hạn 1, 3, 6, 9 hoặc 12 tháng.
+**Trả góp qua Home PayLater:** Khách từ 20 đến 60 tuổi, chỉ cần căn cước công dân và có thể đăng ký online hoặc tại cửa hàng mà không bắt buộc cài ứng dụng; hạn mức từ 1.000.000 đến 25.000.000 đồng, kỳ hạn 3, 6 hoặc 12 tháng.
+**Trả góp – đổi trả sản phẩm mua trả góp qua công ty tài chính:** Khách phải hủy hoặc tất toán hợp đồng trả góp trước khi được đổi trả sản phẩm tại FPT Shop.

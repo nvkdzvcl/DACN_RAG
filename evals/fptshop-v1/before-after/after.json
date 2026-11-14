@@ -1,0 +1,138 @@
+{
+  "label": "after",
+  "run_at_utc": "2026-11-14T17:30:20.173754+00:00",
+  "indexed_documents": [
+    "bao-hanh.md",
+    "bao-mat.md",
+    "doi-tra.md",
+    "giao-hang.md",
+    "ho-tro-ky-thuat.md",
+    "khach-hang-than-thiet.md",
+    "khieu-nai.md",
+    "kiem-hang.md",
+    "lien-he-va-mua-hang.md",
+    "thanh-toan.md",
+    "thu-cu-doi-moi.md",
+    "tra-gop.md"
+  ],
+  "results": [
+    {
+      "id": "fpt-001",
+      "query": "Mua iPhone mới về được một tuần thì máy bị lỗi phần cứng, có được đổi máy mới không?",
+      "expected": "Lỗi NSX trong 30 ngày: đổi 1-1 cùng model, màu, dung lượng.",
+      "answer": "**Đổi trả – điện thoại, máy tính bảng, laptop, PC, đồng hồ, màn hình mới bị lỗi nhà sản xuất trong 30 ngày đầu:** Trong 30 ngày tính từ ngày xuất hóa đơn, khách được đổi 1-1 sang máy cùng model, cùng màu, cùng dung lượng và không mất phí khấu hao; nếu hết hàng, khách có thể đổi sang sản phẩm khác có giá trị tương đương hoặc cao hơn.",
+      "grounded": true,
+      "sources": [
+        "doi-tra.md Dòng 9"
+      ],
+      "seconds": 7.09
+    },
+    {
+      "id": "fpt-007",
+      "query": "Máy chống nước IP68 mà bị vào nước thì có được bảo hành không?",
+      "expected": "Không, kể cả máy IP68.",
+      "answer": "**Bảo hành – không bảo hành khi vào nước, chất lỏng hoặc bụi:** Lỗi do ngấm nước, chất lỏng hoặc bụi bẩn không được bảo hành, kể cả với máy có chuẩn kháng nước, kháng bụi IP68 hoặc IP69.\n\n**Bảo hành – không bảo hành khi gặp sự kiện bất khả kháng:** Hư hỏng do hỏa hoạn, lũ lụt, động đất, sét đánh, tai nạn giao thông hoặc côn trùng, động vật phá hoại không được bảo hành.",
+      "grounded": true,
+      "sources": [
+        "bao-hanh.md Dòng 13",
+        "bao-hanh.md Dòng 16"
+      ],
+      "seconds": 6.56
+    },
+    {
+      "id": "fpt-010",
+      "query": "Đơn đặt online giao từ kho, mở ra thấy máy bị móp thì phải báo trong bao lâu?",
+      "expected": "Không quá 1 ngày kể từ khi nhận.",
+      "answer": "**Kiểm hàng – thời hạn báo lỗi đơn online giao thẳng từ kho:** Nếu phát hiện vấn đề với đơn giao thẳng từ kho, khách gọi tổng đài chăm sóc khách hàng ngay khi phát hiện và không quá 1 ngày kể từ khi nhận hàng.\n\n**Kiểm hàng – đơn online giao thẳng từ kho đến nhà:** Với đơn đặt trên website hoặc ứng dụng và giao thẳng từ kho, đơn vị vận chuyển chỉ cho kiểm tra bên ngoài kiện hàng, không cho mở kiểm tra chi tiết sản phẩm; nếu khách từ chối nhận, kiện hàng được chuyển hoàn về nơi gửi.",
+      "grounded": true,
+      "sources": [
+        "kiem-hang.md Dòng 7",
+        "kiem-hang.md Dòng 9"
+      ],
+      "seconds": 7.02
+    },
+    {
+      "id": "fpt-011",
+      "query": "Nhà mình cách cửa hàng 40km, giao tủ lạnh có mất phí không?",
+      "expected": "Quá 30 km phụ thu 5.000 đồng/km vượt.",
+      "answer": "**Giao hàng – phí giao điện máy, gia dụng cồng kềnh có lắp đặt từ cửa hàng:** Với điện máy và gia dụng cồng kềnh có lắp đặt giao từ cửa hàng, giao miễn phí khi khoảng cách từ cửa hàng gần nhất đến nhà khách không quá 30 km, xa hơn thì phụ thu 5.000 đồng cho mỗi km vượt.\n\n**Giao hàng – phí giao điện thoại, laptop, thiết bị số và gia dụng không lắp đặt từ cửa hàng:** Với điện thoại, máy tính bảng, laptop, thiết bị đeo, phụ kiện số và gia dụng không cần lắp đặt giao từ cửa hàng, giao miễn phí trong bán kính 20 km; xa hơn thì nhân viên báo phí cụ thể trước khi xác nhận giao.",
+      "grounded": true,
+      "sources": [
+        "giao-hang.md Dòng 11",
+        "giao-hang.md Dòng 13"
+      ],
+      "seconds": 6.97
+    },
+    {
+      "id": "fpt-015",
+      "query": "Hoàn tiền về lại thẻ đã thanh toán thì mất mấy ngày?",
+      "expected": "5 đến 7 ngày, không tính T7, CN, lễ.",
+      "answer": "**Hoàn tiền – về nguồn thanh toán ban đầu:** Nếu chọn hoàn về đúng nguồn đã thanh toán (thẻ, ví), tiền được hoàn trong 5 đến 7 ngày, không tính thứ Bảy, Chủ nhật và ngày lễ, Tết.\n\n**Đổi trả – hoàn tiền khi trả hàng:** Khi trả hàng được chấp nhận, FPT Shop hoàn tiền theo phương thức quy định trong chính sách thanh toán; đơn trả góp hoặc đơn xuất hóa đơn doanh nghiệp có thể mất thêm thời gian và thủ tục.",
+      "grounded": true,
+      "sources": [
+        "doi-tra.md Dòng 34",
+        "thanh-toan.md Dòng 13"
+      ],
+      "seconds": 5.88
+    },
+    {
+      "id": "fpt-016",
+      "query": "Thẻ Visa debit có mua trả góp được không?",
+      "expected": "Không, thẻ ghi nợ không áp dụng.",
+      "answer": "**Trả góp qua thẻ tín dụng – loại thẻ không áp dụng:** Không trả góp được bằng thẻ phụ, thẻ ghi nợ (debit) hoặc thẻ tín dụng phát hành ở nước ngoài.\n\n**Trả góp qua thẻ tín dụng – ngân hàng không chuyển đổi sau sao kê:** Với Vietcombank, MB, SHB, LPBank, HDBank, PVcomBank, TPBank, Shinhan Finance, Mcredit, Woori Bank, Lotte Finance, Home Credit, Standard Chartered và Vietbank, giao dịch đã lên sao kê thì không được chuyển sang trả góp; các ngân hàng này còn khóa giao dịch trả góp vào những ngày gần kỳ sao kê.\n\n**Trả góp qua thẻ tín dụng – hạn mức và thông tin thẻ:** Hạn mức còn lại của thẻ phải lớn hơn hoặc bằng tổng giá trị trả góp, và khách phải nhập đúng số thẻ, ngày hết hạn và mã CVV khi giao dịch.",
+      "grounded": true,
+      "sources": [
+        "tra-gop.md Dòng 5",
+        "tra-gop.md Dòng 8",
+        "tra-gop.md Dòng 9"
+      ],
+      "seconds": 6.32
+    },
+    {
+      "id": "fpt-018",
+      "query": "Mua hết 400 nghìn thì được bao nhiêu điểm thành viên?",
+      "expected": "1 điểm mỗi 4.000 đồng: 100 điểm.",
+      "answer": "**Khách hàng thân thiết – tỷ lệ tích điểm:** Cứ mỗi 4.000 đồng trên hóa đơn thanh toán, khách được tích 1 điểm, tính trên số tiền cuối cùng sau khi trừ khuyến mãi; ví dụ đơn 500.000 đồng dùng mã giảm 100.000 đồng thì khách trả 400.000 đồng và được 100 điểm.",
+      "grounded": true,
+      "sources": [
+        "khach-hang-than-thiet.md Dòng 6"
+      ],
+      "seconds": 6.62
+    },
+    {
+      "id": "fpt-020",
+      "query": "Muốn khiếu nại thì gọi số nào?",
+      "expected": "1800 6616, 8h-22h.",
+      "answer": "**Khiếu nại – kênh tổng đài:** Khách gửi phản ánh, yêu cầu hoặc khiếu nại qua tổng đài chăm sóc khách hàng 1800 6616, hoạt động từ 8 giờ đến 22 giờ.\n\n**Liên hệ – tổng đài góp ý, khiếu nại:** Tổng đài góp ý, khiếu nại và tiếp nhận cảnh báo vi phạm của FPT Shop là 1800 6616, hoạt động từ 8 giờ đến 22 giờ.",
+      "grounded": true,
+      "sources": [
+        "khieu-nai.md Dòng 4",
+        "lien-he-va-mua-hang.md Dòng 5"
+      ],
+      "seconds": 6.05
+    },
+    {
+      "id": "fpt-022",
+      "query": "Mang iPhone cũ đi thu cũ đổi mới thì trước đó phải làm gì với iCloud?",
+      "expected": "Đăng xuất Apple ID, tắt Find My.",
+      "answer": "**Thu cũ đổi mới – đăng xuất tài khoản và tắt khóa kích hoạt:** Khách cần đăng xuất Apple ID, tài khoản Google và các tài khoản khác, đồng thời tắt Find My iPhone, Find My Device hoặc tính năng chống trộm tương tự, nếu không máy không đủ điều kiện chuyển giao.",
+      "grounded": true,
+      "sources": [
+        "thu-cu-doi-moi.md Dòng 10"
+      ],
+      "seconds": 5.85
+    },
+    {
+      "id": "fpt-023",
+      "query": "Giá niêm yết trên web đã có VAT chưa?",
+      "expected": "Đã gồm thuế, chưa gồm phí vận chuyển.",
+      "answer": "**Giá – giá niêm yết đã gồm thuế:** Giá sản phẩm niêm yết trên website và ứng dụng FPT Shop đã bao gồm thuế nhưng chưa gồm phí vận chuyển; phí vận chuyển tính theo chính sách giao hàng và lắp đặt.\n\n**Mua hàng online – mã giảm giá:** Khách xem ưu đãi đang áp dụng ở mục ưu đãi và khuyến mãi của đơn, và nhập mã voucher kèm số điện thoại xác minh nếu có.",
+      "grounded": true,
+      "sources": [
+        "lien-he-va-mua-hang.md Dòng 10",
+        "thanh-toan.md Dòng 14"
+      ],
+      "seconds": 7.77
+    }
+  ]
+}
