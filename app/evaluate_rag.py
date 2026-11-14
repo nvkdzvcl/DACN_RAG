@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.db.migrations import migrate
-from app.rag.answer_service import answer_question
+from app.rag.answer_service import answer_question, min_score
 from app.rag.ollama import CHAT_OPTIONS, CHAT_THINK, KEEP_ALIVE, call, chat, chat_model, embedding_model
 from app.rag.vector_store import VectorStore
 from app.services.document_service import ALLOWED_EXTENSIONS, CHUNK_OVERLAP, CHUNK_SIZE, chunk_text, extract_sections, save_document
@@ -159,18 +159,18 @@ def run(split, output, dataset=DATASET):
         "dataset": dataset.relative_to(ROOT).as_posix(),
         "case_ids": [c["id"] for c in cases], "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "sha256": {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
-        "models": selected_models, "top_k": 5, "min_score": float(os.getenv("RAG_MIN_SCORE", "0.35")),
+        "models": selected_models, "top_k": 5, "min_score": min_score(),
         "chunk_words": CHUNK_SIZE, "overlap_words": CHUNK_OVERLAP,
         **CHAT_OPTIONS, "think": CHAT_THINK, "keep_alive": KEEP_ALIVE,
-        "answer_pipeline": "bounded retrieval, shared source/sentence grammar for selection and review plus backend ID validation, grounded event/schedule rendering before review, validated relevance pruning preserving original conditions, one re-reviewed repair/prune or semantic retry, source-version recheck",
-        "chat_calls_per_question": "0-3; selection, review including empty evidence, optional repair or semantic review of verbatim evidence; conflicts and invalid reviews never retry; final review must accept every flag; completions saved in call order",
+        "answer_pipeline": "standalone rewrite for follow-ups, bounded retrieval, sentence-ID selection with answer/ask_customer/sources_disagree/not_in_sources decision, verbatim assembly, structural conflict checks, same-model review with one re-reviewed repair, source-version recheck",
+        "chat_calls_per_question": "0-4; optional rewrite when customer history exists, selection, review, optional repair review; completions saved in call order",
         "packages": {p: importlib.metadata.version(p) for p in ("qdrant-client", "sqlalchemy", "httpx", "pypdf", "python-docx")},
         "label_status": "synthetic_agent_authored_pending_human_review",
         "timing": "Sequential end-to-end calls; includes query embedding and any model loading, excludes ingestion. No deliberate warmup.",
     }
     write_json(output / "manifest.json", manifest)
-    for filename in ("answer_service.py", "ollama.py", "vector_store.py"):
-        (output / (filename + ".txt")).write_bytes((ROOT / "app/rag" / filename).read_bytes())
+    for path in sorted((ROOT / "app/rag").glob("*.py")):
+        (output / (path.name + ".txt")).write_bytes(path.read_bytes())
     rows = []
     try:
         with tempfile.TemporaryDirectory(prefix="rag-eval-") as directory:
