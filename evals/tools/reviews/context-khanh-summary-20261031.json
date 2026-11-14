@@ -1,0 +1,29 @@
+{
+  "cases": 12,
+  "submitted_rows": 12,
+  "approved_cases": 12,
+  "rejected_case_ids": [],
+  "pending_case_ids": [],
+  "all_labels_approved": true,
+  "passed_among_approved": 12,
+  "accuracy_against_approved_labels": 1.0,
+  "errors_among_approved": 0,
+  "error_case_ids": [],
+  "by_category": {
+    "handoff-context": {
+      "approved": 12,
+      "passed": 12
+    }
+  },
+  "rag_is_stubbed": true,
+  "scope": "Named label decisions only; reviewer identity is self-declared, not authenticated. Score is recomputed from frozen routing evidence; errors remain in the approved denominator. Partial or selected approvals do not estimate whole-dataset quality. Label approval does not make a development set independent or assess RAG answer quality.",
+  "created_at_utc": "2026-10-31T15:01:27.693457+00:00",
+  "run_sha256": "2b225673af4d6c609e48986fcc8706531c5959005d619de583b86f4822c6c53b",
+  "input_sha256": {
+    "manifest.json": "ebe9393e8ba6474c4a3b073720fc54dc7c5ed9a0ac2875af17cc642b0e1c9e15",
+    "results.jsonl": "70182315228972c615f75fbbc230224a7022c6396c60c7c7ff751034f4f835c5",
+    "summary.json": "04d81e6bb9cf6be093651e5ff0abcee3221c420cc94c0f8642dc1b5daed32b50"
+  },
+  "review_sha256": "27fbd5cfc0d893f15291fab567f575206927a1a24eebd4f5192056b1d233440f",
+  "scorer_sha256": "7894306ec1a8068e1811ccd781d16a86e5ed977c08038b4ca8b69fb7b802c111"
+}

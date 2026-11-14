@@ -1,6 +1,6 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon } from 'lucide-react';
 
 function GoogleIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
@@ -17,6 +17,7 @@ const statuses = { open: 'Trợ lý hỗ trợ', handoff_requested: 'Đang chờ
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
 const orderStatuses = { processing: 'Đang xử lý', paid: 'Đã thanh toán', shipping: 'Đang giao', shipped: 'Đã gửi hàng', delivered: 'Đã giao', cancelled: 'Đã hủy' };
 const suggestions = ['Chính sách đổi trả của cửa hàng là gì?', 'Làm thế nào để theo dõi đơn hàng?', 'Điều kiện bảo hành sản phẩm là gì?', 'Khi nào tôi cần gặp nhân viên hỗ trợ?'];
+const policyGroups = [['Đổi & Trả hàng', 'Quy định đổi mới, hoàn tiền'], ['Bảo hành', 'Thời hạn, điều kiện và địa điểm'], ['Giao nhận', 'Thời gian, phí và kiểm hàng'], ['Thanh toán', 'Phương thức và hoàn tiền'], ['Hủy đơn hàng', 'Điều kiện và hướng dẫn'], ['Khiếu nại & Góp ý', 'Quy trình tiếp nhận hỗ trợ']];
 async function request(path, options = {}) {
   const response = await fetch(`/api/v1/widget${path}`, { ...options, credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json', 'X-CSRF-Protection': '1' } });
@@ -206,14 +207,16 @@ export default function Widget() {
         email: fields.get('email').trim(), password: fields.get('password'),
         ...(authMode === 'register' && { display_name: fields.get('display_name').trim() })
       }) });
-      apply(data, version); setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : authMode === 'register' ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
+      const pendingRegistration = authMode === 'register' && data.registration_email_pending;
+      apply(data, version); if (!pendingRegistration) setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : authMode === 'register' ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
       if (authMode === 'register' && data.registration_email_pending) {
         try {
           await request('/account/registration-verification-request', { method: 'POST' });
           setEmailAction({ mode: 'register-code' });
         } catch (mailError) {
-          setNotice('Tạo tài khoản thành công, nhưng chưa gửi được mã xác minh. Kiểm tra cấu hình email rồi thử gửi lại.');
+          setNotice('Tài khoản đang chờ xác minh. Chưa vào hệ thống cho đến khi nhập mã 6 số.');
           setError(mailError.message);
+          setEmailAction({ mode: 'register-code' });
         }
       }
       handoffId.current = null;
@@ -285,7 +288,8 @@ export default function Widget() {
     <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
       {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}</header>
     {successModal && <div className="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successTitle"><div className="successModal"><div className="successIcon">✓</div><h2 id="successTitle">Đăng ký tài khoản thành công</h2><p>Email đã được xác minh. Bạn có thể bắt đầu sử dụng tài khoản ngay.</p><button onClick={() => setSuccessModal(false)}>Tiếp tục</button></div></div>}
-    {session && <div className="widgetAccountBar"><span>{session.account ? session.account.email : 'Khách vãng lai'}{session.account && !session.account.email_verified && !embedded && <button onClick={() => setView('account')}>Xác minh email</button>}</span>{session.account ? <button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button> : <button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button>}</div>}
+    {session && !session.account && <div className="widgetAccountBar"><span>Khách vãng lai</span><button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button></div>}
+    {session?.account && embedded && <div className="widgetAccountBar"><span>{session.account.email}</span><button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></div>}
     {loading ? <p className="widgetState" role="status">Đang kết nối...</p> : !session || authMode !== 'guest' ? <section className="widgetWelcome">
       <span className="widgetEyebrow">RAG SUPPORT · KHÁCH HÀNG</span><h2>{authMode === 'register' ? 'Tạo tài khoản' : authMode === 'login' ? 'Chào mừng trở lại' : 'Bạn cần hỗ trợ điều gì?'}</h2>
       <p>{authMode === 'guest' ? 'Hỏi chính sách hoặc kết nối với nhân viên. Bạn có thể trò chuyện ngay mà không cần tài khoản.' : 'Đăng nhập để giữ lịch sử và tiếp tục trò chuyện trên nhiều thiết bị.'}</p>
@@ -310,6 +314,7 @@ export default function Widget() {
         const el = e.currentTarget; nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
         setAtLatest(nearBottom.current); if (nearBottom.current) setHasNewMessages(false);
       }}>
+        {!messageBefore && session.messages.length === 0 && <div className="widgetWelcomeCard"><h2>Xin chào, {session.display_name}! 👋</h2><p>Tôi là Trợ lý AI. Bạn cần hỗ trợ gì hôm nay?</p><div className="widgetSuggestions">{suggestions.map(question => <button type="button" key={question} onClick={() => setDraft(question)}>{question}</button>)}</div></div>}
         <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>
         {session.messages.map(message => <article key={message.id} className={`widgetMessage ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p>{message.content}</p>
@@ -359,20 +364,20 @@ export default function Widget() {
   </AuthLayout>;
   const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
   const activeAccess = session?.order_access?.filter(access => access.expires_at > Date.now() / 1000) || [];
-  return <div className="customerPortal">
+  return <div className={`customerPortal ${view === 'account' ? 'accountTheme' : ''}`}>
     <div className="portalSide"><div className="portalBrand"><span><Bot size={19} /></span><div><b>RAG Support</b><small>Hỗ trợ khách hàng</small></div></div>
       <nav aria-label="Dịch vụ khách hàng">{pages.map(([Icon, label, key]) => <button key={key} className={view === key ? 'current' : ''} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}><Icon size={17} />{label}</button>)}</nav>
-      <div className="portalSideFoot"><ShieldCheck size={17} /><span>Tra đơn cần mã truy cập do cửa hàng cấp.</span></div>
+      <div className="portalSideFoot"><ShieldCheck size={17} /><span>Tra đơn cần mã truy cập do cửa hàng cấp.</span>{session?.account && <><div className="portalSideAccount"><b>{session.display_name || session.account.email}</b><small>{session.account.email}</small></div><button className="portalLogout" onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></>}</div>
     </div>
     <div className="portalMain" role="main"><nav className="portalMobileNav" aria-label="Dịch vụ khách hàng">{pages.map(([Icon, label, key]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}><Icon size={16} />{label}</button>)}</nav>
       {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => clearIdentity('Đã đổi mật khẩu. Vui lòng đăng nhập lại.')} /> : view === 'orders' ? <section className="portalPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><span className="portalPageIcon"><PackageSearch size={22} /></span><div><h1>Tra cứu đơn hàng</h1><p>Xem trạng thái và mã vận đơn sau khi xác nhận quyền truy cập.</p></div></div>
-        {!session ? <div className="portalEmpty"><p>Bắt đầu phiên trò chuyện để tra cứu đơn.</p><button onClick={() => setView('messages')}>Bắt đầu trò chuyện <ArrowRight size={16} /></button></div> : <><form className="portalOrderForm" onSubmit={event => { event.preventDefault(); inspectOrder(orderId, new FormData(event.currentTarget).get('code')); }}><label>Mã đơn<input value={orderId} onChange={event => { setOrderId(event.target.value); setOrderResult(null); }} placeholder="Ví dụ: DH12345" required minLength={6} maxLength={64} autoComplete="off" /></label>
+        {!session ? <div className="portalEmpty"><p>Bắt đầu phiên trò chuyện để tra cứu đơn.</p><button onClick={() => setView('messages')}>Bắt đầu trò chuyện <ArrowRight size={16} /></button></div> : <><div className="portalOrderGrid"><form className="portalOrderForm" onSubmit={event => { event.preventDefault(); inspectOrder(orderId, new FormData(event.currentTarget).get('code')); }}><h2>Nhập thông tin tra cứu</h2><label>Mã đơn<input value={orderId} onChange={event => { setOrderId(event.target.value); setOrderResult(null); }} placeholder="Ví dụ: DH12345" required minLength={6} maxLength={64} autoComplete="off" /></label>
           {!activeAccess.some(access => access.order_id === orderId.trim().toUpperCase()) && <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} placeholder="Mã do cửa hàng cấp" /></label>}
-          <p>Mã truy cập chỉ dùng để xác nhận quyền tra đơn. Không gửi mã trong tin nhắn.</p><button disabled={busy || orderLoading}>{orderLoading ? 'Đang tra cứu...' : 'Tra cứu đơn'}</button></form>
+          <p>Mã truy cập chỉ dùng để xác nhận quyền tra đơn. Không gửi mã trong tin nhắn.</p><button disabled={busy || orderLoading}>{orderLoading ? 'Đang tra cứu...' : 'Tra cứu đơn hàng'}</button></form><div className="portalOrderHelp"><h2>Lấy mã truy cập ở đâu?</h2><ol><li>Liên hệ cửa hàng qua kênh đã xác minh (điện thoại hoặc email đặt hàng).</li><li>Nhân viên kiểm tra chủ đơn rồi cấp mã riêng cho từng đơn.</li><li>Không gửi mã truy cập trong tin nhắn trò chuyện.</li></ol></div></div>
           {orderError && <p className="widgetError" role="alert">{orderError}</p>}
           {orderResult && activeAccess.some(access => access.order_id === orderResult.order_id) && <article className="portalOrderResult" role="status"><div><small>ĐƠN HÀNG</small><h2>{orderResult.order_id}</h2></div><span>{orderStatuses[orderResult.status] || orderResult.status}</span><dl><dt>Trạng thái</dt><dd>{orderStatuses[orderResult.status] || orderResult.status}</dd><dt>Mã vận đơn</dt><dd>{orderResult.tracking_code || 'Chưa có mã vận đơn'}</dd></dl></article>}
           {activeAccess.length > 0 && <div className="portalAccess"><h2>Đơn đã cấp quyền</h2>{activeAccess.map(access => <button key={access.order_id} onClick={() => { setOrderId(access.order_id); inspectOrder(access.order_id, ''); }}>{access.order_id}<ArrowRight size={16} /></button>)}</div>}</>}
-      </section> : <section className="portalPage" aria-label="Hỏi đáp chính sách"><div className="portalPageHead"><span className="portalPageIcon"><BookOpen size={22} /></span><div><h1>Hỏi đáp chính sách</h1><p>Đặt câu hỏi cho trợ lý AI. Câu trả lời sẽ kèm trích nguồn khi tìm được tài liệu.</p></div></div><div className="portalQuestions"><h2>Gợi ý câu hỏi</h2>{suggestions.map(question => <button key={question} onClick={() => askSuggestion(question)}>{question}<ArrowRight size={17} /></button>)}</div><div className="portalEmpty"><p>Không thấy câu hỏi phù hợp? Nhập câu hỏi của bạn trong Tin nhắn.</p><button onClick={() => setView('messages')}>Mở trò chuyện <ArrowRight size={16} /></button></div></section>}
+      </section> : <section className="portalPage" aria-label="Hỏi đáp chính sách"><div className="portalPageHead"><span className="portalPageIcon"><BookOpen size={22} /></span><div><h1>Hỏi đáp chính sách</h1><p>Đặt câu hỏi cho trợ lý AI. Câu trả lời sẽ kèm trích nguồn khi tìm được tài liệu.</p></div></div><button type="button" className="portalSearchFake" onClick={() => setView('messages')}><SearchIcon aria-hidden="true" /><span>Đặt câu hỏi về chính sách cho trợ lý...</span></button><div className="portalPolicyGrid">{policyGroups.map(([title, description]) => <button type="button" key={title} onClick={() => askSuggestion(title)}><strong>{title}</strong><small>{description}</small></button>)}</div><div className="portalQuestions"><h2>4 câu hỏi phổ biến</h2>{suggestions.map(question => <button key={question} onClick={() => askSuggestion(question)}>{question}<ArrowRight size={17} /></button>)}</div><div className="portalEmpty"><p>Không tìm thấy chính sách bạn cần?</p><button onClick={() => setView('messages')}>Mở trò chuyện <ArrowRight size={16} /></button></div></section>}
     </div>
     <div className="portalContext"><h2>Phiên hỗ trợ</h2><div className="portalPerson"><span><UserRound size={20} /></span><div><b>{session?.display_name || 'Khách hàng'}</b><small>{session?.account ? 'Đã đăng nhập tài khoản' : session ? 'Khách vãng lai · ' + statuses[session.status] : 'Chưa bắt đầu phiên'}</small></div></div><div className="portalContextBlock"><h3>Kênh hỗ trợ</h3><p>Website Chat</p></div><div className="portalContextBlock"><h3>Đơn được tra cứu</h3>{activeAccess.length ? activeAccess.map(access => <button key={access.order_id} onClick={() => { setOrderId(access.order_id); setView('orders'); inspectOrder(access.order_id, ''); }}>{access.order_id}<ArrowRight size={15} /></button>) : <p>Chưa có đơn được cấp quyền.</p>}</div><div className="portalContextBlock"><h3>Cần thêm hỗ trợ?</h3><p>Trò chuyện cùng AI hoặc yêu cầu gặp nhân viên.</p><button onClick={() => setView('messages')}>Vào Tin nhắn <ArrowRight size={15} /></button></div></div>
   </div>;
