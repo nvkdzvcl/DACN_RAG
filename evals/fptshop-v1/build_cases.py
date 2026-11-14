@@ -131,7 +131,7 @@ def main():
         rows.append({"id": case_id, "split": "test", "category": category, "group": case_id, "query": query,
                      "history": history, "should_answer": answer, "should_clarify": clarify, "expected_answer": expected,
                      "evidence": quotes, "required_patterns": patterns, "forbidden_patterns": forbidden,
-                     "review_status": "agent_authored_pending_human_review"})
+                     "review_status": "approved_by_project_user_20261115"})
     OUTPUT.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
     print(f"Wrote {len(rows)} cases to {OUTPUT}")
 

@@ -13,7 +13,7 @@
 ## Trạng thái
 
 - Soạn ngày 15/11/2026 **trước khi** nạp chính sách mới vào hệ thống và trước mọi lượt chạy.
-- Nhãn do trợ lý AI soạn, **chờ người duyệt** qua `REVIEW.md`. Sửa nhãn chỉ trước lượt chạy đầu tiên; sau đó tạo phiên bản mới, không ghi đè.
+- Nhãn do trợ lý AI soạn; **người dùng dự án (Nguyễn Văn Khanh) duyệt toàn bộ 40 nhãn ngày 15/11/2026** qua `REVIEW.md`, không yêu cầu sửa. Duyệt được xác nhận trong hội thoại, không ký từng dòng. Từ đây bộ câu đóng băng; muốn sửa nhãn phải tạo phiên bản mới.
 - `build_cases.py` sinh `cases.jsonl` từ bảng trong script, tra dòng gold theo đoạn chữ và từ chối ghi đè.
 
 ## Chạy
@@ -22,10 +22,10 @@
 python -m app.evaluate_rag --split test --dataset evals/fptshop-v1 --output evals/fptshop-v1/runs/<tên-mới>
 ```
 
-## SHA-256 bản nháp (trước duyệt)
+## SHA-256 khi đóng băng (sau duyệt, trước lượt chạy đầu tiên)
 
 ```
-f3c75c1888d59cf9649677e6be3b81396cf033343d80e9c282ce421ef6b3c259 *cases.jsonl
+f82296992e79c490f4a33b35fcc694a5c1c47cb49f4ac608bb9956bcec59c800 *cases.jsonl
 fbf1168886a37f8cd702a1c31de24b1df680b38fb4d49ecdbe7403dcc83e1189 *corpus/test-bao-hanh.md
 7ba58dca5883265ca24242c1118b9c5a41bfca7231de6608cc85f21750cf76da *corpus/test-bao-mat.md
 aceed44f86f601458a73c2dc6dd55bddea5ee1af51cc1459fe40b75de8ed1678 *corpus/test-doi-tra.md
