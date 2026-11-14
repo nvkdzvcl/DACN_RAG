@@ -7,6 +7,15 @@ import time
 # Match a whole token up to the DB/API limit; ORD IDs may be compact or multi-segment.
 ORDER_PATTERN = re.compile(r"(?<![\w-])(?=[\w-]{6,64}(?![\w-]))(?ai:(?:DH(?:[-_]?)[A-Z0-9]{4,}|ORD(?:[-_]?[A-Z0-9]{4,})(?:[-_][A-Z0-9]+)*))(?![\w-])")
 
+ORDER_STATUS_LABELS = {
+    'processing': 'Đang xử lý',
+    'paid': 'Đã thanh toán',
+    'shipping': 'Đang giao',
+    'shipped': 'Đã gửi hàng',
+    'delivered': 'Đã giao',
+    'cancelled': 'Đã hủy',
+}
+
 def extract_order_id(content: str) -> str | None:
     match = ORDER_PATTERN.search(content)
     return match.group(0).upper() if match else None

@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.models.support import Conversation, Message
 from app.services.handoff_service import classify_message, queue_handoff, refresh_handoff_summary
-from app.services.order_service import ORDER_PATTERN, lookup_order
+from app.services.order_service import ORDER_PATTERN, ORDER_STATUS_LABELS, lookup_order
 from app.services.tool_service import select_order_tool
 from app.rag.answer_service import answer_question, sources_current
 from app.rag.ollama import ProviderError
@@ -123,7 +123,8 @@ def process_message(db: Session, conversation: Conversation, content: str, exter
                             raise HTTPException(503, 'Không thể tra cứu đơn lúc này. Tin nhắn đã được lưu.') from exc
                         trace['outcome'] = 'found' if order_result['found'] else 'not_found_or_not_owned'
                         if order_result['found']:
-                            answer = f"Đơn hàng {order_result['order_id']}: {order_result['status']}."
+                            status = ORDER_STATUS_LABELS.get(order_result['status'], order_result['status'])
+                            answer = f"Đơn hàng {order_result['order_id']}: {status}."
                             if order_result['tracking_code']:
                                 answer += f" Mã vận đơn: {order_result['tracking_code']}."
                     if selection['name'] == 'handoff' or not order_result['found']:

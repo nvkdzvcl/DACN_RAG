@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-31",
+  "cases": 44,
+  "approved_cases": 44,
+  "rejected_case_ids": [],
+  "pending_case_ids": [],
+  "passed_among_approved": 44,
+  "errors_among_approved": 0,
+  "accuracy_against_approved_labels": 1.0,
+  "all_labels_approved": true,
+  "sets": {
+    "base-final": {
+      "cases": 24,
+      "approved_cases": 24,
+      "rejected_case_ids": [],
+      "pending_case_ids": [],
+      "passed_among_approved": 24,
+      "accuracy_against_approved_labels": 1.0
+    },
+    "followups": {
+      "cases": 8,
+      "approved_cases": 8,
+      "rejected_case_ids": [],
+      "pending_case_ids": [],
+      "passed_among_approved": 8,
+      "accuracy_against_approved_labels": 1.0
+    },
+    "context": {
+      "cases": 12,
+      "approved_cases": 12,
+      "rejected_case_ids": [],
+      "pending_case_ids": [],
+      "passed_among_approved": 12,
+      "accuracy_against_approved_labels": 1.0
+    }
+  },
+  "scope": "Manual label approval only; not independent evaluation and not RAG answer-quality approval."
+}

@@ -74,7 +74,7 @@ class ToolTests(unittest.TestCase):
             self.assertEqual(transport.call_count, 1)
         with Session(self.engine) as db:
             ai = db.query(Message).filter_by(sender_type='ai').one()
-            self.assertEqual(ai.content, 'Đơn hàng DH12345: shipped. Mã vận đơn: PRIVATE-TRACK.')
+            self.assertEqual(ai.content, 'Đơn hàng DH12345: Đã gửi hàng. Mã vận đơn: PRIVATE-TRACK.')
             trace = db.query(Message).filter_by(sender_type='customer').one().tool_trace
             self.assertEqual(trace['outcome'], 'found')
             self.assertNotIn('PRIVATE-TRACK', str(trace))

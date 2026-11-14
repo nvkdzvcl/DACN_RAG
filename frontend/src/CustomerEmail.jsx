@@ -68,7 +68,7 @@ export default function CustomerEmail({ action, request, onBack, onComplete }) {
     {mode === 'register-code' && <><p className="authFeedback" role="status">Mã xác minh có hạn 15 phút và chỉ dùng một lần.</p><button className="authBack" type="button" onClick={resendRegistrationCode} disabled={busy || resendBusy}>{resendBusy ? 'Đang gửi lại...' : 'Gửi lại mã xác minh'}</button></>}
     {mode === 'forgot' && configured === false && <p className="authFeedback" role="status">Chức năng gửi email chưa sẵn sàng. Vui lòng liên hệ cửa hàng hoặc thử lại sau.</p>}
     {error && <p className="authFeedback" role="alert">{error}</p>}{notice && <p className="authFeedback" role="status">{notice}</p>}
-    <button className="authBack" type="button" onClick={onBack} disabled={busy}><ArrowLeft size={15} />Quay lại</button>
+    {mode !== 'register-code' ? <button className="authBack" type="button" onClick={onBack} disabled={busy}><ArrowLeft size={15} />Quay lại</button> : <p className="authFeedback" role="status">Bạn cần nhập đúng mã xác minh để hoàn tất đăng ký tài khoản.</p>}
     <div className="authNote"><Mail size={22} /><div>{mode === 'forgot' ? 'Kiểm tra cả thư rác' : 'Liên kết chỉ dùng một lần'}<small>{mode === 'forgot' ? 'Email chưa xác minh không nhận được thư khôi phục. Nếu còn nhớ mật khẩu, đăng nhập và xác minh trong mục Tài khoản.' : mode === 'verify' ? 'Liên kết có hạn 60 phút. Không yêu cầu xác minh hoặc không biết mật khẩu? Hãy đóng trang này.' : 'Liên kết có hạn 15 phút. Nếu hết hạn, quay lại Đăng nhập và chọn Quên mật khẩu để yêu cầu thư mới.'}</small></div></div>
   </AuthLayout>;
 }

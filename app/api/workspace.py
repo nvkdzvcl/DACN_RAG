@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import hash_password, public_user, require_admin, require_staff, token_hash, verify_password
 from app.db.session import get_db
-from app.models.support import AuthSession, Conversation, Customer, KnowledgeDocument, Message, Order, OrderAccess, Ticket, User
+from app.models.support import AuthSession, Conversation, Customer, CustomerAccount, KnowledgeDocument, Message, Order, OrderAccess, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, ticket_slas, utc
 from app.telegram import telegram_status
 
@@ -64,8 +64,9 @@ class PasswordChange(BaseModel):
     new_password: str = Field(min_length=12, max_length=128)
 
 
-def customer_data(customer):
-    return {'id': customer.id, 'display_name': customer.display_name, 'email': customer.email}
+def customer_data(customer, account_email=None):
+    return {'id': customer.id, 'display_name': customer.display_name,
+            'email': account_email or customer.email}
 
 
 def order_data(order, name):
@@ -76,15 +77,19 @@ def order_data(order, name):
 @router.get('/customers')
 def customers(q: str = Query('', max_length=160), offset: int = Query(0, ge=0),
               limit: int = Query(25, ge=1, le=100), db: Session = Depends(get_db)):
-    query = db.query(Customer)
+    query = db.query(Customer, CustomerAccount.email).outerjoin(
+        CustomerAccount, CustomerAccount.customer_id == Customer.id)
     if q.strip():
-        query = query.filter(or_(*(column.contains(q.strip(), autoescape=True)
-                                  for column in (Customer.id, Customer.display_name, Customer.email))))
+        query = query.filter(or_(Customer.id.contains(q.strip(), autoescape=True),
+                                 Customer.display_name.contains(q.strip(), autoescape=True),
+                                 Customer.email.contains(q.strip(), autoescape=True),
+                                 CustomerAccount.email.contains(q.strip(), autoescape=True)))
     total = query.count()
     conv_count = select(func.count(Conversation.id)).where(Conversation.customer_id == Customer.id).correlate(Customer).scalar_subquery()
     order_count = select(func.count(Order.id)).where(Order.customer_id == Customer.id).correlate(Customer).scalar_subquery()
     rows = query.add_columns(conv_count, order_count).order_by(Customer.display_name, Customer.id).offset(offset).limit(limit).all()
-    return {'total': total, 'items': [customer_data(c) | {'conversation_count': cc, 'order_count': oc} for c, cc, oc in rows]}
+    return {'total': total, 'items': [customer_data(c, account_email) | {'conversation_count': cc, 'order_count': oc}
+                                     for c, account_email, cc, oc in rows]}
 
 
 @router.get('/customers/{customer_id}')

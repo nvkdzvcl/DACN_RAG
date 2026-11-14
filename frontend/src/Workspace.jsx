@@ -99,6 +99,10 @@ function RecordForm({ kind, record, request, onExpired, onSaved }) {
 function CustomerPicker({ request, onExpired }) {
   const [q, setQ] = useState(''), [selected, setSelected] = useState('');
   const state = useData(`/workspace/customers?${new URLSearchParams({ q, limit: 25 })}`, request, onExpired);
+  useEffect(() => {
+    const exact = state.data?.items?.find(customer => customer.email?.toLowerCase() === q.trim().toLowerCase());
+    if (exact) setSelected(exact.id);
+  }, [q, state.data]);
   return <div><label>Tìm khách để gắn đơn<input value={q} onChange={e => { setQ(e.target.value); setSelected(''); }} placeholder="Tên, email hoặc mã khách" /></label><LoadState state={state} /><label>Khách hàng<select name="customer_id" required value={selected} onChange={e => setSelected(e.target.value)}><option value="">Chọn khách hàng</option>{state.data?.items.map(c => <option value={c.id} key={c.id}>{c.display_name} · {c.email || c.id}</option>)}</select></label>{state.data && <small>{state.data.total} kết quả; hiển thị tối đa 25. Nhập thêm để thu hẹp tìm kiếm.</small>}</div>;
 }
 
