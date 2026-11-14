@@ -3,6 +3,7 @@ import os
 import re
 import secrets
 import time
+from threading import Lock
 from typing import Annotated
 from uuid import uuid4
 
@@ -232,6 +233,23 @@ def consume_challenge(db, challenge, account):
         raise HTTPException(400, 'Liên kết không còn hiệu lực. Vui lòng yêu cầu liên kết mới.')
 
 
+# ponytail: in-memory like the IP rate limits, so it assumes one API worker; persist attempts before scaling out.
+MAX_CODE_ATTEMPTS = 5
+_code_failures = {}
+_code_lock = Lock()
+
+
+def code_failure(digest, expires_at):
+    """Count one wrong guess against a registration code; returns the total so far."""
+    now = int(time.time())
+    with _code_lock:
+        for key in [key for key, (_, expiry) in _code_failures.items() if expiry <= now]:
+            del _code_failures[key]
+        count = _code_failures.get(digest, (0, expires_at))[0] + 1
+        _code_failures[digest] = (count, expires_at)
+        return count
+
+
 @router.get('/email-status')
 def email_status():
     try:
@@ -256,7 +274,14 @@ def verify_registration(payload: RegistrationCode, request: Request,
         CustomerEmailToken.used.is_(False),
         CustomerEmailToken.expires_at > now,
     ).order_by(CustomerEmailToken.created_at.desc()).first()
-    if not challenge or challenge.token_hash != token_hash(payload.code):
+    if not challenge:
+        raise HTTPException(400, 'Mã xác minh không đúng hoặc đã hết hạn.')
+    if challenge.token_hash != token_hash(payload.code):
+        if code_failure(challenge.token_hash, challenge.expires_at) >= MAX_CODE_ATTEMPTS:
+            # A 6-digit code is guessable across IPs; burn it so a new code must come from the mailbox.
+            db.execute(update(CustomerEmailToken).where(CustomerEmailToken.token_hash == challenge.token_hash).values(used=True))
+            db.commit()
+            raise HTTPException(400, f'Đã nhập sai mã {MAX_CODE_ATTEMPTS} lần nên mã này bị hủy. Vui lòng bấm gửi lại mã mới.')
         raise HTTPException(400, 'Mã xác minh không đúng hoặc đã hết hạn.')
     consumed = db.execute(update(CustomerEmailToken).where(
         CustomerEmailToken.token_hash == challenge.token_hash,

@@ -161,7 +161,7 @@ Giữ model trên GPU: kiểm chứng RTX 3060 6 GiB cho cả hai model 100% GPU
 
 ## Tài khoản khách hàng bằng email và mật khẩu
 
-Mở `/chat`, chọn **Đăng ký**, nhập tên hiển thị, email và mật khẩu 15–128 ký tự. Khách có thể đăng nhập trên nhiều thiết bị, xem **Lịch sử**, tạo **Chat mới** và đổi mật khẩu trong **Tài khoản**. Đổi mật khẩu đăng xuất mọi thiết bị; đăng xuất thông thường chỉ kết thúc phiên hiện tại. Vẫn hỗ trợ khách vãng lai.
+Mở `/chat`, chọn **Đăng ký**, nhập tên hiển thị, email và mật khẩu 8–128 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt, rồi nhập mã 6 số gửi qua email để hoàn tất đăng ký. Khách có thể đăng nhập trên nhiều thiết bị, xem **Lịch sử**, tạo **Chat mới** và đổi mật khẩu trong **Tài khoản**. Đổi mật khẩu đăng xuất mọi thiết bị; đăng xuất thông thường chỉ kết thúc phiên hiện tại. Vẫn hỗ trợ khách vãng lai.
 
 Đăng ký và đăng nhập không cần dịch vụ xác thực ngoài. Đã có **xác minh email và quên mật khẩu qua SMTP**: cấu hình hộp thư trong `.env`, vào Tài khoản để gửi xác minh; chỉ email đã xác minh được khôi phục mật khẩu. Đặt lại mật khẩu thu hồi mọi phiên và liên kết cũ. Không tự ghép lịch sử khách vãng lai hoặc cấp quyền xem đơn theo email. Backend tự nâng schema lên v10 (thêm trạng thái đọc riêng từng nhân viên); tra đơn vẫn cần mã truy cập riêng. Chi tiết: [Tài khoản khách hàng](docs/CUSTOMER_AUTH.md).
 
