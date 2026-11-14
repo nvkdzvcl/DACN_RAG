@@ -1,0 +1,18 @@
+# Chương trình khách hàng thân thiết FPT Shop (bản diễn đạt lại cho đồ án)
+**Nguồn và phạm vi tài liệu:** Tài liệu này do nhóm đồ án diễn đạt lại từ trang Chính sách chương trình khách hàng thân thiết của FPT Shop (fptshop.com.vn/ho-tro/chinh-sach-chuong-trinh-khach-hang-than-thiet-tai-fpt-shop), chương trình áp dụng từ 05/01/2024, truy cập ngày 15/11/2026; đây không phải văn bản chính thức của FPT Shop, khách hàng cần xác nhận lại tại cửa hàng hoặc tổng đài trước khi giao dịch.
+**Khách hàng thân thiết – phạm vi chương trình:** Chương trình tích điểm áp dụng chung cho chuỗi FPT Shop, các cửa hàng thương hiệu F.Studio, S.Studio, Garmin, nhà thuốc FPT Long Châu và Tiêm chủng Long Châu, khi mua trực tiếp tại cửa hàng hoặc qua kênh online chính thức.
+**Khách hàng thân thiết – đối tượng áp dụng:** Chương trình chỉ dành cho khách cá nhân; không áp dụng cho khách mua sỉ, mua số lượng lớn cho doanh nghiệp, đơn ưu đãi riêng cho đối tác, dự án hoặc đơn xuất hóa đơn công ty.
+**Khách hàng thân thiết – cách đăng ký:** Khách tìm "FPT Shop" trên Zalo hoặc quét mã QR để theo dõi tài khoản Zalo chính thức của FPT Shop, rồi nhập số điện thoại trong khung chat Zalo để đăng ký thành viên.
+**Khách hàng thân thiết – tỷ lệ tích điểm:** Cứ mỗi 4.000 đồng trên hóa đơn thanh toán, khách được tích 1 điểm, tính trên số tiền cuối cùng sau khi trừ khuyến mãi; ví dụ đơn 500.000 đồng dùng mã giảm 100.000 đồng thì khách trả 400.000 đồng và được 100 điểm.
+**Khách hàng thân thiết – hóa đơn không được tích điểm:** Không tích điểm cho dịch vụ thu hộ, hàng FPT Shop bán thay đối tác, và đơn thuộc chương trình ưu đãi riêng cho đối tác, dự án hoặc xuất hóa đơn công ty.
+**Khách hàng thân thiết – giá trị quy đổi điểm:** Mỗi điểm thưởng có giá trị 10 đồng khi đổi thành ưu đãi giảm giá, và khách phải đổi tối thiểu 50 điểm mỗi lần.
+**Khách hàng thân thiết – mức giảm tối đa khi đổi điểm:** Từ 01/11/2024, đơn dưới 1.000.000 đồng được dùng điểm giảm tối đa 200.000 đồng (tương đương 20.000 điểm), còn đơn từ 1.000.000 đồng trở lên được dùng điểm giảm tối đa 20% giá trị đơn.
+**Khách hàng thân thiết – suất mua đặc quyền:** Khi đạt các mốc 1.000, 3.000, 8.000 hoặc 15.000 điểm, khách có thể đổi điểm lấy suất mua đặc quyền giá 1.000 đồng; suất mua có hạn 30 ngày kể từ khi đổi, và điểm đã đổi sẽ không được hoàn lại nếu suất mua hết hạn.
+**Khách hàng thân thiết – đổi điểm khi mua trên website:** Khi mua trên website, khách bật nút đổi điểm ở màn hình giỏ hàng; phần giảm giá từ điểm được cộng vào tổng khuyến mãi trước khi xác nhận đơn.
+**Khách hàng thân thiết – đổi điểm khi mua tại cửa hàng hoặc qua tổng đài:** Khi mua tại cửa hàng hoặc qua tổng đài, khách nhờ nhân viên hỗ trợ đổi điểm trực tiếp.
+**Khách hàng thân thiết – hạn sử dụng điểm:** Mỗi lần tích điểm có hạn 12 tháng và hết hạn vào ngày cuối cùng của tháng đó; ví dụ điểm tích ngày 24/09/2023 hết hạn ngày 30/09/2024.
+**Khách hàng thân thiết – thứ tự trừ điểm khi đổi:** Khi đổi điểm, hệ thống tự dùng trước những điểm có hạn sử dụng gần nhất.
+**Khách hàng thân thiết – trừ điểm khi trả hàng:** Khi khách trả sản phẩm đã được tích điểm, cứ mỗi 4.000 đồng giá trị trả lại thì bị trừ 1 điểm.
+**Khách hàng thân thiết – điểm không quy đổi thành tiền mặt:** Điểm thưởng chỉ dùng để đổi ưu đãi giảm giá hoặc suất mua đặc quyền khi mua hàng, không được đổi ra tiền mặt.
+**Khách hàng thân thiết – thay đổi hoặc kết thúc chương trình:** FPT Shop có thể sửa đổi hoặc kết thúc sớm chương trình theo quy định pháp luật và sẽ thông báo công khai trước để khách kịp dùng điểm; thay đổi không làm ảnh hưởng quyền lợi đã có của khách.
+**Khách hàng thân thiết – nơi giải đáp thắc mắc:** Mọi thắc mắc và khiếu nại về chương trình được tiếp nhận qua tổng đài miễn phí 1800 6601.
