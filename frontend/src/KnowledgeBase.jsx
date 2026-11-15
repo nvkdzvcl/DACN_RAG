@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { RichText } from './RichText';
 
 const labels = { indexed: 'Đã lập chỉ mục', processing: 'Đang xử lý', failed: 'Xử lý lỗi', ready_for_embedding: 'Cần lập chỉ mục lại', deleting: 'Xóa chưa hoàn tất', uploaded: 'Đã tải lên' };
 
@@ -22,7 +23,7 @@ export function Citations({ citations, request }) {
     const start = quote ? content.indexOf(quote) : -1;
     return <details key={`${id}-${index}`}>
       <summary>Nguồn {index + 1} · {citation.source}{citation.location ? ` · ${citation.location}` : citation.page ? ` · Trang ${citation.page}` : ''}</summary>
-      {citation.quote && <><p className="sourceLabel">Trích dẫn trong câu trả lời</p><blockquote>{citation.quote}</blockquote></>}
+      {citation.quote && <><p className="sourceLabel">Trích dẫn trong câu trả lời</p><blockquote><RichText text={citation.quote} /></blockquote></>}
       {citation.document_id && <button type="button" disabled={current?.loading} onClick={() => open(citation)}>{current?.loading ? 'Đang tải nguồn...' : current?.error ? 'Thử tải lại nguồn' : 'Xem đoạn nguồn'}</button>}
       {current?.error && <p role="alert">{current.error}</p>}
       {content && <div className="sourceContext"><p className="sourceLabel">Toàn đoạn nguồn · phần khớp trích dẫn được đánh dấu</p><p>{start < 0 ? content : <>{content.slice(0, start)}<mark>{content.slice(start, start + quote.length)}</mark>{content.slice(start + quote.length)}</>}</p></div>}

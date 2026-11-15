@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.inbox import accept_conversation, add_agent_message, conversation_detail, list_conversations, mark_conversation_read, mark_conversation_unread, ReadConversation, AgentMessageCreate
 from app.db.session import Base
-from app.models.support import Conversation, Customer, Message, Ticket, User
+from app.models.support import Conversation, Customer, CustomerAccount, Message, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, conversation_sla, ticket_slas
 from app.services.ticket_service import complete_tickets
 
@@ -33,6 +33,13 @@ class InboxTests(unittest.TestCase):
             Ticket(id='ticket', conversation_id='first', priority='high', summary='Needs help'),
         ])
         self.db.commit()
+
+    def test_detail_falls_back_to_the_customer_account_email(self):
+        self.assertEqual(conversation_detail('first', self.db)['customer_email'], 'a@example.test')
+        self.assertIsNone(conversation_detail('second', self.db)['customer_email'])
+        self.db.add(CustomerAccount(id='acc-b', customer_id='b', email='b@example.test', password_hash='unused'))
+        self.db.commit()
+        self.assertEqual(conversation_detail('second', self.db)['customer_email'], 'b@example.test')
 
     def test_activity_preview_and_per_user_unread_cursor(self):
         other = User(id='other', username='other', display_name='Other', password_hash='unused', role='agent')

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { RichText } from './RichText';
 import { UserRound } from 'lucide-react';
 import { EmailVerification } from './CustomerEmail';
 
@@ -35,7 +36,7 @@ export function CustomerHistory({ request, onExpired, currentId }) {
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [selected, before, refresh]);
-  return <section className="portalPage customerHistory"><div className="portalPageHead"><div><h1>Lịch sử trò chuyện</h1><p>Lịch sử được lưu theo tài khoản. Phiên khách vãng lai không tự ghép vào đây.</p></div></div>
+  return <section className="portalPage customerHistory"><div className="portalPageHead"><div><h1>Lịch sử trò chuyện</h1><p>Lịch sử được lưu theo tài khoản và xem được trên mọi thiết bị.</p></div></div>
     {error && <p role="alert" className="widgetError">{error} <button onClick={() => setRefresh(n => n + 1)}>Thử lại</button></p>}
     {!list && !error && <p role="status">Đang tải lịch sử...</p>}
     {list && <><div className="accountHistoryList">{list.items.map(item => <button key={item.id} aria-pressed={selected === item.id} onClick={() => { setSelected(item.id); setCursors([]); }}><b>{date(item.created_at)}</b><span>{labels[item.status] || item.status}{item.id === currentId ? ' · Phiên hiện tại' : ''}</span><small>#{item.id.slice(0, 8)}</small></button>)}</div>
@@ -43,7 +44,7 @@ export function CustomerHistory({ request, onExpired, currentId }) {
       {!list.items.length && <p>Chưa có hội thoại.</p>}</>}
     {loading && <p role="status">Đang tải tin nhắn...</p>}
     {detail && <div className="accountHistoryDetail"><h2>Nội dung hội thoại</h2><p>Chế độ xem lịch sử. Vào Tin nhắn để tiếp tục phiên hiện tại.</p><div className="accountPager"><button disabled={loading || !detail.message_page.has_more} onClick={() => setCursors(values => [...values, detail.message_page.next_before])}>Tin cũ hơn</button><button disabled={loading || !cursors.length} onClick={() => setCursors(values => values.slice(0, -1))}>Tin mới hơn</button></div>
-      <div className="accountMessages">{detail.messages.map(message => <article className={'widgetMessage ' + (message.sender_type === 'customer' ? 'widgetOwn' : '')} key={message.id}><b>{senderLabels[message.sender_type] || 'Hỗ trợ'}</b><p>{message.content}</p>{message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ' · ' + citation.location}</summary><blockquote>{citation.quote}</blockquote></details>)}</article>)}{!detail.messages.length && <p>Hội thoại chưa có tin nhắn.</p>}</div></div>}
+      <div className="accountMessages">{detail.messages.map(message => <article className={'widgetMessage ' + (message.sender_type === 'customer' ? 'widgetOwn' : '')} key={message.id}><b>{senderLabels[message.sender_type] || 'Hỗ trợ'}</b><p><RichText text={message.content} /></p>{message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ' · ' + citation.location}</summary><blockquote>{citation.quote}</blockquote></details>)}</article>)}{!detail.messages.length && <p>Hội thoại chưa có tin nhắn.</p>}</div></div>}
   </section>;
 }
 

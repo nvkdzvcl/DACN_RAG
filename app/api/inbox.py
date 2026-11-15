@@ -7,7 +7,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, joinedload
 from app.core.auth import require_staff
 from app.db.session import get_db
-from app.models.support import Conversation, ConversationRead, Message, TelegramDelivery, Ticket, User, now_utc
+from app.models.support import Conversation, ConversationRead, CustomerAccount, Message, TelegramDelivery, Ticket, User, now_utc
 from app.services.sla_service import conversation_sla, ticket_slas, utc
 from app.services.ticket_service import complete_tickets
 
@@ -232,7 +232,8 @@ def conversation_detail(conversation_id: str, db: Session = Depends(get_db),
     completers = {u.id: u.display_name for u in db.query(User).filter(User.id.in_([t.completed_by_id for t in tickets if t.completed_by_id])).all()}
     deliveries = {d.message_id: {'state': d.state, 'error': d.error, 'sent_at': d.sent_at}
                   for d in db.query(TelegramDelivery).filter(TelegramDelivery.message_id.in_([m.id for m in messages]))}
-    return {"conversation_id": conversation.id, "customer_id": conversation.customer_id, "customer_name": conversation.customer.display_name, "customer_email": conversation.customer.email, "channel": conversation.channel, "status": conversation.status, "assigned_agent_id": conversation.assigned_agent_id, "priority": conversation.priority, "sla": conversation_sla(list(slas.values())), "last_customer_message_id": conversation.last_customer_message_id, "message_page": message_page, "messages": [{"id": m.id, "sender_type": m.sender_type, "agent_id": m.agent_id, "content": m.content, "citations": m.citations or [], "tool_trace": m.tool_trace, "delivery": deliveries.get(m.id, {"state": "pending"} if conversation.channel == "telegram" and m.sender_type != "customer" else None), "created_at": m.created_at} for m in messages], "tickets": [{"id": t.id, "status": t.status, "priority": t.priority, "summary": t.summary, "created_at": t.created_at, "completed_at": t.completed_at, "completed_by_id": t.completed_by_id, "completed_by_name": completers.get(t.completed_by_id), "completion_note": t.completion_note, "sla": slas[t.id]} for t in tickets]}
+    return {"conversation_id": conversation.id, "customer_id": conversation.customer_id, "customer_name": conversation.customer.display_name, "customer_email": conversation.customer.email or db.query(CustomerAccount.email).filter_by(
+                customer_id=conversation.customer_id).scalar(), "channel": conversation.channel, "status": conversation.status, "assigned_agent_id": conversation.assigned_agent_id, "priority": conversation.priority, "sla": conversation_sla(list(slas.values())), "last_customer_message_id": conversation.last_customer_message_id, "message_page": message_page, "messages": [{"id": m.id, "sender_type": m.sender_type, "agent_id": m.agent_id, "content": m.content, "citations": m.citations or [], "tool_trace": m.tool_trace, "delivery": deliveries.get(m.id, {"state": "pending"} if conversation.channel == "telegram" and m.sender_type != "customer" else None), "created_at": m.created_at} for m in messages], "tickets": [{"id": t.id, "status": t.status, "priority": t.priority, "summary": t.summary, "created_at": t.created_at, "completed_at": t.completed_at, "completed_by_id": t.completed_by_id, "completed_by_name": completers.get(t.completed_by_id), "completion_note": t.completion_note, "sla": slas[t.id]} for t in tickets]}
 
 @router.post("/conversations/{conversation_id}/accept")
 def accept_conversation(conversation_id: str, db: Session = Depends(get_db), user: User = Depends(require_staff)):

@@ -1,5 +1,6 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { RichText } from './RichText';
 import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon } from 'lucide-react';
 
 function GoogleIcon() {
@@ -327,8 +328,8 @@ export default function Widget() {
         {!messageBefore && session.messages.length === 0 && <div className="widgetWelcomeCard"><h2>Xin chào, {session.display_name}! 👋</h2><p>Tôi là Trợ lý AI. Bạn cần hỗ trợ gì hôm nay?</p><div className="widgetSuggestions">{suggestions.map(question => <button type="button" key={question} onClick={() => setDraft(question)}>{question}</button>)}</div></div>}
         {(messageBefore || session.messages.length > 0) && <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>}
         {session.messages.map(message => <article key={message.id} className={`widgetMessage ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
-          <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p>{message.content}</p>
-          {message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ` · ${citation.location}`}</summary><blockquote>{citation.quote}</blockquote></details>)}
+          <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p><RichText text={message.content} /></p>
+          {message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ` · ${citation.location}`}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
         </article>)}
         {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}

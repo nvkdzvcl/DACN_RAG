@@ -3,9 +3,9 @@
 ## Phạm vi và cách làm
 
 - **Trang khách hàng** (`/chat`): đăng nhập, chat, Tra đơn, Hỏi đáp, Lịch sử, Tài khoản; Chrome/Edge desktop 1366×800 và mobile 390×844.
-- **Trang nhân viên** (Inbox, ticket, trạng thái Telegram, Kho tri thức, lỗi 403): chưa rà soát trong lượt này, chờ tài khoản admin/agent test do người dùng dự án tạo bằng `python -m app.create_user`.
+- **Trang nhân viên** (Tổng quan, Hội thoại/Inbox, Khách hàng, Đơn hàng, Kho tri thức, Phân tích, Cài đặt): đăng nhập bằng tài khoản test `e2e-admin` và `e2e-agent` do người dùng dự án tạo bằng `python -m app.create_user`; desktop 1366×800 và mobile 390×844.
 - Script Playwright chạy trên dev server thật (frontend 5173 → backend 8000, Ollama local), giả lập lỗi bằng cách chặn hoặc thay phản hồi API: mất mạng, HTTP 429, 500, 502, hết phiên (401). Ảnh trước/sau nằm trong `docs/images/ui-review/`, kết quả từng mục trong `report.json` cùng thư mục.
-- 4 test giao diện có sẵn (`frontend/tests/*.cjs`) chạy được khi có Playwright trong `NODE_PATH`: cả 4 đạt.
+- 4 test giao diện có sẵn (`frontend/tests/*.cjs`) chạy được khi có Playwright trong `NODE_PATH`: cả 4 đạt trước và sau khi sửa; 244 test backend đạt.
 
 ## Kết quả kiểm tra tự động (desktop và mobile)
 
@@ -32,7 +32,23 @@
 | 3 | Lời chào lặp hai lần khi hội thoại trống | `desktop-02-chat-empty.png` | Ẩn dòng chào phụ khi đã có thẻ chào |
 | 4 | Trang Hỏi đáp có nhóm "Hủy đơn hàng" và câu gợi ý không có trong Kho tri thức, bấm vào bị từ chối; nhóm chỉ gửi tên nhóm ("Bảo hành") làm câu hỏi | `desktop-09-faq.png` | Thay "Hủy đơn hàng" bằng "Trả góp"; mỗi nhóm gửi một câu hỏi đầy đủ; câu gợi ý lấy từ nội dung có trong Kho tri thức |
 | 5 | Chữ trên giao diện vẫn hứa "trò chuyện ngay mà không cần tài khoản" và hướng dẫn "xác minh email trong mục Tài khoản" đã lỗi thời | `mobile-01-login.png` | Sửa chữ cho khớp: bắt buộc tài khoản, xác minh bằng mã 6 số |
-| 6 | (giai đoạn 2, PR #14) Mật khẩu yếu báo lỗi ở ô "Nhập lại"; trên mobile không có nút Đăng xuất | | Đã sửa trong PR #14 |
+| 6 | Câu trả lời AI hiện nguyên dấu `**` (tiền tố phạm vi in đậm trong tài liệu chính sách được trích nguyên văn) ở chat khách, lịch sử, Inbox, trích nguồn | `after/desktop-11-history-bold.png` | Component `RichText` chỉ chuyển `**…**` thành chữ đậm bằng phần tử React (không chèn HTML); dòng xem trước bỏ dấu |
+| 7 | Inbox ghi "Chưa có email" cho khách có tài khoản | `staff-after/admin-desktop-inbox.png` | Chi tiết hội thoại lấy email tài khoản khi hồ sơ khách không có email |
+| 8 | (giai đoạn 2, PR #14) Mật khẩu yếu báo lỗi ở ô "Nhập lại"; trên mobile không có nút Đăng xuất | | Đã sửa trong PR #14 |
+
+## Trang nhân viên
+
+| Mục | Kết quả |
+|---|---|
+| Phân quyền trên giao diện | Agent không thấy "Tải tài liệu", "Thêm khách hàng", "Tạo đơn hàng"; admin thấy đủ |
+| Không tràn ngang, không lỗi JavaScript (admin và agent, desktop và mobile) | Đạt |
+| Inbox mất mạng | Trước: "Failed to fetch"; sau: "Không kết nối được máy chủ…" kèm "Dữ liệu có thể đã cũ; đang thử kết nối lại" và nút Thử lại |
+| Inbox HTTP 500 | "Yêu cầu thất bại (HTTP 500)…" kèm Thử lại (đã đạt từ trước) |
+| Inbox HTTP 403 | "Tài khoản không có quyền thực hiện thao tác…" kèm Thử lại (đã đạt từ trước) |
+| Thông tin liên hệ trong Inbox | Trước: "Chưa có email" với khách có tài khoản; sau: hiện email tài khoản (có test) |
+| Câu trả lời AI và dòng xem trước | Trước: hiện nguyên dấu `**` của tiền tố phạm vi trong tài liệu; sau: tiền tố in đậm trong tin nhắn, bỏ dấu ở dòng xem trước |
+
+Ảnh: `staff-before/admin-desktop-00-home.png` (dấu `**` trong dòng xem trước, "Chưa có email") và `staff-after/admin-desktop-inbox*.png`.
 
 ## Lỗi chức năng phát hiện khi rà soát giao diện
 
@@ -50,4 +66,5 @@
 - Hai nút "Tin cũ hơn / Tin mới hơn" luôn hiện kể cả khi hội thoại ngắn; nút "Vào Tin nhắn" ở cột phải hiện cả khi đang ở trang Tin nhắn.
 - Khi hỏi liên tiếp nhiều câu trong một hội thoại dài, câu trả lời thay đổi giữa các lần chạy (2 lượt kiểm tra 10 câu gợi ý: lần lượt 7/10 câu có trích nguồn, với tập câu đúng/sai khác nhau). Đây là giới hạn của model 4B cộng với lịch sử dài; không chỉnh câu gợi ý thêm để tránh tinh chỉnh theo bài test.
 - Độ dao động giữa các lần chạy eval khoảng ±2–3 câu mỗi bộ (5 câu không có lịch sử đổi kết quả dù không đi qua phần code đã sửa); chênh 1–2 câu giữa các phiên bản không đủ để kết luận.
-- Rà soát trang nhân viên.
+- Tin nhắn gửi sang Telegram vẫn chứa dấu `**` (Telegram gửi văn bản thuần); cần kiểm tra ở bước smoke test Telegram.
+- Dữ liệu test (khách `e2e-test@example.com`, các hội thoại "Khach E2E", tài khoản `e2e-admin`, `e2e-agent`) còn trong DB local; cần dọn trước khi demo.
