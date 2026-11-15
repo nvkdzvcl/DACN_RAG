@@ -42,7 +42,8 @@ Bản kiểm tra: `main` sau khi merge PR #11–#15, cộng hai sửa nhỏ tron
 | Tin khách gửi khi hội thoại cũ (05/11) vẫn đang chờ nhân viên | Lưu vào DB, hiện trong Inbox; AI im lặng đúng thiết kế; khách không nhận được phản hồi nào |
 | Agent tiếp nhận, trả lời, đóng hội thoại từ Inbox | Cả tin trả lời và thông báo đóng đều `sent`; người dùng xác nhận đã thấy trên điện thoại |
 | Hỏi lại "Hoàn tiền về thẻ đã thanh toán mất mấy ngày?" | Mở hội thoại mới; AI trả lời đúng (5 đến 7 ngày, không tính thứ Bảy, Chủ nhật, lễ) sau khoảng 14 giây, có nguồn; không bị chuyển nhân viên nhờ sửa quy tắc handoff (PR #15) |
-| Dấu `**` trong tin Telegram | Có trong lần gửi trên; đã sửa `outgoing_text` bỏ dấu (test mới) |
+| Dấu `**` trong tin Telegram | Có trong lần gửi trên; đã sửa `outgoing_text` bỏ dấu (test mới). Kiểm tra lại sau sửa: tin AI gửi lúc 23:43 không còn dấu `**`, người dùng xác nhận trên điện thoại |
+| Tin đến khi backend tắt | Bot nhận lại khi chạy lại backend; câu trả lời cho tin cũ ("kết thúc") bị bỏ qua (`stale_ai`) vì khách đã gửi câu mới, chỉ câu trả lời mới nhất được gửi |
 
 ## Lỗi tìm thấy trong lượt này và cách xử lý
 
@@ -55,4 +56,5 @@ Bản kiểm tra: `main` sau khi merge PR #11–#15, cộng hai sửa nhỏ tron
 
 - **Khách quay lại hội thoại đang chờ nhân viên không nhận được phản hồi** (ví dụ Telegram sau 10 ngày). Cân nhắc gửi lời nhắc "yêu cầu của bạn đang chờ nhân viên" hoặc tự đóng ticket quá hạn; đây là thay đổi nghiệp vụ, cần quyết định của nhóm.
 - Trong lượt test, merge PR #14 kèm xóa nhánh đã làm GitHub tự đóng PR #15 (nhánh gốc bị xóa); đã khôi phục nhánh tạm, mở lại và merge #15. Lần sau với PR xếp chồng: không xóa nhánh gốc trước khi chuyển base.
+- Khách chỉ nhắn câu kết thúc như "kết thúc" (không kèm câu hỏi) thì AI có thể lặp lại câu trả lời trước, vì câu được viết lại theo lịch sử hội thoại. Xem xét ở giai đoạn 5.
 - Dữ liệu test còn trong DB local: khách `e2e-test@example.com` và các hội thoại "Khach E2E", tài khoản `e2e-admin` và `e2e-agent`. Cần dọn trước khi demo.
