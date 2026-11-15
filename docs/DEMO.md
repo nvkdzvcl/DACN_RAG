@@ -91,7 +91,7 @@ Kiểm thử model thật: `python -m app.tests.smoke_ollama` tự dùng thư m�
 ## Demo widget và phiên khách
 
 1. Chạy Ollama, backend và frontend như phần RAG. Mở `/widget-demo.html` trên origin frontend; `/chat` mở chat trực tiếp. Không dùng port QA 5184/8014 cho dữ liệu thật.
-2. Chọn Hỗ trợ, nhập tên và bắt đầu. Hỏi chính sách đã lập chỉ mục; mở Nguồn để xem quote và vị trí. Tải lại trang, mở widget: phiên và lịch sử vẫn còn trong 24 giờ nếu cookie chưa bị xóa.
+2. Chọn Hỗ trợ, đăng nhập hoặc đăng ký tài khoản (nhập mã 6 số gửi qua email) rồi bắt đầu. Hỏi chính sách đã lập chỉ mục; mở Nguồn để xem quote và vị trí. Tải lại trang, mở widget: phiên và lịch sử vẫn còn trong 24 giờ nếu cookie chưa bị xóa.
 3. Chọn Gặp nhân viên; tại trang nhân viên `/`, chọn Làm mới, mở hội thoại và Tiếp nhận. Gửi trả lời: widget nhận trong chu kỳ polling 3 giây khi tab hiển thị và không đang chờ thao tác. AI không trả lời tiếp khi đã chuyển nhân viên.
 4. Mở trình duyệt riêng hoặc cửa sổ ẩn danh: phiên mới không thấy hội thoại cũ. Tên giống khách có đơn không cấp quyền tra đơn; mã đơn không thuộc khách hiện tại chuyển nhân viên.
 5. Mất mạng khi gửi: bản nháp vẫn còn; thử gửi lại cùng nội dung trên cùng trang dùng lại ID. HTTP 429 do AI bận chưa lưu tin; có thể thử lại hoặc Gặp nhân viên. Không tải lại trang nếu cần giữ bản nháp/ID chưa xác nhận.

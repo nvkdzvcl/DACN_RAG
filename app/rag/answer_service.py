@@ -82,18 +82,32 @@ def ask_model(system, payload, schema, model):
 
 
 def standalone_question(query, history):
-    """Resolve a follow-up into a self-contained question; one model call only when the customer has history."""
+    """Returns (question the model judges, retrieval queries); one model call only when the customer has history."""
     user_turns = [m["content"] for m in history if m["role"] == "user"]
     if not user_turns:
-        return query
-    fallback = "\n".join([*(turn[:240] for turn in user_turns), query])
+        return query, [query]
+    with_history = "\n".join([*(turn[:240] for turn in user_turns), query])
     result = ask_model(REWRITE_PROMPT, {"HISTORY": history, "CÂU HỎI CUỐI": query},
                        StandaloneQuestion.model_json_schema(), StandaloneQuestion)
     rewritten = " ".join(result.question.split()) if result else ""
-    # An unchanged or instruction-carrying rewrite is discarded; the raw customer turns are still safe retrieval input.
-    if not rewritten or rewritten.casefold() == " ".join(query.split()).casefold() or has_instruction(rewritten):
-        return fallback
-    return rewritten
+    if rewritten and rewritten.casefold() != " ".join(query.split()).casefold() and not has_instruction(rewritten):
+        return rewritten, [rewritten]
+    # The model kept the question (usually a new topic) or failed. Judge the current question itself, so an
+    # earlier topic cannot take over the answer, but also retrieve with the customer's earlier turns so a
+    # follow-up the model could not resolve still finds its policy. HISTORY is passed to the model separately.
+    return query, [query, with_history]
+
+
+def retrieve(queries, top_k, db):
+    """Interleave results of several queries (current question first), dropping duplicate chunks."""
+    lists = [vector_store.search(query, top_k, db) for query in queries]
+    merged, seen = [], set()
+    for rank in range(top_k):
+        for results in lists:
+            if rank < len(results) and results[rank]["chunk_id"] not in seen:
+                seen.add(results[rank]["chunk_id"])
+                merged.append(results[rank])
+    return merged[:top_k]
 
 
 def select_evidence(question, history, choices, choice_schema):
@@ -125,8 +139,8 @@ def answer_question(query, top_k=5, history=None, db=None):
             return answer_question(query, top_k, history, session)
     history = clean_history(history)
     # History resolves follow-up subjects; it is never evidence for policy facts.
-    question = standalone_question(query, history)
-    results = vector_store.search(question, top_k, db)
+    question, queries = standalone_question(query, history)
+    results = retrieve(queries, top_k, db)
     useful = [r for r in results if r["score"] >= min_score()][:5]
     fallback = {"answer": ABSTENTION, "grounded": False, "citations": [], "results": results}
     clarify = fallback | {"answer": CLARIFICATION, "needs_clarification": True}

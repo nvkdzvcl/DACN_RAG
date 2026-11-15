@@ -1,0 +1,172 @@
+[
+  {
+    "id": "desktop: login page horizontal overflow",
+    "ok": true,
+    "detail": "0px"
+  },
+  {
+    "id": "desktop: no promise of chatting without an account",
+    "ok": true,
+    "detail": "registration is required since 06/11/2026"
+  },
+  {
+    "id": "desktop: chat horizontal overflow",
+    "ok": true,
+    "detail": "after login"
+  },
+  {
+    "id": "desktop: single greeting",
+    "ok": true,
+    "detail": "1 greeting blocks"
+  },
+  {
+    "id": "desktop: offline send keeps draft",
+    "ok": true,
+    "detail": "draft=\"Kiểm tra lỗi mạng\""
+  },
+  {
+    "id": "desktop: offline message is Vietnamese",
+    "ok": true,
+    "detail": "alert=\"Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại; nội dung đang soạn vẫn được giữ.\""
+  },
+  {
+    "id": "desktop: HTTP 500 shows a clear Vietnamese message",
+    "ok": true,
+    "detail": "alert=\"Hệ thống đang gặp sự cố (HTTP 500). Vui lòng thử lại sau ít phút.\""
+  },
+  {
+    "id": "desktop: HTTP 500 keeps draft",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "desktop: HTTP 429 shows a clear Vietnamese message",
+    "ok": true,
+    "detail": "alert=\"Bạn gửi quá nhanh. Vui lòng thử lại sau.\""
+  },
+  {
+    "id": "desktop: HTTP 429 keeps draft",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "desktop: HTTP 502 shows a clear Vietnamese message",
+    "ok": true,
+    "detail": "alert=\"Hệ thống đang gặp sự cố (HTTP 502). Vui lòng thử lại sau ít phút.\""
+  },
+  {
+    "id": "desktop: HTTP 502 keeps draft",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "desktop: pending message is explained",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "desktop: send button locked while sending",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "desktop: input cleared after success",
+    "ok": true,
+    "detail": "value=\"\""
+  },
+  {
+    "id": "desktop: expired session returns to sign-in",
+    "ok": true,
+    "detail": "messages=\"Phiên trò chuyện đã hết hạn. Vui lòng bắt đầu phiên mới.\""
+  },
+  {
+    "id": "desktop: no page errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "mobile: login page horizontal overflow",
+    "ok": true,
+    "detail": "0px"
+  },
+  {
+    "id": "mobile: no promise of chatting without an account",
+    "ok": true,
+    "detail": "registration is required since 06/11/2026"
+  },
+  {
+    "id": "mobile: chat horizontal overflow",
+    "ok": true,
+    "detail": "after login"
+  },
+  {
+    "id": "mobile: single greeting",
+    "ok": true,
+    "detail": "1 greeting blocks"
+  },
+  {
+    "id": "mobile: offline send keeps draft",
+    "ok": true,
+    "detail": "draft=\"Kiểm tra lỗi mạng\""
+  },
+  {
+    "id": "mobile: offline message is Vietnamese",
+    "ok": true,
+    "detail": "alert=\"Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại; nội dung đang soạn vẫn được giữ.\""
+  },
+  {
+    "id": "mobile: HTTP 500 shows a clear Vietnamese message",
+    "ok": true,
+    "detail": "alert=\"Hệ thống đang gặp sự cố (HTTP 500). Vui lòng thử lại sau ít phút.\""
+  },
+  {
+    "id": "mobile: HTTP 500 keeps draft",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "mobile: HTTP 429 shows a clear Vietnamese message",
+    "ok": true,
+    "detail": "alert=\"Bạn gửi quá nhanh. Vui lòng thử lại sau.\""
+  },
+  {
+    "id": "mobile: HTTP 429 keeps draft",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "mobile: HTTP 502 shows a clear Vietnamese message",
+    "ok": true,
+    "detail": "alert=\"Hệ thống đang gặp sự cố (HTTP 502). Vui lòng thử lại sau ít phút.\""
+  },
+  {
+    "id": "mobile: HTTP 502 keeps draft",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "mobile: pending message is explained",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "mobile: send button locked while sending",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "id": "mobile: input cleared after success",
+    "ok": true,
+    "detail": "value=\"\""
+  },
+  {
+    "id": "mobile: expired session returns to sign-in",
+    "ok": true,
+    "detail": "messages=\"Phiên trò chuyện đã hết hạn. Vui lòng bắt đầu phiên mới.\""
+  },
+  {
+    "id": "mobile: no page errors",
+    "ok": true,
+    "detail": ""
+  }
+]

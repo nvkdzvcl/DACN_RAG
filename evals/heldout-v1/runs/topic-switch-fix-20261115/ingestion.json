@@ -1,0 +1,42 @@
+[
+  {
+    "source": "test-chinh-sach.md",
+    "sha256": "1f024deff2cae81a51d5b5f5958b5803e45f25666ae0c66c8ce80d67bce26c21",
+    "seconds": 1.931,
+    "status": "indexed",
+    "chunks": 17,
+    "error_message": null
+  },
+  {
+    "source": "test-dh9-a.txt",
+    "sha256": "d7b43a03883ea773cdd2924cee7492b7d4df3ad91c4cefd0ee192b7dcbe40408",
+    "seconds": 0.78,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  },
+  {
+    "source": "test-dh9-b.txt",
+    "sha256": "e1bc0c48b7e835318514b2e8735be65b385cefa4b378abd8810caac3594c5250",
+    "seconds": 0.736,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  },
+  {
+    "source": "test-lk3-a.txt",
+    "sha256": "97fd5925dda1047834b7a8aaa73b02659518ca1e86721c6ed4c4f2a3ff47a873",
+    "seconds": 0.724,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  },
+  {
+    "source": "test-lk3-b.txt",
+    "sha256": "60b749cb3c1beca81025ea00976c16751c6074cd189f1bf17545c9235abc32c0",
+    "seconds": 0.759,
+    "status": "indexed",
+    "chunks": 1,
+    "error_message": null
+  }
+]
