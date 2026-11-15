@@ -1,8 +1,20 @@
 import re
 import unicodedata
 
-COMPLAINT_TERMS = ("khiếu nại", "bức xúc", "tệ", "lừa đảo", "hoàn tiền", "gặp nhân viên", "người thật")
-COMPLAINT_PATTERN = re.compile(r'(?<!\w)(?:' + '|'.join(map(re.escape, COMPLAINT_TERMS)) + r')(?!\w)')
+# Strong terms always hand off. Topic terms also name policies customers ask about, so they hand off only
+# when the message is a demand or concerns the customer's own case, not an information question.
+STRONG_TERMS = ("bức xúc", "tệ", "lừa đảo", "gặp nhân viên", "người thật")
+TOPIC_TERMS = ("khiếu nại", "hoàn tiền")
+COMPLAINT_TERMS = TOPIC_TERMS + STRONG_TERMS
+STRONG_PATTERN = re.compile(r'(?<!\w)(?:' + '|'.join(map(re.escape, STRONG_TERMS)) + r')(?!\w)')
+TOPIC_PATTERN = re.compile(r'(?<!\w)(?:' + '|'.join(map(re.escape, TOPIC_TERMS)) + r')(?!\w)')
+QUESTION_PATTERN = re.compile(
+    r'\?|(?<!\w)(?:bao lâu|mấy ngày|mấy giờ|bao nhiêu|thế nào|ra sao|ở đâu|số nào|khi nào|là gì|có được|được không)(?!\w)')
+OWN_CASE_PATTERN = re.compile(
+    r'(?<!\w)(?:(?:tôi|mình|em|anh|chị)(?: \S+){0,2}? (?:muốn|cần|yêu cầu|đòi|xin)(?: được)? (?:hoàn tiền|khiếu nại)|'
+    r'(?:hoàn|trả)(?: \S+){0,3}? cho (?:tôi|mình|em)|'
+    r'chưa (?:được |nhận được |thấy )?(?:hoàn|nhận|trả)|'
+    r'ngay(?! (?:khi|sau|lúc|từ)))(?!\w)')
 NEUTRAL_CONTEXT_PATTERN = re.compile(
     r'(?<!\w)tiền tệ(?!\w)|'
     r'(?:^|[.!?;,] )(?:(?:hiện tại|bây giờ|lúc này) )?(?:(?:tôi|mình|em) )?(?:không|chưa) (?:cần|muốn) '
@@ -20,7 +32,12 @@ def classify_message(content: str) -> tuple[str, bool]:
     # ponytail: mask only clear local phrases; free-form negation needs separately evaluated intent detection.
     # Keep other complaints/requests in the same message eligible for immediate handoff.
     normalized = NEUTRAL_CONTEXT_PATTERN.sub(' ', normalized)
-    if COMPLAINT_PATTERN.search(normalized):
+    if STRONG_PATTERN.search(normalized):
+        return "negative", True
+    if TOPIC_PATTERN.search(normalized):
+        # A policy question about refunds or complaints goes to RAG; the customer can still choose staff.
+        if QUESTION_PATTERN.search(normalized) and not OWN_CASE_PATTERN.search(normalized):
+            return "neutral", False
         return "negative", True
     return "neutral", False
 
