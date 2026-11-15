@@ -16,16 +16,24 @@ import { clearDrafts, useDrafts } from './drafts';
 const statuses = { open: 'Trợ lý hỗ trợ', handoff_requested: 'Đang chờ nhân viên', assigned: 'Nhân viên đã tiếp nhận', closed: 'Hội thoại đã đóng', resolved: 'Hội thoại đã giải quyết' };
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
 const orderStatuses = { processing: 'Đang xử lý', paid: 'Đã thanh toán', shipping: 'Đang giao', shipped: 'Đã gửi hàng', delivered: 'Đã giao', cancelled: 'Đã hủy' };
-const suggestions = ['Chính sách đổi trả của cửa hàng là gì?', 'Làm thế nào để theo dõi đơn hàng?', 'Điều kiện bảo hành sản phẩm là gì?', 'Khi nào tôi cần gặp nhân viên hỗ trợ?'];
+const suggestions = ['Hoàn tiền về thẻ đã thanh toán mất mấy ngày?', 'Khi nhận hàng cần kiểm tra những gì?', 'Bao nhiêu tiền thì được 1 điểm thành viên?', 'Thu cũ đổi mới cần chuẩn bị gì trước khi mang máy đến?'];
 const PASSWORD_RULE = String.raw`(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}`;
 const PASSWORD_HINT = 'Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt.';
-const policyGroups = [['Đổi & Trả hàng', 'Quy định đổi mới, hoàn tiền'], ['Bảo hành', 'Thời hạn, điều kiện và địa điểm'], ['Giao nhận', 'Thời gian, phí và kiểm hàng'], ['Thanh toán', 'Phương thức và hoàn tiền'], ['Hủy đơn hàng', 'Điều kiện và hướng dẫn'], ['Khiếu nại & Góp ý', 'Quy trình tiếp nhận hỗ trợ']];
+const policyGroups = [['Đổi & Trả hàng', 'Lỗi nhà sản xuất, đổi ý, phí', 'Điện thoại mới bị lỗi trong 30 ngày đầu có được đổi máy không?'], ['Bảo hành', 'Thời hạn và trường hợp không bảo hành', 'Thời gian bảo hành bắt đầu tính từ khi nào?'], ['Giao nhận', 'Thời gian, phí và kiểm hàng', 'Giao tủ lạnh từ cửa hàng về nhà xa 40 km có mất phí không?'], ['Thanh toán', 'Phương thức và hoàn tiền', 'Cửa hàng nhận những phương thức thanh toán nào?'], ['Trả góp', 'Thẻ tín dụng, công ty tài chính', 'Trả góp qua Home PayLater cần điều kiện gì?'], ['Khiếu nại & Góp ý', 'Kênh tiếp nhận và thời hạn', 'Tổng đài chăm sóc khách hàng hoạt động mấy giờ?']];
 async function request(path, options = {}) {
-  const response = await fetch(`/api/v1/widget${path}`, { ...options, credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Protection': '1' } });
+  let response;
+  try {
+    response = await fetch(`/api/v1/widget${path}`, { ...options, credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Protection': '1' } });
+  } catch (cause) {
+    if (cause.name === 'AbortError') throw cause;
+    throw Object.assign(new Error('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại; nội dung đang soạn vẫn được giữ.'), { status: 0 });
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(typeof data.detail === 'string' ? data.detail : `Không gửi được yêu cầu (HTTP ${response.status}).`);
+    // Server-side 5xx details are not written for customers; show a stable Vietnamese message instead.
+    const detail = response.status < 500 && typeof data.detail === 'string' ? data.detail : null;
+    const error = new Error(detail || (response.status >= 500 ? `Hệ thống đang gặp sự cố (HTTP ${response.status}). Vui lòng thử lại sau ít phút.` : `Không gửi được yêu cầu (HTTP ${response.status}).`));
     error.status = response.status; throw error;
   }
   if (!response.headers.get('content-type')?.includes('application/json')) throw new Error('Không kết nối được dịch vụ hỗ trợ.');
@@ -294,7 +302,7 @@ export default function Widget() {
     {session?.account && embedded && <div className="widgetAccountBar"><span>{session.account.email}</span><button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></div>}
     {loading ? <p className="widgetState" role="status">Đang kết nối...</p> : !session || authMode !== 'guest' ? <section className="widgetWelcome">
       <span className="widgetEyebrow">RAG SUPPORT · KHÁCH HÀNG</span><h2>{authMode === 'register' ? 'Tạo tài khoản' : authMode === 'login' ? 'Chào mừng trở lại' : 'Bạn cần hỗ trợ điều gì?'}</h2>
-      <p>{authMode === 'guest' ? 'Hỏi chính sách hoặc kết nối với nhân viên. Bạn có thể trò chuyện ngay mà không cần tài khoản.' : 'Đăng nhập để giữ lịch sử và tiếp tục trò chuyện trên nhiều thiết bị.'}</p>
+      <p>{authMode === 'guest' ? 'Đăng nhập hoặc tạo tài khoản để hỏi chính sách và kết nối với nhân viên.' : 'Đăng nhập để giữ lịch sử và tiếp tục trò chuyện trên nhiều thiết bị.'}</p>
       <div className="customerAuthTabs" aria-label="Cách bắt đầu">{[['login', 'Đăng nhập'], ['register', 'Đăng ký']].map(([mode, label]) => <button type="button" key={mode} aria-pressed={authMode === mode} disabled={busy} onClick={() => openAuth(mode)}>{label}</button>)}</div>
       <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
         {authMode === 'register' && <label>Tên hiển thị<input name="display_name" autoComplete="name" required maxLength={80} /></label>}
@@ -317,7 +325,7 @@ export default function Widget() {
         setAtLatest(nearBottom.current); if (nearBottom.current) setHasNewMessages(false);
       }}>
         {!messageBefore && session.messages.length === 0 && <div className="widgetWelcomeCard"><h2>Xin chào, {session.display_name}! 👋</h2><p>Tôi là Trợ lý AI. Bạn cần hỗ trợ gì hôm nay?</p><div className="widgetSuggestions">{suggestions.map(question => <button type="button" key={question} onClick={() => setDraft(question)}>{question}</button>)}</div></div>}
-        <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>
+        {(messageBefore || session.messages.length > 0) && <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>}
         {session.messages.map(message => <article key={message.id} className={`widgetMessage ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p>{message.content}</p>
           {message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ` · ${citation.location}`}</summary><blockquote>{citation.quote}</blockquote></details>)}
@@ -362,7 +370,7 @@ export default function Widget() {
     {authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}
     {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button className="authGoogle" type="button" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.')}><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}
     <div className="authNote"><ShieldCheck size={21} /><div>Lịch sử của bạn, luôn được kết nối<small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small></div></div>
-    {authMode === 'register' && <p className="authHelp">Sau khi đăng ký, xác minh email trong mục Tài khoản để dùng khôi phục mật khẩu.</p>}
+    {authMode === 'register' && <p className="authHelp">Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</p>}
   </AuthLayout>;
   const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
   const activeAccess = session?.order_access?.filter(access => access.expires_at > Date.now() / 1000) || [];
@@ -379,7 +387,7 @@ export default function Widget() {
           {orderError && <p className="widgetError" role="alert">{orderError}</p>}
           {orderResult && activeAccess.some(access => access.order_id === orderResult.order_id) && <article className="portalOrderResult" role="status"><div><small>ĐƠN HÀNG</small><h2>{orderResult.order_id}</h2></div><span>{orderStatuses[orderResult.status] || orderResult.status}</span><dl><dt>Trạng thái</dt><dd>{orderStatuses[orderResult.status] || orderResult.status}</dd><dt>Mã vận đơn</dt><dd>{orderResult.tracking_code || 'Chưa có mã vận đơn'}</dd></dl></article>}
           {activeAccess.length > 0 && <div className="portalAccess"><h2>Đơn đã cấp quyền</h2>{activeAccess.map(access => <button key={access.order_id} onClick={() => { setOrderId(access.order_id); inspectOrder(access.order_id, ''); }}>{access.order_id}<ArrowRight size={16} /></button>)}</div>}</>}
-      </section> : <section className="portalPage" aria-label="Hỏi đáp chính sách"><div className="portalPageHead"><span className="portalPageIcon"><BookOpen size={22} /></span><div><h1>Hỏi đáp chính sách</h1><p>Đặt câu hỏi cho trợ lý AI. Câu trả lời sẽ kèm trích nguồn khi tìm được tài liệu.</p></div></div><button type="button" className="portalSearchFake" onClick={() => setView('messages')}><SearchIcon aria-hidden="true" /><span>Đặt câu hỏi về chính sách cho trợ lý...</span></button><div className="portalPolicyGrid">{policyGroups.map(([title, description]) => <button type="button" key={title} onClick={() => askSuggestion(title)}><strong>{title}</strong><small>{description}</small></button>)}</div><div className="portalQuestions"><h2>4 câu hỏi phổ biến</h2>{suggestions.map(question => <button key={question} onClick={() => askSuggestion(question)}>{question}<ArrowRight size={17} /></button>)}</div><div className="portalEmpty"><p>Không tìm thấy chính sách bạn cần?</p><button onClick={() => setView('messages')}>Mở trò chuyện <ArrowRight size={16} /></button></div></section>}
+      </section> : <section className="portalPage" aria-label="Hỏi đáp chính sách"><div className="portalPageHead"><span className="portalPageIcon"><BookOpen size={22} /></span><div><h1>Hỏi đáp chính sách</h1><p>Đặt câu hỏi cho trợ lý AI. Câu trả lời sẽ kèm trích nguồn khi tìm được tài liệu.</p></div></div><button type="button" className="portalSearchFake" onClick={() => setView('messages')}><SearchIcon aria-hidden="true" /><span>Đặt câu hỏi về chính sách cho trợ lý...</span></button><div className="portalPolicyGrid">{policyGroups.map(([title, description, question]) => <button type="button" key={title} onClick={() => askSuggestion(question)}><strong>{title}</strong><small>{description}</small></button>)}</div><div className="portalQuestions"><h2>Câu hỏi thường gặp</h2>{suggestions.map(question => <button key={question} onClick={() => askSuggestion(question)}>{question}<ArrowRight size={17} /></button>)}</div><div className="portalEmpty"><p>Không tìm thấy chính sách bạn cần?</p><button onClick={() => setView('messages')}>Mở trò chuyện <ArrowRight size={16} /></button></div></section>}
     </div>
     <div className="portalContext"><h2>Phiên hỗ trợ</h2><div className="portalPerson"><span><UserRound size={20} /></span><div><b>{session?.display_name || 'Khách hàng'}</b><small>{session?.account ? 'Đã đăng nhập tài khoản' : session ? 'Khách vãng lai · ' + statuses[session.status] : 'Chưa bắt đầu phiên'}</small></div></div><div className="portalContextBlock"><h3>Kênh hỗ trợ</h3><p>Website Chat</p></div><div className="portalContextBlock"><h3>Đơn được tra cứu</h3>{activeAccess.length ? activeAccess.map(access => <button key={access.order_id} onClick={() => { setOrderId(access.order_id); setView('orders'); inspectOrder(access.order_id, ''); }}>{access.order_id}<ArrowRight size={15} /></button>) : <p>Chưa có đơn được cấp quyền.</p>}</div><div className="portalContextBlock"><h3>Cần thêm hỗ trợ?</h3><p>Trò chuyện cùng AI hoặc yêu cầu gặp nhân viên.</p><button onClick={() => setView('messages')}>Vào Tin nhắn <ArrowRight size={15} /></button></div></div>
   </div>;
