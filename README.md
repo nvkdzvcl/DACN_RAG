@@ -6,7 +6,7 @@
 
 - Doanh nghiệp mẫu: cửa hàng bán lẻ trực tuyến.
 - Khách hàng gửi tin nhắn qua Website Chat Widget và một kênh mở rộng.
-- AI trả lời chính sách giao hàng, đổi trả, thanh toán và bảo hành từ Knowledge Base.
+- AI trả lời chính sách từ Knowledge Base: 12 nhóm chính sách FPT Shop (đổi trả, bảo hành, giao hàng, thanh toán, trả góp, khiếu nại...) diễn đạt lại và ghi nguồn tại [POLICY_SOURCES.md](docs/POLICY_SOURCES.md).
 - AI tra cứu trạng thái đơn hàng qua tool nội bộ giả lập.
 - Hội thoại được phân loại theo mức độ ưu tiên và SLA.
 - Khi phát hiện khiếu nại hoặc khách yêu cầu gặp người thật, hệ thống tạo handoff kèm tóm tắt.
@@ -24,7 +24,7 @@ Lịch sử Inbox đã phân trang 50 tin, có điều hướng tin cũ và về
 
 Inbox đã phân trang 25 hội thoại, tìm kiếm toàn bộ tên/mã khách/kênh và lọc SLA trước chia trang. Giữ hội thoại/bản nháp khi đổi trang; thẻ số ghi rõ tổng khớp bộ lọc và số trên trang. API trả thêm total/offset/limit/has_more; count chỉ còn số dòng trang. Tìm kiếm/SLA vẫn quét dữ liệu theo lô, chưa phải tối ưu cho tải lớn. Chi tiết tại [API.md](docs/API.md).
 
-Hồ sơ kỹ thuật: [thiết kế và sơ đồ](docs/DESIGN.md), [đặc tả API](docs/API.md), [ma trận kiểm chứng M4](docs/M4_ACCEPTANCE.md). Chạy toàn luồng với Ollama thật bằng `python -m app.tests.smoke_m4`; lệnh tự dùng DB/vector/tài liệu tạm. Phần nghiệm thu người dùng và chấm chất lượng M3 vẫn chờ duyệt.
+Hồ sơ kỹ thuật: [thiết kế và sơ đồ](docs/DESIGN.md), [đặc tả API](docs/API.md), [ma trận kiểm chứng M4](docs/M4_ACCEPTANCE.md). Chạy toàn luồng với Ollama thật bằng `python -m app.tests.smoke_m4`; lệnh tự dùng DB/vector/tài liệu tạm. Nghiệm thu tích hợp toàn hệ thống ngày 15/11/2026 (website, phân quyền, Telegram bot thật, smoke test Ollama) tại [ACCEPTANCE_20261115.md](docs/ACCEPTANCE_20261115.md); rà soát giao diện tại [UI_REVIEW.md](docs/UI_REVIEW.md).
 
 Đã có Unified Inbox với đăng nhập nhân viên, tiếp nhận và trả lời theo người phụ trách; AI dừng khi handoff. Backend chạy FastAPI/SQLite, frontend React/Vite. RAG chạy Ollama local (qwen3:4b + embeddinggemma:300m), Qdrant embedded lưu bền, có trích nguồn và giao diện Kho tri thức. LLM chọn câu nguồn bằng ID, backend ghép nguyên văn rồi gọi kiểm định. Tin khách được lưu trước khi gọi LLM; kiểm tra lại handoff/tin mới/phiên bản nguồn trước khi lưu AI.
 
@@ -93,7 +93,7 @@ Trong hội thoại đang mở, tin chứa đúng một mã đơn dạng DH/ORD 
 
 Mã nhận diện chỉ dùng chữ/số ASCII, tổng tối đa 64 ký tự, không phân biệt hoa/thường. Không cắt DH12345 từ DH12345-EXTRA hoặc đổi chữ Unicode giống hình thành mã ASCII; quy tắc đầy đủ tại [M5_TOOLS.md](docs/M5_TOOLS.md).
 
-Nhận diện handoff chuẩn hóa Unicode/khoảng trắng, so đủ từ và bỏ qua riêng cụm trung tính/phủ định rõ: “tiền tệ”, “không cần gặp nhân viên”, một số mẫu hỏi chính sách hoàn tiền. Khiếu nại/yêu cầu gặp người ở phần khác vẫn chuyển giao ngay cả khi AI bận; tin trung tính chịu giới hạn AI thông thường. Bộ chọn tool nhận NFC, văn bản lưu giữ nguyên. Quy tắc chưa hiểu ngữ cảnh hoặc phủ định tự do; giới hạn tại [M5_TOOLS.md](docs/M5_TOOLS.md).
+Nhận diện handoff chuẩn hóa Unicode/khoảng trắng, so đủ từ và bỏ qua riêng cụm trung tính/phủ định rõ: “tiền tệ”, “không cần gặp nhân viên”. Từ mạnh (“bức xúc”, “lừa đảo”, “gặp nhân viên”...) luôn chuyển nhân viên; từ chủ đề “hoàn tiền”, “khiếu nại” chỉ chuyển khi khách đòi cho trường hợp của mình, còn câu hỏi chính sách (“hoàn tiền mất mấy ngày?”) đi qua RAG. Trên 384 câu eval, số câu bị chuyển nhầm giảm từ 33 xuống 11. Khiếu nại/yêu cầu gặp người ở phần khác vẫn chuyển giao ngay cả khi AI bận; tin trung tính chịu giới hạn AI thông thường. Bộ chọn tool nhận NFC, văn bản lưu giữ nguyên. Quy tắc chưa hiểu ngữ cảnh hoặc phủ định tự do; giới hạn tại [M5_TOOLS.md](docs/M5_TOOLS.md).
 
 Tool tra đơn chỉ đọc DB giả lập, lấy customer_id từ hội thoại và kiểm tra chủ đơn ngay trước thực thi; không nhận danh tính, URL hoặc công cụ khác từ model. Backend dựng câu trả lời từ dữ liệu đơn, không nhờ model viết lại. Không thấy đơn thuộc khách thì chuyển nhân viên; không tự hủy/sửa đơn. Khách widget ẩn danh chưa được xác minh chủ đơn, tên giống nhau không cấp quyền.
 
@@ -109,6 +109,8 @@ Máy mới: cài Ollama từ https://ollama.com/download/windows rồi chạy `o
 
 Qdrant embedded chỉ dùng **một API worker**; không mở hai tiến trình cùng `QDRANT_PATH`. Chuyển sang Qdrant server trước khi chạy nhiều worker. Sao lưu cùng SQL DB, `data/knowledge_base` và `data/vectors` khi API đã dừng. Model và runtime tải lại được. Đổi embedding model phải lập chỉ mục lại.
 
+Pipeline: viết lại câu hỏi nối tiếp thành câu độc lập (chỉ khi có lịch sử) → truy hồi → model chọn câu nguồn và quyết định `answer`/`ask_customer`/`sources_disagree`/`not_in_sources` → backend ghép nguyên văn, kiểm tra mâu thuẫn theo cấu trúc → kiểm định, sửa tối đa một lần → kiểm tra lại phiên bản nguồn. Không có quy tắc viết theo câu hỏi cụ thể; thiết kế và lý do tại [RAG_GENERIC.md](docs/RAG_GENERIC.md), so sánh truy hồi dense/BM25/hybrid tại [RAG_RETRIEVAL.md](docs/RAG_RETRIEVAL.md). Câu chào, hỏi danh tính và câu kết thúc (“cảm ơn”, “kết thúc”) được trả lời cố định, không gọi RAG.
+
 Kiểm chứng mô hình thật, DB/vector tạm: `python -m app.tests.smoke_ollama`. Lượt đầu tải model có thể mất hơn một phút. Giữ ngưỡng score 0.35 sau chẩn đoán trên dev. Model chọn tối đa ba cặp source_id/sentence_id; backend xác thực ID rồi lấy nguyên văn, chỉ chuẩn hóa khoảng trắng. Đáp án giữ ngôn ngữ nguồn; chưa dịch hoặc tổng hợp tự do. Tách câu bằng dấu chấm/chấm hỏi/chấm than theo sau bởi khoảng trắng, giữ chấm phẩy cùng điều kiện; chưa xử lý đầy đủ chữ viết tắt hoặc nguồn dài bị cắt.
 
 JSON Schema gửi Ollama chỉ cho chọn ID câu thực có của từng nguồn, dùng một nhánh `oneOf` cho mỗi nguồn. Backend vẫn kiểm tra ID/trùng sau phản hồi nếu provider bỏ qua schema; ràng buộc không bảo đảm chọn đúng nội dung và không thêm lượt gọi model.
@@ -116,6 +118,17 @@ JSON Schema gửi Ollama chỉ cho chọn ID câu thực có của từng nguồ
 Một lượt Ollama riêng kiểm định đáp án với câu hỏi/lịch sử và toàn bộ nguồn đã cấp cho LLM. Chỉ trả lời khi đủ ngữ cảnh, nguồn nhất quán và dữ kiện có căn cứ; JSON kiểm định lỗi dẫn đến từ chối. Provider chưa hoàn tất, hết giới hạn sinh hoặc không có nội dung cuối được báo lỗi dịch vụ và giữ tin khách. Cấu hình chat: think=false, context 8192, tối đa 700 token, giữ model 5 phút sau lần dùng cuối, Ollama tự chọn GPU và có thể dỡ model khi thiếu bộ nhớ. Kiểm định dùng cùng model nên vẫn có thể sai, tăng độ trễ và không thay người duyệt. Backend kiểm tra lại phiên bản mọi nguồn đã kiểm định trước khi lưu AI.
 
 ## Đánh giá RAG
+
+Kết quả chính (chi tiết, mẫu số và giới hạn trong từng thư mục):
+
+| Bộ đo | Kết quả | Ghi chú |
+|---|---|---|
+| Bộ cũ 240 câu (đã dùng để tinh chỉnh) | 240/240 với bản regex cũ | Quá khớp: regex viết theo từng ca, không đo được câu mới |
+| `evals/heldout-v1` (41 câu chưa thấy) | Regex cũ 33/41 → pipeline tổng quát **35/41** | Trả lời sai tự tin giảm từ 4 xuống 1; chênh lệch 2 câu không có ý nghĩa thống kê |
+| `evals/fptshop-v2` (40 câu trên chính sách FPT Shop) | **36/40** quyết định đúng, 36/40 đúng dữ kiện và nguồn | Recall@5 96,7%; p50 5,2 giây |
+| 10 câu trước/sau khi nạp chính sách FPT Shop | 2 sai + 8 từ chối → **10/10** có nguồn | `evals/fptshop-v1/KET_QUA.md` |
+
+Kết quả giữa các lần chạy dao động khoảng ±2–3 câu mỗi bộ do model sinh. Nhãn do nhóm tự viết, chưa có người chấm độc lập.
 
 Bộ 72 câu tiếng Việt và chính sách giả lập nằm trong `evals/rag/`; nhãn đang chờ người dùng duyệt. Chạy `python -m app.evaluate_rag --split dev --output evals/rag/runs/my-dev-run`, rồi dùng `--split test` và thư mục mới cho tập kiểm tra. Trình chạy dùng SQL/vector tạm, ghi từng đáp án/lỗi và tổng hợp Recall@k, citation, từ chối, p50/p95; không sửa dữ liệu ứng dụng. Xem `evals/rag/README.md` để hiểu mẫu số và giới hạn từng chỉ số, `docs/RAG_EVALUATION.md` để xem kết quả baseline và ca cần sửa.
 
@@ -133,13 +146,13 @@ Admin có thể cấp mã truy cập một lần từ trang Đơn hàng sau khi 
 
 ## Telegram
 
-Kiểm tra bot lúc khởi động tự thử lại sau 5 giây nếu lỗi mạng/HTTP 5xx; token sai hoặc webhook đang hoạt động vẫn cần xử lý cấu hình và khởi động lại. Thử lại không áp dụng cho tin gửi có kết quả chưa rõ. 23 test Telegram đạt bằng transport giả lập.
+Kiểm tra bot lúc khởi động tự thử lại sau 5 giây nếu lỗi mạng/HTTP 5xx; token sai hoặc webhook đang hoạt động vẫn cần xử lý cấu hình và khởi động lại. Thử lại không áp dụng cho tin gửi có kết quả chưa rõ.
 
-Lỗi HTTP bị cắt/sai giao thức khi gửi được ghi `uncertain`, tránh kẹt `sending` đến restart; không tự gửi lại hoặc chặn gửi cho khách khác. 21 test Telegram đạt bằng transport giả lập.
+Lỗi HTTP bị cắt/sai giao thức khi gửi được ghi `uncertain`, tránh kẹt `sending` đến restart; không tự gửi lại hoặc chặn gửi cho khách khác. Tin gửi đi là văn bản thuần (bỏ dấu `**` của nhãn phạm vi chính sách). 25 test Telegram đạt bằng transport giả lập.
 
 Đã sửa kẹt hàng chờ khi `getUpdates` lỗi: update đã lưu vẫn được xử lý, trạng thái kết nối tiếp tục báo lỗi và con trỏ không tiến khi response sai. Không tự gửi lại tin có kết quả chưa rõ; cần kiểm chứng bot thật.
 
-Đã có adapter polling cho chat riêng, dùng chung RAG/Inbox/handoff; mặc định tắt. Cấu hình TELEGRAM_ENABLED và TELEGRAM_BOT_TOKEN trong `.env` local, khởi động một API worker. Inbox hiển thị trạng thái gửi, cho người phụ trách gửi lại/bỏ qua tin lỗi; SLA Telegram tính khi Telegram xác nhận gửi. Chưa thử bot thật hoặc nghiệm thu M6. Hướng dẫn và giới hạn: [TELEGRAM.md](docs/TELEGRAM.md).
+Đã có adapter polling cho chat riêng, dùng chung RAG/Inbox/handoff; mặc định tắt. Cấu hình TELEGRAM_ENABLED và TELEGRAM_BOT_TOKEN trong `.env` local, khởi động một API worker. Inbox hiển thị trạng thái gửi, cho người phụ trách gửi lại/bỏ qua tin lỗi; SLA Telegram tính khi Telegram xác nhận gửi. Đã thử bot thật ngày 15/11/2026: AI trả lời có nguồn, nhân viên trả lời và đóng hội thoại từ Inbox, tin đến lúc backend tắt được nhận lại khi chạy lại (xem [nghiệm thu](docs/ACCEPTANCE_20261115.md#telegram)). Hướng dẫn và giới hạn: [TELEGRAM.md](docs/TELEGRAM.md).
 
 Thông báo chuyển nhân viên được lưu cùng transaction với trạng thái/ticket để không mất khi worker gián đoạn; retry không tạo thêm thông báo. Lỗi gửi trước đó vẫn chặn hàng chờ, cần người phụ trách xử lý. Không tự bù thông báo thiếu trong dữ liệu cũ.
 

@@ -56,5 +56,5 @@ Bản kiểm tra: `main` sau khi merge PR #11–#15, cộng hai sửa nhỏ tron
 
 - **Khách quay lại hội thoại đang chờ nhân viên không nhận được phản hồi** (ví dụ Telegram sau 10 ngày). Cân nhắc gửi lời nhắc "yêu cầu của bạn đang chờ nhân viên" hoặc tự đóng ticket quá hạn; đây là thay đổi nghiệp vụ, cần quyết định của nhóm.
 - Trong lượt test, merge PR #14 kèm xóa nhánh đã làm GitHub tự đóng PR #15 (nhánh gốc bị xóa); đã khôi phục nhánh tạm, mở lại và merge #15. Lần sau với PR xếp chồng: không xóa nhánh gốc trước khi chuyển base.
-- Khách chỉ nhắn câu kết thúc như "kết thúc" (không kèm câu hỏi) thì AI có thể lặp lại câu trả lời trước, vì câu được viết lại theo lịch sử hội thoại. Xem xét ở giai đoạn 5.
+- ~~Khách chỉ nhắn câu kết thúc như "kết thúc" thì AI có thể lặp lại câu trả lời trước~~ — đã sửa ở giai đoạn 5: câu kết thúc/cảm ơn đứng riêng được trả lời cố định, không gọi RAG (`simple_reply`, có test).
 - Dữ liệu test còn trong DB local: khách `e2e-test@example.com` và các hội thoại "Khach E2E", tài khoản `e2e-admin` và `e2e-agent`. Cần dọn trước khi demo.
