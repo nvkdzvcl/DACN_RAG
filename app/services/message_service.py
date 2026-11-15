@@ -16,6 +16,9 @@ from app.rag.answer_service import answer_question, sources_current
 from app.rag.ollama import ProviderError
 from app.rag.vector_store import document_lock
 
+CLOSING_PHRASES = {'kết thúc', 'cảm ơn', 'cám ơn', 'cảm ơn bạn', 'cảm ơn shop', 'cảm ơn nhé', 'cảm ơn nhiều',
+                   'ok cảm ơn', 'ok', 'oke', 'okay', 'thanks', 'thank you', 'tạm biệt', 'bye', 'vậy thôi',
+                   'không cần nữa', 'xong rồi', 'hết rồi'}
 ORDER_REFERENCE = re.compile(r'(?<!\w)đơn(?: hàng)? (?:đó|này|ấy|vừa nêu|ở trên)(?!\w)')
 
 def simple_reply(content: str) -> str | None:
@@ -25,6 +28,9 @@ def simple_reply(content: str) -> str | None:
         return 'Chào bạn! Mình là trợ lý AI hỗ trợ khách hàng. Bạn có thể hỏi về chính sách cửa hàng hoặc chọn Gặp nhân viên.'
     if text in {'bạn là ai', 'đây là ai', 'ai đang trả lời', 'bạn là bot hay người'}:
         return 'Mình là trợ lý AI hỗ trợ khách hàng. Mình trả lời chính sách dựa trên tài liệu cửa hàng; nếu cần người hỗ trợ, hãy chọn Gặp nhân viên.'
+    # A closing message carries no question; RAG would rewrite it into the previous question and repeat that answer.
+    if text in CLOSING_PHRASES:
+        return 'Cảm ơn bạn đã liên hệ. Khi cần hỗ trợ thêm, bạn cứ nhắn tiếp nhé.'
     return None
 
 

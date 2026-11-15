@@ -217,6 +217,11 @@ class WidgetTests(unittest.TestCase):
                 self.assertIn('trợ lý AI', greeting.json()['messages'][-1]['content'])
                 identity = self.send('bạn là ai?')
                 self.assertIn('dựa trên tài liệu', identity.json()['messages'][-1]['content'])
+                for closing in ('Kết thúc', 'cảm ơn nhé!', 'ok'):
+                    reply = self.send(closing)
+                    self.assertEqual(reply.status_code, 200, reply.text)
+                    self.assertIn('Cảm ơn bạn đã liên hệ', reply.json()['messages'][-1]['content'])
+                    self.assertEqual(reply.json()['status'], 'open')
                 rag.assert_not_called()
         finally:
             _answer_slot.release()
