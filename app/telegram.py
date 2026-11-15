@@ -175,8 +175,12 @@ def queue_outgoing(db, bot_id):
     db.commit()
 
 
+BOLD_MARKER = re.compile(r'\*\*(.+?)\*\*', re.S)
+
+
 def outgoing_text(message):
-    text = message.content[:4000]
+    # Telegram receives plain text; policy scope labels are **bold** in the knowledge base, so drop the markers.
+    text = BOLD_MARKER.sub(r'\1', message.content[:4000]).replace('**', '')
     for citation in (message.citations or [])[:3]:
         source = f"\nNguồn: {citation.get('source', '')} {citation.get('location') or ''}"
         if len(text) + len(source) <= 4096:
