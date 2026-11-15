@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
+from app.api.customer_auth import _code_failures
 from app.api.widget import COOKIE, COOKIE_PATH, _attempts
 from app.core.auth import token_hash, verify_password, hash_password
 from app.db.migrations import migrate
@@ -37,6 +38,7 @@ class CustomerAuthTests(unittest.TestCase):
         app.dependency_overrides[get_db] = db_session
         self.addCleanup(app.dependency_overrides.clear)
         _attempts.clear()
+        _code_failures.clear()
         self.client, self.other = [TestClient(app, headers={'X-CSRF-Protection': '1'}) for _ in range(2)]
         self.addCleanup(self.client.close)
         self.addCleanup(self.other.close)
@@ -78,6 +80,30 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': code}).status_code, 200)
         self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': code}).status_code, 400)
         self.assertTrue(self.client.get(COOKIE_PATH + '/session').json()['account']['email_verified'])
+
+    def test_registration_code_is_burned_after_five_wrong_guesses(self):
+        delivery = self.mail_config()
+        self.register()
+        self.client.post(ACCOUNT + '/registration-verification-request')
+        code = delivery.call_args.args[3]
+        wrong = f'{(int(code) + 1) % 1000000:06d}'
+        for attempt in range(4):
+            response = self.client.post(ACCOUNT + '/verify-registration', json={'code': wrong})
+            self.assertEqual(response.status_code, 400)
+            self.assertNotIn('bị hủy', response.json()['detail'])
+        _attempts.clear()  # isolate the per-code limit from the per-IP rate limit
+        burned = self.client.post(ACCOUNT + '/verify-registration', json={'code': wrong})
+        self.assertEqual(burned.status_code, 400)
+        self.assertIn('bị hủy', burned.json()['detail'])
+        # The right code no longer works once burned; a fresh code from the mailbox does.
+        self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': code}).status_code, 400)
+        with Session(self.engine) as db:
+            db.query(CustomerEmailToken).update({CustomerEmailToken.created_at: CustomerEmailToken.created_at - 120})
+            db.commit()
+        _attempts.clear()
+        self.assertEqual(self.client.post(ACCOUNT + '/registration-verification-request').status_code, 202)
+        fresh = delivery.call_args.args[3]
+        self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': fresh}).status_code, 200)
 
     def test_registration_email_code_can_be_resent_with_rate_limit(self):
         delivery = self.mail_config()

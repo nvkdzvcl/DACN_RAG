@@ -5,8 +5,8 @@ Cập nhật ngày 07/10/2026. Tài khoản khách dùng email + mật khẩu t�
 ## Sử dụng
 
 1. Khởi động backend để tự nâng schema lên v10. Chạy `npm --prefix frontend run build` khi phục vụ giao diện từ backend.
-2. Mở `/chat`, chọn **Đăng ký**, nhập tên, email và mật khẩu 15–128 ký tự. Khách vãng lai và tài khoản chưa xác minh vẫn trò chuyện được.
-3. Vào **Tài khoản → Gửi email xác minh**. Mở thư, bấm liên kết rồi nhập mật khẩu hiện tại. Liên kết có hạn 60 phút, dùng một lần; mở trang chưa tự xác minh.
+2. Mở `/chat`, chọn **Đăng ký**, nhập tên, email và mật khẩu 8–128 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt. Hệ thống gửi **mã 6 số** về email; mã có hạn 15 phút, dùng một lần, nhập sai 5 lần thì mã bị hủy và cần bấm gửi lại. Gửi lại cách nhau ít nhất 60 giây, tối đa 3 mã mỗi giờ. Khách vãng lai vẫn trò chuyện được không cần tài khoản.
+3. Tài khoản tạo trước khi có mã đăng ký có thể xác minh sau tại **Tài khoản → Gửi email xác minh**. Mở thư, bấm liên kết rồi nhập mật khẩu hiện tại. Liên kết có hạn 60 phút, dùng một lần; mở trang chưa tự xác minh.
 4. Khi quên mật khẩu, chọn **Quên mật khẩu?** trên trang đăng nhập. Nhập email đã xác minh, mở liên kết trong thư và nhập lại mật khẩu mới hai lần. Liên kết có hạn 15 phút. Đặt lại thành công thu hồi mọi phiên và mọi liên kết cũ; đăng nhập lại bằng mật khẩu mới.
 5. **Đăng xuất** chỉ thu hồi phiên hiện tại; **Tài khoản → Đổi mật khẩu** yêu cầu mật khẩu hiện tại và thu hồi tất cả phiên, liên kết của tài khoản.
 6. **Lịch sử** lưu theo tài khoản trên nhiều thiết bị. **Chat mới** kết thúc hội thoại hiện tại nhưng giữ lịch sử; thiết bị đang xem chat cũ có thể đăng nhập lại để chọn hội thoại đang hoạt động mới nhất.

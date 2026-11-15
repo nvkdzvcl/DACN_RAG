@@ -236,10 +236,10 @@ Prefix: `/api/v1/widget/account`. Cookie phiên khách, độc lập phiên staf
 
 | Method | Path                | Nội dung                                                                                                               |
 | ------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| POST   | /register           | {display_name, email, password}; tên 1–80, mật khẩu 15–128 ký tự; trả 201 và snapshot, email đã dùng trả 409           |
+| POST   | /register           | {display_name, email, password}; tên 1–80, mật khẩu 8–128 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt; trả 201 và snapshot, email đã dùng trả 409           |
 | POST   | /login              | {email, password}; trả snapshot; thông tin sai trả 401 với thông báo chung                                             |
 | POST   | /logout             | Yêu cầu tài khoản khách; thu hồi phiên hiện tại, giữ lịch sử                                                           |
-| POST   | /password           | {current_password, new_password}; mật khẩu mới 15–128, khác cũ; thu hồi mọi phiên; sai mật khẩu cũ 400, tranh chấp 409 |
+| POST   | /password           | {current_password, new_password}; mật khẩu mới 8–128 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt, khác cũ; thu hồi mọi phiên; sai mật khẩu cũ 400, tranh chấp 409 |
 | GET    | /conversations      | offset >= 0, limit 1–50 (mặc định 20); trả items, total, has_more của chính tài khoản                                  |
 | GET    | /conversations/{id} | limit 1–100 (mặc định 50), before tùy chọn; trả snapshot lịch sử; sai chủ hoặc không tồn tại trả 404                   |
 
@@ -252,10 +252,12 @@ Cùng prefix `/api/v1/widget/account`, POST yêu cầu CSRF. GET/POST không tr�
 | Method | Path                  | Hợp đồng                                                                                                                     |
 | ------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | GET    | /email-status         | Công khai; {configured: boolean}, chỉ kiểm tra cấu hình                                                                      |
+| POST   | /registration-verification-request | Phiên tài khoản khách vừa đăng ký; 202 message; gửi mã 6 số hạn 15 phút cho email chưa xác minh; cách nhau ≥60 giây, tối đa 3 mã/giờ |
+| POST   | /verify-registration  | {code} 6 chữ số; đúng mã còn hạn thì 200 và đánh dấu email đã xác minh; sai/hết hạn/đã dùng 400; sai 5 lần thì mã bị hủy, phải gửi lại |
 | POST   | /verification-request | Phiên tài khoản khách; 202 message; gửi cho email tài khoản chưa xác minh                                                    |
 | POST   | /verify-email         | {token, password}; mật khẩu hiện tại + token verify còn hạn; 200 message, sai/đã dùng/hết hạn 400                            |
 | POST   | /forgot-password      | {email}; 202 với thông báo chung cho tài khoản đã xác minh/chưa xác minh/không tồn tại; gửi nền chỉ khi đã xác minh          |
-| POST   | /reset-password       | {token, new_password}; mật khẩu 15–128 ký tự khác mật khẩu cũ; 200 message, thu hồi mọi phiên/token; sai/đã dùng/hết hạn 400 |
+| POST   | /reset-password       | {token, new_password}; mật khẩu 8–128 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt, khác mật khẩu cũ; 200 message, thu hồi mọi phiên/token; sai/đã dùng/hết hạn 400 |
 
 Hai endpoint yêu cầu gửi trả 503 khi cấu hình mail không hợp lệ; 202 chỉ là tiếp nhận yêu cầu, không xác nhận thư đã giao. Payload thừa/sai kiểu trả 422, vượt giới hạn IP trả 429. Token verify hạn 60 phút, reset 15 phút; chỉ POST hợp lệ mới tiêu thụ token, mở GET không đổi dữ liệu. Xác minh không đăng nhập tự động và không cấp quyền đơn. Snapshot trả cờ email_verified thực từ DB. Chi tiết giới hạn, cấu hình và retry tại [CUSTOMER_AUTH.md](CUSTOMER_AUTH.md).
 
