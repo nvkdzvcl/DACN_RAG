@@ -21,7 +21,7 @@ from app.models.support import (Conversation, Customer, Message, TelegramCursor,
 from app.services.sla_service import ticket_slas
 from app.services.handoff_service import queue_handoff
 from app.services.message_service import process_message
-from app.telegram import (TelegramError, persist_updates, process_next, queue_outgoing,
+from app.telegram import (TelegramError, outgoing_text, persist_updates, process_next, queue_outgoing,
                          recover_sends, run_telegram, send_outgoing, start_telegram, telegram_call, telegram_status)
 
 
@@ -496,6 +496,15 @@ class TelegramTests(unittest.TestCase):
         self.assertEqual(self.db.query(TelegramUpdate).count(),1)
         self.assertEqual(self.db.query(TelegramDelivery).count(),1)
         self.assertEqual(self.db.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(),11)
+
+
+class OutgoingTextTests(unittest.TestCase):
+    def test_bold_scope_markers_are_removed_for_plain_text_telegram(self):
+        from types import SimpleNamespace
+        message = SimpleNamespace(content='**Hoàn tiền – về nguồn:** 5 đến 7 ngày.' + chr(10) + '**Dòng cắt dở', citations=[
+            {'source': 'thanh-toan.md', 'location': 'Dòng 13'}])
+        self.assertEqual(outgoing_text(message),
+                         'Hoàn tiền – về nguồn: 5 đến 7 ngày.' + chr(10) + 'Dòng cắt dở' + chr(10) + 'Nguồn: thanh-toan.md Dòng 13')
 
 
 if __name__ == '__main__':
