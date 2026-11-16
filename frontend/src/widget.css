@@ -62,7 +62,7 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 }
 .widgetWelcome form button:hover:not(:disabled), .widgetComposer button:hover:not(:disabled) { background: #4935d3; }
 .widgetLog { background: #f8f9fe; padding: 22px; gap: 15px; }
-.widgetIntro { color: #697896; background: #eeefff; border-radius: 10px; padding: 10px 14px; }
+.widgetIntro { color: #5e6c87; background: #eeefff; border-radius: 10px; padding: 10px 14px; }
 .widgetMessage { border-color: #e1e6f2; border-radius: 15px 15px 15px 5px; box-shadow: 0 2px 8px rgba(23, 36, 67, .03); }
 .widgetMessage b { color: #657492; }
 .widgetOwn {
@@ -84,7 +84,7 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .widgetOrderAccess[open] { padding-bottom: 12px; }
 .widgetOrderAccess button { background: #ece9ff; border-color: #d5ceff; color: #4535af; }
 .widgetHistory { background: #fff; border-color: #e2e7f3; padding: 11px 20px; }
-.widgetHistory span { color: #6b7893; }
+.widgetHistory span { color: #68748f; }
 .widgetHistory button { border-color: #dce2f0; color: #4c3ac2; }
 .widgetLog:focus-visible { outline-color: #8d78ff; }
 @media (min-width: 700px) {
@@ -111,7 +111,7 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .widgetAccountBar span { min-width:0; overflow-wrap:anywhere; }
 .widgetAccountBar button { min-height:32px; flex:none; border:1px solid #dcd5ff; padding:6px 10px; color:#5841cb; background:white; font-size:11px; }
 .customerAuthTabs { display:flex; gap:6px; }
-.customerAuthTabs button { flex:1; padding:8px; border:1px solid #e0dff1; color:#63718e; background:white; font-size:11px; }
+.customerAuthTabs button { flex:1; padding:8px; border:1px solid #e0dff1; color:#5c6984; background:white; font-size:11px; }
 .customerAuthTabs button[aria-pressed=true] { background:#604cf3; color:white; border-color:#604cf3; }
 .widgetWelcome fieldset { border:0; margin:0; padding:0; min-width:0; display:grid; gap:14px; }
 .widgetWelcome fieldset label { display:grid; gap:8px; font-size:12px; }
@@ -143,7 +143,7 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .customerPortal .widgetFooter { padding: 12px clamp(16px, 3vw, 30px) 18px; }
 @media(max-width:560px) { .widgetSuggestions { grid-template-columns: 1fr; } }
 /* v1.1: password rule checklist, 6-box code input, success toast, composer safety note */
-.passwordRules{list-style:none;margin:-6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;font-size:11px;color:#7c8bb2}
+.passwordRules{list-style:none;margin:-6px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;font-size:11px;color:#677394}
 .passwordRules li{display:flex;align-items:center;gap:6px}
 .passwordRules li>span[aria-hidden]{display:grid;place-items:center;width:15px;height:15px;border-radius:50%;font-size:10px;line-height:1}
 .passwordRules li.met{color:#16855a}
@@ -154,7 +154,7 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .codeBoxes input:focus{outline:none;border-color:#8f80f4;box-shadow:0 0 0 3px #6753ee22}
 .successToast{position:fixed;bottom:20px;right:20px;z-index:120;display:flex;align-items:center;gap:10px;max-width:min(380px,calc(100vw - 40px));padding:12px 16px;border-radius:10px;background:#e8f7ef;border:1px solid #b6e3c8;color:#14613f;font-size:13px;line-height:1.5;box-shadow:0 10px 30px #14244322;animation:successIn .22s ease-out}
 .successToast>span{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:#20a66a;color:#fff;font-weight:700}
-.composerNote{margin:6px 2px 0;font-size:11px;color:#7c8bb2;line-height:1.4}
+.composerNote{margin:6px 2px 0;font-size:11px;color:#677394;line-height:1.4}
 [data-theme=dark] .codeBoxes input{background:#202c3d;border-color:#475569;color:#e2e8f0}
 [data-theme=dark] .passwordRules,[data-theme=dark] .composerNote{color:#a3b1c6}
 [data-theme=dark] .passwordRules li.met{color:#6ee7a8}
