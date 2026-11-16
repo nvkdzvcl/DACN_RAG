@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from fastapi import BackgroundTasks, APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
-from sqlalchemy import delete, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -17,7 +17,7 @@ from app.api.widget import (COOKIE, COOKIE_PATH, SESSION_SECONDS, check_csrf, fi
                             no_cache, rate_limit, require_session, snapshot)
 from app.core.auth import hash_password, token_hash, verify_password
 from app.db.session import get_db
-from app.models.support import Conversation, Customer, CustomerAccount, CustomerEmailToken, CustomerSession
+from app.models.support import Conversation, Customer, CustomerAccount, CustomerEmailToken, CustomerSession, Message
 from app.services.customer_email import deliver_challenge, mail_settings
 
 router = APIRouter(prefix=COOKIE_PATH + '/account', tags=['customer accounts'],
@@ -172,15 +172,28 @@ def change_password(payload: ChangePassword, request: Request, response: Respons
     response.delete_cookie(COOKIE, path=COOKIE_PATH)
     return {'status': 'password_changed'}
 
+HISTORY_STATUSES = ('open', 'handoff_requested', 'assigned', 'resolved', 'closed')
+
 @router.get('/conversations')
 def conversations(session=Depends(require_verified_account), db: Session = Depends(get_db),
-                  offset: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=1, le=50)] = 20):
+                  offset: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=1, le=50)] = 20,
+                  status: Annotated[str | None, Query(pattern='^(' + '|'.join(HISTORY_STATUSES) + ')$')] = None,
+                  q: Annotated[str, Query(max_length=100)] = ''):
     account = db.get(CustomerAccount, session.account_id)
     query = db.query(Conversation).filter_by(customer_id=account.customer_id, channel='website')
+    if status:
+        query = query.filter(Conversation.status == status)
+    if q.strip():
+        # ponytail: SQLite lower() folds ASCII only; Vietnamese capitals with diacritics match only as typed.
+        query = query.filter(select(Message.id).where(
+            Message.conversation_id == Conversation.id, Message.sender_type.in_(['customer', 'ai', 'agent']),
+            func.lower(Message.content).contains(q.strip().lower(), autoescape=True)).exists())
     total = query.count()
-    rows = query.order_by(Conversation.created_at.desc(), Conversation.id.desc()).offset(offset).limit(limit).all()
+    first_question = select(Message.content).where(Message.conversation_id == Conversation.id, Message.sender_type == 'customer')         .order_by(Message.created_at, Message.id).limit(1).correlate(Conversation).scalar_subquery()
+    rows = query.add_columns(first_question).order_by(Conversation.created_at.desc(), Conversation.id.desc()).offset(offset).limit(limit).all()
     return {'total': total, 'has_more': offset + len(rows) < total,
-            'items': [{'id': row.id, 'created_at': row.created_at, 'status': row.status} for row in rows]}
+            'items': [{'id': row.id, 'created_at': row.created_at, 'status': row.status, 'preview': (preview or '')[:120]}
+                      for row, preview in rows]}
 
 @router.get('/conversations/{conversation_id}')
 def conversation_history(conversation_id: str, session=Depends(require_verified_account), db: Session = Depends(get_db),

@@ -145,3 +145,13 @@
 .profileLogout { margin-left:auto; padding:8px 14px; border:1px solid #d8e0f0; border-radius:8px; background:#fff; color:#b42318; font:inherit; font-size:13px; cursor:pointer; }
 .profileLogout:hover { border-color:#f1b0a9; background:#fff5f4; }
 .profileLogout:disabled { opacity:.55; cursor:not-allowed; }
+/* v1.1: history search and status filter, in row 2 of the left column (list moves to row 3). */
+.historyFilters { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin:20px 0 0; }
+.historyFilters label { display:grid; gap:6px; font-size:12px; font-weight:600; color:#283857; }
+.historyFilters input,.historyFilters select { font:inherit; font-weight:400; width:100%; min-width:0; box-sizing:border-box; min-height:40px; padding:8px 10px; border:1px solid #e0e5f1; border-radius:8px; background:white; color:#283857; }
+.customerHistory { grid-template-rows: auto auto 1fr auto; }
+.customerHistory .historyFilters { grid-column: 1; grid-row: 2; }
+.customerHistory .accountHistoryList { grid-row: 3; margin-top: 14px; }
+.accountHistoryList b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-theme=dark] .historyFilters label { color:#d4deed; }
+[data-theme=dark] .historyFilters :is(input,select) { background:#202c3d; border-color:#475569; color:#e2e8f0; }

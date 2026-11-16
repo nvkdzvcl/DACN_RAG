@@ -13,6 +13,7 @@ import { CustomerHistory, CustomerProfile } from './CustomerAccount';
 import AuthLayout, { AuthInput } from './AuthLayout';
 import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
+import PasswordRules from './PasswordRules';
 
 const statuses = { open: 'Trợ lý hỗ trợ', handoff_requested: 'Đang chờ nhân viên', assigned: 'Nhân viên đã tiếp nhận', closed: 'Hội thoại đã đóng', resolved: 'Hội thoại đã giải quyết' };
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -57,6 +58,8 @@ export default function Widget() {
   const [connectionError, setConnectionError] = useState('');
   const [notice, setNotice] = useState('');
   const [successModal, setSuccessModal] = useState(false);
+  const [passwordDraft, setPasswordDraft] = useState('');
+  const [toast, setToast] = useState('');
   const [retry, setRetry] = useState(0);
   const [view, setView] = useState('messages');
   const [authMode, setAuthMode] = useState('login');
@@ -211,7 +214,8 @@ export default function Widget() {
     handoffId.current = null; setAuthMode(embedded ? 'guest' : 'login');
     setEmailAction(current => current?.mode === 'register-code' ? null : current);
   }
-  function openAuth(mode) { setAuthMode(mode); setView('messages'); setError(''); }
+  function openAuth(mode) { setAuthMode(mode); setView('messages'); setError(''); setPasswordDraft(''); }
+  useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 5000); return () => clearTimeout(timer); }, [toast]);
   async function authenticate(event) {
     event.preventDefault(); const fields = new FormData(event.currentTarget); setError('');
     if (authMode === 'register' && fields.get('password') !== fields.get('confirm')) { setError('Mật khẩu nhập lại chưa khớp.'); return; }
@@ -227,7 +231,7 @@ export default function Widget() {
       if (unverified) {
         try {
           await request('/account/registration-verification-request', { method: 'POST' });
-          setEmailAction({ mode: 'register-code' });
+          setEmailAction({ mode: 'register-code', sent: true });
         } catch (mailError) {
           setNotice('Tài khoản đang chờ xác minh. Chưa vào hệ thống cho đến khi nhập mã 6 số.');
           setError(mailError.message);
@@ -312,7 +316,8 @@ export default function Widget() {
       <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
         {authMode === 'register' && <label>Tên hiển thị<input name="display_name" autoComplete="name" required maxLength={80} /></label>}
         <label>Email<input name="email" type="email" required maxLength={254} autoComplete="username" placeholder="ban@example.com" /></label>
-        <label>Mật khẩu<input name="password" type="password" required minLength={authMode === 'register' ? 8 : 1} pattern={authMode === 'register' ? PASSWORD_RULE : undefined} title={authMode === 'register' ? PASSWORD_HINT : undefined} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} /></label>
+        <label>Mật khẩu<input name="password" type="password" required minLength={authMode === 'register' ? 8 : 1} pattern={authMode === 'register' ? PASSWORD_RULE : undefined} title={authMode === 'register' ? PASSWORD_HINT : undefined} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} onChange={event => setPasswordDraft(event.target.value)} /></label>
+        {authMode === 'register' && <PasswordRules value={passwordDraft} />}
         {authMode === 'register' && <><label>Nhập lại mật khẩu<input name="confirm" type="password" required minLength={8} maxLength={128} pattern={PASSWORD_RULE} title={PASSWORD_HINT} autoComplete="new-password" /></label><small>Mật khẩu: tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Email chưa được xác minh và không tự cấp quyền xem đơn.</small></>}
         <button>{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
       </fieldset></form>
@@ -355,6 +360,7 @@ export default function Widget() {
         </div>
         {draftError && <p className="widgetError" role="alert">Không lưu hoặc khôi phục được nháp. Sao chép trước khi tải lại.</p>}
         <form onSubmit={send}><div className="widgetComposer"><MessageInput id="widgetDraft" aria-label="Tin nhắn của bạn" maxLength={4000} value={draft} onChange={e => setDraft(e.target.value)} disabled={closed} placeholder={closed ? 'Hội thoại đã đóng' : busy ? 'Soạn tin tiếp; chờ xử lý xong để gửi' : 'Nhập tin nhắn...'} /><button type="submit" aria-label="Gửi tin nhắn" disabled={busy || closed || historyLoading || pendingBlocksSend || !draft.trim()}><Send size={20} aria-hidden="true" /></button></div></form>
+        <p className="composerNote">Không gửi mật khẩu, mã OTP hoặc thông tin thẻ ngân hàng trong ô chat.</p>
       </footer>
     </>}
   </section>;
@@ -367,7 +373,8 @@ export default function Widget() {
     <form key={authMode} onSubmit={authenticate} aria-busy={busy}><fieldset disabled={busy}>
       {authMode === 'register' && <AuthInput label="Tên hiển thị" name="display_name" autoComplete="name" required maxLength={80} placeholder="Nhập tên của bạn" />}
       <AuthInput label="Email" name="email" type="email" required maxLength={254} autoComplete="username" placeholder="Nhập địa chỉ email của bạn" />
-      <AuthInput label="Mật khẩu" name="password" type="password" required minLength={authMode === 'register' ? 8 : 1} pattern={authMode === 'register' ? PASSWORD_RULE : undefined} title={authMode === 'register' ? PASSWORD_HINT : undefined} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} placeholder={authMode === 'register' ? 'Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt' : 'Nhập mật khẩu'} />
+      <AuthInput label="Mật khẩu" name="password" type="password" required minLength={authMode === 'register' ? 8 : 1} pattern={authMode === 'register' ? PASSWORD_RULE : undefined} title={authMode === 'register' ? PASSWORD_HINT : undefined} maxLength={128} autoComplete={authMode === 'register' ? 'new-password' : 'current-password'} placeholder={authMode === 'register' ? 'Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt' : 'Nhập mật khẩu'} onChange={event => setPasswordDraft(event.target.value)} />
+      {authMode === 'register' && <PasswordRules value={passwordDraft} />}
       {authMode === 'register' && <><AuthInput label="Nhập lại mật khẩu" name="confirm" type="password" required minLength={8} maxLength={128} pattern={PASSWORD_RULE} title={PASSWORD_HINT} autoComplete="new-password" placeholder="Nhập lại mật khẩu của bạn" /><small>Email chưa được xác minh và không tự cấp quyền xem đơn. Lịch sử khách vãng lai không tự ghép vào tài khoản.</small></>}
       <button className="authSubmit"><ArrowRight size={18} />{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
     </fieldset></form>
@@ -376,6 +383,7 @@ export default function Widget() {
     {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button className="authGoogle" type="button" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.')}><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}
     <div className="authNote"><ShieldCheck size={21} /><div>Lịch sử của bạn, luôn được kết nối<small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small></div></div>
     {authMode === 'register' && <p className="authHelp">Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</p>}
+    {toast && <div className="successToast" role="status"><span aria-hidden="true">✓</span>{toast}</div>}
   </AuthLayout>;
   const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
   const activeAccess = session?.order_access?.filter(access => access.expires_at > Date.now() / 1000) || [];
@@ -385,7 +393,7 @@ export default function Widget() {
       <div className="portalSideFoot"><ShieldCheck size={17} /><span>Tra đơn cần mã truy cập do cửa hàng cấp.</span>{session?.account && <><div className="portalSideAccount"><b>{session.display_name || session.account.email}</b><small>{session.account.email}</small></div><button className="portalLogout" onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></>}</div>
     </div>
     <div className="portalMain" role="main"><nav className="portalMobileNav" aria-label="Dịch vụ khách hàng">{pages.map(([Icon, label, key]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}><Icon size={16} />{label}</button>)}</nav>
-      {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => clearIdentity('Đã đổi mật khẩu. Vui lòng đăng nhập lại.')} onLogout={logout} logoutDisabled={busy || handoffBusy || historyLoading} /> : view === 'orders' ? <section className="portalPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><span className="portalPageIcon"><PackageSearch size={22} /></span><div><h1>Tra cứu đơn hàng</h1><p>Xem trạng thái và mã vận đơn sau khi xác nhận quyền truy cập.</p></div></div>
+      {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => { clearIdentity(''); setToast('Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.'); }} onLogout={logout} logoutDisabled={busy || handoffBusy || historyLoading} /> : view === 'orders' ? <section className="portalPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><span className="portalPageIcon"><PackageSearch size={22} /></span><div><h1>Tra cứu đơn hàng</h1><p>Xem trạng thái và mã vận đơn sau khi xác nhận quyền truy cập.</p></div></div>
         {!session ? <div className="portalEmpty"><p>Bắt đầu phiên trò chuyện để tra cứu đơn.</p><button onClick={() => setView('messages')}>Bắt đầu trò chuyện <ArrowRight size={16} /></button></div> : <><div className="portalOrderGrid"><form className="portalOrderForm" onSubmit={event => { event.preventDefault(); inspectOrder(orderId, new FormData(event.currentTarget).get('code')); }}><h2>Nhập thông tin tra cứu</h2><label>Mã đơn<input value={orderId} onChange={event => { setOrderId(event.target.value); setOrderResult(null); }} placeholder="Ví dụ: DH12345" required minLength={6} maxLength={64} autoComplete="off" /></label>
           {!activeAccess.some(access => access.order_id === orderId.trim().toUpperCase()) && <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} placeholder="Mã do cửa hàng cấp" /></label>}
           <p>Mã truy cập chỉ dùng để xác nhận quyền tra đơn. Không gửi mã trong tin nhắn.</p><button disabled={busy || orderLoading}>{orderLoading ? 'Đang tra cứu...' : 'Tra cứu đơn hàng'}</button></form><div className="portalOrderHelp"><h2>Lấy mã truy cập ở đâu?</h2><ol><li>Liên hệ cửa hàng qua kênh đã xác minh (điện thoại hoặc email đặt hàng).</li><li>Nhân viên kiểm tra chủ đơn rồi cấp mã riêng cho từng đơn.</li><li>Không gửi mã truy cập trong tin nhắn trò chuyện.</li></ol></div></div>
