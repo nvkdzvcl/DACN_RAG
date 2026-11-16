@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
 
+const PAGE_SIZE = 10;
 const labels = { indexed: 'Đã lập chỉ mục', processing: 'Đang xử lý', failed: 'Xử lý lỗi', ready_for_embedding: 'Cần lập chỉ mục lại', deleting: 'Xóa chưa hoàn tất', uploaded: 'Đã tải lên' };
 
 export function Citations({ citations, request }) {
@@ -48,9 +49,19 @@ export default function KnowledgeBase({ user, request, onExpired }) {
   const [status, setStatus] = useState('');
   const [loadError, setLoadError] = useState('');
   const [slow, setSlow] = useState(false);
+  const [page, setPage] = useState(0);
   const answerRequest = useRef(null);
+  const previewRef = useRef(null);
   const tabs = [['documents', 'Tài liệu'], ...(user.role === 'admin' ? [['upload', 'Tải tài liệu']] : []), ['ask', 'Thử hỏi AI']];
   const visibleDocuments = documents.filter(document => document.filename.toLocaleLowerCase('vi').includes(search.trim().toLocaleLowerCase('vi')) && (!status || document.status === status));
+  const pageCount = Math.max(1, Math.ceil(visibleDocuments.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const pageDocuments = visibleDocuments.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  // A new search or filter starts from the first page.
+  useEffect(() => setPage(0), [search, status]);
+  // The content opens under the clicked document; bring it into view instead of making staff scroll to find it.
+  useEffect(() => { if (preview?.id) previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [preview?.id]);
+  function goToPage(next) { setPage(next); setPreview(null); }
   useEffect(() => () => answerRequest.current?.abort(), []);
   useEffect(() => {
     setSlow(false);
@@ -95,6 +106,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     if (await mutate('/documents/upload', { method: 'POST', body }, 'upload')) { form.reset(); setSection('documents'); }
   }
   async function show(document) {
+    if (preview?.id === document.document_id) { setPreview(null); return; }
     setPreview({ id: document.document_id, name: document.filename, loading: true });
     try {
       const data = await request(`/documents/${encodeURIComponent(document.document_id)}/chunks`);
@@ -132,13 +144,14 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     <section id="kb-panel-documents" role="tabpanel" aria-labelledby="kb-tab-documents" hidden={section !== 'documents'}>
     <h2 className="documentHeading" id="tai-lieu">Tài liệu <span>{visibleDocuments.length} / {documents.length} tài liệu</span></h2>
     <div className="documentFilters"><label>Tìm tài liệu<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tên tài liệu..." /></label><label>Trạng thái<select value={status} onChange={event => setStatus(event.target.value)}><option value="">Tất cả trạng thái</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{(search || status) && <button onClick={() => { setSearch(''); setStatus(''); }}>Xóa bộ lọc</button>}</div>
-    {loading ? <p role="status">Đang tải tài liệu...</p> : !documents.length ? <p>Chưa có tài liệu. {user.role === 'admin' ? <button onClick={() => setSection('upload')}>Tải tài liệu đầu tiên</button> : 'Quản trị viên tải tài liệu để bắt đầu hỏi đáp.'}</p> : !visibleDocuments.length ? <p role="status">Không có tài liệu phù hợp. Thử đổi tên hoặc bỏ bộ lọc trạng thái.</p> : <div className="documentList">{visibleDocuments.map(document => <article className="documentCard" key={document.document_id}>
+    {loading ? <p role="status">Đang tải tài liệu...</p> : !documents.length ? <p>Chưa có tài liệu. {user.role === 'admin' ? <button onClick={() => setSection('upload')}>Tải tài liệu đầu tiên</button> : 'Quản trị viên tải tài liệu để bắt đầu hỏi đáp.'}</p> : !visibleDocuments.length ? <p role="status">Không có tài liệu phù hợp. Thử đổi tên hoặc bỏ bộ lọc trạng thái.</p> : <><div className="documentList">{pageDocuments.map(document => <article className="documentCard" key={document.document_id}>
       <div><h2>{document.filename}</h2><p>{labels[document.status] || document.status} · {document.chunks} đoạn</p>{document.error_message && <p className="kbError">{document.error_message}</p>}</div>
-      <div className="documentActions"><button onClick={() => show(document)} disabled={Boolean(busy)}>Xem nội dung</button>
+      <div className="documentActions"><button onClick={() => show(document)} disabled={Boolean(busy)} aria-expanded={preview?.id === document.document_id}>{preview?.id === document.document_id ? 'Ẩn nội dung' : 'Xem nội dung'}</button>
       {user.role === 'admin' && <><button disabled={Boolean(busy) || document.status === 'deleting'} onClick={() => mutate(`/documents/${document.document_id}/reindex`, { method: 'POST' }, document.document_id)}>{busy === document.document_id ? 'Đang xử lý...' : 'Lập chỉ mục lại'}</button><button disabled={Boolean(busy)} onClick={() => setRemoveId(document.document_id)}>Xóa</button></>}</div>
       {removeId === document.document_id && <div className="deleteConfirm" role="alert"><p>Xóa tài liệu, các đoạn và vector? Lịch sử hội thoại vẫn giữ trích dẫn cũ.</p><button disabled={Boolean(busy)} onClick={() => mutate(`/documents/${document.document_id}`, { method: 'DELETE' }, document.document_id)}>Xác nhận xóa</button><button disabled={Boolean(busy)} onClick={() => setRemoveId(null)}>Hủy</button></div>}
-    </article>)}</div>}
-    {preview && <section className="sourcePreview" aria-label="Nội dung tài liệu"><button onClick={() => setPreview(null)}>Đóng nội dung</button><h2>{preview.name}</h2>{preview.loading ? <p role="status">Đang tải...</p> : preview.error ? <p role="alert">{preview.error}</p> : preview.chunks.map(chunk => <article key={chunk.chunk_id}><h3>{chunk.location || `Đoạn ${chunk.index + 1}`}</h3><p>{chunk.content}</p></article>)}</section>}
+      {preview?.id === document.document_id && <section ref={previewRef} className="sourcePreview inlinePreview" aria-label={`Nội dung ${document.filename}`}>{preview.loading ? <p role="status">Đang tải...</p> : preview.error ? <p role="alert">{preview.error}</p> : preview.chunks.map(chunk => <article key={chunk.chunk_id}><h3>{chunk.location || `Đoạn ${chunk.index + 1}`}</h3><p><RichText text={chunk.content} /></p></article>)}</section>}
+    </article>)}</div>
+    {pageCount > 1 && <nav className="kbPager" aria-label="Phân trang tài liệu"><span>Trang {currentPage + 1} / {pageCount} · {currentPage * PAGE_SIZE + 1}–{currentPage * PAGE_SIZE + pageDocuments.length} trong {visibleDocuments.length} tài liệu</span><div><button type="button" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 0}>Trang trước</button><button type="button" onClick={() => goToPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}>Trang sau</button></div></nav>}</>}
     </section>
     <section id="kb-panel-ask" role="tabpanel" aria-labelledby="kb-tab-ask" hidden={section !== 'ask'}><div className="askCard"><h2>Thử hỏi từ tài liệu</h2><p>Trích nguồn giúp đối chiếu, không bảo đảm mọi câu trả lời đều đúng.</p><form onSubmit={ask} aria-busy={asking}><label>Câu hỏi<textarea value={question} onChange={event => setQuestion(event.target.value)} disabled={asking} maxLength={2000} required rows={3} /></label><button disabled={asking || Boolean(busy) || !question.trim()}>{asking ? 'Đang xử lý...' : answerError ? 'Thử lại câu hỏi' : 'Hỏi AI'}</button></form>
       {asking && <p role="status">{slow ? 'Yêu cầu vẫn đang chờ phản hồi. Model có thể cần tải; không cần gửi lại câu hỏi.' : 'Đang tìm nguồn và kiểm định câu trả lời...'}</p>}

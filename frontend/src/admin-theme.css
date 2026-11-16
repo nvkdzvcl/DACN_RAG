@@ -386,3 +386,16 @@ body:has(.shell[data-theme=dark]){background:#111827}
   .shell[data-theme=dark] .recordTable tr{background:#182131}
   .shell[data-theme=dark] .recordTable td::before{color:#b7c9e2}
 }
+/* Knowledge base: document content opens under its row; list is paginated. */
+.knowledge .inlinePreview{flex-basis:100%;margin:14px 0 0;max-height:420px;overflow:auto;padding:4px 16px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;scroll-margin:16px}
+.knowledge .inlinePreview article{border-top:1px solid #e2e8f0;margin-top:10px}
+.knowledge .inlinePreview article:first-child{border-top:0;margin-top:0}
+.knowledge .inlinePreview h3{font-size:12px;color:#475569;margin:12px 0 4px}
+.knowledge .inlinePreview p{font-size:13px;color:#263654;line-height:1.6;margin:0}
+.knowledge .kbPager{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:-8px 0 22px;font-size:12px;color:#73809a}
+.knowledge .kbPager div{display:flex;gap:8px}
+.knowledge .kbPager button{border:1px solid #dce3f3;border-radius:8px;color:#2563eb;background:#fff;padding:8px 12px}
+.knowledge .kbPager button:disabled{color:#a0aec0;cursor:default}
+.shell[data-theme=dark] .knowledge .inlinePreview p{color:#d4deed}
+.shell[data-theme=dark] .knowledge .inlinePreview h3,.shell[data-theme=dark] .knowledge .kbPager{color:#a3b1c6}
+.shell[data-theme=dark] .knowledge .kbPager button{background:#202c3d;color:#cad8ed;border-color:#3c4a60}
