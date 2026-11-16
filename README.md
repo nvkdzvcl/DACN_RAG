@@ -54,7 +54,7 @@ Nhúng trên website cùng origin đã phục vụ frontend và proxy `/api` t�
 <script src="/widget.js" defer></script>
 ```
 
-Giữ đường dẫn `/chat` trả về frontend SPA khi phục vụ bản build. Origin gồm scheme, hostname và port; không trộn `localhost` với `127.0.0.1`. Chưa hỗ trợ nhúng khác origin. Ngoài development cần HTTPS để cookie Secure hoạt động; chạy một API worker.
+Trên màn hình hẹp (từ 600 px trở xuống) khung chat mở toàn màn hình và đóng bằng nút ✕ ở đầu khung. Giữ đường dẫn `/chat` trả về frontend SPA khi phục vụ bản build. Origin gồm scheme, hostname và port; không trộn `localhost` với `127.0.0.1`. Chưa hỗ trợ nhúng khác origin. Ngoài development cần HTTPS để cookie Secure hoạt động; chạy một API worker.
 
 Cookie HttpOnly riêng có hạn cố định 24 giờ, DB chỉ lưu hash token; server tạo danh tính khách và gắn phiên với một hội thoại. Tên tự nhập không xác minh chủ đơn hàng: tra mã đơn không thuộc khách này chuyển nhân viên, không lộ thông tin đơn. Đóng khung chat giữ phiên; Kết thúc thu hồi phiên, đóng hội thoại/ticket và giữ lịch sử cho nhân viên. Widget hiển thị 50 tin mỗi trang, cho xem tin cũ ngoài 200 tin và giữ bản nháp/ID khi thử gửi lại trong cùng trang trình duyệt. Gửi hoặc handoff thành công trở về tin mới nhất; hết phiên không xem tiếp được lịch sử. Giới hạn mỗi IP/phút: 6 yêu cầu tạo phiên, 10 gửi tin, 6 chuyển nhân viên; chỉ một lượt AI từ widget được xử lý cùng lúc, lượt bận trả 429 trước khi lưu. Handoff vẫn hoạt động trong lúc AI chờ; giới hạn này chưa điều phối các lời gọi RAG nội bộ của nhân viên.
 

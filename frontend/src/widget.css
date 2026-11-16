@@ -160,3 +160,8 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 [data-theme=dark] .passwordRules li.met{color:#6ee7a8}
 [data-theme=dark] .successToast{background:#173a2a;border-color:#2f6b4c;color:#c9f2db}
 @media(max-width:420px){.codeBoxes{gap:6px}.codeBoxes input{width:40px;height:48px}}
+/* Audit group 3 (mobile): embedded close button, 24px minimum tap height for source toggles. */
+.widgetClose{display:grid;place-items:center;flex:none;order:5;width:44px;height:44px;padding:0;margin-left:auto;border:1px solid #46567a;border-radius:8px;background:#25365b;color:#fff;cursor:pointer}
+.widgetEnd+.widgetClose{margin-left:0}
+.widgetClose:hover{background:#354b79}
+.widgetMessage summary{min-height:24px;padding:3px 0;box-sizing:border-box}

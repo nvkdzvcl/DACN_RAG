@@ -401,3 +401,5 @@ body:has(.shell[data-theme=dark]){background:#111827}
 .shell[data-theme=dark] .knowledge .kbPager button{background:#202c3d;color:#cad8ed;border-color:#3c4a60}
 /* Contrast: dark theme overrides for labels that kept the light theme's gray. */
 .shell[data-theme=dark] :is(.filters label,.slaFilter,.mobileNav button){color:#a3b1c6}
+/* Audit group 3 (mobile): fade the right edge of the scrolling staff menu so cut-off items read as "more this way". */
+@media(max-width:760px){.shell .mobileNav{padding-right:36px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}}

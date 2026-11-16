@@ -1,7 +1,7 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X } from 'lucide-react';
 
 function GoogleIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
@@ -305,7 +305,8 @@ export default function Widget() {
   function askSuggestion(question) { setDraft(question); setView('messages'); }
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
     <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
-      {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}</header>
+      {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}
+      {embedded && <button type="button" className="widgetClose" aria-label="Đóng trò chuyện" onClick={() => window.parent.postMessage({ type: 'rag-support-close' }, window.location.origin)}><X size={18} aria-hidden="true" /></button>}</header>
     {successModal && <div className="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successTitle"><div className="successModal"><div className="successIcon">✓</div><h2 id="successTitle">Đăng ký tài khoản thành công</h2><p>Email đã được xác minh. Bạn có thể bắt đầu sử dụng tài khoản ngay.</p><button onClick={() => setSuccessModal(false)}>Tiếp tục</button></div></div>}
     {session && !session.account && <div className="widgetAccountBar"><span>Khách vãng lai</span><button onClick={() => openAuth('login')} disabled={busy || handoffBusy || historyLoading}>Đăng nhập tài khoản</button></div>}
     {session?.account && embedded && <div className="widgetAccountBar"><span>{session.account.email}</span><button onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></div>}
@@ -324,12 +325,12 @@ export default function Widget() {
       {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button type="button" className="authGoogle" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.') }><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}{authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}{authMode !== 'guest' && <small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small>}
       {notice && <p role="status">{notice}</p>}{error && <div className="widgetError" role="alert"><p>{error}</p>{authMode === 'guest' && <button onClick={() => { setError(''); setRetry(n => n + 1); }} disabled={busy}>Thử kết nối lại</button>}</div>}
     </section> : <>
-      <nav className="widgetHistory" aria-label="Phân trang tin nhắn" aria-busy={historyLoading}>
+      {(session.message_page.has_more || messageCursors.length > 0 || historyLoading) && <nav className="widgetHistory" aria-label="Phân trang tin nhắn" aria-busy={historyLoading}>
         <span role="status">{historyLoading ? 'Đang tải tin nhắn...' : `${messageBefore ? 'Đang xem tin cũ' : 'Tin gần nhất'} · ${session.messages.length} tin`}</span>
         <button disabled={busy || handoffBusy || historyLoading || !session.message_page.has_more} onClick={() => viewHistory([...messageCursors, session.message_page.next_before])}>Tin cũ hơn</button>
         <button disabled={busy || handoffBusy || historyLoading || messageCursors.length < 2} onClick={() => viewHistory(messageCursors.slice(0, -1))}>Tin mới hơn</button>
         {messageBefore && <button disabled={busy || handoffBusy || historyLoading} onClick={() => viewHistory([])}>Về tin mới nhất</button>}
-      </nav>
+      </nav>}
       <div className="widgetLog" ref={log} role="log" tabIndex={0} aria-label="Tin nhắn hỗ trợ" aria-live={messageBefore ? 'off' : 'polite'} aria-relevant="additions" onScroll={e => {
         const el = e.currentTarget; nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
         setAtLatest(nearBottom.current); if (nearBottom.current) setHasNewMessages(false);
@@ -346,7 +347,7 @@ export default function Widget() {
       {!messageBefore && !atLatest && <div className="widgetLatest"><span role="status">{hasNewMessages ? 'Có tin mới' : 'Đang xem tin phía trên'}</span><button type="button" onClick={jumpLatest}>Về tin mới nhất</button></div>}
       <footer className="widgetFooter">
         <div className="widgetFooterTools" tabIndex={0} role="region" aria-label="Thao tác hội thoại">
-        {!closed && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
+        {!closed && embedded && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
           <p>Nhập mã truy cập do cửa hàng cấp riêng. Không gửi mã truy cập trong tin nhắn.</p>
           {session.order_access?.map(access => <p key={access.order_id}>Đã cấp quyền: <strong>{access.order_id}</strong> đến {new Date(access.expires_at * 1000).toLocaleTimeString('vi-VN')}.</p>)}
           <form onSubmit={redeem}><fieldset disabled={busy || handoffBusy || historyLoading}><label>Mã đơn<input name="order_id" required maxLength={64} autoComplete="off" /></label>
