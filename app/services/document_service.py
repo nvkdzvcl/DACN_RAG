@@ -67,8 +67,15 @@ def extract_sections(path):
             yield paragraph, None, f"Dòng {number}"
 
 
+def document_title(db, record):
+    """A document that opens with a Markdown heading is listed by that heading instead of its file name."""
+    first = db.query(DocumentChunk.content).filter_by(document_id=record.id).order_by(DocumentChunk.chunk_index).first()
+    text = first[0].strip() if first else ""
+    return text.lstrip("#").strip()[:160] or None if text.startswith("#") else None
+
+
 def document_info(db, record):
-    return {"document_id": record.id, "filename": record.filename, "status": record.status,
+    return {"document_id": record.id, "filename": record.filename, "title": document_title(db, record), "status": record.status,
             "error_message": record.error_message, "embedding_model": record.embedding_model,
             "created_at": record.created_at,
             "chunks": db.query(DocumentChunk).filter_by(document_id=record.id).count()}

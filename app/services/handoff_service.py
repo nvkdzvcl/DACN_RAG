@@ -42,6 +42,10 @@ def classify_message(content: str) -> tuple[str, bool]:
     return "neutral", False
 
 
+# Staff read the summary as-is in the inbox, so senders are named in Vietnamese.
+SUMMARY_SENDERS = {'customer': 'Khách', 'ai': 'AI'}
+
+
 def refresh_handoff_summary(db, conversation):
     from app.models.support import Message, Ticket
 
@@ -55,7 +59,7 @@ def refresh_handoff_summary(db, conversation):
         Message.conversation_id == conversation.id,
         Message.sender_type.in_(['customer', 'ai']),
     ).order_by(Message.created_at.desc(), Message.id.desc()).limit(8).all()
-    ticket.summary = '\n'.join(f'{item.sender_type}: {item.content[:400]}' for item in reversed(recent))
+    ticket.summary = '\n'.join(f'{SUMMARY_SENDERS[item.sender_type]}: {item.content[:400]}' for item in reversed(recent))
 
 def queue_handoff(db, conversation):
     from uuid import uuid4

@@ -454,6 +454,7 @@ class WidgetTests(unittest.TestCase):
             self.assertEqual(message.content, content)
             ticket = db.query(Ticket).filter_by(conversation_id=cid).one()
             self.assertIn(content, ticket.summary)
+            self.assertTrue(ticket.summary.startswith('Khách: '), ticket.summary)
 
     def test_file_question_stays_open_without_a_false_complaint_ticket(self):
         cid = self.start().json()['conversation_id']

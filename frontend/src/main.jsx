@@ -1,7 +1,8 @@
+import { channelNames, conversationStatuses, formatDateTime, formatShort, localizeSummary, shortId, ticketStatuses } from './shared';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText, plainText } from './RichText';
 import { createRoot } from 'react-dom/client';
-import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot, LayoutDashboard, MessageSquare, PanelRight, SlidersHorizontal, RefreshCw, ChevronLeft, ChevronRight, LogOut, Send, CheckCheck, X, Globe, Clock3, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot, LayoutDashboard, MessageSquare, Headphones, PanelRight, SlidersHorizontal, RefreshCw, ChevronLeft, ChevronRight, LogOut, Send, CheckCheck, X, Globe, Clock3, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import './styles.css';
 import KnowledgeBase, { Citations } from './KnowledgeBase';
 import Widget from './Widget';
@@ -16,28 +17,16 @@ import { Mail } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const fieldLabels = { id: 'Mã đơn', tracking_code: 'Mã vận đơn', customer_id: 'Khách hàng', status: 'Trạng thái' };
-const statuses = { open: 'Đang mở', handoff_requested: 'Chờ nhân viên', assigned: 'Đã tiếp nhận', closed: 'Đã đóng', resolved: 'Đã giải quyết' };
+const statuses = conversationStatuses;
 const priorities = { normal: 'Bình thường', high: 'Cao', urgent: 'Khẩn cấp', low: 'Thấp' };
 const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Kết thúc trước phản hồi', none: 'Chưa có SLA' };
-const senders = { customer: 'Khách hàng', ai: 'RAG AI', assistant: 'RAG AI', agent: 'Nhân viên', system: 'Hệ thống' };
+const senders = { customer: 'Khách hàng', ai: 'Trợ lý AI', assistant: 'Trợ lý AI', agent: 'Nhân viên', system: 'Hệ thống' };
 const pages = [[LayoutDashboard, 'Tổng quan', 'overview'], [Inbox, 'Hội thoại', 'inbox'], [UserRound, 'Khách hàng', 'customers'], [Package, 'Đơn hàng', 'orders'], [BookOpen, 'Kho tri thức', 'knowledge'], [BarChart3, 'Phân tích', 'analytics'], [Settings, 'Cài đặt', 'settings']];
-const channelName = channel => ({ website: 'Website', telegram: 'Telegram' })[channel] || channel;
+const channelName = channel => channelNames[channel] || channel;
 const nameOf = c => c.customer_name || c.customer_id;
 const initials = name => name.trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
-function timeOf(value) {
-  if (!value) return '';
-  const date = new Date(/[zZ]$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('vi-VN');
-}
-
-function shortTime(value) {
-  if (!value) return '';
-  const date = new Date(/[zZ]$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toDateString() === new Date().toDateString()
-    ? date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-    : date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-}
+const timeOf = formatDateTime;
+const shortTime = formatShort;
 
 async function request(path, options = {}) {
   let response;
@@ -136,7 +125,7 @@ function SessionGate() {
   if (loading) return <p className="state" role="status">Đang kiểm tra phiên đăng nhập...</p>;
   if (user) return <App user={user} onExpired={(message = '') => { setUser(null); setError(message); }} onLogout={logout} logoutBusy={busy} sessionError={error} />;
   return <AuthLayout staff><h1>Chào mừng trở lại!</h1><p className="authLead">Đăng nhập để tiếp tục sử dụng nền tảng AI hỗ trợ khách hàng.</p>
-    <form onSubmit={login} aria-busy={busy}><fieldset disabled={busy}><AuthInput label="Tên đăng nhập" name="username" autoComplete="username" required maxLength={64} pattern="[a-zA-Z0-9_.-]+" placeholder="Nhập tên đăng nhập nhân viên" /><AuthInput label="Mật khẩu" name="password" type="password" autoComplete="current-password" required maxLength={128} placeholder="Nhập mật khẩu" />
+    <form onSubmit={login} aria-busy={busy}><fieldset disabled={busy}><AuthInput label="Tên đăng nhập" name="username" autoComplete="username" required maxLength={64} pattern="[a-zA-Z0-9_.\-]+" placeholder="Nhập tên đăng nhập nhân viên" /><AuthInput label="Mật khẩu" name="password" type="password" autoComplete="current-password" required maxLength={128} placeholder="Nhập mật khẩu" />
       {error && <p className="authFeedback" role="alert">{error}</p>}<button className="authSubmit">{busy ? 'Đang đăng nhập...' : 'Đăng nhập'}</button></fieldset></form>
     <details className="authHelp"><summary>Quên mật khẩu?</summary><p>Liên hệ quản trị viên để được đặt lại mật khẩu tài khoản nhân viên.</p></details>
     <div className="authNote"><UserRound size={22} /><div>Chưa có tài khoản?<small>Liên hệ quản trị viên để được cấp quyền truy cập.</small></div></div>
@@ -385,7 +374,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   }
   return <div data-theme={theme} className={`shell ${page === 'inbox' ? 'inboxShell' : ''}`}>
     <aside aria-label="Điều hướng chính">
-      <div className="brand"><span className="brandLogo"><MessageSquare aria-hidden="true" /></span><b>RAG Support</b><small>Không gian làm việc</small></div>
+      <div className="brand"><span className="brandLogo"><Headphones aria-hidden="true" /></span><b>RAG Support</b><small>Không gian làm việc</small></div>
       <span className="navCaption">KHÔNG GIAN HỖ TRỢ</span>
       {pages.map(([Icon, label, target]) =>
         <button key={target} title={label} aria-label={label} className={`nav ${page === target ? 'active' : ''}`} onClick={() => navigate(target)} aria-current={page === target ? 'page' : undefined}><Icon size={18} aria-hidden="true" />{label}</button>)}
@@ -443,8 +432,8 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
           </form></details>}
           {actionError?.id === activeId && <p className="state" role="alert">{actionError.message}</p>}
         </div>
-        {profileOpen && <ProfilePanel ref={profilePanel} onCancel={() => setProfileOpen(false)} id="customerInfo" className="profile" aria-label="Thông tin khách hàng" onKeyDown={event => { if (event.key === 'Escape') { setProfileOpen(false); profileToggle.current?.focus(); } }}><div className="profileHeading"><h2>Thông tin liên hệ</h2><button className="iconButton" aria-label="Đóng thông tin khách hàng" onClick={() => { setProfileOpen(false); profileToggle.current?.focus(); }}><X size={17} /></button></div>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><h3>{nameOf(current)}</h3><p>{current.customer_email || 'Chưa có email'}</p><button className="profileLink" onClick={() => openOrders(current.customer_id)}><Package size={14} aria-hidden="true" />Xem đơn hàng<ArrowUpRight size={13} aria-hidden="true" /></button></div><dl className="conversationFacts"><dt>Kênh hỗ trợ</dt><dd>{channelName(current.channel)}</dd><dt>Trạng thái</dt><dd>{statuses[current.status] || current.status}</dd><dt>Người phụ trách</dt><dd>{current.assigned_agent_id === user.id ? `${user.display_name} (bạn)` : current.assigned_agent_id ? 'Nhân viên khác' : 'Chưa phân công'}</dd><dt>Ưu tiên</dt><dd>{priorities[current.priority] || current.priority}</dd><dt>Mã khách hàng</dt><dd className="customerIdentifier">{current.customer_id}</dd></dl><details className="profileTickets" open><summary><Clock3 size={15} aria-hidden="true" />Ticket hỗ trợ<span>{current.tickets.length}</span></summary>
-              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{statuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary ? plainText(t.summary) : 'Chưa có tóm tắt.'}</p><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section></details><div className="profileFootnote"><ShieldCheck size={15} aria-hidden="true" /><p>Thông tin nội bộ dành cho đội hỗ trợ.</p></div></> : <p className="state">Chọn hội thoại để xem thông tin khách hàng.</p>}</ProfilePanel>}
+        {profileOpen && <ProfilePanel ref={profilePanel} onCancel={() => setProfileOpen(false)} id="customerInfo" className="profile" aria-label="Thông tin khách hàng" onKeyDown={event => { if (event.key === 'Escape') { setProfileOpen(false); profileToggle.current?.focus(); } }}><div className="profileHeading"><h2>Thông tin liên hệ</h2><button className="iconButton" aria-label="Đóng thông tin khách hàng" onClick={() => { setProfileOpen(false); profileToggle.current?.focus(); }}><X size={17} /></button></div>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><h3>{nameOf(current)}</h3><p>{current.customer_email || 'Chưa có email'}</p><button className="profileLink" onClick={() => openOrders(current.customer_id)}><Package size={14} aria-hidden="true" />Xem đơn hàng<ArrowUpRight size={13} aria-hidden="true" /></button></div><dl className="conversationFacts"><dt>Kênh hỗ trợ</dt><dd>{channelName(current.channel)}</dd><dt>Trạng thái</dt><dd>{statuses[current.status] || current.status}</dd><dt>Người phụ trách</dt><dd>{current.assigned_agent_id === user.id ? `${user.display_name} (bạn)` : current.assigned_agent_id ? 'Nhân viên khác' : 'Chưa phân công'}</dd><dt>Ưu tiên</dt><dd>{priorities[current.priority] || current.priority}</dd><dt>Mã khách hàng</dt><dd className="customerIdentifier" title={current.customer_id}>{shortId(current.customer_id)}</dd></dl><details className="profileTickets" open><summary><Clock3 size={15} aria-hidden="true" />Ticket hỗ trợ<span>{current.tickets.length}</span></summary>
+              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{ticketStatuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary ? plainText(localizeSummary(t.summary)) : 'Chưa có tóm tắt.'}</p><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section></details><div className="profileFootnote"><ShieldCheck size={15} aria-hidden="true" /><p>Thông tin nội bộ dành cho đội hỗ trợ.</p></div></> : <p className="state">Chọn hội thoại để xem thông tin khách hàng.</p>}</ProfilePanel>}
 
       </section>
       </>}

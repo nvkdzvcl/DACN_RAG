@@ -14,14 +14,21 @@
     frame.id = 'rag-support-frame';
     frame.title = 'Trò chuyện với bộ phận hỗ trợ';
     frame.hidden = true;
-    frame.style.cssText = 'position:fixed;right:16px;bottom:84px;z-index:10000;width:min(400px,calc(100vw - 32px));height:min(640px,calc(100dvh - 100px));border:1px solid #dce2f0;border-radius:16px;box-shadow:0 15px 60px #17244333;background:#f5f7fc';
-    function close() { frame.hidden = true; button.setAttribute('aria-expanded', 'false'); button.textContent = 'Hỗ trợ'; button.focus(); }
+    const desktopFrame = 'position:fixed;right:16px;bottom:84px;z-index:10000;width:min(400px,calc(100vw - 32px));height:min(640px,calc(100dvh - 100px));border:1px solid #dce2f0;border-radius:16px;box-shadow:0 15px 60px #17244333;background:#f5f7fc';
+    // Phones: the chat takes the whole screen and closes from its own header, so the launcher is hidden while it is open.
+    const phoneFrame = 'position:fixed;inset:0;z-index:10000;width:100vw;height:100dvh;border:0;border-radius:0;background:#f5f7fc';
+    const phone = matchMedia('(max-width: 600px)');
+    function layout() { frame.style.cssText = phone.matches ? phoneFrame : desktopFrame; button.hidden = phone.matches && !frame.hidden; }
+    phone.addEventListener('change', layout);
+    function close() { frame.hidden = true; button.setAttribute('aria-expanded', 'false'); button.textContent = 'Hỗ trợ'; layout(); button.focus(); }
+    addEventListener('message', event => { if (event.origin === origin && event.source === frame.contentWindow && event.data?.type === 'rag-support-close') close(); });
     frame.addEventListener('load', () => frame.contentWindow.addEventListener('keydown', event => { if (event.key === 'Escape') close(); }));
     button.addEventListener('click', () => {
       if (!frame.hidden) { close(); return; }
       if (!frame.src) frame.src = `${origin}/chat?embed=1`;
-      frame.hidden = false; button.setAttribute('aria-expanded', 'true'); button.textContent = 'Đóng trò chuyện'; frame.focus();
+      frame.hidden = false; button.setAttribute('aria-expanded', 'true'); button.textContent = 'Đóng trò chuyện'; layout(); frame.focus();
     });
+    layout();
     document.body.append(frame, button);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true }); else mount();

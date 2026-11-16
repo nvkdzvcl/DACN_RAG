@@ -140,6 +140,26 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(self.client.get('/api/v1/workspace/summary?days=90').json()['period']['tickets'], 5)
         self.assertEqual(self.client.get('/api/v1/workspace/summary?days=8').status_code, 422)
 
+    def test_daily_metrics_use_vietnam_calendar_days(self):
+        self.login()
+        local = timezone(timedelta(hours=7))
+        today = datetime.now(timezone.utc).astimezone(local).date()
+        midnight = datetime.combine(today, datetime.min.time(), local).astimezone(timezone.utc)
+        first_midnight = midnight - timedelta(days=6)
+        with Session(self.engine) as db:
+            # 00:00 local today is still "yesterday" in UTC; it must count for today.
+            db.add_all([Conversation(id='local-midnight', customer_id='bob', created_at=midnight),
+                        Conversation(id='first-instant', customer_id='bob', created_at=first_midnight),
+                        Conversation(id='just-before', customer_id='bob', created_at=first_midnight - timedelta(seconds=1))])
+            db.commit()
+        result = self.client.get('/api/v1/workspace/summary?days=7').json()
+        daily = result['period']['daily']
+        self.assertEqual(result['timezone'], 'Asia/Ho_Chi_Minh')
+        self.assertEqual(daily[-1], {'date': today.isoformat(), 'count': 2})  # setUp's chat (now) + local-midnight
+        self.assertEqual(daily[0], {'date': (today - timedelta(days=6)).isoformat(), 'count': 1})
+        self.assertEqual(result['period']['conversations'], 3)
+        self.assertEqual(datetime.fromisoformat(result['start']).astimezone(local).date(), today - timedelta(days=6))
+
     def test_empty_metrics_do_not_invent_percentages(self):
         self.login()
         period = self.client.get('/api/v1/workspace/summary').json()['period']
