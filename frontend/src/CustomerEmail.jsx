@@ -30,7 +30,7 @@ export function EmailVerification({ account, request, onExpired }) {
     {notice && <p role="status">{notice}</p>}{error && <p role="alert" className="widgetError">{error}</p>}</div></div>;
 }
 
-export default function CustomerEmail({ action, request, onBack, onComplete }) {
+export default function CustomerEmail({ action, request, onBack, onComplete, onLogout }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [resendBusy, setResendBusy] = useState(false);
   const [configured, setConfigured] = useState(null);
@@ -60,7 +60,7 @@ export default function CustomerEmail({ action, request, onBack, onComplete }) {
     catch (e) { setError(e.message); }
     finally { setResendBusy(false); }
   }
-  return <AuthLayout><h1>{mode === 'forgot' ? 'Quên mật khẩu?' : mode === 'verify' ? 'Xác minh email của bạn' : mode === 'register-code' ? 'Xác minh email đăng ký' : 'Đặt lại mật khẩu'}</h1><p className="authLead">{mode === 'forgot' ? 'Nhập email đã xác minh để nhận liên kết đặt lại mật khẩu.' : mode === 'verify' ? 'Nhập mật khẩu của tài khoản đã yêu cầu xác minh để xác nhận quyền sở hữu email.' : 'Chọn mật khẩu mới. Mọi phiên đăng nhập cũ sẽ hết hiệu lực sau khi đổi.'}</p>
+  return <AuthLayout><h1>{mode === 'forgot' ? 'Quên mật khẩu?' : mode === 'verify' ? 'Xác minh email của bạn' : mode === 'register-code' ? 'Xác minh email đăng ký' : 'Đặt lại mật khẩu'}</h1><p className="authLead">{mode === 'forgot' ? 'Nhập email đã xác minh để nhận liên kết đặt lại mật khẩu.' : mode === 'verify' ? 'Nhập mật khẩu của tài khoản đã yêu cầu xác minh để xác nhận quyền sở hữu email.' : mode === 'register-code' ? 'Nhập mã 6 số đã gửi tới email đăng ký. Bạn chỉ trò chuyện được sau khi xác minh.' : 'Chọn mật khẩu mới. Mọi phiên đăng nhập cũ sẽ hết hiệu lực sau khi đổi.'}</p>
     <form onSubmit={submit} aria-busy={busy}><fieldset disabled={busy}>
       {mode === 'register-code' ? <AuthInput label="Mã xác minh 6 số" name="code" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required autoComplete="one-time-code" placeholder="Nhập mã 6 số" /> : mode === 'forgot' ? <AuthInput label="Email" name="email" type="email" required maxLength={254} autoComplete="email" placeholder="Email đã xác minh của bạn" /> : mode === 'verify' ? <AuthInput label="Mật khẩu hiện tại" name="password" type="password" required maxLength={128} autoComplete="current-password" /> : <><AuthInput label="Mật khẩu mới" name="new_password" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" placeholder="Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt" /><AuthInput label="Nhập lại mật khẩu mới" name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" /></>}
       <button className="authSubmit" disabled={busy || mode === 'forgot' && !configured}><ArrowRight size={18} />{busy ? 'Đang xử lý...' : mode === 'forgot' ? 'Gửi liên kết khôi phục' : mode === 'verify' ? 'Xác minh email' : mode === 'register-code' ? 'Xác minh email' : 'Lưu mật khẩu mới'}</button>
@@ -68,7 +68,7 @@ export default function CustomerEmail({ action, request, onBack, onComplete }) {
     {mode === 'register-code' && <><p className="authFeedback" role="status">Mã xác minh có hạn 15 phút và chỉ dùng một lần.</p><button className="authBack" type="button" onClick={resendRegistrationCode} disabled={busy || resendBusy}>{resendBusy ? 'Đang gửi lại...' : 'Gửi lại mã xác minh'}</button></>}
     {mode === 'forgot' && configured === false && <p className="authFeedback" role="status">Chức năng gửi email chưa sẵn sàng. Vui lòng liên hệ cửa hàng hoặc thử lại sau.</p>}
     {error && <p className="authFeedback" role="alert">{error}</p>}{notice && <p className="authFeedback" role="status">{notice}</p>}
-    {mode !== 'register-code' ? <button className="authBack" type="button" onClick={onBack} disabled={busy}><ArrowLeft size={15} />Quay lại</button> : <p className="authFeedback" role="status">Bạn cần nhập đúng mã xác minh để hoàn tất đăng ký tài khoản.</p>}
+    {mode !== 'register-code' ? <button className="authBack" type="button" onClick={onBack} disabled={busy}><ArrowLeft size={15} />Quay lại</button> : <><p className="authFeedback" role="status">Bạn cần nhập đúng mã xác minh để hoàn tất đăng ký tài khoản.</p>{onLogout && <button className="authBack" type="button" onClick={onLogout} disabled={busy}><ArrowLeft size={15} />Dùng tài khoản khác</button>}</>}
     <div className="authNote"><Mail size={22} /><div>{mode === 'forgot' ? 'Kiểm tra cả thư rác' : 'Liên kết chỉ dùng một lần'}<small>{mode === 'forgot' ? 'Email chưa xác minh không nhận được thư khôi phục. Nếu còn nhớ mật khẩu, đăng nhập và xác minh trong mục Tài khoản.' : mode === 'verify' ? 'Liên kết có hạn 60 phút. Không yêu cầu xác minh hoặc không biết mật khẩu? Hãy đóng trang này.' : 'Liên kết có hạn 15 phút. Nếu hết hạn, quay lại Đăng nhập và chọn Quên mật khẩu để yêu cầu thư mới.'}</small></div></div>
   </AuthLayout>;
 }

@@ -43,11 +43,45 @@ class CustomerAuthTests(unittest.TestCase):
         self.addCleanup(self.client.close)
         self.addCleanup(self.other.close)
 
-    def register(self, client=None, email='customer@example.com'):
+    def register(self, client=None, email='customer@example.com', verified=False):
         response = (client or self.client).post(ACCOUNT + '/register', json={
             'email': email, 'password': PASSWORD, 'display_name': 'Khách thử'})
         self.assertEqual(response.status_code, 201, response.text)
+        if verified:
+            # Stands in for entering the emailed code; the code flow itself is tested separately.
+            with Session(self.engine) as db:
+                db.query(CustomerAccount).filter_by(email=email).update({'email_verified': True})
+                db.commit()
         return response.json()
+
+    def test_unverified_account_cannot_chat_until_code_is_entered(self):
+        self.register(verified=False)
+        blocked = [
+            self.client.post(COOKIE_PATH + '/messages', json={'content': 'Phí giao hàng?', 'client_message_id': str(uuid4())}),
+            self.client.post(COOKIE_PATH + '/handoff', json={'client_message_id': str(uuid4())}),
+            self.client.delete(COOKIE_PATH + '/session'),
+            self.client.get(COOKIE_PATH + '/orders/DH12345'),
+            self.client.post(COOKIE_PATH + '/order-access', json={'order_id': 'DH12345', 'code': 'x' * 43}),
+            self.client.get(ACCOUNT + '/conversations'),
+        ]
+        for response in blocked:
+            self.assertEqual(response.status_code, 403, response.text)
+            self.assertIn('mã xác minh', response.json()['detail'])
+        self.assertEqual(self.client.post(ACCOUNT + '/logout').status_code, 200)
+        login = self.login()
+        self.assertEqual(login.status_code, 200)
+        self.assertFalse(login.json()['account']['email_verified'])
+        session = self.client.get(COOKIE_PATH + '/session')
+        self.assertEqual(session.status_code, 200)
+        with Session(self.engine) as db:
+            self.assertEqual(db.query(Message).count(), 0)
+            account_id = db.query(CustomerAccount).one().id
+            db.add(CustomerEmailToken(token_hash=token_hash('246810'), account_id=account_id, purpose='register',
+                                      created_at=int(time.time()), expires_at=int(time.time()) + 900))
+            db.commit()
+        self.assertEqual(self.client.post(ACCOUNT + '/verify-registration', json={'code': '246810'}).status_code, 200)
+        sent = self.client.post(COOKIE_PATH + '/messages', json={'content': 'xin chào', 'client_message_id': str(uuid4())})
+        self.assertEqual(sent.status_code, 200, sent.text)
 
     def login(self, client=None, email='customer@example.com', password=PASSWORD):
         return (client or self.client).post(ACCOUNT + '/login', json={'email': email, 'password': password})
@@ -164,7 +198,7 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertEqual(self.client.get(ACCOUNT + '/conversations').status_code, 401)
 
     def test_history_survives_new_chat_and_is_private(self):
-        first = self.register()
+        first = self.register(verified=True)
         self.other.post(COOKIE_PATH + '/session', json={'display_name': 'Guest'})
         self.assertEqual(self.other.get(ACCOUNT + '/conversations').status_code, 401)
         own = first['conversation_id']
@@ -183,7 +217,7 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertTrue(history['message_page']['has_more'])
         before = history['message_page']['next_before']
         self.assertEqual(len(self.client.get(ACCOUNT + f'/conversations/{own}?before={before}').json()['messages']), 1)
-        self.register(self.other, 'other@example.com')
+        self.register(self.other, 'other@example.com', verified=True)
         self.assertEqual(self.other.get(ACCOUNT + f'/conversations/{own}').status_code, 404)
         self.assertEqual(self.other.get(ACCOUNT + '/conversations').json()['total'], 1)
         self.assertEqual(self.client.post(ACCOUNT + '/logout').status_code, 200)
@@ -219,7 +253,7 @@ class CustomerAuthTests(unittest.TestCase):
             db.flush()
             db.add(Order(id='DH12345', customer_id='owner', status='shipped', tracking_code='PRIVATE'))
             db.commit()
-        account = self.register()
+        account = self.register(verified=True)
         self.assertEqual(self.client.get(COOKIE_PATH + '/orders/DH12345').status_code, 404)
         with Session(self.engine) as db:
             self.assertNotEqual(db.query(CustomerAccount).one().customer_id, 'owner')

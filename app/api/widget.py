@@ -91,10 +91,21 @@ def find_session(request, db):
     return session if session and session.expires_at > int(time.time()) else None
 
 
+UNVERIFIED = 'Bạn cần nhập mã xác minh gửi qua email để hoàn tất đăng ký trước khi trò chuyện.'
+
+
 def require_session(request: Request, db: Session = Depends(get_db)):
     session = find_session(request, db)
     if session is None:
         raise HTTPException(401, 'Phiên trò chuyện đã hết hạn. Vui lòng bắt đầu phiên mới.')
+    return session
+
+
+def require_chat_session(request: Request, db: Session = Depends(get_db)):
+    """A customer account may chat only after its email code is verified; until then it can only finish registration."""
+    session = require_session(request, db)
+    if isinstance(session, CustomerSession) and not db.query(CustomerAccount.email_verified).filter_by(id=session.account_id).scalar():
+        raise HTTPException(403, UNVERIFIED)
     return session
 
 
@@ -158,7 +169,7 @@ def get_session(session: WidgetSession = Depends(require_session), db: Session =
 
 @router.post('/order-access')
 def redeem_order_access(payload: RedeemOrderAccess, request: Request,
-                        session: WidgetSession = Depends(require_session), db: Session = Depends(get_db)):
+                        session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
     rate_limit(request, 'order-access', 6)
     conversation_id = session.conversation_id
     db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
@@ -184,7 +195,7 @@ def redeem_order_access(payload: RedeemOrderAccess, request: Request,
 
 @router.get('/orders/{order_id}')
 def get_authorized_order(order_id: str, request: Request,
-                         session: WidgetSession = Depends(require_session), db: Session = Depends(get_db)):
+                         session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
     rate_limit(request, 'order-read', 30)
     if len(order_id) > 64 or not active_order_access(db, session.conversation_id).filter(
             OrderAccess.order_id == order_id).first():
@@ -193,7 +204,7 @@ def get_authorized_order(order_id: str, request: Request,
     return {'order_id': order.id, 'status': order.status, 'tracking_code': order.tracking_code}
 
 @router.post('/messages')
-def send_message(payload: WidgetMessage, request: Request, session: WidgetSession = Depends(require_session), db: Session = Depends(get_db)):
+def send_message(payload: WidgetMessage, request: Request, session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
     rate_limit(request, 'message', 10)
     conversation = db.get(Conversation, session.conversation_id)
     needs_slot = conversation.status == 'open' and not classify_message(payload.content)[1] and simple_reply(payload.content) is None
@@ -212,7 +223,7 @@ def send_message(payload: WidgetMessage, request: Request, session: WidgetSessio
 
 
 @router.post('/handoff')
-def request_handoff(payload: WidgetAction, request: Request, session: WidgetSession = Depends(require_session), db: Session = Depends(get_db)):
+def request_handoff(payload: WidgetAction, request: Request, session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
     rate_limit(request, 'handoff', 6)
     process_message(db, db.get(Conversation, session.conversation_id), 'Tôi cần gặp nhân viên.', str(payload.client_message_id))
     db.expunge_all()
@@ -220,7 +231,7 @@ def request_handoff(payload: WidgetAction, request: Request, session: WidgetSess
 
 
 @router.delete('/session')
-def end_session(response: Response, session: WidgetSession = Depends(require_session), db: Session = Depends(get_db)):
+def end_session(response: Response, session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
     db.execute(update(Conversation).where(Conversation.id == session.conversation_id).values(status='closed'))
     complete_tickets(db, session.conversation_id, 'closed')
     if isinstance(session, CustomerSession):

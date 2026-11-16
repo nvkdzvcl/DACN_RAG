@@ -13,7 +13,7 @@ from sqlalchemy import delete, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.widget import (COOKIE, COOKIE_PATH, SESSION_SECONDS, check_csrf, find_session,
+from app.api.widget import (COOKIE, COOKIE_PATH, SESSION_SECONDS, check_csrf, find_session, require_chat_session,
                             no_cache, rate_limit, require_session, snapshot)
 from app.core.auth import hash_password, token_hash, verify_password
 from app.db.session import get_db
@@ -80,6 +80,9 @@ def require_account(session=Depends(require_session)):
     if not isinstance(session, CustomerSession):
         raise HTTPException(401, 'Vui lòng đăng nhập tài khoản khách hàng.')
     return session
+
+def require_verified_account(session=Depends(require_chat_session)):
+    return require_account(session)
 
 def issue_session(db, request, response, account):
     previous = find_session(request, db)
@@ -170,7 +173,7 @@ def change_password(payload: ChangePassword, request: Request, response: Respons
     return {'status': 'password_changed'}
 
 @router.get('/conversations')
-def conversations(session=Depends(require_account), db: Session = Depends(get_db),
+def conversations(session=Depends(require_verified_account), db: Session = Depends(get_db),
                   offset: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=1, le=50)] = 20):
     account = db.get(CustomerAccount, session.account_id)
     query = db.query(Conversation).filter_by(customer_id=account.customer_id, channel='website')
@@ -180,7 +183,7 @@ def conversations(session=Depends(require_account), db: Session = Depends(get_db
             'items': [{'id': row.id, 'created_at': row.created_at, 'status': row.status} for row in rows]}
 
 @router.get('/conversations/{conversation_id}')
-def conversation_history(conversation_id: str, session=Depends(require_account), db: Session = Depends(get_db),
+def conversation_history(conversation_id: str, session=Depends(require_verified_account), db: Session = Depends(get_db),
                          before: Annotated[str | None, Query(min_length=1, max_length=64)] = None,
                          limit: Annotated[int, Query(ge=1, le=100)] = 50):
     account = db.get(CustomerAccount, session.account_id)
@@ -275,7 +278,8 @@ def verify_registration(payload: RegistrationCode, request: Request,
         CustomerEmailToken.expires_at > now,
     ).order_by(CustomerEmailToken.created_at.desc()).first()
     if not challenge:
-        raise HTTPException(400, 'Mã xác minh không đúng hoặc đã hết hạn.')
+        # Also reached after the code was burned, so every later attempt explains why the code no longer works.
+        raise HTTPException(400, 'Mã xác minh đã hết hạn hoặc đã bị hủy. Vui lòng bấm Gửi lại mã xác minh để nhận mã mới.')
     if challenge.token_hash != token_hash(payload.code):
         if code_failure(challenge.token_hash, challenge.expires_at) >= MAX_CODE_ATTEMPTS:
             # A 6-digit code is guessable across IPs; burn it so a new code must come from the mailbox.
