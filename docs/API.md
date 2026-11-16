@@ -46,7 +46,7 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 | Tài khoản khách | POST   | `/api/v1/widget/account/login`                           | Đăng nhập tài khoản khách                | Công khai + CSRF                   | UC15        |
 | Tài khoản khách | POST   | `/api/v1/widget/account/logout`                          | Đăng xuất tài khoản khách                | Phiên tài khoản khách + CSRF       | UC15        |
 | Tài khoản khách | POST   | `/api/v1/widget/account/password`                        | Đổi mật khẩu tài khoản khách             | Phiên tài khoản khách + CSRF       | UC15        |
-| Tài khoản khách | GET    | `/api/v1/widget/account/conversations`                   | Xem danh sách hội thoại của khách        | Phiên tài khoản khách              | UC15        |
+| Tài khoản khách | GET    | `/api/v1/widget/account/conversations`                   | Xem danh sách hội thoại của khách; lọc `status`, tìm `q` trong tin nhắn; mỗi mục có `preview` là câu hỏi đầu tiên | Phiên tài khoản khách              | UC15        |
 | Tài khoản khách | GET    | `/api/v1/widget/account/conversations/{conversation_id}` | Xem chi tiết/lịch sử hội thoại của khách | Phiên tài khoản khách              | UC15        |
 | Tài khoản khách | GET    | `/api/v1/widget/account/email-status`                    | Kiểm tra trạng thái xác thực email       | Phiên tài khoản khách              | UC15        |
 | Tài khoản khách | POST   | `/api/v1/widget/account/verification-request`            | Yêu cầu gửi email xác thực               | Phiên tài khoản khách + CSRF       | UC15        |

@@ -224,6 +224,33 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertEqual(self.login().status_code, 200)
         self.assertEqual(self.client.get(ACCOUNT + '/conversations').json()['total'], 2)
 
+    def test_history_filters_by_status_and_search_with_first_question_preview(self):
+        first = self.register(verified=True)
+        own = first['conversation_id']
+        with Session(self.engine) as db:
+            customer_id = db.get(Conversation, own).customer_id
+            db.add(Conversation(id='done', customer_id=customer_id, channel='website', status='resolved'))
+            db.add(Conversation(id='other-channel', customer_id=customer_id, channel='telegram', status='resolved'))
+            db.flush()
+            db.add_all([Message(id=str(uuid4()), conversation_id=own, sender_type='customer', content='Phí giao hàng bao nhiêu?'),
+                        Message(id=str(uuid4()), conversation_id='done', sender_type='customer', content='Bảo hành pin laptop thế nào?'),
+                        Message(id=str(uuid4()), conversation_id='done', sender_type='agent', content='Đã kiểm tra BẢO HÀNH 100% cho bạn'),
+                        Message(id=str(uuid4()), conversation_id='other-channel', sender_type='customer', content='bảo hành telegram')])
+            db.commit()
+        everything = self.client.get(ACCOUNT + '/conversations').json()
+        self.assertEqual(everything['total'], 2)
+        self.assertEqual({item['id']: item['preview'] for item in everything['items']},
+                         {own: 'Phí giao hàng bao nhiêu?', 'done': 'Bảo hành pin laptop thế nào?'})
+        resolved = self.client.get(ACCOUNT + '/conversations?status=resolved').json()
+        self.assertEqual([item['id'] for item in resolved['items']], ['done'])
+        self.assertEqual(self.client.get(ACCOUNT + '/conversations?q=PIN laptop').json()['total'], 1)
+        self.assertEqual(self.client.get(ACCOUNT + '/conversations?q=100%').json()['total'], 1)
+        self.assertEqual(self.client.get(ACCOUNT + '/conversations?q=telegram').json()['total'], 0)
+        self.assertEqual(self.client.get(ACCOUNT + '/conversations?q=%25%25').json()['total'], 0)
+        self.assertEqual(self.client.get(ACCOUNT + '/conversations?status=deleted').status_code, 422)
+        self.register(self.other, 'other@example.com', verified=True)
+        self.assertEqual(self.other.get(ACCOUNT + '/conversations?q=laptop').json()['total'], 0)
+
     def test_inflight_login_cannot_bypass_password_change(self):
         self.register()
         entered, release = Event(), Event()
