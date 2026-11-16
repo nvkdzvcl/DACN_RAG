@@ -106,7 +106,9 @@ export default function Widget() {
     const controller = new AbortController();
     const version = ++sequence.current;
     setLoading(true);
-    request('/session', { signal: controller.signal }).then(data => { if (!controller.signal.aborted) { apply(data, version); setAuthMode('guest'); } })
+    request('/session', { signal: controller.signal }).then(data => { if (!controller.signal.aborted) { apply(data, version); setAuthMode('guest');
+      // An account that has not entered its email code cannot chat; reloading must return to the code screen.
+      if (data.account && !data.account.email_verified) setEmailAction(current => current || { mode: 'register-code' }); } })
       .catch(error => { if (!controller.signal.aborted && error.status !== 401) fail(error, version); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -207,6 +209,7 @@ export default function Widget() {
     ++sequence.current; setSession(null); setMessageCursors([]); setView('messages');
     setOrderResult(null); setOrderId(''); setOrderError(''); setConnectionError(''); setNotice(message);
     handoffId.current = null; setAuthMode(embedded ? 'guest' : 'login');
+    setEmailAction(current => current?.mode === 'register-code' ? null : current);
   }
   function openAuth(mode) { setAuthMode(mode); setView('messages'); setError(''); }
   async function authenticate(event) {
@@ -218,9 +221,10 @@ export default function Widget() {
         email: fields.get('email').trim(), password: fields.get('password'),
         ...(authMode === 'register' && { display_name: fields.get('display_name').trim() })
       }) });
-      const pendingRegistration = authMode === 'register' && data.registration_email_pending;
-      apply(data, version); if (!pendingRegistration) setAuthMode('guest'); setNotice(data.account?.email_verified ? '' : authMode === 'register' ? '' : 'Đăng nhập thành công. Mở Tài khoản để xác minh email và bật khôi phục mật khẩu.'); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
-      if (authMode === 'register' && data.registration_email_pending) {
+      // Registration and login of an unverified account both continue to the email code; chat stays locked until then.
+      const unverified = Boolean(data.account && !data.account.email_verified);
+      apply(data, version); if (!unverified) setAuthMode('guest'); setNotice(''); setMessageCursors([]); setOrderResult(null); setOrderId(''); setConnectionError('');
+      if (unverified) {
         try {
           await request('/account/registration-verification-request', { method: 'POST' });
           setEmailAction({ mode: 'register-code' });
@@ -354,7 +358,7 @@ export default function Widget() {
       </footer>
     </>}
   </section>;
-  if (emailAction) return <CustomerEmail key={emailAction.mode + (emailAction.token || '')} action={emailAction} request={request} onBack={() => setEmailAction(null)} onComplete={emailComplete} />;
+  if (emailAction) return <CustomerEmail key={emailAction.mode + (emailAction.token || '')} action={emailAction} request={request} onBack={() => setEmailAction(null)} onComplete={emailComplete} onLogout={logout} />;
   if (embedded) return chat;
   if (!loading && (!session || authMode !== 'guest')) return <AuthLayout>
     <h1>{authMode === 'register' ? 'Tạo tài khoản của bạn' : authMode === 'login' ? 'Chào mừng trở lại!' : 'Bạn cần hỗ trợ điều gì?'}</h1>
