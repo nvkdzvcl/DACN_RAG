@@ -403,3 +403,20 @@ body:has(.shell[data-theme=dark]){background:#111827}
 .shell[data-theme=dark] :is(.filters label,.slaFilter,.mobileNav button){color:#a3b1c6}
 /* Audit group 3 (mobile): fade the right edge of the scrolling staff menu so cut-off items read as "more this way". */
 @media(max-width:760px){.shell .mobileNav{padding-right:36px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}}
+/* K7: message paging looks like the other buttons instead of 10px gray text. */
+.shell .messagePagination span{font-size:11px}
+.shell .messagePagination button{padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:#475569;font-size:11px;cursor:pointer}
+.shell .messagePagination button:disabled{opacity:.45;cursor:default}
+.shell[data-theme=dark] .messagePagination button{background:#202c3d;color:#cecaed;border-color:#3c4a60}
+/* K9: customer/order search is one bordered field like the inbox and knowledge base searches. */
+.shell .recordFilters .search{align-items:center;gap:8px;width:min(100%,420px);padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#606f85}
+.shell .recordFilters .search input{flex:1;min-width:0;min-height:40px;padding:0;border:0;background:transparent;font-size:13px}
+.shell .recordFilters .search:focus-within{border-color:#8f80f4;box-shadow:0 0 0 3px #604cf31a}
+.shell[data-theme=dark] .recordFilters .search{background:#111b2b;border-color:#3c4a60}
+/* K12: destructive action. */
+.knowledge .documentActions button.danger{color:#b42318;border-color:#f1b0a9}
+.knowledge .documentActions button.danger:hover:not(:disabled){background:#fff5f4}
+.shell[data-theme=dark] .knowledge .documentActions button.danger{color:#ffb4a8;border-color:#865453}
+
+/* The theme toggle scrolls with the phone menu instead of sticking over the items next to it. */
+.shell .mobileNav .themeToggle{position:static}

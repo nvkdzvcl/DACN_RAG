@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Search, Plus, RefreshCw, X, MessagesSquare, UsersRound, ShoppingBag, BookOpen, TicketCheck, MessageCircle } from 'lucide-react';
 import './workspace.css';
+import PasswordRules from './PasswordRules';
 import { channelNames, conversationStatuses, formatDate, formatDateTime, formatDay, formatMinutes, shortId } from './shared';
 
 const orderLabels = { processing: 'Đang xử lý', paid: 'Đã thanh toán', shipping: 'Đang giao', shipped: 'Đã gửi hàng', delivered: 'Đã giao', cancelled: 'Đã hủy' };
@@ -165,6 +166,9 @@ function Records({ kind, request, onExpired, user, openInbox, openOrders, route,
 
 function PasswordForm({ request, onExpired }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const [current, setCurrent] = useState(''), [next, setNext] = useState('');
+  // Same checks as POST /workspace/password.
+  const rules = [['Từ 12 đến 128 ký tự', value => value.length >= 12 && value.length <= 128], ['Khác mật khẩu hiện tại', value => value.length > 0 && value !== current]];
   async function submit(event) {
     event.preventDefault();
     const { current_password, new_password, confirm } = fieldsOf(event);
@@ -174,7 +178,7 @@ function PasswordForm({ request, onExpired }) {
     catch (e) { setError(e.message); if (e.status === 401) onExpired(); }
     finally { setBusy(false); }
   }
-  return <form className="recordForm" onSubmit={submit}><fieldset disabled={busy}><label>Mật khẩu hiện tại<input type="password" name="current_password" autoComplete="current-password" required maxLength={128} /></label><label>Mật khẩu mới<input type="password" name="new_password" autoComplete="new-password" required minLength={12} maxLength={128} /></label><label>Nhập lại mật khẩu mới<input type="password" name="confirm" autoComplete="new-password" required minLength={12} maxLength={128} /></label><small>12–128 ký tự. Đổi thành công sẽ đăng xuất mọi phiên của tài khoản này.</small>{error && <p className="workspaceError" role="alert">{error}</p>}<button className="primary">{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form>;
+  return <form className="recordForm" onSubmit={submit}><fieldset disabled={busy}><label>Mật khẩu hiện tại<input type="password" name="current_password" autoComplete="current-password" required maxLength={128} onChange={event => setCurrent(event.target.value)} /></label><label>Mật khẩu mới<input type="password" name="new_password" autoComplete="new-password" required minLength={12} maxLength={128} onChange={event => setNext(event.target.value)} /></label><PasswordRules value={next} rules={rules} /><label>Nhập lại mật khẩu mới<input type="password" name="confirm" autoComplete="new-password" required minLength={12} maxLength={128} /></label><small>Đổi thành công sẽ đăng xuất mọi phiên của tài khoản này.</small>{error && <p className="workspaceError" role="alert">{error}</p>}<button className="primary">{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form>;
 }
 
 function StaffAccounts({ request, onExpired }) {

@@ -81,7 +81,7 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 
 | Nhóm API     | Method | Đường dẫn (Path)                                    | Chức năng                                          | Quyền truy cập | Mã Use Case |
 | ------------ | ------ | --------------------------------------------------- | -------------------------------------------------- | -------------- | ----------- |
-| Kho tri thức | GET    | `/api/v1/documents`                                 | Liệt kê tài liệu và trạng thái lập chỉ mục         | Nhân viên      | UC05        |
+| Kho tri thức | GET    | `/api/v1/documents`                                 | Liệt kê tài liệu và trạng thái lập chỉ mục; `title` là dòng tiêu đề `#` đầu tài liệu (null nếu không có) | Nhân viên      | UC05        |
 | Kho tri thức | GET    | `/api/v1/documents/runtime`                         | Kiểm tra trạng thái runtime/mô hình xử lý tài liệu | Nhân viên      | UC05        |
 | Kho tri thức | POST   | `/api/v1/documents/upload`                          | Tải tài liệu lên kho tri thức                      | Admin          | UC05        |
 | Kho tri thức | POST   | `/api/v1/documents/{document_id}/reindex`           | Lập chỉ mục lại tài liệu                           | Admin          | UC05        |

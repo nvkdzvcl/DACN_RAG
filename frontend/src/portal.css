@@ -127,8 +127,12 @@
 .portalOrderHelp { align-self: start; margin-top: 20px; padding: 22px; border: 1px solid #e0e5f1; border-radius: 13px; background: #fff; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
 .portalOrderHelp h2 { margin: 0 0 14px; font-size: 16px; }
 .portalOrderHelp ol { margin: 0; padding-left: 20px; color: #5c6984; font-size: 12px; line-height: 1.8; }
-.portalSearchFake { display: flex; align-items: center; gap: 9px; width: 100%; max-width: 900px; cursor: pointer; text-align: left; font: inherit; margin-top: 20px; padding: 12px 14px; border: 1px solid #d8e0f0; border-radius: 9px; background: #fff; color: #6a758a; font-size: 13px; }
-.portalSearchFake:hover { border-color: #bcb0ff; }
+.portalSearch { display: flex; align-items: center; gap: 9px; width: 100%; max-width: 900px; box-sizing: border-box; margin-top: 20px; padding: 5px 5px 5px 14px; border: 1px solid #d8e0f0; border-radius: 9px; background: #fff; color: #6a758a; }
+.portalSearch input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: #263655; padding: 8px 0; }
+.portalSearch input::placeholder { color: #6a758a; }
+.portalSearch button { flex: none; border: 0; border-radius: 7px; padding: 9px 14px; background: #604cf3; color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.portalSearch:focus-within { border-color: #8f80f4; box-shadow: 0 0 0 3px #6753ee1a; }
+.portalSearch:hover { border-color: #bcb0ff; }
 .portalPolicyGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 900px; margin-top: 12px; }
 .portalPolicyGrid button { min-height: 78px; padding: 14px; border: 1px solid #e0e5f1; border-radius: 12px; background: #fff; color: #263655; text-align: left; box-shadow: 0 6px 18px rgba(31, 42, 79, .04); }
 .portalPolicyGrid button:hover { border-color: #bcb0ff; background: #f8f7ff; }
@@ -157,9 +161,9 @@
 [data-theme=dark] .historyFilters label { color:#d4deed; }
 [data-theme=dark] .historyFilters :is(input,select) { background:#202c3d; border-color:#475569; color:#e2e8f0; }
 /* Dark theme for portal surfaces that were left white: order help, FAQ search and cards, history, profile. */
-[data-theme=dark] :is(.portalOrderHelp,.portalSearchFake,.portalPolicyGrid button,.accountHistoryDetail,.accountHistoryList button,.profileCard) { background:#202c3d; color:#e2e8f0; border-color:#475569; box-shadow:none; }
+[data-theme=dark] :is(.portalOrderHelp,.portalSearch,.portalPolicyGrid button,.accountHistoryDetail,.accountHistoryList button,.profileCard) { background:#202c3d; color:#e2e8f0; border-color:#475569; box-shadow:none; }
 [data-theme=dark] :is(.portalOrderHelp h2,.accountHistoryDetail h2,.profileCard h2,.profilePassword h2,.portalPolicyGrid strong,.accountHistoryList b) { color:#f1f5f9; }
-[data-theme=dark] :is(.portalOrderHelp li,.portalSearchFake span,.portalPolicyGrid small,.accountHistoryList span,.accountHistoryList small,.accountHistoryDetail>p,.profileCard p) { color:#b7c9e2; }
+[data-theme=dark] :is(.portalOrderHelp li,.portalSearch input::placeholder,.portalPolicyGrid small,.accountHistoryList span,.accountHistoryList small,.accountHistoryDetail>p,.profileCard p) { color:#b7c9e2; }
 [data-theme=dark] :is(.portalPolicyGrid button:hover,.accountHistoryList button:hover) { background:#27354a; border-color:#8f80f4; }
 [data-theme=dark] .accountHistoryList button[aria-pressed=true] { background:#302b4a; border-color:#8f80f4; }
 [data-theme=dark] .accountPager button { background:#202c3d; color:#d4caff; border-color:#475569; }
@@ -169,3 +173,11 @@
 [data-theme=dark] .profileStatus.verified { background:#164c3c; color:#8df0c1; }
 [data-theme=dark] .profileLogout { background:#202c3d; color:#ffb4a8; border-color:#6b4a4a; }
 [data-theme=dark] .profileLogout:hover { background:#3a2529; border-color:#a8605a; }
+[data-theme=dark] .portalSearch input { color:#e2e8f0; }
+/* K6: on desktop the sidebar already has Đăng xuất; the page button is for phones, where the sidebar is hidden. */
+@media(min-width:701px) { .customerProfile .profileLogout { display:none; } }
+/* K6: the email gets the full row; the verification badge sits under it instead of squeezing it into four lines. */
+.profileCard { flex-wrap:wrap; align-items:flex-start; align-content:flex-start; align-self:start; row-gap:10px; }
+.profileCard > div:nth-child(2) { flex:1 1 calc(100% - 70px); min-width:0; }
+.profileCard h2 { font-size:15px; }
+.profileCard .profileStatus { margin-left:66px; }

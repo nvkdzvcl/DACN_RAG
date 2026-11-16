@@ -98,6 +98,12 @@ class RagTests(unittest.TestCase):
         self.assertEqual(self.client.get(f'/api/v1/documents/{document_id}/chunks').status_code, 404)
         self.assertEqual(self.store._client().count(self.store.collection()).count, 0)
 
+    def test_document_list_uses_leading_markdown_heading_as_title(self):
+        self.upload('# Chính sách giao hàng (bản thử)\nGiao trong 2 ngày.'.encode(), 'giao-hang.md')
+        self.upload(b'Returns accepted within 7 days.', 'policy.txt')
+        titles = {d['filename']: d['title'] for d in self.client.get('/api/v1/documents').json()['documents']}
+        self.assertEqual(titles, {'giao-hang.md': 'Chính sách giao hàng (bản thử)', 'policy.txt': None})
+
     def test_failed_embedding_can_retry_and_non_admin_cannot_mutate(self):
         with patch('app.services.document_service.embed', side_effect=ProviderError('Ollama offline')):
             result = self.client.post('/api/v1/documents/upload', files={'file': ('policy.txt', b'Policy text for recovery.')})
