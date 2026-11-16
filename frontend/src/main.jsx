@@ -136,7 +136,7 @@ function SessionGate() {
   if (loading) return <p className="state" role="status">Đang kiểm tra phiên đăng nhập...</p>;
   if (user) return <App user={user} onExpired={(message = '') => { setUser(null); setError(message); }} onLogout={logout} logoutBusy={busy} sessionError={error} />;
   return <AuthLayout staff><h1>Chào mừng trở lại!</h1><p className="authLead">Đăng nhập để tiếp tục sử dụng nền tảng AI hỗ trợ khách hàng.</p>
-    <form onSubmit={login} aria-busy={busy}><fieldset disabled={busy}><AuthInput label="Tên đăng nhập" name="username" autoComplete="username" required maxLength={64} pattern="[a-zA-Z0-9_.-]+" placeholder="Nhập tên đăng nhập nhân viên" /><AuthInput label="Mật khẩu" name="password" type="password" autoComplete="current-password" required maxLength={128} placeholder="Nhập mật khẩu" />
+    <form onSubmit={login} aria-busy={busy}><fieldset disabled={busy}><AuthInput label="Tên đăng nhập" name="username" autoComplete="username" required maxLength={64} pattern="[a-zA-Z0-9_.\-]+" placeholder="Nhập tên đăng nhập nhân viên" /><AuthInput label="Mật khẩu" name="password" type="password" autoComplete="current-password" required maxLength={128} placeholder="Nhập mật khẩu" />
       {error && <p className="authFeedback" role="alert">{error}</p>}<button className="authSubmit">{busy ? 'Đang đăng nhập...' : 'Đăng nhập'}</button></fieldset></form>
     <details className="authHelp"><summary>Quên mật khẩu?</summary><p>Liên hệ quản trị viên để được đặt lại mật khẩu tài khoản nhân viên.</p></details>
     <div className="authNote"><UserRound size={22} /><div>Chưa có tài khoản?<small>Liên hệ quản trị viên để được cấp quyền truy cập.</small></div></div>
