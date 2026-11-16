@@ -3,13 +3,11 @@ import { RichText, plainText } from './RichText';
 import { UserRound } from 'lucide-react';
 import { EmailVerification } from './CustomerEmail';
 import PasswordRules from './PasswordRules';
+import { conversationStatuses, formatDateTime } from './shared';
 
-const labels = { open: 'AI hỗ trợ', handoff_requested: 'Chờ nhân viên', assigned: 'Nhân viên hỗ trợ', resolved: 'Đã giải quyết', closed: 'Đã kết thúc' };
+const labels = conversationStatuses;
 const senderLabels = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
-function date(value) {
-  const parsed = new Date(/[zZ]$|[+-]\d{2}:\d{2}$/.test(value) ? value : value + 'Z');
-  return Number.isNaN(parsed.getTime()) ? '' : parsed.toLocaleString('vi-VN');
-}
+const date = formatDateTime;
 
 export function CustomerHistory({ request, onExpired, currentId }) {
   const [offset, setOffset] = useState(0), [list, setList] = useState(null), [selected, setSelected] = useState(null);

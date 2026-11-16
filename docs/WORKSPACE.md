@@ -18,7 +18,7 @@ Sửa khách/đơn phải gửi expected chứa giá trị cũ; UPDATE có đi�
 
 ## Cách đọc số liệu
 
-Tổng quan đếm toàn bộ dữ liệu và trạng thái hiện tại. Phần thống kê theo kỳ dùng từ 00:00 UTC của ngày đầu đến lúc gọi API, gồm ngày hiện tại. Hội thoại theo ngày/kênh dựa trên thời điểm tạo hội thoại; tin nhắn đếm riêng theo thời điểm tạo tin. Ticket thuộc kỳ dựa trên thời điểm tạo ticket, dù hội thoại bắt đầu từ trước kỳ.
+Tổng quan đếm toàn bộ dữ liệu và trạng thái hiện tại. Phần thống kê theo kỳ dùng từ 00:00 giờ Việt Nam (UTC+7) của ngày đầu đến lúc gọi API, gồm ngày hiện tại. Hội thoại theo ngày/kênh dựa trên thời điểm tạo hội thoại; tin nhắn đếm riêng theo thời điểm tạo tin. Ticket thuộc kỳ dựa trên thời điểm tạo ticket, dù hội thoại bắt đầu từ trước kỳ.
 
 Tỷ lệ đúng hạn = ticket phản hồi đúng hạn / ticket đã có phản hồi nhân viên. Ticket đang chờ trong hạn, quá hạn và kết thúc chưa phản hồi được tách riêng; không đưa vào mẫu số này. Thời gian trung bình tính từ tạo ticket đến phản hồi đầu của các ticket đã được phản hồi. Khi chưa có mẫu, API trả null, UI hiện Chưa có. Ticket đã kết thúc dùng first_response_at đã chốt; lượt hỗ trợ sau không sửa số liệu lịch sử. Chỉ số này không phải chất lượng RAG hoặc tỷ lệ giải quyết tự động.
 

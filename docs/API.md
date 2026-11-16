@@ -201,7 +201,7 @@ Tiền tố /api/v1/workspace. GET yêu cầu Staff; POST/PATCH yêu cầu CSRF.
 | GET    | /orders                  | Staff | q, status, customer_id, offset/limit; tên khách/trạng thái/vận đơn                                                                                |
 | POST   | /orders                  | Admin | id DH/ORD 6–64 ký tự, customer_id, status, tracking_code <= 100; 201, trùng 409, thiếu khách 404                                                  |
 | PATCH  | /orders/{order_id}       | Admin | status/tracking_code và expected chứa giá trị cũ; không nhận customer_id, xung đột 409                                                            |
-| GET    | /summary                 | Staff | days thuộc 7/30/90; totals toàn bộ, period theo UTC, SLA nullable khi chưa có mẫu                                                                 |
+| GET    | /summary                 | Staff | days thuộc 7/30/90; totals toàn bộ, period và daily theo ngày giờ Việt Nam (`timezone`: Asia/Ho_Chi_Minh), SLA nullable khi chưa có mẫu                                                                 |
 | GET    | /settings                | Staff | Người dùng công khai, SLA cố định và tình trạng hỗ trợ kênh; không có secrets                                                                     |
 | GET    | /users                   | Admin | offset/limit; người dùng công khai và active, không password_hash                                                                                 |
 | POST   | /password                | Staff | current_password 1–128, new_password 12–128; sai mật khẩu cũ 400, không đổi 422, tranh chấp 409; thành công thu hồi mọi phiên của chính người đổi |

@@ -14,8 +14,9 @@ import AuthLayout, { AuthInput } from './AuthLayout';
 import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
 import PasswordRules from './PasswordRules';
+import { conversationStatuses, formatDateTime } from './shared';
 
-const statuses = { open: 'Trợ lý hỗ trợ', handoff_requested: 'Đang chờ nhân viên', assigned: 'Nhân viên đã tiếp nhận', closed: 'Hội thoại đã đóng', resolved: 'Hội thoại đã giải quyết' };
+const statuses = conversationStatuses;
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
 const orderStatuses = { processing: 'Đang xử lý', paid: 'Đã thanh toán', shipping: 'Đang giao', shipped: 'Đã gửi hàng', delivered: 'Đã giao', cancelled: 'Đã hủy' };
 const suggestions = ['Hoàn tiền về thẻ đã thanh toán mất mấy ngày?', 'Khi nhận hàng cần kiểm tra những gì?', 'Bao nhiêu tiền thì được 1 điểm thành viên?', 'Thu cũ đổi mới cần chuẩn bị gì trước khi mang máy đến?'];
@@ -349,7 +350,7 @@ export default function Widget() {
         <div className="widgetFooterTools" tabIndex={0} role="region" aria-label="Thao tác hội thoại">
         {!closed && embedded && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
           <p>Nhập mã truy cập do cửa hàng cấp riêng. Không gửi mã truy cập trong tin nhắn.</p>
-          {session.order_access?.map(access => <p key={access.order_id}>Đã cấp quyền: <strong>{access.order_id}</strong> đến {new Date(access.expires_at * 1000).toLocaleTimeString('vi-VN')}.</p>)}
+          {session.order_access?.map(access => <p key={access.order_id}>Đã cấp quyền: <strong>{access.order_id}</strong> đến {formatDateTime(new Date(access.expires_at * 1000)).slice(-5)}.</p>)}
           <form onSubmit={redeem}><fieldset disabled={busy || handoffBusy || historyLoading}><label>Mã đơn<input name="order_id" required maxLength={64} autoComplete="off" /></label>
             <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} /></label>
             <button type="submit">Xác nhận quyền tra đơn</button></fieldset></form>

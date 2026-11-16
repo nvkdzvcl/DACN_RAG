@@ -193,12 +193,18 @@ def revoke_order_access(order_id: str, db: Session = Depends(get_db)):
     return {'status': 'revoked'}
 
 
+# Reports follow the shop's calendar day. Vietnam has no daylight saving, so a fixed offset is exact.
+REPORT_TZ = timezone(timedelta(hours=7), 'Asia/Ho_Chi_Minh')
+
+
 @router.get('/summary')
 def summary(days: int = Query(7), db: Session = Depends(get_db)):
     if days not in (7, 30, 90):
         raise HTTPException(422, 'Khoảng thống kê phải là 7, 30 hoặc 90 ngày.')
     now = datetime.now(timezone.utc)
-    start = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days - 1)
+    first_day = now.astimezone(REPORT_TZ).date() - timedelta(days=days - 1)
+    # Timestamps are stored in UTC, so the local midnight is converted back before filtering.
+    start = datetime.combine(first_day, datetime.min.time(), REPORT_TZ).astimezone(timezone.utc)
     chats = db.query(Conversation).filter(Conversation.created_at >= start, Conversation.created_at <= now).all()
     tickets = db.query(Ticket).filter(Ticket.created_at >= start, Ticket.created_at <= now).all()
     # ponytail: demo-sized ticket cohorts; use SQL aggregation before large deployments.
@@ -206,17 +212,17 @@ def summary(days: int = Query(7), db: Session = Depends(get_db)):
     sla_counts = Counter(slas[t.id]['status'] for t in tickets)
     response_minutes = [(datetime.fromisoformat(slas[t.id]['responded_at']) - utc(t.created_at)).total_seconds() / 60
                         for t in tickets if slas[t.id]['responded_at']]
-    daily = Counter(utc(c.created_at).date().isoformat() for c in chats)
+    daily = Counter(utc(c.created_at).astimezone(REPORT_TZ).date().isoformat() for c in chats)
     grouped = lambda model, field: dict(db.query(field, func.count()).select_from(model).group_by(field).all())
     totals = {name: db.query(model).count() for name, model in [('customers', Customer), ('orders', Order), ('conversations', Conversation), ('documents', KnowledgeDocument)]}
-    return {'days': days, 'start': start, 'end': now, 'timezone': 'UTC', 'totals': totals,
+    return {'days': days, 'start': start, 'end': now, 'timezone': REPORT_TZ.tzname(None), 'totals': totals,
             'conversation_statuses': grouped(Conversation, Conversation.status),
             'order_statuses': grouped(Order, Order.status),
             'period': {'conversations': len(chats), 'tickets': len(tickets),
                        'messages': db.query(Message).filter(Message.created_at >= start, Message.created_at <= now).count(),
                        'channels': dict(Counter(c.channel for c in chats)),
-                       'daily': [{'date': (start + timedelta(days=i)).date().isoformat(),
-                                  'count': daily[(start + timedelta(days=i)).date().isoformat()]} for i in range(days)],
+                       'daily': [{'date': (first_day + timedelta(days=i)).isoformat(),
+                                  'count': daily[(first_day + timedelta(days=i)).isoformat()]} for i in range(days)],
                        'sla': {key: sla_counts[key] for key in ('met', 'breached', 'on_track', 'overdue', 'cancelled')},
                        'responded_tickets': len(response_minutes),
                        'sla_met_percent': round(100 * sla_counts['met'] / len(response_minutes), 1) if response_minutes else None,
