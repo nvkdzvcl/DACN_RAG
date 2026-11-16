@@ -1,7 +1,7 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X, Headphones } from 'lucide-react';
 
 function GoogleIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
@@ -390,7 +390,7 @@ export default function Widget() {
   const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
   const activeAccess = session?.order_access?.filter(access => access.expires_at > Date.now() / 1000) || [];
   return <div className={`customerPortal ${view === 'account' ? 'accountLayout' : ''}`}>
-    <div className="portalSide"><div className="portalBrand"><span><Bot size={19} /></span><div><b>RAG Support</b><small>Hỗ trợ khách hàng</small></div></div>
+    <div className="portalSide"><div className="portalBrand"><span><Headphones size={19} aria-hidden="true" /></span><div><b>RAG Support</b><small>Hỗ trợ khách hàng</small></div></div>
       <nav aria-label="Dịch vụ khách hàng">{pages.map(([Icon, label, key]) => <button key={key} className={view === key ? 'current' : ''} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}><Icon size={17} />{label}</button>)}</nav>
       <div className="portalSideFoot"><ShieldCheck size={17} /><span>Tra đơn cần mã truy cập do cửa hàng cấp.</span>{session?.account && <><div className="portalSideAccount"><b>{session.display_name || session.account.email}</b><small>{session.account.email}</small></div><button className="portalLogout" onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></>}</div>
     </div>

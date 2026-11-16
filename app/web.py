@@ -16,6 +16,8 @@ def mount_frontend(app, directory):
     def page(request: Request):
         return FileResponse(directory / pages[request.url.path], headers={'Cache-Control': 'no-cache'})
 
+    if (directory / 'favicon.svg').is_file():
+        pages['/favicon.svg'] = 'favicon.svg'
     for path in pages:
         app.add_api_route(path, page, methods=['GET', 'HEAD'], include_in_schema=False)
     # Explicit paths keep unknown API routes and private files out of SPA fallback.

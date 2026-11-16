@@ -130,14 +130,14 @@ class ServingTests(unittest.TestCase):
     def test_built_pages_assets_and_no_private_or_api_fallback(self):
         build = self.root / 'dist'
         (build / 'assets').mkdir(parents=True)
-        for name in ('index.html', 'widget-demo.html', 'widget.js'):
+        for name in ('index.html', 'widget-demo.html', 'widget.js', 'favicon.svg'):
             (build / name).write_text('build-' + name, encoding='utf-8')
         (build / 'assets' / 'app.js').write_text('asset', encoding='utf-8')
         (build / '.env').write_text('private', encoding='utf-8')
         server = FastAPI()
         mount_frontend(server, build)
         with TestClient(server) as client:
-            for route in ('/', '/index.html', '/chat', '/widget-demo.html', '/widget.js'):
+            for route in ('/', '/index.html', '/chat', '/widget-demo.html', '/widget.js', '/favicon.svg'):
                 response = client.get(route)
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.headers['cache-control'], 'no-cache')

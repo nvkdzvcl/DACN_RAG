@@ -2,7 +2,7 @@ import { channelNames, conversationStatuses, formatDateTime, formatShort, locali
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText, plainText } from './RichText';
 import { createRoot } from 'react-dom/client';
-import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot, LayoutDashboard, MessageSquare, PanelRight, SlidersHorizontal, RefreshCw, ChevronLeft, ChevronRight, LogOut, Send, CheckCheck, X, Globe, Clock3, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { Inbox, BookOpen, Package, BarChart3, Settings, Search, UserRound, Bot, LayoutDashboard, MessageSquare, Headphones, PanelRight, SlidersHorizontal, RefreshCw, ChevronLeft, ChevronRight, LogOut, Send, CheckCheck, X, Globe, Clock3, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import './styles.css';
 import KnowledgeBase, { Citations } from './KnowledgeBase';
 import Widget from './Widget';
@@ -374,7 +374,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   }
   return <div data-theme={theme} className={`shell ${page === 'inbox' ? 'inboxShell' : ''}`}>
     <aside aria-label="Điều hướng chính">
-      <div className="brand"><span className="brandLogo"><MessageSquare aria-hidden="true" /></span><b>RAG Support</b><small>Không gian làm việc</small></div>
+      <div className="brand"><span className="brandLogo"><Headphones aria-hidden="true" /></span><b>RAG Support</b><small>Không gian làm việc</small></div>
       <span className="navCaption">KHÔNG GIAN HỖ TRỢ</span>
       {pages.map(([Icon, label, target]) =>
         <button key={target} title={label} aria-label={label} className={`nav ${page === target ? 'active' : ''}`} onClick={() => navigate(target)} aria-current={page === target ? 'page' : undefined}><Icon size={18} aria-hidden="true" />{label}</button>)}
