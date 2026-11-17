@@ -1,0 +1,139 @@
+/* Redesign (docs/design/redesign): customer portal shell and chat. Loaded after widget.css, portal.css and auth.css. */
+.customerPortal, .customerWidget {
+  --rd-bg: #f6f5f1; --rd-surface: #ffffff; --rd-sunken: #efeee9; --rd-line: #e4e2db; --rd-line-strong: #d3d0c6;
+  --rd-ink: #1b1b18; --rd-ink-2: #3f3e39; --rd-muted: #67665e;
+  --rd-accent: #0e6b61; --rd-accent-soft: #e3f0ed; --rd-accent-strong: #0a524a;
+  --rd-shadow: 0 1px 2px #1b1b1810, 0 8px 24px #1b1b180d;
+}
+[data-theme=dark] :is(.customerPortal, .customerWidget) {
+  --rd-bg: #191814; --rd-surface: #22211c; --rd-sunken: #2b2a24; --rd-line: #37352e; --rd-line-strong: #4a4840;
+  --rd-ink: #ecebe6; --rd-ink-2: #d2d0c8; --rd-muted: #a9a69c;
+  --rd-accent: #3fb3a5; --rd-accent-soft: #1d3a36; --rd-accent-strong: #7fd3c8;
+  --rd-shadow: 0 1px 2px #00000040;
+}
+
+/* Shell: two columns, light sidebar, no right context column. */
+.customerPortal { grid-template-columns: 232px minmax(0, 1fr); background: var(--rd-bg); border-color: var(--rd-line); }
+.customerPortal .portalContext { display: none; }
+.customerPortal .portalSide { background: var(--rd-bg); color: var(--rd-ink-2); border-right: 1px solid var(--rd-line); padding: 20px 14px; }
+.customerPortal .portalBrand b { color: var(--rd-ink); }
+.customerPortal .portalBrand small { color: var(--rd-muted); }
+.customerPortal .portalBrand > span { background: var(--rd-accent); color: #fff; }
+.customerPortal .portalSide nav button { color: var(--rd-ink-2); background: transparent; border: 0; border-radius: 8px; font-weight: 500; }
+.customerPortal .portalSide nav button:hover { background: var(--rd-sunken); color: var(--rd-ink); }
+.customerPortal .portalSide nav button.current { background: var(--rd-surface); color: var(--rd-ink); font-weight: 600; box-shadow: var(--rd-shadow); }
+.customerPortal .portalSide nav button.current::before { display: none; }
+.customerPortal .portalSide nav button.current svg { color: var(--rd-accent); }
+.customerPortal .portalSideFoot { border-color: var(--rd-line); color: var(--rd-muted); }
+.customerPortal .portalSideFoot svg { color: var(--rd-accent); }
+.customerPortal .portalSideAccount b { color: var(--rd-ink); }
+.customerPortal .portalSideAccount small { color: var(--rd-muted); }
+.customerPortal .portalLogout { background: var(--rd-surface) !important; color: var(--rd-ink) !important; border: 1px solid var(--rd-line-strong) !important; }
+.customerPortal .portalMain { background: var(--rd-surface); }
+
+/* Chat header: title, status pill, actions. */
+.customerWidget .widgetHeader { gap: 12px; padding: 12px 24px; min-height: 64px; background: var(--rd-surface); border-bottom: 1px solid var(--rd-line); }
+.customerWidget .widgetHeader .widgetMark { background: var(--rd-accent); color: #fff; }
+.customerWidget .widgetHeader h1 { color: var(--rd-ink); font-size: 16px; }
+.customerWidget .widgetHeader p { margin: 2px 0 0; }
+.statusPill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 550; line-height: 1.6; white-space: nowrap; background: #e3f0ed; color: #0a524a; }
+.statusPill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.statusPill.status-handoff_requested { background: #fcefd6; color: #8a4305; }
+.statusPill.status-assigned { background: #e5eafb; color: #2747b8; }
+.statusPill.status-resolved { background: #e1f2e7; color: #17703c; }
+.statusPill.status-closed { background: #eceae4; color: #5c5b54; }
+[data-theme=dark] .statusPill { background: #1d3a36; color: #7fd3c8; }
+[data-theme=dark] .statusPill.status-handoff_requested { background: #3d2c12; color: #f2c47c; }
+[data-theme=dark] .statusPill.status-assigned { background: #1f2a4d; color: #a9bbf5; }
+[data-theme=dark] .statusPill.status-resolved { background: #183524; color: #8fdcaa; }
+[data-theme=dark] .statusPill.status-closed { background: #2f2e28; color: #c8c5bb; }
+.customerWidget .widgetHeader .widgetEnd, .customerWidget .widgetHeader .widgetHandoff {
+  display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; margin: 0; border-radius: 8px; font-size: 13px !important; font-weight: 550;
+  background: var(--rd-surface); color: var(--rd-ink); border: 1px solid var(--rd-line-strong); box-shadow: none; }
+.customerWidget .widgetHeader .widgetEnd { margin-left: auto; border-color: transparent; color: var(--rd-ink-2); }
+.customerWidget .widgetHeader .widgetEnd:hover:not(:disabled), .customerWidget .widgetHeader .widgetHandoff:hover:not(:disabled) { background: var(--rd-sunken); }
+.customerWidget .widgetHeader .widgetHandoff svg { color: var(--rd-accent); }
+.customerWidget .widgetHeader .themeToggle { border-color: var(--rd-line-strong); background: var(--rd-surface); color: var(--rd-ink-2); }
+
+/* Conversation: centered column, teal own bubbles, AI answers as quoted policy text. */
+.customerWidget .widgetLog { background: var(--rd-surface); gap: 20px; padding: 24px max(20px, calc((100% - 760px) / 2)); }
+.customerWidget .widgetIntro { background: transparent; color: var(--rd-muted); font-size: 12.5px; text-align: center; padding: 0; border: 0; }
+.customerWidget .widgetMessage { max-width: 88%; padding: 0; background: transparent; border: 0; box-shadow: none; color: var(--rd-ink); }
+.customerWidget .widgetMessage > b { display: block; margin-bottom: 6px; font-size: 12.5px; font-weight: 600; color: var(--rd-ink); }
+.customerWidget .widgetMessage > p { margin: 0; padding: 10px 14px; border-left: 3px solid var(--rd-accent); border-radius: 0 8px 8px 0; background: var(--rd-accent-soft); color: var(--rd-ink-2); line-height: 1.6; }
+.customerWidget .widgetMessage > p strong { color: var(--rd-ink); }
+.customerWidget .widgetMessage.from-agent > p { border-left-color: #2747b8; background: #eef1fc; }
+.customerWidget .widgetMessage.from-system > p { border-left: 0; border-radius: 999px; background: var(--rd-sunken); color: var(--rd-muted); font-size: 12.5px; padding: 4px 12px; }
+.customerWidget .widgetMessage.from-system { align-self: center; } .customerWidget .widgetMessage.from-system > b { display: none; }
+[data-theme=dark] .customerWidget .widgetMessage.from-agent > p { background: #1f2a4d; border-left-color: #8ea6f2; }
+.customerWidget .widgetMessage.widgetOwn { align-self: flex-end; max-width: 72%; }
+.customerWidget .widgetMessage.widgetOwn > b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.customerWidget .widgetMessage.widgetOwn > p { border: 0; border-radius: 16px 16px 4px 16px; background: var(--rd-accent); color: #fff; }
+[data-theme=dark] .customerWidget .widgetMessage.widgetOwn > p { background: #0e6b61; }
+.customerWidget .widgetMessage details { display: inline-block; margin: 8px 8px 0 0; font-size: 12.5px; vertical-align: top; }
+.customerWidget .widgetMessage summary { display: inline-flex; align-items: center; gap: 6px; height: 28px; min-height: 28px; padding: 0 10px; border: 1px solid var(--rd-line); border-radius: 999px; background: var(--rd-surface); color: var(--rd-ink-2); list-style: none; cursor: pointer; }
+.customerWidget .widgetMessage summary::-webkit-details-marker { display: none; }
+.customerWidget .widgetMessage summary::before { content: ''; width: 12px; height: 14px; flex: none; border: 1.6px solid var(--rd-accent); border-radius: 2px; }
+.customerWidget .widgetMessage details[open] { display: block; }
+.customerWidget .widgetMessage details[open] summary { border-color: var(--rd-accent); }
+.customerWidget .widgetMessage blockquote { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--rd-line-strong); background: var(--rd-bg); border-radius: 0 8px 8px 0; color: var(--rd-ink-2); }
+
+/* Welcome card and suggestions. */
+.customerWidget .widgetWelcomeCard { background: var(--rd-bg); border: 0; box-shadow: none; border-radius: 14px; }
+.customerWidget .widgetWelcomeCard h2 { color: var(--rd-ink); }
+.customerWidget .widgetWelcomeCard p { color: var(--rd-muted); }
+.customerWidget .widgetSuggestions button { background: var(--rd-surface); border: 1px solid var(--rd-line); color: var(--rd-ink-2); border-radius: 10px; }
+.customerWidget .widgetSuggestions button:hover { border-color: var(--rd-accent); }
+
+/* Footer: one rounded composer bar, centered like the conversation. */
+.customerWidget .widgetFooter { padding: 10px max(20px, calc((100% - 760px) / 2)) 16px; background: var(--rd-surface); border-top: 0; }
+.customerWidget .widgetComposer { gap: 8px; padding: 6px 6px 6px 14px; border: 1px solid var(--rd-line-strong); border-radius: 14px; background: var(--rd-surface); box-shadow: var(--rd-shadow); align-items: center; }
+.customerWidget .widgetComposer textarea { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 8px 0 !important; color: var(--rd-ink); }
+.customerWidget .widgetComposer textarea:focus-visible { outline: none; }
+.customerWidget .widgetComposer:focus-within { border-color: var(--rd-accent); box-shadow: 0 0 0 3px #0e6b6122; }
+.customerWidget .widgetComposer button { width: 40px; height: 40px; min-height: 40px; border-radius: 10px; background: var(--rd-accent); color: #fff; border: 0; }
+.customerWidget .widgetComposer button:disabled { background: var(--rd-accent); opacity: .45; }
+.customerWidget .composerNote { text-align: center; color: var(--rd-muted); }
+.customerWidget .widgetStatus { background: var(--rd-bg); border: 0; color: var(--rd-ink-2); border-radius: 10px; }
+
+/* Phones: icon-only handoff button, tighter padding. */
+@media (max-width: 700px) {
+  .customerWidget .widgetHeader { padding: 10px 12px; gap: 8px; }
+  .customerWidget .widgetHeader .widgetHandoff { width: 40px; padding: 0; justify-content: center; }
+  .customerWidget .widgetHeader .widgetHandoff .btnLabel { display: none; }
+  .customerWidget .widgetHeader .widgetEnd { padding: 0 10px; }
+  .customerWidget .widgetLog { padding: 16px 14px; }
+  .customerWidget .widgetFooter { padding: 8px 12px 12px; }
+}
+/* The embedded widget is narrow too. */
+.customerWidget[role=main] .widgetHeader .widgetHandoff { width: 40px; padding: 0; justify-content: center; }
+.customerWidget[role=main] .widgetHeader .widgetHandoff .btnLabel { display: none; }
+/* Header actions grouped on the right: Chat mới, Gặp nhân viên, theme, close. */
+.customerWidget .widgetHeader .widgetEnd { order: 3; margin-left: auto; }
+.customerWidget .widgetHeader .widgetHandoff { order: 4; }
+.customerWidget .widgetHeader .themeToggle { order: 5; }
+.customerWidget .widgetHeader .widgetClose { order: 6; }
+/* Source chip icon: a document outline, not a square that reads as a checkbox. */
+.customerWidget .widgetMessage summary::before { width: 13px; height: 13px; border: 0; border-radius: 0; background: var(--rd-accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6Z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6Z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* Dark theme: neutralize older dark rules (auth.css) that painted cards and bars behind the new layout. */
+[data-theme=dark] .customerWidget.customerWidget .widgetLog, [data-theme=dark] .customerWidget.customerWidget .widgetFooter, [data-theme=dark] .customerPortal.customerPortal .portalMain { background: var(--rd-surface); }
+[data-theme=dark] .customerWidget.customerWidget .widgetIntro { background: transparent; color: var(--rd-muted); }
+[data-theme=dark] .customerWidget.customerWidget .widgetMessage { background: transparent; border: 0; }
+[data-theme=dark] .customerWidget.customerWidget .widgetMessage > b { color: var(--rd-ink); }
+[data-theme=dark] .customerWidget.customerWidget .widgetMessage > p { background: var(--rd-accent-soft); color: var(--rd-ink-2); }
+[data-theme=dark] .customerWidget.customerWidget .widgetMessage.widgetOwn > p { background: #0e6b61; color: #fff; }
+[data-theme=dark] .customerWidget.customerWidget .widgetMessage.from-agent > p { background: #1f2a4d; border-left-color: #8ea6f2; }
+[data-theme=dark] .customerWidget.customerWidget .widgetHeader .widgetEnd { background: transparent; border-color: transparent; color: var(--rd-ink-2); }
+[data-theme=dark] .customerWidget.customerWidget .widgetHeader .widgetHandoff { background: var(--rd-surface); border-color: var(--rd-line-strong); color: var(--rd-ink); }
+[data-theme=dark] .customerWidget.customerWidget .widgetStatus { background: var(--rd-bg); color: var(--rd-ink-2); }
+[data-theme=dark] .customerWidget.customerWidget .widgetWelcomeCard { background: var(--rd-bg); }
+[data-theme=dark] .customerWidget.customerWidget .widgetSuggestions button { background: var(--rd-surface); border-color: var(--rd-line); color: var(--rd-ink-2); }
+[data-theme=dark] .customerWidget.customerWidget .widgetComposer textarea { background: transparent; color: var(--rd-ink); }
+[data-theme=dark] .customerPortal.customerPortal .portalSide nav button.current { background: var(--rd-surface); }
+/* Embedded widget close button matches the other header icon buttons; actions never wrap. */
+.customerWidget .widgetHeader .widgetClose { width: 40px; height: 40px; background: var(--rd-surface); color: var(--rd-ink-2); border: 1px solid var(--rd-line-strong); }
+.customerWidget .widgetHeader .widgetClose:hover { background: var(--rd-sunken); }
+.customerWidget .widgetHeader .widgetEnd { white-space: nowrap; flex: none; }

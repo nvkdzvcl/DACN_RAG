@@ -1,7 +1,7 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X, Headphones } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X, Headphones, ArrowDown } from 'lucide-react';
 
 function GoogleIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
@@ -15,6 +15,7 @@ import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
 import PasswordRules from './PasswordRules';
 import { conversationStatuses, formatDateTime } from './shared';
+import './redesign.css';
 
 const statuses = conversationStatuses;
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -306,7 +307,8 @@ export default function Widget() {
   }
   function askSuggestion(question) { setDraft(question); setView('messages'); }
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
-    <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
+    <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{session ? <span className={`statusPill status-${session.status}`}>{statuses[session.status] || session.status}</span> : 'Cùng bạn tìm câu trả lời'}</p></div>
+      {session && session.status === 'open' && authMode === 'guest' && <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading} aria-label="Gặp nhân viên" title="Gặp nhân viên"><UserRound size={16} aria-hidden="true" /><span className="btnLabel">{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</span></button>}
       {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}
       {embedded && <button type="button" className="widgetClose" aria-label="Đóng trò chuyện" onClick={() => window.parent.postMessage({ type: 'rag-support-close' }, window.location.origin)}><X size={18} aria-hidden="true" /></button>}</header>
     {successModal && <div className="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successTitle"><div className="successModal"><div className="successIcon">✓</div><h2 id="successTitle">Đăng ký tài khoản thành công</h2><p>Email đã được xác minh. Bạn có thể bắt đầu sử dụng tài khoản ngay.</p><button onClick={() => setSuccessModal(false)}>Tiếp tục</button></div></div>}
@@ -339,14 +341,14 @@ export default function Widget() {
       }}>
         {!messageBefore && session.messages.length === 0 && <div className="widgetWelcomeCard"><h2>Xin chào, {session.display_name}! 👋</h2><p>Tôi là Trợ lý AI. Bạn cần hỗ trợ gì hôm nay?</p><div className="widgetSuggestions">{suggestions.map(question => <button type="button" key={question} onClick={() => setDraft(question)}>{question}</button>)}</div></div>}
         {(messageBefore || session.messages.length > 0) && <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>}
-        {session.messages.map(message => <article key={message.id} className={`widgetMessage ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
+        {session.messages.map(message => <article key={message.id} className={`widgetMessage from-${message.sender_type} ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p><RichText text={message.content} /></p>
-          {message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ` · ${citation.location}`}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
+          {message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citation.source.replace(/\.(md|txt|markdown|pdf|docx)$/i, '')}{citation.location && ` · ${citation.location.toLowerCase()}`}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
         </article>)}
         {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}
       </div>
-      {!messageBefore && !atLatest && <div className="widgetLatest"><span role="status">{hasNewMessages ? 'Có tin mới' : 'Đang xem tin phía trên'}</span><button type="button" onClick={jumpLatest}>Về tin mới nhất</button></div>}
+      {!messageBefore && !atLatest && <div className="widgetLatest"><div className="widgetLatestInner">{hasNewMessages ? <span className="widgetLatestBadge" role="status">Có tin mới</span> : <span className="srOnly" role="status">Đang xem tin phía trên</span>}<button type="button" onClick={jumpLatest} aria-label="Về tin mới nhất" title="Về tin mới nhất"><ArrowDown size={20} aria-hidden="true" /></button></div></div>}
       <footer className="widgetFooter">
         <div className="widgetFooterTools" tabIndex={0} role="region" aria-label="Thao tác hội thoại">
         {!closed && embedded && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
@@ -356,7 +358,7 @@ export default function Widget() {
             <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} /></label>
             <button type="submit">Xác nhận quyền tra đơn</button></fieldset></form>
         </details>}
-        {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
+        {session.status !== 'open' && <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
         {!busy && pending && <div className="pendingNotice"><p className="widgetIntro" role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pending.content}</p></details><button type="button" onClick={event => send(event, true)} disabled={closed || historyLoading}>Gửi lại tin chưa xác nhận</button></div>}
