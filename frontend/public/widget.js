@@ -9,12 +9,12 @@
     button.type = 'button';
     button.setAttribute('aria-expanded', 'false');
     button.setAttribute('aria-controls', 'rag-support-frame');
-    button.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:10001;border:0;border-radius:28px;padding:14px 24px;background:#604cf3;color:white;font:600 15px Inter,Segoe UI,sans-serif;box-shadow:0 5px 20px #17244333;cursor:pointer;min-height:48px';
+    button.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:10001;border:0;border-radius:28px;padding:14px 24px;background:#0e6b61;color:white;font:600 15px Inter,Segoe UI,sans-serif;box-shadow:0 5px 20px #17244333;cursor:pointer;min-height:48px';
     const frame = document.createElement('iframe');
     frame.id = 'rag-support-frame';
     frame.title = 'Trò chuyện với bộ phận hỗ trợ';
     frame.hidden = true;
-    const desktopFrame = 'position:fixed;right:16px;bottom:84px;z-index:10000;width:min(400px,calc(100vw - 32px));height:min(640px,calc(100dvh - 100px));border:1px solid #dce2f0;border-radius:16px;box-shadow:0 15px 60px #17244333;background:#f5f7fc';
+    const desktopFrame = 'position:fixed;right:16px;bottom:84px;z-index:10000;width:min(400px,calc(100vw - 32px));height:min(640px,calc(100dvh - 100px));border:1px solid #e4e2dc;border-radius:16px;box-shadow:0 15px 60px #17244333;background:#f5f7fc';
     // Phones: the chat takes the whole screen and closes from its own header, so the launcher is hidden while it is open.
     const phoneFrame = 'position:fixed;inset:0;z-index:10000;width:100vw;height:100dvh;border:0;border-radius:0;background:#f5f7fc';
     const phone = matchMedia('(max-width: 600px)');

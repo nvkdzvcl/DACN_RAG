@@ -15,6 +15,7 @@ import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
 import PasswordRules from './PasswordRules';
 import { conversationStatuses, formatDateTime } from './shared';
+import './redesign.css';
 
 const statuses = conversationStatuses;
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -306,7 +307,8 @@ export default function Widget() {
   }
   function askSuggestion(question) { setDraft(question); setView('messages'); }
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
-    <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{statuses[session?.status] || 'Cùng bạn tìm câu trả lời'}</p></div>
+    <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{session ? <span className={`statusPill status-${session.status}`}>{statuses[session.status] || session.status}</span> : 'Cùng bạn tìm câu trả lời'}</p></div>
+      {session && session.status === 'open' && authMode === 'guest' && <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading} aria-label="Gặp nhân viên" title="Gặp nhân viên"><UserRound size={16} aria-hidden="true" /><span className="btnLabel">{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</span></button>}
       {session && <button className="widgetEnd" onClick={end} disabled={busy || handoffBusy || historyLoading}>{session.account ? 'Chat mới' : 'Kết thúc'}</button>}
       {embedded && <button type="button" className="widgetClose" aria-label="Đóng trò chuyện" onClick={() => window.parent.postMessage({ type: 'rag-support-close' }, window.location.origin)}><X size={18} aria-hidden="true" /></button>}</header>
     {successModal && <div className="successOverlay" role="dialog" aria-modal="true" aria-labelledby="successTitle"><div className="successModal"><div className="successIcon">✓</div><h2 id="successTitle">Đăng ký tài khoản thành công</h2><p>Email đã được xác minh. Bạn có thể bắt đầu sử dụng tài khoản ngay.</p><button onClick={() => setSuccessModal(false)}>Tiếp tục</button></div></div>}
@@ -339,9 +341,9 @@ export default function Widget() {
       }}>
         {!messageBefore && session.messages.length === 0 && <div className="widgetWelcomeCard"><h2>Xin chào, {session.display_name}! 👋</h2><p>Tôi là Trợ lý AI. Bạn cần hỗ trợ gì hôm nay?</p><div className="widgetSuggestions">{suggestions.map(question => <button type="button" key={question} onClick={() => setDraft(question)}>{question}</button>)}</div></div>}
         {(messageBefore || session.messages.length > 0) && <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>}
-        {session.messages.map(message => <article key={message.id} className={`widgetMessage ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
+        {session.messages.map(message => <article key={message.id} className={`widgetMessage from-${message.sender_type} ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p><RichText text={message.content} /></p>
-          {message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ` · ${citation.location}`}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
+          {message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citation.source.replace(/\.(md|txt|markdown|pdf|docx)$/i, '')}{citation.location && ` · ${citation.location.toLowerCase()}`}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
         </article>)}
         {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}
@@ -356,7 +358,7 @@ export default function Widget() {
             <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} /></label>
             <button type="submit">Xác nhận quyền tra đơn</button></fieldset></form>
         </details>}
-        {session.status === 'open' ? <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading}><UserRound size={16} aria-hidden="true" />{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</button> : <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
+        {session.status !== 'open' && <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
         {!busy && pending && <div className="pendingNotice"><p className="widgetIntro" role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pending.content}</p></details><button type="button" onClick={event => send(event, true)} disabled={closed || historyLoading}>Gửi lại tin chưa xác nhận</button></div>}

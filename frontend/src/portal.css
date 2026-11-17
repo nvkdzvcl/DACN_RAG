@@ -1,80 +1,80 @@
-.customerPortal { display:grid; grid-template-columns:210px minmax(0,1fr) 280px; width:min(1480px,calc(100% - 32px)); height:calc(100dvh - 32px); min-height:480px; margin:16px auto; overflow:hidden; border:1px solid #dfe5f2; border-radius:16px; box-shadow:0 18px 60px #17244314; background:#fff; color:#172443; font:14px Inter,'Segoe UI',sans-serif; }
-.portalSide { min-width:0; display:flex; flex-direction:column; padding:20px 12px; color:#b8c4df; background:linear-gradient(160deg,#14254b,#0d1834); }
+.customerPortal { display:grid; grid-template-columns:210px minmax(0,1fr) 280px; width:min(1480px,calc(100% - 32px)); height:calc(100dvh - 32px); min-height:480px; margin:16px auto; overflow:hidden; border:1px solid #e6e5e0; border-radius:16px; box-shadow:0 18px 60px #17244314; background:#fff; color:#27251f; font:14px Inter,'Segoe UI',sans-serif; }
+.portalSide { min-width:0; display:flex; flex-direction:column; padding:20px 12px; color:#c7c4b9; background:linear-gradient(160deg,#292620,#1b1915); }
 .portalBrand { display:flex; align-items:center; gap:10px; padding:4px 7px 28px; }
-.portalBrand>span { width:34px; height:34px; display:grid; place-items:center; border-radius:10px; background:#604cf3; color:white; flex:none; }
+.portalBrand>span { width:34px; height:34px; display:grid; place-items:center; border-radius:10px; background:#0e6b61; color:white; flex:none; }
 .portalBrand b,.portalBrand small { display:block; }
 .portalBrand b { color:white; font-size:14px; }
-.portalBrand small { color:#a8b5d3; font-size:10px; margin-top:3px; }
+.portalBrand small { color:#b9b5a9; font-size:10px; margin-top:3px; }
 .portalSide nav { display:grid; gap:5px; }
 .portalSide button { width:100%; display:flex; align-items:center; gap:12px; padding:12px; border:0; border-radius:8px; background:transparent; color:inherit; text-align:left; font:inherit; }
 .portalSide button:hover,.portalSide button.current { color:white; background:#2d4283; }
-.portalSide button.current { box-shadow:inset 3px 0 #9b87ff; }
-.portalSideFoot { display:flex; align-items:flex-start; gap:9px; margin-top:auto; padding:18px 8px 0; border-top:1px solid #314061; font-size:11px; line-height:1.5; }
+.portalSide button.current { box-shadow:inset 3px 0 #50a69c; }
+.portalSideFoot { display:flex; align-items:flex-start; gap:9px; margin-top:auto; padding:18px 8px 0; border-top:1px solid #434037; font-size:11px; line-height:1.5; }
 .portalSideFoot svg { flex:none; }
 .portalMain { min-width:0; min-height:0; padding:0; overflow:hidden; display:flex; flex-direction:column; background:#f8f9fe; }
 .customerPortal .customerWidget { width:100%; max-width:none; height:100%; min-height:0; margin:0; border:0; border-radius:0; box-shadow:none; }
-.customerPortal .widgetHeader { background:#fff; color:#172443; border-bottom:1px solid #e2e7f3; }
-.customerPortal .widgetHeader h1 { color:#172443; }
-.customerPortal .widgetHeader p { color:#657391; }
-.customerPortal .widgetEnd { background:#fff; color:#5140c3; border-color:#dcdff3; }
+.customerPortal .widgetHeader { background:#fff; color:#27251f; border-bottom:1px solid #e8e7e2; }
+.customerPortal .widgetHeader h1 { color:#27251f; }
+.customerPortal .widgetHeader p { color:#76736a; }
+.customerPortal .widgetEnd { background:#fff; color:#2d5e59; border-color:#dcdff3; }
 .customerPortal .widgetMark { width:36px; height:36px; }
 .customerPortal .widgetLog { background:#f9faff; }
-.portalContext { min-width:0; padding:26px 19px; border-left:1px solid #e5eaf4; overflow:auto; background:#fff; }
+.portalContext { min-width:0; padding:26px 19px; border-left:1px solid #ebeae6; overflow:auto; background:#fff; }
 .portalContext h2 { font-size:15px; margin:0 0 19px; }
 .portalPerson { display:flex; align-items:center; gap:10px; padding:0 0 19px; }
-.portalPerson>span { width:40px; height:40px; display:grid; place-items:center; border-radius:50%; background:#ebe8ff; color:#604cf3; flex:none; }
+.portalPerson>span { width:40px; height:40px; display:grid; place-items:center; border-radius:50%; background:#dceeec; color:#0e6b61; flex:none; }
 .portalPerson b,.portalPerson small { display:block; overflow-wrap:anywhere; }
-.portalPerson small { color:#68758f; font-size:11px; margin-top:4px; }
-.portalContextBlock { padding:18px 0; border-top:1px solid #edf0f7; }
+.portalPerson small { color:#77756c; font-size:11px; margin-top:4px; }
+.portalContextBlock { padding:18px 0; border-top:1px solid #f1f0ed; }
 .portalContextBlock h3 { font-size:12px; margin:0 0 12px; }
-.portalContextBlock p { color:#667491; line-height:1.6; font-size:12px; }
-.portalContextBlock button { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; padding:11px; border:1px solid #e1e4f3; border-radius:8px; background:#f8f7ff; color:#4d3bc4; font:inherit; margin-top:7px; }
+.portalContextBlock p { color:#77746b; line-height:1.6; font-size:12px; }
+.portalContextBlock button { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; padding:11px; border:1px solid #e6e4df; border-radius:8px; background:#f3f9f8; color:#2c5b56; font:inherit; margin-top:7px; }
 .portalMobileNav { display:none; }
 .portalPage { flex:1; min-height:0; overflow:auto; padding:clamp(22px,3vw,38px); }
-.portalPageHead { display:flex; gap:14px; align-items:center; padding-bottom:22px; border-bottom:1px solid #e2e7f3; }
-.portalPageIcon { width:44px; height:44px; display:grid; place-items:center; background:#eae7ff; border-radius:12px; color:#604cf3; flex:none; }
+.portalPageHead { display:flex; gap:14px; align-items:center; padding-bottom:22px; border-bottom:1px solid #e8e7e2; }
+.portalPageIcon { width:44px; height:44px; display:grid; place-items:center; background:#dbedeb; border-radius:12px; color:#0e6b61; flex:none; }
 .portalPage h1 { font-size:24px; }
 .portalPage h2 { font-size:16px; }
-.portalPage p { color:#5c6984; line-height:1.6; }
+.portalPage p { color:#6b6960; line-height:1.6; }
 .portalPageHead p { margin:5px 0 0; font-size:12px; }
-.portalOrderForm,.portalOrderResult,.portalQuestions,.portalEmpty,.portalAccess { padding:22px; margin-top:20px; border:1px solid #e1e6f2; border-radius:13px; background:#fff; box-shadow:0 5px 20px #17244308; }
+.portalOrderForm,.portalOrderResult,.portalQuestions,.portalEmpty,.portalAccess { padding:22px; margin-top:20px; border:1px solid #e7e6e1; border-radius:13px; background:#fff; box-shadow:0 5px 20px #17244308; }
 .portalOrderForm { display:grid; gap:14px; }
 .portalOrderForm label { display:grid; gap:7px; font-weight:600; font-size:12px; }
-.portalOrderForm input { width:100%; padding:12px; border:1px solid #d8e0f0; border-radius:8px; font:inherit; }
+.portalOrderForm input { width:100%; padding:12px; border:1px solid #e2e0da; border-radius:8px; font:inherit; }
 .portalOrderForm p { margin:0; font-size:12px; }
 .portalPage button { cursor:pointer; font:inherit; }
-.portalOrderForm button,.portalEmpty button { justify-self:start; display:inline-flex; align-items:center; gap:8px; padding:11px 18px; border:0; border-radius:8px; background:#604cf3; color:white; font-weight:600; }
+.portalOrderForm button,.portalEmpty button { justify-self:start; display:inline-flex; align-items:center; gap:8px; padding:11px 18px; border:0; border-radius:8px; background:#0e6b61; color:white; font-weight:600; }
 .portalOrderForm button:disabled { opacity:.6; }
 .portalOrderResult { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
-.portalOrderResult small { color:#657391; font-weight:700; letter-spacing:.1em; }
+.portalOrderResult small { color:#76736a; font-weight:700; letter-spacing:.1em; }
 .portalOrderResult h2 { margin:5px 0; overflow-wrap:anywhere; }
 .portalOrderResult>span { border-radius:20px; padding:7px 10px; color:#187b5f; background:#e9f7ef; font-size:12px; }
-.portalOrderResult dl { flex-basis:100%; display:grid; grid-template-columns:110px minmax(0,1fr); gap:12px; border-top:1px solid #edf0f7; padding-top:16px; }
-.portalOrderResult dt { color:#657391; }.portalOrderResult dd { margin:0; overflow-wrap:anywhere; }
+.portalOrderResult dl { flex-basis:100%; display:grid; grid-template-columns:110px minmax(0,1fr); gap:12px; border-top:1px solid #f1f0ed; padding-top:16px; }
+.portalOrderResult dt { color:#76736a; }.portalOrderResult dd { margin:0; overflow-wrap:anywhere; }
 .portalAccess h2,.portalQuestions h2 { margin:0 0 14px; }
-.portalAccess button,.portalQuestions button { display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%; padding:14px 0; border:0; border-bottom:1px solid #edf0f7; background:transparent; color:#263655; text-align:left; }
+.portalAccess button,.portalQuestions button { display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%; padding:14px 0; border:0; border-bottom:1px solid #f1f0ed; background:transparent; color:#39362d; text-align:left; }
 .portalAccess button:last-child,.portalQuestions button:last-child { border-bottom:0; }
-.portalAccess button:hover,.portalQuestions button:hover { color:#604cf3; }
+.portalAccess button:hover,.portalQuestions button:hover { color:#0e6b61; }
 .portalEmpty p { margin:0 0 14px; }
-.customerPortal button:focus-visible,.customerPortal input:focus-visible { outline:3px solid #8d78ff; outline-offset:2px; }
+.customerPortal button:focus-visible,.customerPortal input:focus-visible { outline:3px solid #4a9990; outline-offset:2px; }
 @media(max-width:1140px) { .customerPortal { grid-template-columns:200px minmax(0,1fr); } .portalContext { display:none; } }
-@media(max-width:700px) { .customerPortal { display:flex; flex-direction:column; width:100%; height:100dvh; min-height:0; margin:0; border:0; border-radius:0; } .portalSide { display:none; } .portalMain { flex:1; } .portalMobileNav { display:flex; gap:5px; padding:8px; border-bottom:1px solid #e2e7f3; background:white; } .portalMobileNav button { flex:1; display:grid; place-items:center; gap:3px; min-width:0; padding:7px 4px; border:0; border-radius:8px; background:transparent; color:#5c6984; font:inherit; font-size:11px; } .portalMobileNav button[aria-current=page] { color:#513dca; background:#eeeaff; } .portalPage { padding:18px; } .portalPageHead h1 { font-size:20px; } .portalOrderForm,.portalOrderResult,.portalQuestions,.portalEmpty,.portalAccess { padding:17px; } }
+@media(max-width:700px) { .customerPortal { display:flex; flex-direction:column; width:100%; height:100dvh; min-height:0; margin:0; border:0; border-radius:0; } .portalSide { display:none; } .portalMain { flex:1; } .portalMobileNav { display:flex; gap:5px; padding:8px; border-bottom:1px solid #e8e7e2; background:white; } .portalMobileNav button { flex:1; display:grid; place-items:center; gap:3px; min-width:0; padding:7px 4px; border:0; border-radius:8px; background:transparent; color:#6b6960; font:inherit; font-size:11px; } .portalMobileNav button[aria-current=page] { color:#2d5e59; background:#e0f0ee; } .portalPage { padding:18px; } .portalPageHead h1 { font-size:20px; } .portalOrderForm,.portalOrderResult,.portalQuestions,.portalEmpty,.portalAccess { padding:17px; } }
 
 .accountHistoryList { display:grid; gap:8px; margin:20px 0; }
-.accountHistoryList button { display:grid; gap:5px; text-align:left; padding:14px; border:1px solid #e0e5f1; border-radius:9px; background:white; color:#283857; }
-.accountHistoryList button[aria-pressed=true] { border-color:#9180ee; background:#f1eeff; }
-.accountHistoryList span,.accountHistoryList small { font-size:11px; color:#5f6c88; }
+.accountHistoryList button { display:grid; gap:5px; text-align:left; padding:14px; border:1px solid #e6e5e0; border-radius:9px; background:white; color:#3b382f; }
+.accountHistoryList button[aria-pressed=true] { border-color:#4b9d93; background:#e6f3f1; }
+.accountHistoryList span,.accountHistoryList small { font-size:11px; color:#6f6c63; }
 .accountPager { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin:12px 0; font-size:12px; }
-.accountPager button { padding:8px 12px; border:1px solid #dddff1; border-radius:7px; background:white; color:#4d3ec2; }
+.accountPager button { padding:8px 12px; border:1px solid #e2e0da; border-radius:7px; background:white; color:#2c5c57; }
 .accountPager button:disabled { opacity:.5; }
-.accountHistoryDetail { border-top:1px solid #e2e7f3; margin-top:24px; padding-top:12px; }
+.accountHistoryDetail { border-top:1px solid #e8e7e2; margin-top:24px; padding-top:12px; }
 .accountHistoryDetail>p,.accountInfo { font-size:12px; line-height:1.6; }
 .accountMessages { display:flex; flex-direction:column; gap:12px; }
 .accountMessages .widgetMessage { max-width:90%; }
 .portalOrderForm fieldset { display:grid; gap:14px; border:0; min-width:0; margin:0; padding:0; }
 .portalOrderForm fieldset h2 { margin:0; }
 
-.portalEmailCard{display:flex;align-items:flex-start;gap:13px;background:#f0efff;padding:18px;border-radius:10px;margin-top:20px}.portalEmailCard>svg{flex:none;color:#604cf3}.portalEmailCard h2{margin:0}.portalEmailCard p{font-size:12px}.portalEmailCard button{padding:10px 14px;border:1px solid #d9d4f9;border-radius:7px;background:white;color:#5140c3}.widgetAccountBar>span>button{margin-left:10px}
+.portalEmailCard{display:flex;align-items:flex-start;gap:13px;background:#e6f3f2;padding:18px;border-radius:10px;margin-top:20px}.portalEmailCard>svg{flex:none;color:#0e6b61}.portalEmailCard h2{margin:0}.portalEmailCard p{font-size:12px}.portalEmailCard button{padding:10px 14px;border:1px solid #bddfdb;border-radius:7px;background:white;color:#2d5e59}.widgetAccountBar>span>button{margin-left:10px}
 
 
 /* Integrated customer portal visual layer: preserves existing API-driven markup. */
@@ -84,7 +84,7 @@
 .portalPageHead { align-items: flex-start; padding-bottom: 24px; }
 .portalPageHead h1 { font-size: clamp(23px, 2vw, 30px); letter-spacing: -.04em; }
 .portalPageHead p { max-width: 620px; font-size: 13px; }
-.portalOrderForm, .portalOrderResult, .portalQuestions, .portalEmpty, .portalAccess { border-color: #e0e5f1; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
+.portalOrderForm, .portalOrderResult, .portalQuestions, .portalEmpty, .portalAccess { border-color: #e6e5e0; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
 .portalOrderForm { max-width: 760px; }
 .portalOrderResult { max-width: 760px; }
 .portalQuestions { max-width: 900px; }
@@ -94,17 +94,17 @@
 .portalContextBlock { padding: 21px 0; }
 .portalContextBlock p { margin: 0; }
 .portalContextBlock button { transition: border-color .15s ease, background .15s ease, transform .15s ease; }
-.portalContextBlock button:hover { border-color: #bcb0ff; background: #f1efff; transform: translateX(2px); }
+.portalContextBlock button:hover { border-color: #87c5be; background: #e7f3f2; transform: translateX(2px); }
 .customerHistory { display: grid; grid-template-columns: minmax(220px, .75fr) minmax(360px, 1.25fr); grid-template-rows: auto auto 1fr; gap: 0 20px; }
 .customerHistory .portalPageHead, .customerHistory > .widgetError { grid-column: 1 / -1; }
 .customerHistory .portalPageHead { grid-row: 1; }
 .customerHistory .accountHistoryList { grid-column: 1; grid-row: 2 / 4; align-content: start; max-height: 100%; overflow: auto; padding-right: 4px; }
 .customerHistory .accountPager { grid-column: 1; grid-row: 4; }
-.customerHistory .accountHistoryDetail { grid-column: 2; grid-row: 2 / 5; min-height: 0; margin-top: 20px; padding: 20px; border: 1px solid #e0e5f1; border-radius: 14px; background: #fff; overflow: auto; }
+.customerHistory .accountHistoryDetail { grid-column: 2; grid-row: 2 / 5; min-height: 0; margin-top: 20px; padding: 20px; border: 1px solid #e6e5e0; border-radius: 14px; background: #fff; overflow: auto; }
 .customerHistory .accountHistoryDetail .accountPager { margin-top: 0; }
 .customerHistory .accountMessages { padding-top: 8px; }
 .customerHistory .accountHistoryList button { transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
-.customerHistory .accountHistoryList button:hover { border-color: #bcb0ff; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(74, 61, 190, .08); }
+.customerHistory .accountHistoryList button:hover { border-color: #87c5be; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(74, 61, 190, .08); }
 .customerProfile { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); align-content: start; gap: 0 20px; }
 .customerProfile .portalPageHead { grid-column: 1 / -1; }
 .customerProfile .portalEmailCard { grid-column: 1 / -1; }
@@ -124,56 +124,56 @@
 
 .portalOrderGrid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(220px, .85fr); gap: 16px; max-width: 900px; }
 .portalOrderGrid .portalOrderForm { max-width: none; margin-top: 20px; }
-.portalOrderHelp { align-self: start; margin-top: 20px; padding: 22px; border: 1px solid #e0e5f1; border-radius: 13px; background: #fff; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
+.portalOrderHelp { align-self: start; margin-top: 20px; padding: 22px; border: 1px solid #e6e5e0; border-radius: 13px; background: #fff; box-shadow: 0 10px 28px rgba(31, 42, 79, .05); }
 .portalOrderHelp h2 { margin: 0 0 14px; font-size: 16px; }
-.portalOrderHelp ol { margin: 0; padding-left: 20px; color: #5c6984; font-size: 12px; line-height: 1.8; }
-.portalSearch { display: flex; align-items: center; gap: 9px; width: 100%; max-width: 900px; box-sizing: border-box; margin-top: 20px; padding: 5px 5px 5px 14px; border: 1px solid #d8e0f0; border-radius: 9px; background: #fff; color: #6a758a; }
-.portalSearch input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: #263655; padding: 8px 0; }
-.portalSearch input::placeholder { color: #6a758a; }
-.portalSearch button { flex: none; border: 0; border-radius: 7px; padding: 9px 14px; background: #604cf3; color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-.portalSearch:focus-within { border-color: #8f80f4; box-shadow: 0 0 0 3px #6753ee1a; }
-.portalSearch:hover { border-color: #bcb0ff; }
+.portalOrderHelp ol { margin: 0; padding-left: 20px; color: #6b6960; font-size: 12px; line-height: 1.8; }
+.portalSearch { display: flex; align-items: center; gap: 9px; width: 100%; max-width: 900px; box-sizing: border-box; margin-top: 20px; padding: 5px 5px 5px 14px; border: 1px solid #e2e0da; border-radius: 9px; background: #fff; color: #77746e; }
+.portalSearch input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: #39362d; padding: 8px 0; }
+.portalSearch input::placeholder { color: #77746e; }
+.portalSearch button { flex: none; border: 0; border-radius: 7px; padding: 9px 14px; background: #0e6b61; color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.portalSearch:focus-within { border-color: #4c9d94; box-shadow: 0 0 0 3px #6753ee1a; }
+.portalSearch:hover { border-color: #87c5be; }
 .portalPolicyGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 900px; margin-top: 12px; }
-.portalPolicyGrid button { min-height: 78px; padding: 14px; border: 1px solid #e0e5f1; border-radius: 12px; background: #fff; color: #263655; text-align: left; box-shadow: 0 6px 18px rgba(31, 42, 79, .04); }
-.portalPolicyGrid button:hover { border-color: #bcb0ff; background: #f8f7ff; }
+.portalPolicyGrid button { min-height: 78px; padding: 14px; border: 1px solid #e6e5e0; border-radius: 12px; background: #fff; color: #39362d; text-align: left; box-shadow: 0 6px 18px rgba(31, 42, 79, .04); }
+.portalPolicyGrid button:hover { border-color: #87c5be; background: #f3f9f8; }
 .portalPolicyGrid strong, .portalPolicyGrid small { display: block; }
 .portalPolicyGrid strong { font-size: 13px; }
-.portalPolicyGrid small { margin-top: 5px; color: #687795; font-size: 11px; line-height: 1.4; }
+.portalPolicyGrid small { margin-top: 5px; color: #76736a; font-size: 11px; line-height: 1.4; }
 @media(max-width:760px) { .portalOrderGrid, .portalPolicyGrid { grid-template-columns: 1fr; } .portalOrderGrid .portalOrderForm, .portalOrderHelp { margin-top: 14px; } }
 
-.portalSideFoot{flex-direction:column}.portalSideAccount{width:100%;padding-top:4px;overflow:hidden}.portalSideAccount b,.portalSideAccount small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.portalSideAccount b{color:#fff;font-size:12px}.portalSideAccount small{color:#a8b5d3;font-size:10px;margin-top:3px}.portalLogout{justify-content:center!important;margin-top:2px;padding:9px!important;border:1px solid #59698f!important;background:transparent!important;color:#fff!important;font-size:12px!important}.profileCard{display:flex;align-items:center;gap:14px;max-width:900px;margin-top:20px;padding:20px;border:1px solid #e0e5f1;border-radius:13px;background:#fff;box-shadow:0 8px 24px rgba(31,42,79,.05)}.profileAvatar{width:52px;height:52px;display:grid;place-items:center;border-radius:50%;background:#ebe8ff;color:#604cf3;flex:none}.profileCard h2{margin:0;font-size:17px;overflow-wrap:anywhere}.profileCard p{margin:4px 0 0;font-size:12px}.profileStatus{margin-left:auto;padding:7px 10px;border-radius:20px;background:#fff1d7;color:#9a6511;font-size:11px;white-space:nowrap}.profileStatus.verified{background:#e6f7ed;color:#187b5f}@media(max-width:700px){.portalSideFoot{display:none}.profileCard{align-items:flex-start;flex-wrap:wrap}.profileStatus{margin-left:66px}}
+.portalSideFoot{flex-direction:column}.portalSideAccount{width:100%;padding-top:4px;overflow:hidden}.portalSideAccount b,.portalSideAccount small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.portalSideAccount b{color:#fff;font-size:12px}.portalSideAccount small{color:#b9b5a9;font-size:10px;margin-top:3px}.portalLogout{justify-content:center!important;margin-top:2px;padding:9px!important;border:1px solid #6d695f!important;background:transparent!important;color:#fff!important;font-size:12px!important}.profileCard{display:flex;align-items:center;gap:14px;max-width:900px;margin-top:20px;padding:20px;border:1px solid #e6e5e0;border-radius:13px;background:#fff;box-shadow:0 8px 24px rgba(31,42,79,.05)}.profileAvatar{width:52px;height:52px;display:grid;place-items:center;border-radius:50%;background:#dceeec;color:#0e6b61;flex:none}.profileCard h2{margin:0;font-size:17px;overflow-wrap:anywhere}.profileCard p{margin:4px 0 0;font-size:12px}.profileStatus{margin-left:auto;padding:7px 10px;border-radius:20px;background:#fff1d7;color:#9a6511;font-size:11px;white-space:nowrap}.profileStatus.verified{background:#e6f7ed;color:#187b5f}@media(max-width:700px){.portalSideFoot{display:none}.profileCard{align-items:flex-start;flex-wrap:wrap}.profileStatus{margin-left:66px}}
 
-.profileLayout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:20px;max-width:980px;margin-top:20px}.profileLeft{display:grid;align-content:start;gap:16px}.profileLayout .profileCard,.profileLayout .profileVerify,.profileLayout .profileSessions,.profileLayout .profilePassword{max-width:none;margin:0}.profileVerify .portalEmailCard{margin:0}.profileSessions{padding:20px;border:1px solid #e0e5f1;border-radius:13px;background:#fff;box-shadow:0 8px 24px rgba(31,42,79,.05)}.profileSessions h2{margin:0 0 16px;font-size:16px}.profileSession{display:flex;align-items:center;gap:13px;padding-top:14px;border-top:1px solid #edf0f7;color:#604cf3}.profileSession div{min-width:0;flex:1}.profileSession b,.profileSession small{display:block}.profileSession b{color:#263655;font-size:13px}.profileSession small{margin-top:4px;color:#687795;font-size:11px}.profileSession>span{padding:6px 9px;border-radius:16px;background:#e6f7ed;color:#187b5f;font-size:10px;white-space:nowrap}.profilePassword{align-self:start}.profilePassword h2{margin-bottom:2px}@media(max-width:900px){.profileLayout{grid-template-columns:1fr}.profilePassword{grid-row:auto}}@media(max-width:700px){.profileLayout{gap:14px}.profileCard{padding:16px}}
+.profileLayout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:20px;max-width:980px;margin-top:20px}.profileLeft{display:grid;align-content:start;gap:16px}.profileLayout .profileCard,.profileLayout .profileVerify,.profileLayout .profileSessions,.profileLayout .profilePassword{max-width:none;margin:0}.profileVerify .portalEmailCard{margin:0}.profileSessions{padding:20px;border:1px solid #e6e5e0;border-radius:13px;background:#fff;box-shadow:0 8px 24px rgba(31,42,79,.05)}.profileSessions h2{margin:0 0 16px;font-size:16px}.profileSession{display:flex;align-items:center;gap:13px;padding-top:14px;border-top:1px solid #f1f0ed;color:#0e6b61}.profileSession div{min-width:0;flex:1}.profileSession b,.profileSession small{display:block}.profileSession b{color:#39362d;font-size:13px}.profileSession small{margin-top:4px;color:#76736a;font-size:11px}.profileSession>span{padding:6px 9px;border-radius:16px;background:#e6f7ed;color:#187b5f;font-size:10px;white-space:nowrap}.profilePassword{align-self:start}.profilePassword h2{margin-bottom:2px}@media(max-width:900px){.profileLayout{grid-template-columns:1fr}.profilePassword{grid-row:auto}}@media(max-width:700px){.profileLayout{gap:14px}.profileCard{padding:16px}}
 
 /* Account page layout. Colors follow the shared light/dark theme (it used to force its own dark palette). */
 .accountLayout .portalPageHead{padding-bottom:26px}.accountLayout .profileLayout{grid-template-columns:minmax(300px,1fr) minmax(360px,.92fr);gap:20px;max-width:960px;margin-top:20px}.accountLayout .profileCard{min-height:90px}.accountLayout .profilePassword{grid-column:2;grid-row:1}.accountLayout .profileVerify{grid-column:1 / -1;grid-row:2}.accountLayout .profileVerify .portalEmailCard{margin:0}@media(max-width:900px){.accountLayout .profileLayout{grid-template-columns:1fr}.accountLayout .profilePassword,.accountLayout .profileVerify{grid-column:auto;grid-row:auto}}
-.profileLogout { margin-left:auto; padding:8px 14px; border:1px solid #d8e0f0; border-radius:8px; background:#fff; color:#b42318; font:inherit; font-size:13px; cursor:pointer; }
+.profileLogout { margin-left:auto; padding:8px 14px; border:1px solid #e2e0da; border-radius:8px; background:#fff; color:#b42318; font:inherit; font-size:13px; cursor:pointer; }
 .profileLogout:hover { border-color:#f1b0a9; background:#fff5f4; }
 .profileLogout:disabled { opacity:.55; cursor:not-allowed; }
 /* v1.1: history search and status filter, in row 2 of the left column (list moves to row 3). */
 .historyFilters { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin:20px 0 0; }
-.historyFilters label { display:grid; gap:6px; font-size:12px; font-weight:600; color:#283857; }
-.historyFilters input,.historyFilters select { font:inherit; font-weight:400; width:100%; min-width:0; box-sizing:border-box; min-height:40px; padding:8px 10px; border:1px solid #e0e5f1; border-radius:8px; background:white; color:#283857; }
+.historyFilters label { display:grid; gap:6px; font-size:12px; font-weight:600; color:#3b382f; }
+.historyFilters input,.historyFilters select { font:inherit; font-weight:400; width:100%; min-width:0; box-sizing:border-box; min-height:40px; padding:8px 10px; border:1px solid #e6e5e0; border-radius:8px; background:white; color:#3b382f; }
 .customerHistory { grid-template-rows: auto auto 1fr auto; }
 .customerHistory .historyFilters { grid-column: 1; grid-row: 2; }
 .customerHistory .accountHistoryList { grid-row: 3; margin-top: 14px; }
 .accountHistoryList b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-[data-theme=dark] .historyFilters label { color:#d4deed; }
-[data-theme=dark] .historyFilters :is(input,select) { background:#202c3d; border-color:#475569; color:#e2e8f0; }
+[data-theme=dark] .historyFilters label { color:#dfddd7; }
+[data-theme=dark] .historyFilters :is(input,select) { background:#2d2b25; border-color:#56544d; color:#e9e7e4; }
 /* Dark theme for portal surfaces that were left white: order help, FAQ search and cards, history, profile. */
-[data-theme=dark] :is(.portalOrderHelp,.portalSearch,.portalPolicyGrid button,.accountHistoryDetail,.accountHistoryList button,.profileCard) { background:#202c3d; color:#e2e8f0; border-color:#475569; box-shadow:none; }
-[data-theme=dark] :is(.portalOrderHelp h2,.accountHistoryDetail h2,.profileCard h2,.profilePassword h2,.portalPolicyGrid strong,.accountHistoryList b) { color:#f1f5f9; }
-[data-theme=dark] :is(.portalOrderHelp li,.portalSearch input::placeholder,.portalPolicyGrid small,.accountHistoryList span,.accountHistoryList small,.accountHistoryDetail>p,.profileCard p) { color:#b7c9e2; }
-[data-theme=dark] :is(.portalPolicyGrid button:hover,.accountHistoryList button:hover) { background:#27354a; border-color:#8f80f4; }
-[data-theme=dark] .accountHistoryList button[aria-pressed=true] { background:#302b4a; border-color:#8f80f4; }
-[data-theme=dark] .accountPager button { background:#202c3d; color:#d4caff; border-color:#475569; }
-[data-theme=dark] .accountPager span { color:#b7c9e2; }
-[data-theme=dark] :is(.portalPageHead,.portalContextBlock,.portalQuestions button) { border-color:#334155; }
+[data-theme=dark] :is(.portalOrderHelp,.portalSearch,.portalPolicyGrid button,.accountHistoryDetail,.accountHistoryList button,.profileCard) { background:#2d2b25; color:#e9e7e4; border-color:#56544d; box-shadow:none; }
+[data-theme=dark] :is(.portalOrderHelp h2,.accountHistoryDetail h2,.profileCard h2,.profilePassword h2,.portalPolicyGrid strong,.accountHistoryList b) { color:#f5f4f2; }
+[data-theme=dark] :is(.portalOrderHelp li,.portalSearch input::placeholder,.portalPolicyGrid small,.accountHistoryList span,.accountHistoryList small,.accountHistoryDetail>p,.profileCard p) { color:#cbc7bd; }
+[data-theme=dark] :is(.portalPolicyGrid button:hover,.accountHistoryList button:hover) { background:#37342d; border-color:#4c9d94; }
+[data-theme=dark] .accountHistoryList button[aria-pressed=true] { background:#1e3330; border-color:#4c9d94; }
+[data-theme=dark] .accountPager button { background:#2d2b25; color:#b0d9d4; border-color:#56544d; }
+[data-theme=dark] .accountPager span { color:#cbc7bd; }
+[data-theme=dark] :is(.portalPageHead,.portalContextBlock,.portalQuestions button) { border-color:#424039; }
 [data-theme=dark] .profileStatus { background:#514622; color:#ffd978; }
 [data-theme=dark] .profileStatus.verified { background:#164c3c; color:#8df0c1; }
-[data-theme=dark] .profileLogout { background:#202c3d; color:#ffb4a8; border-color:#6b4a4a; }
+[data-theme=dark] .profileLogout { background:#2d2b25; color:#ffb4a8; border-color:#6b4a4a; }
 [data-theme=dark] .profileLogout:hover { background:#3a2529; border-color:#a8605a; }
-[data-theme=dark] .portalSearch input { color:#e2e8f0; }
+[data-theme=dark] .portalSearch input { color:#e9e7e4; }
 /* K6: on desktop the sidebar already has Đăng xuất; the page button is for phones, where the sidebar is hidden. */
 @media(min-width:701px) { .customerProfile .profileLogout { display:none; } }
 /* K6: the email gets the full row; the verification badge sits under it instead of squeezing it into four lines. */
