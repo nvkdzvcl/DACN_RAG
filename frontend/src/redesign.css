@@ -125,6 +125,7 @@
 [data-theme=dark] .customerWidget.customerWidget .widgetMessage > b { color: var(--rd-ink); }
 [data-theme=dark] .customerWidget.customerWidget .widgetMessage > p { background: var(--rd-accent-soft); color: var(--rd-ink-2); }
 [data-theme=dark] .customerWidget.customerWidget .widgetMessage.widgetOwn > p { background: #0e6b61; color: #fff; }
+[data-theme=dark] .customerWidget.customerWidget .widgetMessage.from-agent > p { background: #1f2a4d; border-left-color: #8ea6f2; }
 [data-theme=dark] .customerWidget.customerWidget .widgetHeader .widgetEnd { background: transparent; border-color: transparent; color: var(--rd-ink-2); }
 [data-theme=dark] .customerWidget.customerWidget .widgetHeader .widgetHandoff { background: var(--rd-surface); border-color: var(--rd-line-strong); color: var(--rd-ink); }
 [data-theme=dark] .customerWidget.customerWidget .widgetStatus { background: var(--rd-bg); color: var(--rd-ink-2); }

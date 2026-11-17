@@ -35,7 +35,7 @@
 :root[data-theme=dark] .portalMobileNav button[aria-current=page]{background:#233936;color:#b0d9d4}
 :root[data-theme=dark] .portalOrderResult>span{background:#183d35;color:#a2e1c5}
 :root[data-theme=dark] :is(.authPage,.customerWidget,.customerPortal) :focus-visible{outline-color:#7abfb7}
-:root[data-theme=dark] .widgetLatest{background:#3f3d35;color:#e9e7e4}
+:root[data-theme=dark] .widgetLatest button{background:#2d2b25;color:#b0d9d4;border-color:#56544d}:root[data-theme=dark] .widgetLatest button:hover{background:#3c3932}
 .widgetHeader .themeToggle{order:4;flex:none;width:44px;padding:8px}
 .widgetHeader .themeToggle span{display:none}
 :root[data-theme=dark] .widgetOrderAccess{background:#2d2b25;border-color:#56544d;color:#e9e7e4}
