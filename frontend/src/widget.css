@@ -122,8 +122,12 @@ body:has(.customerWidget) { background: radial-gradient(circle at 15% 10%, #eceb
 .widgetFooter>form{flex:none}
 .widgetFooter>.widgetError{flex:none;margin:6px 0}
 .widgetFooterTools:focus-visible{outline:2px solid var(--widget-green);outline-offset:-2px}
-.widgetLatest{display:flex;align-items:center;justify-content:center;gap:10px;flex:none;padding:6px 12px;background:var(--widget-ink);color:white;font-size:12px}
-.widgetLatest button{background:white;color:#193d36;border:0;padding:6px 10px;min-height:36px}
+/* Jump to latest: a zero-height anchor between the log and the footer; the arrow floats over the bottom-right of the log. */
+.widgetLatest{position:relative;flex:none;height:0;z-index:2}
+.widgetLatestInner{position:absolute;right:18px;bottom:14px;display:flex;align-items:center;gap:8px}
+.widgetLatestBadge{padding:6px 12px;border-radius:999px;background:#604cf3;color:#fff;font-size:12px;font-weight:600;box-shadow:0 4px 14px #17244333}
+.widgetLatest button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid #dcd8f5;border-radius:50%;background:#fff;color:#604cf3;box-shadow:0 4px 14px #17244333;cursor:pointer}
+.widgetLatest button:hover{background:#f1efff}
 .pendingNotice{padding:8px 0;font-size:12px}
 .pendingNotice p{margin:4px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .pendingNotice summary{cursor:pointer;padding:6px 0}

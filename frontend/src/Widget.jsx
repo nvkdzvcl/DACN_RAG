@@ -1,7 +1,7 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X, Headphones } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X, Headphones, ArrowDown } from 'lucide-react';
 
 function GoogleIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
@@ -346,7 +346,7 @@ export default function Widget() {
         {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}
       </div>
-      {!messageBefore && !atLatest && <div className="widgetLatest"><span role="status">{hasNewMessages ? 'Có tin mới' : 'Đang xem tin phía trên'}</span><button type="button" onClick={jumpLatest}>Về tin mới nhất</button></div>}
+      {!messageBefore && !atLatest && <div className="widgetLatest"><div className="widgetLatestInner">{hasNewMessages ? <span className="widgetLatestBadge" role="status">Có tin mới</span> : <span className="srOnly" role="status">Đang xem tin phía trên</span>}<button type="button" onClick={jumpLatest} aria-label="Về tin mới nhất" title="Về tin mới nhất"><ArrowDown size={20} aria-hidden="true" /></button></div></div>}
       <footer className="widgetFooter">
         <div className="widgetFooterTools" tabIndex={0} role="region" aria-label="Thao tác hội thoại">
         {!closed && embedded && <details className="widgetOrderAccess"><summary>Quyền tra cứu đơn</summary>
