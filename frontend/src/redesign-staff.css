@@ -256,3 +256,7 @@
 .shell .management .pickerResults button { width: 100%; justify-items: start; justify-content: start; text-align: left; }
 .shell .management .recordForm label > small, .shell .management .recordForm > fieldset > small { font-size: 12px; font-weight: 400; line-height: 1.45; color: var(--rd-muted); }
 .shell .management .recordForm label > small.fieldWarn { color: #9a4b06; } .shell[data-theme=dark] .management .recordForm label > small.fieldWarn { color: #f2c47c; }
+/* Picker rows keep their natural height (two lines) and the list scrolls; rows never squeeze into each other. */
+.shell .pickerResults { display: flex; flex-direction: column; }
+.shell .management .pickerResults > * { flex: none; }
+.shell .management .pickerResults button { height: auto; line-height: 1.35; }
