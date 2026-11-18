@@ -36,7 +36,8 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 | Nhóm API          | Method | Đường dẫn (Path)                   | Chức năng                              | Quyền truy cập                                     | Mã Use Case |
 | ----------------- | ------ | ---------------------------------- | -------------------------------------- | -------------------------------------------------- | ----------- |
 | Quyền tra cứu đơn | POST   | `/api/v1/widget/order-access`      | Nhập và xác nhận mã quyền tra cứu đơn  | Phiên khách Website + CSRF                         | UC13        |
-| Tra cứu đơn hàng  | GET    | `/api/v1/widget/orders/{order_id}` | Xem đơn hàng đã được cấp quyền tra cứu | Phiên khách Website đã được cấp quyền cho đúng đơn | UC13        |
+| Tra cứu đơn hàng  | GET    | `/api/v1/widget/orders`            | Danh sách đơn của chính khách (tối đa 20) | Phiên khách Website, tài khoản đã xác minh email | UC13        |
+| Tra cứu đơn hàng  | GET    | `/api/v1/widget/orders/{order_id}` | Xem đơn của chính khách hoặc đơn đã được cấp quyền | Phiên khách Website: đơn của khách, hoặc đã cấp quyền đúng đơn | UC13        |
 
 ## 4. Nhóm quản lý tài khoản khách
 
@@ -209,6 +210,8 @@ Tiền tố /api/v1/workspace. GET yêu cầu Staff; POST/PATCH yêu cầu CSRF.
 status đơn nhận processing/paid/shipping/shipped/delivered/cancelled. tracking_code được viết hoa và bỏ khoảng trắng rồi phải khớp `^[A-Z0-9][A-Z0-9-]{6,28}[A-Z0-9]$` (8–30 ký tự); chuỗi rỗng là null. Không đổi chủ đơn/xóa qua workspace. Công thức thống kê, phạm vi quản trị và bằng chứng tại [WORKSPACE.md](WORKSPACE.md). API /auth/users hiện có được dùng để tạo tài khoản từ Cài đặt; không thêm endpoint tạo tài khoản trùng.
 
 ## Mã truy cập từng đơn
+
+Đơn mà nhân viên đã gắn với khách của hội thoại (tài khoản khách giữ một Customer cố định) xem được qua `GET /api/v1/widget/orders` và `GET /api/v1/widget/orders/{order_id}` mà không cần mã; quy tắc giống công cụ tra đơn trong chat. Chi tiết tại [ORDER_ACCESS.md](ORDER_ACCESS.md).
 
 Bổ sung POST và DELETE /api/v1/workspace/orders/{order_id}/access-code cho Admin + CSRF, POST /api/v1/widget/order-access cho phiên khách + CSRF. Snapshot widget bổ sung order_access, chỉ có mã đơn và thời điểm hết quyền, không có mã truy cập/hash. Hợp đồng payload, trạng thái lỗi, retry, rotation và giới hạn tại [ORDER_ACCESS.md](ORDER_ACCESS.md).
 

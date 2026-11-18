@@ -224,6 +224,38 @@ class CustomerAuthTests(unittest.TestCase):
         self.assertEqual(self.login().status_code, 200)
         self.assertEqual(self.client.get(ACCOUNT + '/conversations').json()['total'], 2)
 
+    def test_signed_in_customer_sees_own_orders_without_access_code(self):
+        self.register(verified=True)
+        self.register(self.other, 'other@example.com', verified=True)
+        with Session(self.engine) as db:
+            mine = db.query(CustomerAccount).filter_by(email='customer@example.com').one().customer_id
+            theirs = db.query(CustomerAccount).filter_by(email='other@example.com').one().customer_id
+            db.add_all([Order(id='DH2611180001', customer_id=mine, status='shipping', tracking_code='VN00000001'),
+                        Order(id='DH2611180002', customer_id=mine, status='processing'),
+                        Order(id='DH2611189999', customer_id=theirs, status='delivered', tracking_code='VN99999999')])
+            db.commit()
+        listed = self.client.get(COOKIE_PATH + '/orders')
+        self.assertEqual(listed.status_code, 200, listed.text)
+        self.assertEqual(listed.headers['cache-control'], 'no-store')
+        self.assertEqual([o['order_id'] for o in listed.json()['orders']], ['DH2611180002', 'DH2611180001'])
+        own = self.client.get(COOKIE_PATH + '/orders/DH2611180001')
+        self.assertEqual(own.json(), {'order_id': 'DH2611180001', 'status': 'shipping', 'tracking_code': 'VN00000001'})
+        # Another customer's order stays hidden without a code, and is not listed.
+        self.assertEqual(self.client.get(COOKIE_PATH + '/orders/DH2611189999').status_code, 404)
+        self.assertEqual([o['order_id'] for o in self.other.get(COOKIE_PATH + '/orders').json()['orders']], ['DH2611189999'])
+        self.assertEqual(self.other.get(COOKIE_PATH + '/orders/DH2611180001').status_code, 404)
+        # Still the same customer after "Chat mới"; a guest chat has no orders.
+        self.assertEqual(self.client.delete(COOKIE_PATH + '/session').status_code, 200)
+        self.assertEqual(len(self.client.get(COOKIE_PATH + '/orders').json()['orders']), 2)
+        guest = TestClient(app, headers={'X-CSRF-Protection': '1'}); self.addCleanup(guest.close)
+        guest.post(COOKIE_PATH + '/session', json={'display_name': 'Guest'})
+        self.assertEqual(guest.get(COOKIE_PATH + '/orders').json(), {'orders': []})
+        self.assertEqual(guest.get(COOKIE_PATH + '/orders/DH2611180001').status_code, 404)
+
+    def test_unverified_account_cannot_list_orders(self):
+        self.register(verified=False)
+        self.assertEqual(self.client.get(COOKIE_PATH + '/orders').status_code, 403)
+
     def test_history_filters_by_status_and_search_with_first_question_preview(self):
         first = self.register(verified=True)
         own = first['conversation_id']

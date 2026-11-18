@@ -1,7 +1,7 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, History, Search as SearchIcon, X, Headphones, Headset, ArrowDown, Info, Package, Check } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, History, Search as SearchIcon, X, Headphones, Headset, ArrowDown, Info, Package, Check, ChevronDown } from 'lucide-react';
 
 import './widget.css';
 import MessageInput from './MessageInput';
@@ -81,6 +81,8 @@ export default function Widget() {
   const [orderResult, setOrderResult] = useState(null);
   const [orderError, setOrderError] = useState('');
   const [orderLoading, setOrderLoading] = useState(false);
+  const [myOrders, setMyOrders] = useState(null);
+  const [codeOpen, setCodeOpen] = useState(false);
   const embedded = new URLSearchParams(window.location.search).get('embed') === '1';
   const sequence = useRef(0);
   const pending = savedDrafts.pending[session?.conversation_id];
@@ -224,7 +226,7 @@ export default function Widget() {
   }
   function clearIdentity(message = '') {
     ++sequence.current; setSession(null); setMessageCursors([]); setView('messages');
-    setOrderResult(null); setOrderId(''); setOrderError(''); setConnectionError(''); setNotice(message);
+    setOrderResult(null); setOrderId(''); setOrderError(''); setMyOrders(null); setConnectionError(''); setNotice(message);
     handoffId.current = null; setAuthMode(embedded ? 'guest' : 'login');
     setEmailAction(current => current?.mode === 'register-code' ? null : current);
   }
@@ -305,7 +307,7 @@ export default function Widget() {
     const version = ++sequence.current;
     setBusy(true); setOrderLoading(true); setOrderError(''); setOrderResult(null);
     try {
-      const permitted = session.order_access?.some(access => access.order_id === normalized && access.expires_at > Date.now() / 1000);
+      const permitted = myOrders?.some(order => order.order_id === normalized) || session.order_access?.some(access => access.order_id === normalized && access.expires_at > Date.now() / 1000);
       if (!permitted) {
         const updated = await request('/order-access', { method: 'POST', body: JSON.stringify({ order_id: normalized, code }) });
         apply(updated, version);
@@ -318,6 +320,14 @@ export default function Widget() {
     } finally { setBusy(false); setOrderLoading(false); }
   }
   function askSuggestion(question) { setDraft(question); setView('messages'); }
+  // Orders attached to this customer by staff open without an access code; reload when the page or chat changes.
+  useEffect(() => {
+    if (view !== 'orders' || !session || authMode !== 'guest') return;
+    const controller = new AbortController();
+    request('/orders', { signal: controller.signal }).then(data => { if (!controller.signal.aborted) setMyOrders(Array.isArray(data.orders) ? data.orders : []); })
+      .catch(error => { if (!controller.signal.aborted) { setMyOrders([]); if (error.status === 401) clearIdentity(); } });
+    return () => controller.abort();
+  }, [view, session?.conversation_id, authMode]);
   const chat = <section className="customerWidget" role={embedded ? 'main' : undefined}>
     <header className="widgetHeader"><ThemeToggle /><span className="widgetMark"><Bot aria-hidden="true" /></span><div><h1>Hỗ trợ khách hàng</h1><p>{session ? <span className={`statusPill status-${session.status}`}>{statuses[session.status] || session.status}</span> : 'Cùng bạn tìm câu trả lời'}</p></div>
       {session && session.status === 'open' && authMode === 'guest' && <button className="widgetHandoff" onClick={handoff} disabled={handoffBusy || historyLoading} aria-label="Gặp nhân viên" title="Gặp nhân viên"><Headset size={16} aria-hidden="true" /><span className="btnLabel">{handoffBusy ? 'Đang chuyển...' : 'Gặp nhân viên'}</span></button>}
@@ -408,16 +418,19 @@ export default function Widget() {
       {session?.account && <div className="portalSideFoot"><button type="button" className="portalSideAccount" onClick={() => setView('account')} aria-label={`Tài khoản: ${session.display_name || session.account.email}`}><span className="portalAvatar" aria-hidden="true">{initials(session.display_name || session.account.email)}</span><span><b>{session.display_name || session.account.email}</b><small>{session.account.email}</small></span></button><button className="portalLogout" onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></div>}
     </div>
     <div className="portalMain" role="main"><nav className="portalMobileNav" aria-label="Dịch vụ khách hàng">{pages.map(([Icon, label, key]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}><Icon size={16} />{label}</button>)}</nav>
-      {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onOpenChat={() => setView('messages')} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} displayName={session.display_name} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => { clearIdentity(''); setToast('Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.'); }} onLogout={logout} logoutDisabled={busy || handoffBusy || historyLoading} /> : view === 'orders' ? <section className="portalPage ordersPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><div><h1>Tra cứu đơn hàng</h1><p>Xem trạng thái và mã vận đơn bằng mã truy cập cửa hàng cấp cho bạn.</p></div></div>
+      {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onOpenChat={() => setView('messages')} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} displayName={session.display_name} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => { clearIdentity(''); setToast('Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.'); }} onLogout={logout} logoutDisabled={busy || handoffBusy || historyLoading} /> : view === 'orders' ? <section className="portalPage ordersPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><div><h1>Tra cứu đơn hàng</h1><p>{session?.account ? 'Đơn gắn với tài khoản của bạn hiện sẵn bên dưới. Đơn khác cần mã truy cập cửa hàng cấp.' : 'Xem trạng thái và mã vận đơn bằng mã truy cập cửa hàng cấp cho bạn.'}</p></div></div>
         {!session ? <div className="portalEmpty"><p>Bắt đầu phiên trò chuyện để tra cứu đơn.</p><button onClick={() => setView('messages')}>Bắt đầu trò chuyện <ArrowRight size={16} /></button></div> : <div className="orderLayout"><div className="orderSide">
-          <form className="portalOrderForm" onSubmit={event => { event.preventDefault(); inspectOrder(orderId, new FormData(event.currentTarget).get('code')); }}><label>Mã đơn<input value={orderId} onChange={event => { setOrderId(event.target.value); setOrderResult(null); }} placeholder="Ví dụ: DH12345" required minLength={6} maxLength={64} autoComplete="off" /></label>
-            {!activeAccess.some(access => access.order_id === orderId.trim().toUpperCase()) && <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} placeholder="Mã do cửa hàng cấp" /><small>Nhân viên gửi mã này sau khi xác minh bạn là chủ đơn.</small></label>}
+          {myOrders?.length > 0 && <div className="portalAccess myOrders"><h2>Đơn của bạn</h2>{myOrders.map(order => <button key={order.order_id} aria-pressed={orderResult?.order_id === order.order_id} onClick={() => { setOrderId(order.order_id); inspectOrder(order.order_id, ''); }}><Package size={16} aria-hidden="true" /><b>{order.order_id}</b><span className={`statusPill order-${order.status}`}>{orderStatuses[order.status] || order.status}</span></button>)}</div>}
+          {myOrders?.length > 0 && <button type="button" className="codeToggle" aria-expanded={codeOpen} aria-controls="orderCodeForm" onClick={() => setCodeOpen(open => !open)}>{codeOpen ? 'Thu gọn tra đơn bằng mã' : 'Đơn không có trong danh sách? Tra bằng mã truy cập'}<ChevronDown size={16} aria-hidden="true" /></button>}
+          {(!myOrders?.length || codeOpen) && <form id="orderCodeForm" className="portalOrderForm" onSubmit={event => { event.preventDefault(); inspectOrder(orderId, new FormData(event.currentTarget).get('code')); }}><label>Mã đơn<input value={orderId} onChange={event => { setOrderId(event.target.value); setOrderResult(null); }} placeholder="Ví dụ: DH2611187KQ4" required minLength={6} maxLength={64} autoComplete="off" /></label>
+            {!activeAccess.some(access => access.order_id === orderId.trim().toUpperCase()) && !myOrders?.some(order => order.order_id === orderId.trim().toUpperCase()) && <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} placeholder="Mã do cửa hàng cấp" /><small>Nhân viên gửi mã này sau khi xác minh bạn là chủ đơn.</small></label>}
             <button disabled={busy || orderLoading}>{orderLoading ? 'Đang tra cứu...' : 'Xem đơn hàng'}</button>
-            <p className="orderNote"><Info size={16} aria-hidden="true" /><span>Mã truy cập chỉ dùng để xác nhận quyền tra đơn. Không gửi mã trong tin nhắn. Quyền tra đơn gắn với cuộc trò chuyện hiện tại và hết hạn sau 15 phút; khi bấm Chat mới bạn cần mã mới.</span></p></form>
+            <p className="orderNote"><Info size={16} aria-hidden="true" /><span>Mã truy cập dùng cho cuộc trò chuyện này, hết hạn sau 15 phút; khi bấm Chat mới bạn cần mã mới. Không gửi mã trong tin nhắn.</span></p></form>}
           {activeAccess.length > 0 && <div className="portalAccess"><h2>Đơn đã mở trong phiên này</h2>{activeAccess.map(access => <button key={access.order_id} onClick={() => { setOrderId(access.order_id); inspectOrder(access.order_id, ''); }}><Package size={16} aria-hidden="true" /><b>{access.order_id}</b><small>còn {Math.max(1, Math.ceil((access.expires_at - Date.now() / 1000) / 60))} phút</small></button>)}</div>}
         </div><div className="orderMain">
           {orderError && <p className="widgetError" role="alert">{orderError}</p>}
-          {orderResult && activeAccess.some(access => access.order_id === orderResult.order_id) ? <OrderResult order={orderResult} onAsk={() => askSuggestion('Chính sách đổi trả hàng như thế nào?')} onHandoff={session.status === 'open' ? () => { setView('messages'); handoff(); } : null} /> : <div className="portalOrderHelp"><h2>Lấy mã truy cập ở đâu?</h2><ol><li>Liên hệ cửa hàng qua kênh đã xác minh (điện thoại hoặc email đặt hàng).</li><li>Nhân viên kiểm tra chủ đơn rồi cấp mã riêng cho từng đơn.</li><li>Nhập mã đơn và mã truy cập ở đây; kết quả hiện ở khung này.</li></ol></div>}
+          {orderResult && (myOrders?.some(order => order.order_id === orderResult.order_id) || activeAccess.some(access => access.order_id === orderResult.order_id)) ? <OrderResult order={orderResult} onAsk={() => askSuggestion('Chính sách đổi trả hàng như thế nào?')} onHandoff={session.status === 'open' ? () => { setView('messages'); handoff(); } : null} /> : <div className="portalOrderHelp">{myOrders?.length > 0 && !codeOpen ? <><h2>Chọn một đơn để xem</h2><p>Bấm vào đơn trong mục Đơn của bạn. Kết quả hiện ở khung này.</p></>
+            : <><h2>Lấy mã truy cập ở đâu?</h2><ol>{myOrders?.length > 0 && <li>Đơn của bạn nhưng không có trong danh sách: nhờ cửa hàng gắn đơn vào tài khoản, khi đó không cần mã nữa.</li>}<li>Liên hệ cửa hàng qua kênh đã xác minh (điện thoại hoặc email đặt hàng).</li><li>Nhân viên kiểm tra chủ đơn rồi cấp mã riêng cho từng đơn.</li></ol></>}</div>}
         </div></div>}
       </section> : <section className="portalPage" aria-label="Hỏi đáp chính sách"><div className="portalPageHead"><span className="portalPageIcon"><BookOpen size={22} /></span><div><h1>Hỏi đáp chính sách</h1><p>Đặt câu hỏi cho trợ lý AI. Câu trả lời sẽ kèm trích nguồn khi tìm được tài liệu.</p></div></div><form className="portalSearch" role="search" onSubmit={event => { event.preventDefault(); const question = new FormData(event.currentTarget).get('question').trim(); if (question) askSuggestion(question); }}><SearchIcon aria-hidden="true" /><input name="question" aria-label="Câu hỏi về chính sách" maxLength={400} placeholder="Nhập câu hỏi về chính sách rồi nhấn Enter..." /><button type="submit">Hỏi trợ lý</button></form><div className="portalPolicyGrid">{policyGroups.map(([title, description, question]) => <button type="button" key={title} onClick={() => askSuggestion(question)}><strong>{title}</strong><small>{description}</small></button>)}</div><div className="portalQuestions"><h2>Câu hỏi thường gặp</h2>{suggestions.map(question => <button key={question} onClick={() => askSuggestion(question)}>{question}<ArrowRight size={17} /></button>)}</div><div className="portalEmpty"><p>Không tìm thấy chính sách bạn cần?</p><button onClick={() => setView('messages')}>Mở trò chuyện <ArrowRight size={16} /></button></div></section>}
     </div>

@@ -10,12 +10,24 @@ Ngày 21/09/2026. Khách widget có thể nhận quyền xem trạng thái và m
 4. Khách nhập mã đơn và mã truy cập ở mục **Tra đơn** trên `/chat` hoặc **Quyền tra cứu đơn** trong widget nhúng. Sau khi được cấp quyền, trang `/chat` xem được trạng thái và mã vận đơn; widget nhúng có thể gửi câu hỏi chứa mã đơn. Mã truy cập nhập ở biểu mẫu riêng không được thêm vào Message hay gửi tới model.
 5. Admin chọn **Thu hồi quyền** để chặn các lần tra tiếp theo. Thu hồi không xóa câu trả lời đã được phép xem trước đó.
 
+## Đơn của chính khách (18/11/2026)
+
+Tài khoản khách giữ một Customer cố định qua mọi cuộc trò chuyện. Khi tạo đơn, nhân viên chọn đúng Customer đó; việc chọn này là bước xác minh chủ đơn. Vì vậy đơn có `customer_id` trùng với khách của hội thoại xem được mà không cần mã:
+
+- `GET /api/v1/widget/orders` trả tối đa 20 đơn của khách (order_id, status, tracking_code), no-store; trang **Tra đơn** hiện mục **Đơn của bạn**.
+- `GET /api/v1/widget/orders/{order_id}` chấp nhận đơn của khách hoặc đơn đã cấp quyền bằng mã; đơn của người khác vẫn trả 404.
+- Cùng quy tắc với công cụ tra đơn trong chat (`lookup_order` đã cho phép đơn của khách hội thoại từ trước).
+- Tài khoản chưa xác minh email bị chặn như mọi API chat (403). Khách vãng lai có Customer riêng cho từng phiên nên thường không có đơn; hội thoại đã đóng không trả đơn.
+- Mã truy cập vẫn dùng cho đơn chưa gắn vào tài khoản: khách vãng lai, Telegram, hoặc khi nhân viên chưa xác định được tài khoản.
+
+Test: `python -m unittest app.tests.test_customer_auth -k own_orders` và `-k cannot_list_orders`.
+
 ## Phạm vi và thời hạn
 
 - Mã có 256 bit ngẫu nhiên, dạng URL-safe dài 43 ký tự; DB chỉ lưu SHA-256. Không đặt mã trong URL, localStorage hay log ứng dụng.
 - Mỗi đơn giữ tối đa một mã/quyền hiện tại, hết hạn sau 15 phút tính từ lúc cấp, không gia hạn lúc nhập. Phiên widget hết hạn hoặc kết thúc thì quyền cũng không dùng được.
 - Lần nhập thành công ràng buộc mã vào một hội thoại có phiên widget còn hiệu lực. Gửi lại cùng mã từ cùng phiên được chấp nhận để phục hồi khi mất phản hồi; phiên khác bị từ chối.
-- Chỉ cho xem đúng đơn được cấp quyền. Không đổi Customer của hội thoại, không mở các đơn khác cùng chủ, không gộp hồ sơ, không cấp quyền sửa/hủy đơn.
+- Mã chỉ cho xem đúng đơn được cấp quyền. Không đổi Customer của hội thoại, không mở các đơn khác cùng chủ, không gộp hồ sơ, không cấp quyền sửa/hủy đơn. (Đơn đã gắn với chính khách của hội thoại được xem không cần mã, xem mục trên.)
 - Kiểm tra chủ đơn tại lúc cấp, nhập mã và tra cứu. Thay chủ đơn làm quyền cũ không còn hợp lệ.
 - Không đổi trạng thái handoff khi nhập mã: AI vẫn dừng nếu đã chuyển nhân viên. Hội thoại đóng không nhận mã.
 - Quyền được kiểm tra lại sau khi model chọn tool. Thu hồi, hết hạn hoặc kết thúc phiên trong lúc model chạy chặn phản hồi tra đơn mới.
