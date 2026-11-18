@@ -3,9 +3,6 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
 import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, ShieldCheck, History, Search as SearchIcon, X, Headphones, ArrowDown, Info, Package, Check } from 'lucide-react';
 
-function GoogleIcon() {
-  return <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.53A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.53 13.83a5.86 5.86 0 0 1 0-3.66V7.64H3.29a9.75 9.75 0 0 0 0 8.72l3.24-2.53Z"/><path fill="#EA4335" d="M12 6.14c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.21 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.39l3.24 2.53C7.3 7.86 9.46 6.14 12 6.14Z"/></svg>;
-}
 import './widget.css';
 import MessageInput from './MessageInput';
 import './portal.css';
@@ -341,7 +338,7 @@ export default function Widget() {
         {authMode === 'register' && <><label>Nhập lại mật khẩu<input name="confirm" type="password" required minLength={8} maxLength={128} pattern={PASSWORD_RULE} title={PASSWORD_HINT} autoComplete="new-password" /></label><small>Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</small></>}
         <button>{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
       </fieldset></form>
-      {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button type="button" className="authGoogle" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.') }><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}{authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}{authMode !== 'guest' && <small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small>}
+      {authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}{authMode !== 'guest' && <small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small>}
       {notice && <p role="status">{notice}</p>}{error && <div className="widgetError" role="alert"><p>{error}</p>{authMode === 'guest' && <button onClick={() => { setError(''); setRetry(n => n + 1); }} disabled={busy}>Thử kết nối lại</button>}</div>}
     </section> : <>
       {(session.message_page.has_more || messageCursors.length > 0 || historyLoading) && <nav className="widgetHistory" aria-label="Phân trang tin nhắn" aria-busy={historyLoading}>
@@ -400,7 +397,6 @@ export default function Widget() {
     </fieldset></form>
     {notice && <p className="authFeedback" role="status">{notice}</p>}{error && <p className="authFeedback" role="alert">{error}</p>}
     {authMode === 'login' && <div className="authRow"><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></div>}
-    {['login', 'register'].includes(authMode) && <><div className="authDivider"><span>hoặc</span></div><button className="authGoogle" type="button" onClick={() => setNotice('Đăng nhập Google sẽ được tích hợp sau.')}><GoogleIcon /><span>{authMode === 'register' ? 'Đăng ký bằng Google' : 'Đăng nhập bằng Google'}</span></button></>}
     {authMode === 'register' && <p className="authHelp">Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</p>}
     {toast && <div className="successToast" role="status"><span aria-hidden="true">✓</span>{toast}</div>}
   </AuthLayout>;

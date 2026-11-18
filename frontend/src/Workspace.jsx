@@ -1,18 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Search, Plus, RefreshCw, X, MessagesSquare, UsersRound, ShoppingBag, BookOpen, TicketCheck, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, Search, Plus, RefreshCw, X } from 'lucide-react';
 import './workspace.css';
 import useData from './useData';
 import LoadState from './LoadState';
 import Overview from './Overview';
+import Analytics from './Analytics';
 import PasswordRules from './PasswordRules';
-import { channelNames, conversationStatuses, formatDate, formatDateTime, formatDay, formatMinutes, shortId } from './shared';
+import { conversationStatuses, formatDateTime, shortId } from './shared';
 
 const orderLabels = { processing: 'Đang xử lý', paid: 'Đã thanh toán', shipping: 'Đang giao', shipped: 'Đã gửi hàng', delivered: 'Đã giao', cancelled: 'Đã hủy' };
 const chatLabels = conversationStatuses;
-const slaLabels = { met: 'Phản hồi đúng hạn', breached: 'Phản hồi trễ', on_track: 'Đang chờ, trong hạn', overdue: 'Đang chờ, quá hạn', cancelled: 'Kết thúc trước phản hồi' };
 const fieldsOf = (event) => Object.fromEntries(new FormData(event.currentTarget));
 const labelOf = (labels, value) => labels[value] || value;
-const number = value => value == null ? 'Chưa có' : value.toLocaleString('vi-VN');
 
 
 
@@ -21,30 +20,8 @@ function Pager({ total, offset, setOffset }) {
 }
 
 function Badge({ value, labels = orderLabels }) {
-  return <span className={`recordBadge record-${value}`}>{labelOf(labels, value)}</span>;
-}
-
-function Metrics({ page, request, onExpired, navigate }) {
-  const [days, setDays] = useState(7);
-  const state = useData(`/workspace/summary?days=${days}`, request, onExpired, true);
-  const mine = useData(page === 'overview' ? '/inbox/conversations?assignment=mine&status=assigned&limit=1' : null, request, onExpired, true);
-  const overdue = useData(page === 'overview' ? '/inbox/conversations?sla=overdue&limit=1' : null, request, onExpired, true);
-  const data = state.data, period = data?.period;
-  const overview = page === 'overview';
-  const sources = overview ? [state, mine, overdue] : [state];
-  const updatedAt = sources.every(source => source.updatedAt) ? sources.map(source => source.updatedAt).sort()[0] : null;
-  return <section className="management"><header><div><p className="eyebrow">KHÔNG GIAN HỖ TRỢ</p><h1>{overview ? 'Tổng quan' : 'Phân tích hỗ trợ'}</h1><p>{overview ? 'Nắm tình hình và tiếp tục công việc trong ngày.' : 'Theo dõi lưu lượng hội thoại và phản hồi nhân viên.'}</p></div><div className="toolbar"><label>Khoảng thống kê<select value={days} onChange={e => setDays(Number(e.target.value))}>{[7, 30, 90].map(n => <option key={n} value={n}>{n} ngày</option>)}</select></label><button onClick={() => { state.reload(); mine.reload(); overdue.reload(); }} disabled={state.loading}><RefreshCw size={16} />Làm mới</button></div></header>
-    <p className="dashboardSync" role="status">{sources.some(source => source.error) ? 'Cập nhật thất bại · Số liệu có thể đã cũ.' : sources.some(source => source.loading) ? 'Đang cập nhật...' : 'Đã cập nhật.'} {updatedAt ? <>Cập nhật gần nhất: <time dateTime={updatedAt}>{formatDateTime(updatedAt)}</time>.</> : 'Chưa đủ số liệu mới.'} Tự làm mới khi quay lại tab.</p>
-    <LoadState state={state} />{data && <>
-      {overview && <section className="workQueue" aria-label="Hội thoại cần xử lý"><h2>Cần xử lý hiện tại</h2><p>Hội thoại hiện tại, không giới hạn theo khoảng thống kê.</p><LoadState state={mine} /><LoadState state={overdue} /><div className="quickLinks">{[['Chờ nhân viên', data.conversation_statuses.handoff_requested || 0, { status: 'handoff_requested' }], ['Quá hạn phản hồi', overdue.data?.total, { sla: 'overdue' }], ['Bạn đang phụ trách', mine.data?.total, { assignment: 'mine', status: 'assigned' }]].map(([title, count, filters]) => <button key={title} onClick={() => navigate('inbox', filters)}><div><b>{title}</b><small>{count == null ? 'Chưa có số liệu' : `${number(count)} hội thoại`} · Mở danh sách</small></div><ArrowUpRight size={20} aria-hidden="true" /></button>)}</div></section>}
-      <div className="stats workspaceStats">{(overview ? [['Hội thoại', data.totals.conversations], ['Khách hàng', data.totals.customers], ['Đơn hàng', data.totals.orders], ['Tài liệu', data.totals.documents]] : [['Hội thoại mới', period.conversations], ['Tin nhắn', period.messages], ['Ticket mới', period.tickets], ['Ticket đã phản hồi', period.responded_tickets]]).map(([label, value], index) => { const Icon = (overview ? [MessagesSquare, UsersRound, ShoppingBag, BookOpen] : [MessagesSquare, MessageCircle, TicketCheck, TicketCheck])[index]; return <div key={label}><span className="statIcon"><Icon size={20} aria-hidden="true" /></span><small>{label}</small><b>{number(value)}</b><span>{overview ? 'Toàn bộ dữ liệu' : `Trong ${days} ngày`}</span></div>; })}</div>
-      <div className="reportGrid"><article className="workspaceCard"><h2>{overview ? 'Trạng thái hội thoại' : 'Hội thoại theo ngày'}</h2><p>{overview ? 'Trạng thái hiện tại của toàn bộ hội thoại.' : 'Ngày tạo hội thoại, tính theo giờ Việt Nam.'}</p><div className="metricRows">{(overview ? Object.entries(chatLabels).map(([key, label]) => ({ label, count: data.conversation_statuses[key] || 0 })) : period.daily.map(d => ({ label: formatDay(d.date), count: d.count }))).map(row => <div className="metricRow" key={row.label}><span>{row.label}</span><meter min="0" max={Math.max(1, ...(overview ? [data.totals.conversations] : period.daily.map(d => d.count)))} value={row.count} aria-label={row.label} /><b>{number(row.count)}</b></div>)}</div></article>
-        <article className="workspaceCard"><h2>SLA phản hồi đầu tiên</h2><p>Ticket tạo trong {days} ngày; tính 24/7.</p><div className="slaNumbers"><div><b>{period.sla_met_percent == null ? 'Chưa có' : `${period.sla_met_percent}%`}</b><small>Đúng hạn / ticket đã phản hồi</small></div><div><b>{period.mean_response_minutes == null ? 'Chưa có' : formatMinutes(period.mean_response_minutes)}</b><small>Thời gian phản hồi trung bình</small></div></div>{Object.entries(slaLabels).map(([key, label]) => <div className="summaryLine" key={key}><span>{label}</span><strong>{period.sla[key]}</strong></div>)}</article>
-        <article className="workspaceCard"><h2>Kênh tiếp nhận</h2><p>Hội thoại tạo trong khoảng thống kê.</p>{Object.entries(period.channels).length ? Object.entries(period.channels).map(([name, count]) => <div className="summaryLine" key={name}><span>{channelNames[name] || name}</span><strong>{count}</strong></div>) : <p>Chưa có hội thoại trong khoảng này.</p>}</article>
-        <article className="workspaceCard"><h2>Đơn hàng hiện tại</h2>{Object.entries(data.order_statuses).length ? Object.entries(data.order_statuses).map(([status, count]) => <div className="summaryLine" key={status}><Badge value={status} /><strong>{count}</strong></div>) : <p>Chưa có đơn hàng.</p>}</article></div>
-      <p className="syncNote">Khoảng thống kê: {formatDate(data.start)} đến {formatDate(data.end)} (giờ Việt Nam). SLA chưa phản hồi được tách riêng; số liệu này không đo độ chính xác RAG.</p>
-    </>}
-  </section>;
+  // One color per status everywhere: the same pills as the customer pages and the inbox.
+  return <span className={`statusPill ${labels === orderLabels ? 'order' : 'status'}-${value}`}>{labelOf(labels, value)}</span>;
 }
 
 function RecordForm({ kind, record, request, onExpired, onSaved }) {
@@ -173,7 +150,7 @@ function SettingsPage({ user, request, onExpired }) {
 
 export default function Workspace({ page, ...props }) {
   if (page === 'overview') return <Overview {...props} />;
-  if (page === 'analytics') return <Metrics page={page} {...props} />;
+  if (page === 'analytics') return <Analytics {...props} />;
   if (page === 'settings') return <SettingsPage {...props} />;
   return <Records kind={page} {...props} />;
 }

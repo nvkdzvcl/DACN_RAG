@@ -58,7 +58,7 @@
 ## Quyết định của người dùng dự án (không sửa)
 
 - **Bắt buộc đăng ký tài khoản để chat** (lối vào khách vãng lai đã bị gỡ ở commit `6262eb2`, 06/11/2026): giữ nguyên; README, `CUSTOMER_AUTH.md`, `DEMO.md` đã sửa cho khớp. Hàm `start` của luồng khách vãng lai vẫn còn trong `Widget.jsx` nhưng không được gọi.
-- **Nút "Đăng nhập bằng Google"** (chỉ báo "sẽ được tích hợp sau") và **ô "Ghi nhớ đăng nhập"** (không có tác dụng, phiên luôn 24 giờ): giữ nguyên làm giao diện minh họa; cần ghi rõ trong báo cáo đồ án là chưa triển khai.
+- **Nút "Đăng nhập bằng Google"**: đã gỡ (18/11/2026) vì chưa triển khai. **Ô "Ghi nhớ đăng nhập"** vẫn chưa có tác dụng (phiên luôn 24 giờ); cần ghi rõ trong báo cáo đồ án là chưa triển khai.
 
 ## Còn lại, chưa sửa
 
