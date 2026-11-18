@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
 import { citationLabel } from './shared';
+import { Search as SearchIcon } from 'lucide-react';
 
 const PAGE_SIZE = 10;
 const labels = { indexed: 'Đã lập chỉ mục', processing: 'Đang xử lý', failed: 'Xử lý lỗi', ready_for_embedding: 'Cần lập chỉ mục lại', deleting: 'Xóa chưa hoàn tất', uploaded: 'Đã tải lên' };
@@ -145,7 +146,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     {error && <p role="alert" className="kbError">{error}</p>}
     <section id="kb-panel-documents" role="tabpanel" aria-labelledby="kb-tab-documents" hidden={section !== 'documents'}>
     <h2 className="documentHeading" id="tai-lieu">Tài liệu <span>{visibleDocuments.length} / {documents.length} tài liệu</span></h2>
-    <div className="documentFilters"><label>Tìm tài liệu<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tiêu đề hoặc tên file..." /></label><label>Trạng thái<select value={status} onChange={event => setStatus(event.target.value)}><option value="">Tất cả trạng thái</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{(search || status) && <button onClick={() => { setSearch(''); setStatus(''); }}>Xóa bộ lọc</button>}</div>
+    <div className="recordFilters"><label className="search"><SearchIcon size={16} aria-hidden="true" /><input type="search" aria-label="Tìm tài liệu" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tiêu đề hoặc tên file..." /></label><div className="recordChips" role="group" aria-label="Trạng thái">{[['', 'Tất cả'], ...Object.entries(labels)].map(([value, label]) => <button type="button" key={value} aria-pressed={status === value} onClick={() => setStatus(value)}>{label}</button>)}</div>{(search || status) && <button className="ovLink" onClick={() => { setSearch(''); setStatus(''); }}>Xóa bộ lọc</button>}</div>
     {loading ? <p role="status">Đang tải tài liệu...</p> : !documents.length ? <p>Chưa có tài liệu. {user.role === 'admin' ? <button onClick={() => setSection('upload')}>Tải tài liệu đầu tiên</button> : 'Quản trị viên tải tài liệu để bắt đầu hỏi đáp.'}</p> : !visibleDocuments.length ? <p role="status">Không có tài liệu phù hợp. Thử đổi tên hoặc bỏ bộ lọc trạng thái.</p> : <><div className="documentList">{pageDocuments.map(document => <article className="documentCard" key={document.document_id}>
       <div className="docMain"><h2>{document.title || document.filename}</h2><p>{document.title ? `${document.filename} · ` : ''}{labels[document.status] || document.status}</p>{document.error_message && <p className="kbError">{document.error_message}</p>}</div><div className="docStats"><span><b>{document.chunks}</b> đoạn</span><span title={`Số câu trả lời của AI trích tài liệu này trong ${citationDays} ngày`}><b>{document.cited ?? 0}</b> lần được trích</span></div>
       <div className="documentActions"><button onClick={() => show(document)} disabled={Boolean(busy)} aria-expanded={preview?.id === document.document_id}>{preview?.id === document.document_id ? 'Ẩn nội dung' : 'Xem nội dung'}</button>

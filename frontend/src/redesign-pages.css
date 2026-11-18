@@ -249,3 +249,12 @@
 :root .customerPortal.customerPortal .accountHistoryList .statusPill { font-size: 12px; font-style: normal; }
 /* The selected row is teal-soft, the same as the "AI đang hỗ trợ" pill; lift that pill onto the surface color. */
 :root .customerPortal.customerPortal .accountHistoryList button[aria-pressed=true] .statusPill.status-open { background: var(--rd-surface); }
+
+/* Sidebar footer: avatar, name and email open Tài khoản; Đăng xuất below. */
+:root .customerPortal.customerPortal .portalSideFoot { display: grid; gap: 8px; padding: 14px 0 0; border-top: 1px solid var(--rd-line); }
+:root .customerPortal.customerPortal .portalSideAccount { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 8px; border: 0; border-radius: 10px; background: transparent; color: var(--rd-ink); text-align: left; box-shadow: none; cursor: pointer; }
+:root .customerPortal.customerPortal .portalSideAccount:hover { background: var(--rd-sunken); }
+:root .customerPortal.customerPortal .portalSideAccount > span:last-child { min-width: 0; }
+:root .customerPortal.customerPortal .portalSideAccount b { font-size: 13px; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalSideAccount small { margin-top: 2px; font-size: 11.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalAvatar { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 50%; background: var(--rd-accent-soft); color: var(--rd-accent); font-size: 12px; font-weight: 700; }

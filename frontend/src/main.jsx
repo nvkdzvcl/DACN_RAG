@@ -133,6 +133,19 @@ function SessionGate() {
   </AuthLayout>;
 }
 
+// The handoff summary is "Khách: ..." / "AI: ..." lines; show each as a labelled, clamped turn.
+function TicketSummary({ text }) {
+  const [full, setFull] = useState(false);
+  if (!text) return <p>Chưa có tóm tắt.</p>;
+  const turns = plainText(localizeSummary(text)).split(/\n(?=(?:Khách|AI|Nhân viên|Hệ thống): )/).map(line => {
+    const match = line.match(/^(Khách|AI|Nhân viên|Hệ thống): ([\s\S]*)$/);
+    return match ? [match[1], match[2].trim()] : ['', line.trim()];
+  }).filter(([, body]) => body);
+  const long = turns.some(([, body]) => body.length > 140);
+  return <div className={`ticketSummary ${full ? 'full' : ''}`}>{turns.map(([who, body], i) => <p key={i}>{who && <b>{who}</b>}<span>{body}</span></p>)}
+    {long && <button type="button" className="ticketMore" aria-expanded={full} onClick={() => setFull(v => !v)}>{full ? 'Thu gọn' : 'Xem đầy đủ'}</button>}</div>;
+}
+
 function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const { theme } = useTheme();
   const themeButton = <ThemeToggle />;
@@ -434,7 +447,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
           {actionError?.id === activeId && <p className="state" role="alert">{actionError.message}</p>}
         </div>
         {profileOpen && <ProfilePanel ref={profilePanel} onCancel={() => setProfileOpen(false)} id="customerInfo" className="profile" aria-label="Thông tin khách hàng" onKeyDown={event => { if (event.key === 'Escape') { setProfileOpen(false); profileToggle.current?.focus(); } }}><div className="profileHeading"><h2>Thông tin liên hệ</h2><button className="iconButton" aria-label="Đóng thông tin khách hàng" onClick={() => { setProfileOpen(false); profileToggle.current?.focus(); }}><X size={17} /></button></div>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><h3>{nameOf(current)}</h3><p>{current.customer_email || 'Chưa có email'}</p><button className="profileLink" onClick={() => openOrders(current.customer_id)}><Package size={14} aria-hidden="true" />Xem đơn hàng<ArrowUpRight size={13} aria-hidden="true" /></button></div><dl className="conversationFacts"><dt>Kênh hỗ trợ</dt><dd>{channelName(current.channel)}</dd><dt>Trạng thái</dt><dd>{statuses[current.status] || current.status}</dd><dt>Người phụ trách</dt><dd>{current.assigned_agent_id === user.id ? `${user.display_name} (bạn)` : current.assigned_agent_id ? 'Nhân viên khác' : 'Chưa phân công'}</dd><dt>Ưu tiên</dt><dd>{priorities[current.priority] || current.priority}</dd><dt>Mã khách hàng</dt><dd className="customerIdentifier" title={current.customer_id}>{shortId(current.customer_id)}</dd></dl><details className="profileTickets" open><summary><Clock3 size={15} aria-hidden="true" />Ticket hỗ trợ<span>{current.tickets.length}</span></summary>
-              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{ticketStatuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><p>{t.summary ? plainText(localizeSummary(t.summary)) : 'Chưa có tóm tắt.'}</p><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section></details><div className="profileFootnote"><ShieldCheck size={15} aria-hidden="true" /><p>Thông tin nội bộ dành cho đội hỗ trợ.</p></div></> : <p className="state">Chọn hội thoại để xem thông tin khách hàng.</p>}</ProfilePanel>}
+              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{ticketStatuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><TicketSummary text={t.summary} /><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section></details><div className="profileFootnote"><ShieldCheck size={15} aria-hidden="true" /><p>Thông tin nội bộ dành cho đội hỗ trợ.</p></div></> : <p className="state">Chọn hội thoại để xem thông tin khách hàng.</p>}</ProfilePanel>}
 
       </section>
       </>}
