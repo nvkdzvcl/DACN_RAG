@@ -18,7 +18,7 @@ export default function Analytics({ request, onExpired }) {
   const maxChannel = Math.max(1, ...channels.map(([, count]) => count));
   return <section className="overview2 analytics2">
     <header className="ovTop">
-      <div><p className="eyebrow">PHÂN TÍCH</p><h1>Phân tích hỗ trợ</h1>
+      <div><p className="eyebrow">VẬN HÀNH · PHÂN TÍCH</p><h1>Phân tích hỗ trợ</h1>
         <p className="ovSub dashboardSync" role="status">{state.error ? 'Cập nhật thất bại · số liệu có thể đã cũ.' : state.loading ? 'Đang cập nhật...' : 'Đã cập nhật.'} {state.updatedAt ? <>Lần cuối: <time dateTime={state.updatedAt}>{formatDateTime(state.updatedAt)}</time> · tự làm mới khi quay lại tab.</> : null}</p></div>
       <div className="ovTools">
         <div className="ovSeg" role="group" aria-label="Khoảng thống kê">{[7, 30, 90].map(n => <button key={n} type="button" aria-pressed={days === n} onClick={() => setDays(n)}>{n} ngày</button>)}</div>

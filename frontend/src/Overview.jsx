@@ -33,7 +33,7 @@ export default function Overview({ user, request, onExpired, navigate }) {
   const updatedAt = sources.every(source => source.updatedAt) ? sources.map(source => source.updatedAt).sort()[0] : null;
   return <section className="overview2">
     <header className="ovTop">
-      <div><p className="eyebrow">TỔNG QUAN</p><h1>{greeting(user?.display_name)}</h1>
+      <div><p className="eyebrow">VẬN HÀNH · TỔNG QUAN</p><h1>{greeting(user?.display_name)}</h1>
         <p className="ovSub dashboardSync" role="status">{sources.some(source => source.error) ? 'Cập nhật thất bại · số liệu có thể đã cũ.' : sources.some(source => source.loading) ? 'Đang cập nhật...' : 'Đã cập nhật.'} {updatedAt ? <>Lần cuối: <time dateTime={updatedAt}>{formatDateTime(updatedAt)}</time> · tự làm mới khi quay lại tab.</> : null}</p></div>
       <div className="ovTools">
         <div className="ovSeg" role="group" aria-label="Khoảng thống kê">{[7, 30, 90].map(n => <button key={n} type="button" aria-pressed={days === n} onClick={() => setDays(n)}>{n} ngày</button>)}</div>

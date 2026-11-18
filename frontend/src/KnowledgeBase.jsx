@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
+import { citationLabel } from './shared';
 
 const PAGE_SIZE = 10;
 const labels = { indexed: 'Đã lập chỉ mục', processing: 'Đang xử lý', failed: 'Xử lý lỗi', ready_for_embedding: 'Cần lập chỉ mục lại', deleting: 'Xóa chưa hoàn tất', uploaded: 'Đã tải lên' };
@@ -23,7 +24,7 @@ export function Citations({ citations, request }) {
     const quote = citation.quote?.replace(/\s+/g, ' ').trim();
     const start = quote ? content.indexOf(quote) : -1;
     return <details key={`${id}-${index}`}>
-      <summary>Nguồn {index + 1} · {citation.source}{citation.location ? ` · ${citation.location}` : citation.page ? ` · Trang ${citation.page}` : ''}</summary>
+      <summary><span className="srOnly">Nguồn {index + 1}: </span>{citationLabel(citation)}</summary>
       {citation.quote && <><p className="sourceLabel">Trích dẫn trong câu trả lời</p><blockquote><RichText text={citation.quote} /></blockquote></>}
       {citation.document_id && <button type="button" disabled={current?.loading} onClick={() => open(citation)}>{current?.loading ? 'Đang tải nguồn...' : current?.error ? 'Thử tải lại nguồn' : 'Xem đoạn nguồn'}</button>}
       {current?.error && <p role="alert">{current.error}</p>}
@@ -128,7 +129,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     } finally { if (!controller.signal.aborted) setAsking(false); }
   }
   return <section className="knowledge">
-    <header><div><h1>Kho tri thức</h1><p>Tài liệu nội bộ và câu trả lời có trích nguồn</p></div><button onClick={() => { setLoading(true); load(); }} disabled={loading}>Làm mới</button></header>
+    <header><div><p className="eyebrow">DỮ LIỆU · KHO TRI THỨC</p><h1>Kho tri thức</h1><p>Tài liệu nội bộ và câu trả lời có trích nguồn</p></div><button onClick={() => { setLoading(true); load(); }} disabled={loading}>Làm mới</button></header>
     <div className="kbTabs" role="tablist" aria-label="Các phần kho tri thức" onKeyDown={event => {
       const index = tabs.findIndex(([id]) => id === section);
       const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : null;

@@ -72,3 +72,9 @@ export function shortId(id) {
 export function localizeSummary(text) {
   return String(text ?? '').replace(/^(customer|ai|agent|system): /gm, (_, sender) => ({ customer: 'Khách: ', ai: 'AI: ', agent: 'Nhân viên: ', system: 'Hệ thống: ' })[sender]);
 }
+
+// One citation label everywhere (customer chat, history, staff inbox, knowledge base): "thanh-toan · dòng 13".
+export function citationLabel(citation) {
+  const where = citation.location ? citation.location.toLowerCase() : citation.page ? `trang ${citation.page}` : '';
+  return [(citation.source || '').replace(/\.(md|txt|markdown|pdf|docx)$/i, ''), where].filter(Boolean).join(' · ');
+}

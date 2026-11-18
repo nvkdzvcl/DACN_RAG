@@ -3,7 +3,7 @@ import { RichText, plainText } from './RichText';
 import { LockKeyhole, Search as SearchIcon, UserRound } from 'lucide-react';
 import { EmailVerification } from './CustomerEmail';
 import PasswordRules from './PasswordRules';
-import { conversationStatuses, formatDateTime } from './shared';
+import { citationLabel, conversationStatuses, formatDateTime } from './shared';
 
 const labels = conversationStatuses;
 const senderLabels = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -68,7 +68,7 @@ export function CustomerHistory({ request, onExpired, currentId, onOpenChat }) {
       {detail && (detail.message_page.has_more || cursors.length > 0) && <div className="accountPager"><button disabled={loading || !detail.message_page.has_more} onClick={() => setCursors(values => [...values, detail.message_page.next_before])}>Tin cũ hơn</button><button disabled={loading || !cursors.length} onClick={() => setCursors(values => values.slice(0, -1))}>Tin mới hơn</button></div>}
       <div className="accountMessages" role="log" aria-label="Nội dung hội thoại" tabIndex={0}>
         {loading && <p className="historyState" role="status">Đang tải tin nhắn...</p>}
-        {detail?.messages.map(message => <article className={`widgetMessage from-${message.sender_type} ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`} key={message.id}><b>{senderLabels[message.sender_type] || 'Hỗ trợ'} · <time dateTime={message.created_at}>{date(message.created_at)}</time></b><p><RichText text={message.content} /></p>{message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citation.source.replace(/\.(md|txt|markdown|pdf|docx)$/i, '')}{citation.location && ' · ' + citation.location.toLowerCase()}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}</article>)}
+        {detail?.messages.map(message => <article className={`widgetMessage from-${message.sender_type} ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`} key={message.id}><b>{senderLabels[message.sender_type] || 'Hỗ trợ'} · <time dateTime={message.created_at}>{date(message.created_at)}</time></b><p><RichText text={message.content} /></p>{message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citationLabel(citation)}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}</article>)}
         {detail && !detail.messages.length && <p className="historyState">Hội thoại chưa có tin nhắn.</p>}
         {list && !list.items.length && <p className="historyState">Chọn một hội thoại để xem lại.</p>}
       </div>
