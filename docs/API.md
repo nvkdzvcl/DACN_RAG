@@ -199,14 +199,14 @@ Tiền tố /api/v1/workspace. GET yêu cầu Staff; POST/PATCH yêu cầu CSRF.
 | POST   | /customers               | Admin | display_name 1–160 không trắng, email tùy chọn <= 255; ID server sinh, 201                                                                        |
 | PATCH  | /customers/{customer_id} | Admin | display_name/email mới và expected chứa hai giá trị cũ; khác/mất bản ghi trả 409                                                                  |
 | GET    | /orders                  | Staff | q, status, customer_id, offset/limit; tên khách/trạng thái/vận đơn                                                                                |
-| POST   | /orders                  | Admin | id DH/ORD 6–64 ký tự, customer_id, status, tracking_code <= 100; 201, trùng 409, thiếu khách 404                                                  |
-| PATCH  | /orders/{order_id}       | Admin | status/tracking_code và expected chứa giá trị cũ; không nhận customer_id, xung đột 409                                                            |
+| POST   | /orders                  | Admin | customer_id, status, tracking_code; id DH/ORD 6–64 ký tự không bắt buộc, bỏ trống thì server sinh `DH` + yymmdd + 4 ký tự (không 0/O/1/I/L); 201, trùng 409, thiếu khách 404                                                  |
+| PATCH  | /orders/{order_id}       | Admin | status/tracking_code và expected chứa giá trị cũ (so khớp nguyên văn); không nhận customer_id, xung đột 409                                                            |
 | GET    | /summary                 | Staff | days thuộc 7/30/90; totals toàn bộ, period và daily theo ngày giờ Việt Nam (`timezone`: Asia/Ho_Chi_Minh), period thêm `ai_outcomes` (AI trả lời có nguồn / AI chưa trả lời được / chuyển nhân viên), `unanswered_questions` (câu hỏi AI từ chối hoặc hỏi lại, gộp theo nội dung) và `top_documents` (tài liệu được trích nhiều nhất), SLA nullable khi chưa có mẫu                                                                 |
 | GET    | /settings                | Staff | Người dùng công khai, SLA cố định và tình trạng hỗ trợ kênh; không có secrets                                                                     |
 | GET    | /users                   | Admin | offset/limit; người dùng công khai và active, không password_hash                                                                                 |
 | POST   | /password                | Staff | current_password 1–128, new_password 12–128; sai mật khẩu cũ 400, không đổi 422, tranh chấp 409; thành công thu hồi mọi phiên của chính người đổi |
 
-status đơn nhận processing/paid/shipping/shipped/delivered/cancelled. Không đổi chủ đơn/xóa qua workspace. Công thức thống kê, phạm vi quản trị và bằng chứng tại [WORKSPACE.md](WORKSPACE.md). API /auth/users hiện có được dùng để tạo tài khoản từ Cài đặt; không thêm endpoint tạo tài khoản trùng.
+status đơn nhận processing/paid/shipping/shipped/delivered/cancelled. tracking_code được viết hoa và bỏ khoảng trắng rồi phải khớp `^[A-Z0-9][A-Z0-9-]{6,28}[A-Z0-9]$` (8–30 ký tự); chuỗi rỗng là null. Không đổi chủ đơn/xóa qua workspace. Công thức thống kê, phạm vi quản trị và bằng chứng tại [WORKSPACE.md](WORKSPACE.md). API /auth/users hiện có được dùng để tạo tài khoản từ Cài đặt; không thêm endpoint tạo tài khoản trùng.
 
 ## Mã truy cập từng đơn
 

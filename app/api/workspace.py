@@ -38,25 +38,50 @@ class CustomerEdit(CustomerFields):
     expected: CustomerFields
 
 
+class OrderSnapshot(BaseModel):
+    """The values the editor last saw; compared as stored, so older free-form tracking codes still match."""
+    model_config = ConfigDict(extra='forbid')
+    status: OrderStatus
+    tracking_code: str | None = Field(default=None, max_length=100)
+
+
 class OrderFields(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
     status: OrderStatus = 'processing'
-    tracking_code: str | None = Field(default=None, max_length=100)
+    # Typed by staff: normalized to upper case without spaces, then letters, digits and inner dashes only.
+    tracking_code: str | None = Field(default=None, pattern=r'^[A-Z0-9][A-Z0-9-]{6,28}[A-Z0-9]$')
 
     @field_validator('tracking_code', mode='before')
     @classmethod
-    def empty_tracking(cls, value):
-        return None if isinstance(value, str) and not value.strip() else value
+    def normalize_tracking(cls, value):
+        if not isinstance(value, str):
+            return value
+        value = ''.join(value.split()).upper()
+        return value or None
 
 
 class OrderCreate(OrderFields):
-    id: str = Field(min_length=6, max_length=64,
-                    pattern=r'^(?:DH(?:[-_]?)[A-Z0-9]{4,}|ORD(?:[-_]?[A-Z0-9]{4,})(?:[-_][A-Z0-9]+)*)$')
+    # Omitted by the staff form: the server generates one. Seeds and integrations may still pass a known ID.
+    id: str | None = Field(default=None, min_length=6, max_length=64,
+                           pattern=r'^(?:DH(?:[-_]?)[A-Z0-9]{4,}|ORD(?:[-_]?[A-Z0-9]{4,})(?:[-_][A-Z0-9]+)*)$')
     customer_id: str = Field(min_length=1, max_length=64)
 
 
 class OrderEdit(OrderFields):
-    expected: OrderFields
+    expected: OrderSnapshot
+
+
+ORDER_ID_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'  # no 0/O, 1/I/L: customers read these out or retype them
+
+
+def new_order_id(db):
+    """DH + order date (Vietnam time, yymmdd) + 4 random characters, e.g. DH2611187KQ4."""
+    day = datetime.now(timezone(timedelta(hours=7))).strftime('%y%m%d')
+    for _ in range(20):
+        candidate = 'DH' + day + ''.join(secrets.choice(ORDER_ID_ALPHABET) for _ in range(4))
+        if db.get(Order, candidate) is None:
+            return candidate
+    raise HTTPException(503, 'Không tạo được mã đơn mới. Vui lòng thử lại.')
 
 
 class PasswordChange(BaseModel):
@@ -147,13 +172,15 @@ def add_order(payload: OrderCreate, db: Session = Depends(get_db)):
     customer = db.get(Customer, payload.customer_id)
     if customer is None:
         raise HTTPException(404, 'Không tìm thấy khách hàng.')
-    order = Order(**payload.model_dump())
+    generated = payload.id is None
+    order = Order(**payload.model_dump(exclude={'id'}), id=payload.id or new_order_id(db))
     db.add(order)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(409, 'Mã đơn đã tồn tại.')
+        # A generated ID can only collide with an order created in the same instant; ask for a retry.
+        raise HTTPException(409, 'Mã đơn vừa sinh bị trùng. Vui lòng bấm tạo lại.' if generated else 'Mã đơn đã tồn tại.')
     return order_data(order, customer.display_name)
 
 

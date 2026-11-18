@@ -95,7 +95,7 @@ const { chromium } = require('playwright');
     assert.equal(new URL(page.url()).searchParams.get('customerFilter'), 'customer');
     assert.equal(await noOverflow(), true);
     await page.screenshot({ path: path.join(output, 'orders-mobile.png') });
-    await page.goBack(); await page.getByRole('region', { name: 'Chi tiết bản ghi' }).waitFor();
+    await page.goBack(); await page.getByRole('region', { name: 'Hồ sơ khách hàng' }).waitFor();
     assert.equal(new URL(page.url()).searchParams.get('page'), 'customers');
     await toggle('Chuyển sang giao diện tối').click();
     staffLogin = false; await page.goto(url); await page.getByLabel('Tên đăng nhập', { exact: true }).waitFor();
