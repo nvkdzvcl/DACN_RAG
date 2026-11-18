@@ -383,6 +383,9 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     updateNavigation({ page: 'inbox', assignment: 'all', mobileConversation: true, status: '', priority: '',
       sla: '', search: '', offset: 0, selectedId: id, unreadOnly: false }, false);
   }
+  function openCustomer(id) {
+    updateNavigation({ page: 'customers', customerFilter: '', recordSearch: '', recordStatus: '', recordOffset: 0, recordId: id }, false);
+  }
   function openOrders(id) {
     updateNavigation({ page: 'orders', customerFilter: id, recordSearch: '', recordStatus: '', recordOffset: 0, recordId: null }, false);
   }
@@ -399,7 +402,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     <main>
       <nav className="mobileNav" aria-label="Điều hướng">{themeButton}{pages.map(([Icon, label, target]) => <button key={target} aria-pressed={page === target} onClick={() => navigate(target)}><Icon size={16} aria-hidden="true" />{label}</button>)}<button onClick={onLogout} disabled={logoutBusy || actionLoading}>Đăng xuất</button></nav>
       {sessionError && <p className="state" role="alert">{sessionError}</p>}
-      {page === 'knowledge' ? <KnowledgeBase user={user} request={request} onExpired={onExpired} /> : page !== 'inbox' ? <Workspace key={`${page}-${customerFilter}`} page={page} user={user} request={request} onExpired={onExpired} navigate={navigate} openInbox={openInbox} customerFilter={customerFilter} openOrders={openOrders} route={route} updateNavigation={updateNavigation} /> : <>
+      {page === 'knowledge' ? <KnowledgeBase user={user} request={request} onExpired={onExpired} /> : page !== 'inbox' ? <Workspace key={`${page}-${customerFilter}`} page={page} user={user} request={request} onExpired={onExpired} navigate={navigate} openInbox={openInbox} customerFilter={customerFilter} openOrders={openOrders} openCustomer={openCustomer} route={route} updateNavigation={updateNavigation} /> : <>
       <header className="inboxHeader"><div><Inbox size={21} aria-hidden="true" /><h1>Hội thoại</h1><span className="headerDivider" /><span className="headerSubtitle">Hộp thư hỗ trợ</span></div><span className={`syncStatus ${listError ? 'syncError' : ''}`} title={lastUpdated ? `Cập nhật: ${timeOf(lastUpdated)}. Tự làm mới mỗi 3 giây.` : 'Đang kết nối'}><span />{listError ? 'Mất kết nối' : listLoading ? 'Đang cập nhật' : 'Đã đồng bộ'}</span></header>
       <section className={`workspace ${profileOpen ? 'profileVisible' : ''} ${mobileConversation ? 'showConversation' : ''}`}>
         <div className="list" aria-label="Danh sách hội thoại" aria-busy={listLoading}>

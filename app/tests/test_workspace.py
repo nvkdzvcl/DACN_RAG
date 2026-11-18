@@ -95,20 +95,42 @@ class WorkspaceTests(unittest.TestCase):
     def test_order_create_filter_update_conflict_and_owner_immutable(self):
         self.login()
         path = '/api/v1/workspace/orders'
-        body = {'id': 'ORD-TEST01', 'customer_id': 'bob', 'status': 'shipping', 'tracking_code': 'VN-01'}
+        body = {'id': 'ORD-TEST01', 'customer_id': 'bob', 'status': 'shipping', 'tracking_code': 'VN-000001'}
         self.assertEqual(self.client.post(path, json=body).status_code, 201)
         self.assertEqual(self.client.post(path, json=body).status_code, 409)
         self.assertEqual(self.client.post(path, json=body | {'id': 'ORD-TEST02', 'customer_id': 'missing'}).status_code, 404)
         self.assertEqual(self.client.post(path, json=body | {'id': '../foo'}).status_code, 422)
         self.assertEqual(self.client.get(path, params={'status': 'bad'}).status_code, 422)
         self.assertEqual(self.client.get(path, params={'customer_id': 'bob', 'q': 'VN-', 'status': 'shipping'}).json()['total'], 1)
-        edit = {'status': 'delivered', 'tracking_code': 'VN-02', 'expected': {'status': 'shipping', 'tracking_code': 'VN-01'}}
+        edit = {'status': 'delivered', 'tracking_code': 'VN-000002', 'expected': {'status': 'shipping', 'tracking_code': 'VN-000001'}}
         self.assertEqual(self.client.patch(path + '/ORD-TEST01', json=edit | {'customer_id': 'alice'}).status_code, 422)
         self.assertEqual(self.client.patch(path + '/ORD-TEST01', json=edit).status_code, 200)
         self.assertEqual(self.client.patch(path + '/ORD-TEST01', json=edit).status_code, 409)
         with Session(self.engine) as db:
             self.assertEqual(db.get(Order, 'ORD-TEST01').customer_id, 'bob')
-            self.assertEqual(db.get(Order, 'ORD-TEST01').tracking_code, 'VN-02')
+            self.assertEqual(db.get(Order, 'ORD-TEST01').tracking_code, 'VN-000002')
+
+    def test_order_id_generated_and_tracking_code_normalized(self):
+        self.login()
+        path = '/api/v1/workspace/orders'
+        created = self.client.post(path, json={'customer_id': 'bob', 'status': 'shipping', 'tracking_code': ' vn 1234 5678 '})
+        self.assertEqual(created.status_code, 201)
+        order = created.json()
+        self.assertRegex(order['id'], r'^DH\d{6}[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{4}$')
+        self.assertEqual(order['tracking_code'], 'VN12345678')
+        from app.services.order_service import ORDER_PATTERN
+        self.assertTrue(ORDER_PATTERN.fullmatch(order['id']), 'generated IDs are recognized in chat')
+        self.assertNotEqual(self.client.post(path, json={'customer_id': 'bob'}).json()['id'], order['id'])
+        for bad in ['VN-1', '-VN123456', 'VN123456-', 'VN_123456', 'X' * 31]:
+            self.assertEqual(self.client.post(path, json={'customer_id': 'bob', 'tracking_code': bad}).status_code, 422, bad)
+        self.assertIsNone(self.client.post(path, json={'customer_id': 'bob', 'tracking_code': '   '}).json()['tracking_code'])
+        with Session(self.engine) as db:
+            db.add(Order(id='ORD-LEGACY1', customer_id='bob', status='processing', tracking_code='old free text'))
+            db.commit()
+        edit = {'status': 'shipping', 'tracking_code': 'vn-000003', 'expected': {'status': 'processing', 'tracking_code': 'old free text'}}
+        updated = self.client.patch(path + '/ORD-LEGACY1', json=edit)
+        self.assertEqual(updated.status_code, 200)
+        self.assertEqual(updated.json()['tracking_code'], 'VN-000003')
 
     def test_metrics_cohort_denominator_and_terminal_snapshot(self):
         self.login()
