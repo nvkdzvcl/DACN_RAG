@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { RichText, plainText } from './RichText';
-import { LockKeyhole, Search as SearchIcon, UserRound } from 'lucide-react';
+import { LockKeyhole, Search as SearchIcon } from 'lucide-react';
 import { EmailVerification } from './CustomerEmail';
 import PasswordRules from './PasswordRules';
-import { citationLabel, conversationStatuses, formatDateTime } from './shared';
+import { citationLabel, conversationStatuses, formatDateTime, initials } from './shared';
 
 const labels = conversationStatuses;
 const senderLabels = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
@@ -87,5 +87,13 @@ export function CustomerProfile({ account, displayName, request, onExpired, onPa
     catch (e) { if (e.status === 401) onExpired(); else setError(e.message); }
     finally { setBusy(false); }
   }
-  return <section className="portalPage customerProfile"><div className="portalPageHead"><div><h1>Tài khoản khách hàng</h1><p>{account.email}</p></div>{onLogout && <button type="button" className="profileLogout" onClick={onLogout} disabled={logoutDisabled}>Đăng xuất</button>}</div><div className="profileLayout"><div className="profileCard"><div className="profileAvatar"><UserRound size={26} /></div><div><h2>{displayName || account.email}</h2><p>{displayName ? account.email : 'Tài khoản khách hàng'}</p></div><span className={account.email_verified ? 'profileStatus verified' : 'profileStatus'}>{account.email_verified ? 'Đã xác minh' : 'Chưa xác minh'}</span></div><form className="portalOrderForm profilePassword" onSubmit={save}><fieldset disabled={busy}><h2>Đổi mật khẩu</h2><label>Mật khẩu hiện tại<input name="current_password" type="password" required maxLength={128} autoComplete="current-password" /></label><label>Mật khẩu mới<input name="new_password" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" onChange={event => setNewPassword(event.target.value)} /></label><PasswordRules value={newPassword} /><label>Nhập lại mật khẩu mới<input name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" /></label><p>Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Đổi thành công sẽ đăng xuất tài khoản trên mọi thiết bị.</p>{error && <p role="alert" className="widgetError">{error}</p>}<button>{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form><div className="profileVerify"><EmailVerification account={account} request={request} onExpired={onExpired} /></div></div></section>;
+  const verified = account.email_verified;
+  return <section className="portalPage customerProfile"><div className="portalPageHead"><div><h1>Tài khoản</h1><p>Thông tin đăng nhập và bảo mật.</p></div>{onLogout && <button type="button" className="profileLogout" onClick={onLogout} disabled={logoutDisabled}>Đăng xuất</button>}</div>
+    <div className="profileGrid"><div className="profileSide">
+      <div className="profileCard"><div className="profileAvatar" aria-hidden="true">{initials(displayName || account.email)}</div><div><h2>{displayName || account.email}</h2><p>{account.email}</p></div><span className={verified ? 'profileStatus verified' : 'profileStatus'}>{verified ? 'Email đã xác minh' : 'Email chưa xác minh'}</span>
+        {verified && <p className="profileNote">Dùng email này để khôi phục mật khẩu. Quyền tra đơn vẫn cần mã truy cập riêng.</p>}</div>
+      {!verified && <div className="profileVerify"><EmailVerification account={account} request={request} onExpired={onExpired} /></div>}
+    </div>
+    <form className="portalOrderForm profilePassword" onSubmit={save}><fieldset disabled={busy}><h2>Đổi mật khẩu</h2><label>Mật khẩu hiện tại<input name="current_password" type="password" required maxLength={128} autoComplete="current-password" /></label><label>Mật khẩu mới<input name="new_password" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" onChange={event => setNewPassword(event.target.value)} /></label><PasswordRules value={newPassword} /><label>Nhập lại mật khẩu mới<input name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" /></label><p>Đổi thành công sẽ đăng xuất tài khoản trên mọi thiết bị.</p>{error && <p role="alert" className="widgetError">{error}</p>}<button>{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form>
+    </div></section>;
 }

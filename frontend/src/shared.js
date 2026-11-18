@@ -78,3 +78,8 @@ export function citationLabel(citation) {
   const where = citation.location ? citation.location.toLowerCase() : citation.page ? `trang ${citation.page}` : '';
   return [(citation.source || '').replace(/\.(md|txt|markdown|pdf|docx)$/i, ''), where].filter(Boolean).join(' · ');
 }
+
+// Avatar initials: the last two words, as on the staff side ("Nguyễn Văn An" -> "VA").
+export function initials(name) {
+  return String(name || '').trim().split(/\s+/).filter(Boolean).slice(-2).map(word => word[0]).join('').toUpperCase();
+}

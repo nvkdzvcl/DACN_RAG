@@ -11,12 +11,11 @@ import AuthLayout, { AuthInput } from './AuthLayout';
 import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
 import PasswordRules from './PasswordRules';
-import { citationLabel, conversationStatuses, formatDateTime } from './shared';
+import { citationLabel, conversationStatuses, formatDateTime, initials } from './shared';
 import './redesign.css';
 import './redesign-pages.css';
 
 const statuses = conversationStatuses;
-const initials = name => name.trim().split(/\s+/).filter(Boolean).slice(-2).map(word => word[0]).join('').toUpperCase();
 const senders = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
 const orderStatuses = { processing: 'Đang xử lý', paid: 'Đã thanh toán', shipping: 'Đang giao', shipped: 'Đã gửi hàng', delivered: 'Đã giao', cancelled: 'Đã hủy' };
 const suggestions = ['Hoàn tiền về thẻ đã thanh toán mất mấy ngày?', 'Khi nhận hàng cần kiểm tra những gì?', 'Bao nhiêu tiền thì được 1 điểm thành viên?', 'Thu cũ đổi mới cần chuẩn bị gì trước khi mang máy đến?'];

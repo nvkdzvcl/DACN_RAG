@@ -202,3 +202,12 @@
 .shell .ticketSummary span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; }
 .shell .ticketSummary.full span { display: block; }
 .shell .ticketMore { justify-self: start; min-height: 24px; padding: 0; border: 0; background: none; color: var(--rd-accent); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+/* Record tables: compact rows; on the customer list the two counts are narrow, right-aligned columns. */
+@media (min-width: 761px) {
+  .shell .management .recordTable :is(th, td) { padding: 10px 16px; vertical-align: middle; }
+  .shell .management .recordTable .recordLink { min-height: 24px; }
+  .shell .management .recordTable .recordId { margin-top: 1px; }
+  .shell .management .customersTable :is(th, td):nth-child(n+3) { width: 120px; text-align: right; font-variant-numeric: tabular-nums; }
+  .shell .management .customersTable :is(th, td):nth-child(2) { max-width: none; }
+}
+.shell .recordEmpty { color: var(--rd-muted); }
