@@ -22,6 +22,8 @@ Tài khoản khách giữ một Customer cố định qua mọi cuộc trò chuy
 
 Test: `python -m unittest app.tests.test_customer_auth -k own_orders` và `-k cannot_list_orders`.
 
+Telegram dùng cùng quy tắc sau khi khách kết nối tài khoản web (xem [TELEGRAM.md](TELEGRAM.md)): `/orders` liệt kê đơn của tài khoản; chat chưa kết nối không thấy đơn của tài khoản.
+
 ## Phạm vi và thời hạn
 
 - Mã có 256 bit ngẫu nhiên, dạng URL-safe dài 43 ký tự; DB chỉ lưu SHA-256. Không đặt mã trong URL, localStorage hay log ứng dụng.

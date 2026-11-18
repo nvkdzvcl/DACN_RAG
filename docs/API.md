@@ -37,6 +37,9 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 | ----------------- | ------ | ---------------------------------- | -------------------------------------- | -------------------------------------------------- | ----------- |
 | Quyền tra cứu đơn | POST   | `/api/v1/widget/order-access`      | Nhập và xác nhận mã quyền tra cứu đơn  | Phiên khách Website + CSRF                         | UC13        |
 | Tra cứu đơn hàng  | GET    | `/api/v1/widget/orders`            | Danh sách đơn của chính khách (tối đa 20) | Phiên khách Website, tài khoản đã xác minh email | UC13        |
+| Kết nối Telegram  | GET    | `/api/v1/widget/account/telegram`  | Trạng thái `available` (bot đã kết nối) và `linked` | Tài khoản khách đã xác minh email | UC13        |
+| Kết nối Telegram  | POST   | `/api/v1/widget/account/telegram-link` | Link `t.me/<bot>?start=link_<mã>` dùng một lần, 10 phút; 503 khi Telegram chưa kết nối | Tài khoản khách đã xác minh email + CSRF | UC13        |
+| Kết nối Telegram  | DELETE | `/api/v1/widget/account/telegram`  | Gỡ kết nối chat Telegram khỏi tài khoản | Tài khoản khách đã xác minh email + CSRF | UC13        |
 | Tra cứu đơn hàng  | GET    | `/api/v1/widget/orders/{order_id}` | Xem đơn của chính khách hoặc đơn đã được cấp quyền | Phiên khách Website: đơn của khách, hoặc đã cấp quyền đúng đơn | UC13        |
 
 ## 4. Nhóm quản lý tài khoản khách

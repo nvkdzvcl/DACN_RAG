@@ -14,12 +14,23 @@ Khởi động lại API sau khi đổi cấu hình. Tắt bằng `TELEGRAM_ENAB
 
 ## Phạm vi xử lý
 
-- Chỉ nhận tin mới trong chat riêng giữa người dùng và bot; bỏ qua nhóm, bot gửi tin và chỉnh sửa tin. `/start` trả hướng dẫn, `/human` chuyển nhân viên. Nội dung không phải văn bản hoặc quá 4000 ký tự được chuyển nhân viên; chưa tải/xử lý file Telegram.
+- Chỉ nhận tin mới trong chat riêng giữa người dùng và bot; bỏ qua nhóm, bot gửi tin và chỉnh sửa tin. `/start` trả hướng dẫn và danh sách lệnh, `/human` chuyển nhân viên, `/orders` và `/unlink` xem mục kết nối tài khoản. Nội dung không phải văn bản hoặc quá 4000 ký tự được chuyển nhân viên; chưa tải/xử lý file Telegram.
 - Danh tính gắn với bot ID và user/chat ID do Telegram cung cấp. Không gộp với khách widget hoặc khách cùng tên/email. Tên Telegram là tên hiển thị, không chứng minh chủ đơn; mã truy cập đơn widget không áp dụng cho Telegram.
 - Tin khách được lưu bền cùng con trỏ update trước khi lần polling sau xác nhận đã nhận. Khóa `bot_id:update_id` chặn nhận trùng. Sau gián đoạn, không gọi lại AI nếu tin khách đã lưu mà kết quả chưa rõ; chuyển nhân viên để xử lý.
 - Dùng chung RAG, chọn tool và handoff. Tin AI đang chờ bị bỏ nếu hội thoại không còn open, có tin khách mới hơn hoặc còn update khách chưa xử lý. Tin đã gửi lên mạng không thể thu hồi bằng kiểm tra này.
 - Thông báo chuyển nhân viên được lưu cùng transaction với trạng thái và ticket, kể cả handoff do lỗi gửi/phục hồi. Worker dừng sau commit không làm mất thông báo; rollback hủy cả ba, nhận lại update hoặc khách nhắn thêm khi đang chờ không tạo thông báo trùng. Yêu cầu mới sau giải quyết tạo thông báo lượt mới. Tin này vẫn tuân thủ hàng chờ gửi; lỗi trước đó cần người phụ trách xử lý trước. Không tự bù thông báo đã thiếu trong dữ liệu cũ.
 - Chỉ gửi nội dung trả lời và tối đa ba nhãn nguồn/vị trí; không gửi `tool_trace`, ghi chú nội bộ hoặc bản ghi ticket. Nội dung dài lấy tối đa 4000 ký tự, thêm nguồn nếu tổng không quá 4096. Khi bật bot, nội dung này được truyền tới Telegram.
+
+## Kết nối tài khoản web và lệnh /orders (18/11/2026)
+
+Mặc định mỗi người nhắn bot có một Customer riêng, tách khỏi tài khoản web. Khách có thể gắn Telegram vào tài khoản web để xem cùng đơn hàng:
+
+1. Trên `/chat`, đăng nhập tài khoản đã xác minh email, mở **Tài khoản** và bấm **Kết nối Telegram**. API `POST /api/v1/widget/account/telegram-link` trả link `https://t.me/<tên_bot>?start=link_<mã>`; mã ngẫu nhiên 192 bit, dùng một lần, hết hạn sau 10 phút, chỉ lưu SHA-256 (bảng `customer_email_tokens`, purpose `telegram_link`). Tạo link mới thay link cũ chưa dùng. Tên bot lấy từ `getMe`; khi Telegram chưa kết nối API trả 503.
+2. Mở link trên thiết bị có Telegram và bấm Start. Bot nhận `/start link_<mã>` từ chat riêng, kiểm tra mã và trỏ `TelegramPeer` của chat đó sang Customer của tài khoản; tin nhắn tiếp theo mở hội thoại mới dưới Customer đó. Mã không được lưu vào tin nhắn hay `telegram_updates` (chỉ lưu kết quả `/link ok` hoặc `/link invalid`).
+3. Sau khi kết nối, `/orders` liệt kê tối đa 10 đơn của tài khoản (mã đơn, trạng thái, mã vận đơn), đọc trực tiếp từ CSDL, không gọi model. Hỏi kèm mã đơn thì AI tra đơn như trên web (cùng quy tắc đơn của khách hội thoại).
+4. Gỡ kết nối bằng `/unlink` trong bot hoặc nút **Gỡ kết nối** trên trang Tài khoản (`DELETE /api/v1/widget/account/telegram`). Chat được trả về một Customer mới của riêng nó. `GET /api/v1/widget/account/telegram` cho biết `available` và `linked`.
+
+Ràng buộc: một chat Telegram cho mỗi tài khoản; kết nối chat thứ hai sẽ gỡ chat cũ. Tài khoản chưa xác minh email không tạo được link (403) và mã của tài khoản đó bị từ chối. Tin web của tài khoản không bao giờ được gửi sang Telegram (hàng gửi chỉ lấy hội thoại kênh telegram). Giới hạn: lịch sử Telegram trước khi kết nối ở lại Customer cũ; hội thoại Telegram cũ còn mở sẽ không nhận được phản hồi của nhân viên qua Telegram nữa, nên đóng nó trong Inbox. Test: `python -m unittest app.tests.test_telegram_link -v` (4 test).
 
 ## Trạng thái gửi và xử lý lỗi
 

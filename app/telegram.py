@@ -16,8 +16,11 @@ from app.models.support import (Conversation, Customer, Message, TelegramCursor,
                                 TelegramDelivery, TelegramPeer, TelegramUpdate, now_utc)
 from app.services.handoff_service import queue_handoff
 from app.services.message_service import process_message
+from app.services.telegram_link import command_reply, link_peer, unlink_peer
 
 _status = {'name': 'Telegram', 'status': 'not_connected', 'detail': 'Chưa bật kết nối.'}
+_bot = {'username': None}
+COMMANDS = {'/start', '/link', '/unlink', '/orders'}
 
 
 class TelegramError(Exception):
@@ -49,6 +52,11 @@ def telegram_call(token, method, payload):
 
 def telegram_status():
     return dict(_status)
+
+
+def bot_username():
+    """Set once getMe succeeds; None while Telegram is disabled or not connected."""
+    return _bot['username']
 
 
 def identifier(value):
@@ -117,6 +125,13 @@ def process_next(db, bot_id):
     if incoming is None:
         return False
     peer = db.get(TelegramPeer, incoming.peer_id)
+    if incoming.conversation_id is None and incoming.state == 'pending':
+        words = incoming.content.split()
+        if words[0].lower() == '/start' and len(words) > 1 and words[1].startswith('link_'):
+            # The link code is single-use: store only the outcome, never the code.
+            incoming.content = '/link ' + link_peer(db, peer, words[1][5:])
+        elif words[0].lower() == '/unlink':
+            incoming.content = '/unlink ' + unlink_peer(db, peer)
     conversation = db.get(Conversation, incoming.conversation_id or peer.conversation_id) if incoming.conversation_id or peer.conversation_id else None
     if incoming.conversation_id and conversation.status == 'closed':
         if db.query(Message).filter_by(conversation_id=conversation.id, external_message_id=incoming.id).first():
@@ -134,7 +149,7 @@ def process_next(db, bot_id):
     incoming.state = 'processing'
     update_key, content, conversation_id = incoming.id, incoming.content, conversation.id
     db.commit()
-    if content.split()[0].lower() == '/start':
+    if content.split()[0].lower() in COMMANDS:
         db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
         db.refresh(conversation)
         if conversation.status == 'closed':
@@ -142,13 +157,14 @@ def process_next(db, bot_id):
             db.commit()
             return True
         if not db.query(Message).filter_by(conversation_id=conversation_id, external_message_id=update_key).first():
+            shown = '/start (kết nối tài khoản web)' if content.startswith('/link') else content.split()[0]
             message = Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='customer',
-                              content=content, external_message_id=update_key)
+                              content=shown, external_message_id=update_key)
             db.add(message)
             db.flush()
             conversation.last_customer_message_id = message.id
             db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system',
-                content='Bạn có thể hỏi chính sách cửa hàng bằng văn bản. Gửi /human để gặp nhân viên. Không gửi mật khẩu hoặc mã truy cập đơn vào chat.'))
+                content=command_reply(db, db.get(TelegramPeer, peer.id), content)))
         result = {}
     else:
         result = process_message(db, conversation, content, update_key)
@@ -256,6 +272,7 @@ def run_telegram(stop, token):
                 if not isinstance(bot, dict) or not identifier(bot.get('id')) or bot.get('is_bot') is not True:
                     raise TelegramError('telegram_invalid_bot')
                 bot_id = str(bot['id'])
+                _bot['username'] = bot.get('username') if isinstance(bot.get('username'), str) else None
                 info = telegram_call(token, 'getWebhookInfo', {})
                 if not isinstance(info, dict) or info.get('url'):
                     raise TelegramError('telegram_webhook_active')
