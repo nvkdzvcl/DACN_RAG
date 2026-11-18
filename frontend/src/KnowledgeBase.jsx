@@ -50,6 +50,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
   const [loadError, setLoadError] = useState('');
   const [slow, setSlow] = useState(false);
   const [page, setPage] = useState(0);
+  const [citationDays, setCitationDays] = useState(7);
   const answerRequest = useRef(null);
   const previewRef = useRef(null);
   const tabs = [['documents', 'Tài liệu'], ...(user.role === 'admin' ? [['upload', 'Tải tài liệu']] : []), ['ask', 'Thử hỏi AI']];
@@ -73,7 +74,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     try {
       const [data, status] = await Promise.all([request('/documents', { signal }), request('/documents/runtime', { signal })]);
       if (signal?.aborted) return;
-      setDocuments(data.documents); setRuntime(status); setLoadError('');
+      setDocuments(data.documents); setCitationDays(data.citation_window_days || 7); setRuntime(status); setLoadError('');
     } catch (error) {
       if (signal?.aborted) return;
       if (error.status === 401) onExpired();
@@ -92,7 +93,7 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     try {
       const result = await request(path, options);
       if (result.status === 'failed') setError(result.error_message || 'Xử lý tài liệu thất bại.');
-      const data = await request('/documents'); setDocuments(data.documents);
+      const data = await request('/documents'); setDocuments(data.documents); setCitationDays(data.citation_window_days || 7);
       return result.status !== 'failed';
     } catch (error) { if (error.status === 401) onExpired(); setError(error.message); }
     finally { setBusy(''); setRemoveId(null); }
@@ -145,11 +146,11 @@ export default function KnowledgeBase({ user, request, onExpired }) {
     <h2 className="documentHeading" id="tai-lieu">Tài liệu <span>{visibleDocuments.length} / {documents.length} tài liệu</span></h2>
     <div className="documentFilters"><label>Tìm tài liệu<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tiêu đề hoặc tên file..." /></label><label>Trạng thái<select value={status} onChange={event => setStatus(event.target.value)}><option value="">Tất cả trạng thái</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>{(search || status) && <button onClick={() => { setSearch(''); setStatus(''); }}>Xóa bộ lọc</button>}</div>
     {loading ? <p role="status">Đang tải tài liệu...</p> : !documents.length ? <p>Chưa có tài liệu. {user.role === 'admin' ? <button onClick={() => setSection('upload')}>Tải tài liệu đầu tiên</button> : 'Quản trị viên tải tài liệu để bắt đầu hỏi đáp.'}</p> : !visibleDocuments.length ? <p role="status">Không có tài liệu phù hợp. Thử đổi tên hoặc bỏ bộ lọc trạng thái.</p> : <><div className="documentList">{pageDocuments.map(document => <article className="documentCard" key={document.document_id}>
-      <div><h2>{document.title || document.filename}</h2><p>{document.title ? `${document.filename} · ` : ''}{labels[document.status] || document.status} · {document.chunks} đoạn</p>{document.error_message && <p className="kbError">{document.error_message}</p>}</div>
+      <div className="docMain"><h2>{document.title || document.filename}</h2><p>{document.title ? `${document.filename} · ` : ''}{labels[document.status] || document.status}</p>{document.error_message && <p className="kbError">{document.error_message}</p>}</div><div className="docStats"><span><b>{document.chunks}</b> đoạn</span><span title={`Số câu trả lời của AI trích tài liệu này trong ${citationDays} ngày`}><b>{document.cited ?? 0}</b> lần được trích</span></div>
       <div className="documentActions"><button onClick={() => show(document)} disabled={Boolean(busy)} aria-expanded={preview?.id === document.document_id}>{preview?.id === document.document_id ? 'Ẩn nội dung' : 'Xem nội dung'}</button>
       {user.role === 'admin' && <><button disabled={Boolean(busy) || document.status === 'deleting'} onClick={() => mutate(`/documents/${document.document_id}/reindex`, { method: 'POST' }, document.document_id)}>{busy === document.document_id ? 'Đang xử lý...' : 'Lập chỉ mục lại'}</button><button disabled={Boolean(busy)} onClick={() => setRemoveId(document.document_id)} className="danger">Xóa</button></>}</div>
       {removeId === document.document_id && <div className="deleteConfirm" role="alert"><p>Xóa tài liệu, các đoạn và vector? Lịch sử hội thoại vẫn giữ trích dẫn cũ.</p><button disabled={Boolean(busy)} onClick={() => mutate(`/documents/${document.document_id}`, { method: 'DELETE' }, document.document_id)}>Xác nhận xóa</button><button disabled={Boolean(busy)} onClick={() => setRemoveId(null)}>Hủy</button></div>}
-      {preview?.id === document.document_id && <section ref={previewRef} className="sourcePreview inlinePreview" aria-label={`Nội dung ${document.filename}`}>{preview.loading ? <p role="status">Đang tải...</p> : preview.error ? <p role="alert">{preview.error}</p> : preview.chunks.map(chunk => <article key={chunk.chunk_id}><h3>{chunk.location || `Đoạn ${chunk.index + 1}`}</h3><p><RichText text={chunk.content} /></p></article>)}</section>}
+      {preview?.id === document.document_id && <section ref={previewRef} className="sourcePreview inlinePreview" aria-label={`Nội dung ${document.filename}`}>{preview.loading ? <p role="status">Đang tải...</p> : preview.error ? <p role="alert">{preview.error}</p> : preview.chunks.map(chunk => <article key={chunk.chunk_id} className={chunk.cited ? 'cited' : ''}><h3>{chunk.location || `Đoạn ${chunk.index + 1}`}{chunk.cited ? ` · được trích ${chunk.cited} lần` : ''}</h3><p><RichText text={chunk.content} /></p></article>)}</section>}
     </article>)}</div>
     {pageCount > 1 && <nav className="kbPager" aria-label="Phân trang tài liệu"><span>Trang {currentPage + 1} / {pageCount} · {currentPage * PAGE_SIZE + 1}–{currentPage * PAGE_SIZE + pageDocuments.length} trong {visibleDocuments.length} tài liệu</span><div><button type="button" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 0}>Trang trước</button><button type="button" onClick={() => goToPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}>Trang sau</button></div></nav>}</>}
     </section>

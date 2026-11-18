@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.support import DocumentChunk, KnowledgeDocument
+from app.services.insights import recent_citations
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
@@ -10,7 +11,8 @@ def list_chunks(document_id: str, db: Session = Depends(get_db)):
     if db.get(KnowledgeDocument, document_id) is None:
         raise HTTPException(404, "Document not found")
     chunks = db.query(DocumentChunk).filter_by(document_id=document_id).order_by(DocumentChunk.chunk_index).all()
-    return {"document_id": document_id, "count": len(chunks), "chunks": [{"chunk_id": c.id, "index": c.chunk_index, "source": c.source, "content": c.content, "page": c.page, "location": c.location} for c in chunks]}
+    cited = recent_citations(db, "chunk_id")
+    return {"document_id": document_id, "count": len(chunks), "chunks": [{"chunk_id": c.id, "index": c.chunk_index, "source": c.source, "content": c.content, "page": c.page, "location": c.location, "cited": cited[c.id]} for c in chunks]}
 
 
 @router.get("/{document_id}/chunks/{chunk_id}")

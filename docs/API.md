@@ -81,7 +81,7 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 
 | Nhóm API     | Method | Đường dẫn (Path)                                    | Chức năng                                          | Quyền truy cập | Mã Use Case |
 | ------------ | ------ | --------------------------------------------------- | -------------------------------------------------- | -------------- | ----------- |
-| Kho tri thức | GET    | `/api/v1/documents`                                 | Liệt kê tài liệu và trạng thái lập chỉ mục; `title` là dòng tiêu đề `#` đầu tài liệu (null nếu không có) | Nhân viên      | UC05        |
+| Kho tri thức | GET    | `/api/v1/documents`                                 | Liệt kê tài liệu và trạng thái lập chỉ mục; `title` là dòng tiêu đề `#` đầu tài liệu (null nếu không có); `cited` là số câu trả lời AI trích tài liệu trong `citation_window_days` (7) ngày | Nhân viên      | UC05        |
 | Kho tri thức | GET    | `/api/v1/documents/runtime`                         | Kiểm tra trạng thái runtime/mô hình xử lý tài liệu | Nhân viên      | UC05        |
 | Kho tri thức | POST   | `/api/v1/documents/upload`                          | Tải tài liệu lên kho tri thức                      | Admin          | UC05        |
 | Kho tri thức | POST   | `/api/v1/documents/{document_id}/reindex`           | Lập chỉ mục lại tài liệu                           | Admin          | UC05        |
@@ -201,7 +201,7 @@ Tiền tố /api/v1/workspace. GET yêu cầu Staff; POST/PATCH yêu cầu CSRF.
 | GET    | /orders                  | Staff | q, status, customer_id, offset/limit; tên khách/trạng thái/vận đơn                                                                                |
 | POST   | /orders                  | Admin | id DH/ORD 6–64 ký tự, customer_id, status, tracking_code <= 100; 201, trùng 409, thiếu khách 404                                                  |
 | PATCH  | /orders/{order_id}       | Admin | status/tracking_code và expected chứa giá trị cũ; không nhận customer_id, xung đột 409                                                            |
-| GET    | /summary                 | Staff | days thuộc 7/30/90; totals toàn bộ, period và daily theo ngày giờ Việt Nam (`timezone`: Asia/Ho_Chi_Minh), SLA nullable khi chưa có mẫu                                                                 |
+| GET    | /summary                 | Staff | days thuộc 7/30/90; totals toàn bộ, period và daily theo ngày giờ Việt Nam (`timezone`: Asia/Ho_Chi_Minh), period thêm `ai_outcomes` (AI trả lời có nguồn / AI chưa trả lời được / chuyển nhân viên), `unanswered_questions` (câu hỏi AI từ chối hoặc hỏi lại, gộp theo nội dung) và `top_documents` (tài liệu được trích nhiều nhất), SLA nullable khi chưa có mẫu                                                                 |
 | GET    | /settings                | Staff | Người dùng công khai, SLA cố định và tình trạng hỗ trợ kênh; không có secrets                                                                     |
 | GET    | /users                   | Admin | offset/limit; người dùng công khai và active, không password_hash                                                                                 |
 | POST   | /password                | Staff | current_password 1–128, new_password 12–128; sai mật khẩu cũ 400, không đổi 422, tranh chấp 409; thành công thu hồi mọi phiên của chính người đổi |

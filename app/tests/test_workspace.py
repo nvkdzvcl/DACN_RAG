@@ -15,7 +15,8 @@ from app.core.auth import hash_password, verify_password
 from app.db.migrations import migrate
 from app.db.session import get_db
 from app.main import app
-from app.models.support import Conversation, Customer, Message, Order, Ticket, User
+from app.models.support import Conversation, Customer, DocumentChunk, KnowledgeDocument, Message, Order, Ticket, User
+from app.rag.answer_service import ABSTENTION, CLARIFICATION
 
 
 class WorkspaceTests(unittest.TestCase):
@@ -159,6 +160,36 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(daily[0], {'date': (today - timedelta(days=6)).isoformat(), 'count': 1})
         self.assertEqual(result['period']['conversations'], 3)
         self.assertEqual(datetime.fromisoformat(result['start']).astimezone(local).date(), today - timedelta(days=6))
+
+    def test_summary_reports_ai_outcomes_unanswered_questions_and_cited_documents(self):
+        self.login()
+        now = datetime.now(timezone.utc)
+        cite = lambda doc, chunk: {'document_id': doc, 'chunk_id': chunk, 'source': doc + '.md', 'quote': 'q'}
+        with Session(self.engine) as db:
+            db.add_all([KnowledgeDocument(id='doi-tra', filename='doi-tra.md', status='indexed'),
+                        KnowledgeDocument(id='giao-hang', filename='giao-hang.md', status='indexed')])
+            db.flush()
+            db.add(DocumentChunk(id='doi-tra-1', document_id='doi-tra', chunk_index=0, content='# Chính sách đổi trả', source='doi-tra.md'))
+            rows = []
+            for i, (question, reply, citations) in enumerate([
+                    ('Đổi máy trong 30 ngày?', 'Đổi trả – ...', [cite('doi-tra', 'doi-tra-1'), cite('doi-tra', 'doi-tra-2')]),
+                    ('Phí giao hàng?', 'Giao hàng – ...', [cite('giao-hang', 'giao-hang-1')]),
+                    ('Shop có bán xe máy không?', ABSTENTION, []),
+                    ('shop có bán  XE MÁY không?', ABSTENTION, []),
+                    ('Còn laptop thì sao?', CLARIFICATION, []),
+                    ('Đổi trả laptop?', 'Đổi trả – ...', [cite('doi-tra', 'doi-tra-1')])]):
+                at = now - timedelta(minutes=60 - i)
+                rows += [Message(id=f'q{i}', conversation_id='chat', sender_type='customer', content=question, created_at=at),
+                         Message(id=f'a{i}', conversation_id='chat', sender_type='ai', content=reply, citations=citations, reply_to_id=f'q{i}', created_at=at)]
+            db.add_all(rows)
+            db.add(Ticket(id='handoff', conversation_id='chat', created_at=now - timedelta(minutes=5)))
+            db.commit()
+        period = self.client.get('/api/v1/workspace/summary?days=7').json()['period']
+        self.assertEqual(period['ai_outcomes'], {'answered': 3, 'not_answered': 3, 'handoffs': 1})
+        unanswered = period['unanswered_questions']
+        self.assertEqual([(q['question'], q['count']) for q in unanswered], [('shop có bán  XE MÁY không?', 2), ('Còn laptop thì sao?', 1)])
+        self.assertEqual([(d['document_id'], d['title'], d['count']) for d in period['top_documents']],
+                         [('doi-tra', 'Chính sách đổi trả', 2), ('giao-hang', None, 1)])
 
     def test_empty_metrics_do_not_invent_percentages(self):
         self.login()

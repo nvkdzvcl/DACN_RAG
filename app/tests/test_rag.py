@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
@@ -103,6 +104,23 @@ class RagTests(unittest.TestCase):
         self.upload(b'Returns accepted within 7 days.', 'policy.txt')
         titles = {d['filename']: d['title'] for d in self.client.get('/api/v1/documents').json()['documents']}
         self.assertEqual(titles, {'giao-hang.md': 'Chính sách giao hàng (bản thử)', 'policy.txt': None})
+
+    def test_document_and_chunk_lists_count_recent_citations(self):
+        document_id = self.upload('# Đổi trả\nĐổi trong 30 ngày.'.encode(), 'doi-tra.md')
+        with Session(self.engine) as db:
+            chunk_id = db.query(DocumentChunk).filter_by(document_id=document_id).first().id
+            db.add(Customer(id='c', display_name='C')); db.flush()
+            db.add(Conversation(id='conv', customer_id='c')); db.flush()
+            old = datetime.now(timezone.utc) - timedelta(days=30)
+            for i, at in enumerate([None, None, old]):
+                db.add(Message(id=f'm{i}', conversation_id='conv', sender_type='ai', content='x',
+                               citations=[{'document_id': document_id, 'chunk_id': chunk_id}], **({'created_at': at} if at else {})))
+            db.commit()
+        listing = self.client.get('/api/v1/documents').json()
+        self.assertEqual(listing['citation_window_days'], 7)
+        self.assertEqual(listing['documents'][0]['cited'], 2)
+        chunks = self.client.get(f'/api/v1/documents/{document_id}/chunks').json()['chunks']
+        self.assertEqual({c['chunk_id']: c['cited'] for c in chunks}[chunk_id], 2)
 
     def test_failed_embedding_can_retry_and_non_admin_cannot_mutate(self):
         with patch('app.services.document_service.embed', side_effect=ProviderError('Ollama offline')):
