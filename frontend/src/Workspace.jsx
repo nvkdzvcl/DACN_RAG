@@ -62,17 +62,18 @@ function RecordForm({ kind, record, request, onExpired, onSaved }) {
 function CustomerPicker({ request, onExpired }) {
   const [q, setQ] = useState(''), [query, setQuery] = useState(''), [chosen, setChosen] = useState(null);
   useEffect(() => { const timer = setTimeout(() => setQuery(q.trim()), 250); return () => clearTimeout(timer); }, [q]);
-  const state = useData(chosen ? null : `/workspace/customers?${new URLSearchParams({ q: query, limit: 6 })}`, request, onExpired);
-  const items = state.data?.items || [];
+  // No list until something is typed: an unfiltered first page is not a useful suggestion.
+  const state = useData(chosen || !query ? null : `/workspace/customers?${new URLSearchParams({ q: query, limit: 5 })}`, request, onExpired);
+  const items = query ? state.data?.items || [] : [];
   const input = useRef(null);
   return <div className="customerPicker"><input type="hidden" name="customer_id" value={chosen?.id || ''} />
     {chosen ? <><span className="pickerLabel">Khách hàng</span><div className="pickedCustomer"><span><b>{chosen.display_name}</b><small>{chosen.email || shortId(chosen.id)}</small></span><button type="button" onClick={() => { setChosen(null); setTimeout(() => input.current?.focus()); }}>Đổi khách</button></div></>
       : <><label>Khách hàng<span className="pickerSearch"><Search size={15} aria-hidden="true" /><input ref={input} value={q} onChange={e => setQ(e.target.value)} placeholder="Gõ tên, email hoặc mã khách" autoComplete="off" /></span></label>
-        <div className="pickerResults" role="group" aria-label="Khách hàng phù hợp" aria-busy={state.loading}>
+        {query && <div className="pickerResults" role="group" aria-label="Khách hàng phù hợp" aria-busy={state.loading}>
           {items.map(c => <button type="button" key={c.id} onClick={() => setChosen(c)}><b>{c.display_name}</b><small>{c.email || shortId(c.id)}</small></button>)}
           {state.data && !items.length && <p>Không có khách phù hợp. Thêm khách ở trang Khách hàng trước.</p>}
           {state.data && state.data.total > items.length && <p>Còn {state.data.total - items.length} khách khác · gõ thêm để thu hẹp.</p>}
-        </div></>}
+        </div>}</>}
   </div>;
 }
 
