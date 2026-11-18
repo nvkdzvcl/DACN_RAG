@@ -5,6 +5,7 @@ from app.core.auth import require_admin
 from app.db.session import get_db
 from app.models.support import KnowledgeDocument
 from app.rag.ollama import ProviderError, call, chat_model, embedding_model
+from app.services.insights import CITATION_WINDOW_DAYS, recent_citations
 from app.services.document_service import (MAX_FILE_SIZE, delete_document, document_info,
     document_mutation, index_document, knowledge_root, save_document)
 
@@ -13,7 +14,9 @@ router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
 @router.get("")
 def list_documents(db: Session = Depends(get_db)):
-    return {"documents": [document_info(db, d) for d in db.query(KnowledgeDocument).order_by(KnowledgeDocument.created_at.desc()).all()]}
+    cited = recent_citations(db, "document_id")
+    return {"citation_window_days": CITATION_WINDOW_DAYS,
+            "documents": [document_info(db, d) | {"cited": cited[d.id]} for d in db.query(KnowledgeDocument).order_by(KnowledgeDocument.created_at.desc()).all()]}
 
 
 @router.get("/runtime")

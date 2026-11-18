@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Search, Plus, RefreshCw, X, MessagesSquare, UsersRound, ShoppingBag, BookOpen, TicketCheck, MessageCircle } from 'lucide-react';
 import './workspace.css';
+import useData from './useData';
+import LoadState from './LoadState';
+import Overview from './Overview';
 import PasswordRules from './PasswordRules';
 import { channelNames, conversationStatuses, formatDate, formatDateTime, formatDay, formatMinutes, shortId } from './shared';
 
@@ -11,38 +14,7 @@ const fieldsOf = (event) => Object.fromEntries(new FormData(event.currentTarget)
 const labelOf = (labels, value) => labels[value] || value;
 const number = value => value == null ? 'Chưa có' : value.toLocaleString('vi-VN');
 
-function useData(path, request, onExpired, refreshOnFocus = false) {
-  const [data, setData] = useState(null), [error, setError] = useState(''), [loading, setLoading] = useState(true);
-  const [version, setVersion] = useState(0);
-  const [updatedAt, setUpdatedAt] = useState(null);
-  const loadedPath = useRef(null);
-  useEffect(() => {
-    if (!refreshOnFocus || !path) return;
-    let timer;
-    const refresh = () => {
-      if (!document.hidden) { clearTimeout(timer); timer = setTimeout(() => setVersion(n => n + 1), 150); }
-    };
-    window.addEventListener('focus', refresh); document.addEventListener('visibilitychange', refresh);
-    return () => { clearTimeout(timer); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
-  }, [path, refreshOnFocus]);
-  useEffect(() => {
-    if (!path) { setData(null); setUpdatedAt(null); setError(''); setLoading(false); loadedPath.current = null; return; }
-    const controller = new AbortController();
-    if (loadedPath.current !== path) { setData(null); setUpdatedAt(null); }
-    loadedPath.current = path; setError(''); setLoading(true);
-    request(path, { signal: controller.signal, cache: 'no-store' }).then(value => {
-      if (!controller.signal.aborted) { setData(value); setUpdatedAt(new Date().toISOString()); }
-    }).catch(e => {
-      if (!controller.signal.aborted) { setError(e.message); if (e.status === 401) onExpired(); }
-    }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [path, version]);
-  return { data, error, loading, updatedAt, reload: () => setVersion(n => n + 1) };
-}
 
-function LoadState({ state }) {
-  return <>{state.loading && <p className="state" role="status">{state.data ? 'Đang cập nhật dữ liệu...' : 'Đang tải dữ liệu...'}</p>}{state.error && <div className="workspaceError" role="alert"><p>{state.error}{state.data && ' Dữ liệu hiển thị có thể đã cũ.'}</p><button onClick={state.reload}>Thử lại</button></div>}</>;
-}
 
 function Pager({ total, offset, setOffset }) {
   return <div className="pager"><span>{total ? `${offset + 1}–${Math.min(offset + 25, total)} / ${total}` : 'Không có kết quả'}</span><div><button disabled={!offset} onClick={() => setOffset(Math.max(0, offset - 25))}>Trước</button><button disabled={offset + 25 >= total} onClick={() => setOffset(offset + 25)}>Sau</button></div></div>;
@@ -200,7 +172,8 @@ function SettingsPage({ user, request, onExpired }) {
 }
 
 export default function Workspace({ page, ...props }) {
-  if (page === 'overview' || page === 'analytics') return <Metrics page={page} {...props} />;
+  if (page === 'overview') return <Overview {...props} />;
+  if (page === 'analytics') return <Metrics page={page} {...props} />;
   if (page === 'settings') return <SettingsPage {...props} />;
   return <Records kind={page} {...props} />;
 }

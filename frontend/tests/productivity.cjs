@@ -137,7 +137,7 @@ const { chromium } = require('playwright');
     await page.waitForTimeout(300); assert.equal(summaryCalls, calls + 1); assert.equal(queueCalls, queues + 2);
     summaryFail = true; await page.getByRole('button', { name: 'Làm mới', exact: true }).click();
     await page.getByText('Dữ liệu hiển thị có thể đã cũ.', { exact: false }).waitFor();
-    assert.equal(await page.locator('.workspaceStats').count(), 1); await page.screenshot({ path: path.join(output, 'dashboard-stale.png') });
+    assert.equal(await page.locator('.ovQueue').count(), 1); await page.screenshot({ path: path.join(output, 'dashboard-stale.png') });
     await page.goto(url + '?selectedId=one&mobileConversation=1'); await draft.waitFor();
     await page.getByRole('button', { name: 'Đăng xuất', exact: true }).filter({ visible: true }).first().click(); await page.getByLabel('Tên đăng nhập', { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => sessionStorage.getItem('rag-drafts:staff:staff')), null);

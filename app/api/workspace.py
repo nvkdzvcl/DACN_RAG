@@ -16,6 +16,7 @@ from app.core.auth import hash_password, public_user, require_admin, require_sta
 from app.db.session import get_db
 from app.models.support import AuthSession, Conversation, Customer, CustomerAccount, KnowledgeDocument, Message, Order, OrderAccess, Ticket, User
 from app.services.sla_service import RESPONSE_MINUTES, ticket_slas, utc
+from app.services import insights
 from app.telegram import telegram_status
 
 router = APIRouter(prefix='/api/v1/workspace', tags=['workspace'], dependencies=[Depends(require_staff)])
@@ -214,6 +215,7 @@ def summary(days: int = Query(7), db: Session = Depends(get_db)):
                         for t in tickets if slas[t.id]['responded_at']]
     daily = Counter(utc(c.created_at).astimezone(REPORT_TZ).date().isoformat() for c in chats)
     grouped = lambda model, field: dict(db.query(field, func.count()).select_from(model).group_by(field).all())
+    replies = insights.ai_replies(db, start, now)
     totals = {name: db.query(model).count() for name, model in [('customers', Customer), ('orders', Order), ('conversations', Conversation), ('documents', KnowledgeDocument)]}
     return {'days': days, 'start': start, 'end': now, 'timezone': REPORT_TZ.tzname(None), 'totals': totals,
             'conversation_statuses': grouped(Conversation, Conversation.status),
@@ -226,7 +228,10 @@ def summary(days: int = Query(7), db: Session = Depends(get_db)):
                        'sla': {key: sla_counts[key] for key in ('met', 'breached', 'on_track', 'overdue', 'cancelled')},
                        'responded_tickets': len(response_minutes),
                        'sla_met_percent': round(100 * sla_counts['met'] / len(response_minutes), 1) if response_minutes else None,
-                       'mean_response_minutes': round(sum(response_minutes) / len(response_minutes), 1) if response_minutes else None}}
+                       'mean_response_minutes': round(sum(response_minutes) / len(response_minutes), 1) if response_minutes else None,
+                       'ai_outcomes': insights.outcomes(db, replies, start, now),
+                       'unanswered_questions': insights.unanswered_questions(db, replies),
+                       'top_documents': insights.top_documents(db, replies)}}
 
 
 @router.get('/settings')
