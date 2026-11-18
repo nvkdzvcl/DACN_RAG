@@ -149,4 +149,4 @@ Theo [ORDER_ACCESS.md](ORDER_ACCESS.md), dùng một đơn thử và phiên khá
 
 ## Telegram (chờ cấu hình bot thật)
 
-Theo [TELEGRAM.md](TELEGRAM.md): bật bot thử riêng, /start, hỏi chính sách, /human, tiếp nhận và trả lời trong Inbox, kiểm tra tin trên Telegram rồi đóng/nhắn lại. Hai người cùng tên phải có hồ sơ riêng. Chỉ ghi demo đa kênh đạt sau khi quan sát gửi/nhận thật; test mock và trạng thái connected không thay bằng chứng này.
+Theo [TELEGRAM.md](TELEGRAM.md): bật bot thử riêng, /start, hỏi chính sách, /human, tiếp nhận và trả lời trong Inbox, kiểm tra tin trên Telegram rồi đóng/nhắn lại. Hai người cùng tên phải có hồ sơ riêng. Kết nối tài khoản: trên web mở Tài khoản → Kết nối Telegram, mở link trên điện thoại, rồi gửi /orders để thấy đơn của tài khoản; /unlink để gỡ. Chỉ ghi demo đa kênh đạt sau khi quan sát gửi/nhận thật; test mock và trạng thái connected không thay bằng chứng này.

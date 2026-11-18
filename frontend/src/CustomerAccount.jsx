@@ -77,6 +77,46 @@ export function CustomerHistory({ request, onExpired, currentId, onOpenChat }) {
   </section>;
 }
 
+// Telegram logo (brand blue circle, white paper plane); used only to link to Telegram.
+function TelegramLogo({ size = 18 }) {
+  return <svg className="telegramLogo" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11.5" fill="#fff" /><path fill="#26A5E4" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg>;
+}
+
+// Link this account to the customer's Telegram chat (one-time link, 10 minutes). Afterwards /orders in the bot lists the same orders.
+function TelegramLink({ request, onExpired }) {
+  const [state, setState] = useState(null), [link, setLink] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
+  async function load() {
+    try { setState(await request('/account/telegram')); }
+    catch (e) { if (e.status === 401) onExpired(); else setError(e.message); }
+  }
+  useEffect(() => { load(); }, []);
+  // While a link is open, check every few seconds whether the bot has received it.
+  useEffect(() => {
+    if (!link || state?.linked) return;
+    const timer = setInterval(load, 4000);
+    return () => clearInterval(timer);
+  }, [link, state?.linked]);
+  useEffect(() => { if (state?.linked) setLink(null); }, [state?.linked]);
+  async function act(method, path) {
+    setBusy(true); setError('');
+    try {
+      const data = await request(path, { method });
+      if (method === 'POST') setLink(data); else { setLink(null); setState(current => ({ ...current, linked: false })); }
+    } catch (e) { if (e.status === 401) onExpired(); else setError(e.message); }
+    finally { setBusy(false); }
+  }
+  if (!state) return null;
+  return <div className="telegramCard"><div className="telegramHead"><TelegramLogo size={36} /><div><h2>Telegram</h2><p>{state.linked ? 'Đã kết nối. Gửi /orders cho bot để xem đơn của bạn.' : 'Kết nối để xem đơn và hỏi đáp ngay trong Telegram.'}</p></div>
+      {state.linked && <span className="profileStatus verified">Đã kết nối</span>}</div>
+    {state.linked ? <button type="button" className="telegramSecondary" disabled={busy} onClick={() => { if (window.confirm('Gỡ kết nối Telegram? Bot sẽ không còn xem được đơn của tài khoản này.')) act('DELETE', '/account/telegram'); }}>Gỡ kết nối</button>
+      : !state.available ? <p className="telegramNote">Telegram chưa được bật trên máy chủ.</p>
+      : link ? <div className="telegramLink"><a href={link.url} target="_blank" rel="noopener noreferrer" className="telegramOpen"><TelegramLogo size={18} />Mở Telegram để kết nối</a>
+          <p className="telegramNote">Link dùng một lần, hết hạn sau 10 phút. Mở trên thiết bị có Telegram rồi bấm Start; trang này tự cập nhật khi xong.</p></div>
+      : <button type="button" className="telegramOpen" disabled={busy} onClick={() => act('POST', '/account/telegram-link')}><TelegramLogo size={18} />{busy ? 'Đang tạo link...' : 'Kết nối Telegram'}</button>}
+    {error && <p role="alert" className="widgetError">{error}</p>}
+  </div>;
+}
+
 export function CustomerProfile({ account, displayName, request, onExpired, onPasswordChanged, onLogout, logoutDisabled }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [newPassword, setNewPassword] = useState('');
   async function save(event) {
@@ -91,8 +131,9 @@ export function CustomerProfile({ account, displayName, request, onExpired, onPa
   return <section className="portalPage customerProfile"><div className="portalPageHead"><div><h1>Tài khoản</h1><p>Thông tin đăng nhập và bảo mật.</p></div>{onLogout && <button type="button" className="profileLogout" onClick={onLogout} disabled={logoutDisabled}>Đăng xuất</button>}</div>
     <div className="profileGrid"><div className="profileSide">
       <div className="profileCard"><div className="profileAvatar" aria-hidden="true">{initials(displayName || account.email)}</div><div><h2>{displayName || account.email}</h2><p>{account.email}</p></div><span className={verified ? 'profileStatus verified' : 'profileStatus'}>{verified ? 'Email đã xác minh' : 'Email chưa xác minh'}</span>
-        {verified && <p className="profileNote">Dùng email này để khôi phục mật khẩu. Quyền tra đơn vẫn cần mã truy cập riêng.</p>}</div>
+        {verified && <p className="profileNote">Dùng email này để khôi phục mật khẩu. Đơn cửa hàng gắn vào tài khoản hiện ở mục Tra đơn.</p>}</div>
       {!verified && <div className="profileVerify"><EmailVerification account={account} request={request} onExpired={onExpired} /></div>}
+      {verified && <TelegramLink request={request} onExpired={onExpired} />}
     </div>
     <form className="portalOrderForm profilePassword" onSubmit={save}><fieldset disabled={busy}><h2>Đổi mật khẩu</h2><label>Mật khẩu hiện tại<input name="current_password" type="password" required maxLength={128} autoComplete="current-password" /></label><label>Mật khẩu mới<input name="new_password" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" onChange={event => setNewPassword(event.target.value)} /></label><PasswordRules value={newPassword} /><label>Nhập lại mật khẩu mới<input name="confirm" type="password" required minLength={8} maxLength={128} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,128}" autoComplete="new-password" /></label><p>Đổi thành công sẽ đăng xuất tài khoản trên mọi thiết bị.</p>{error && <p role="alert" className="widgetError">{error}</p>}<button>{busy ? 'Đang đổi...' : 'Đổi mật khẩu'}</button></fieldset></form>
     </div></section>;

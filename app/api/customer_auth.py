@@ -17,7 +17,9 @@ from app.api.widget import (COOKIE, COOKIE_PATH, SESSION_SECONDS, check_csrf, fi
                             no_cache, rate_limit, require_session, snapshot)
 from app.core.auth import hash_password, token_hash, verify_password
 from app.db.session import get_db
-from app.models.support import Conversation, Customer, CustomerAccount, CustomerEmailToken, CustomerSession, Message
+from app.models.support import Conversation, Customer, CustomerAccount, CustomerEmailToken, CustomerSession, Message, TelegramPeer
+from app.services.telegram_link import detach, issue_link_code
+from app.telegram import bot_username
 from app.services.customer_email import deliver_challenge, mail_settings
 
 router = APIRouter(prefix=COOKIE_PATH + '/account', tags=['customer accounts'],
@@ -374,3 +376,34 @@ def reset_password(payload: ResetPassword, request: Request, response: Response,
     db.execute(delete(CustomerSession).where(CustomerSession.account_id == account.id))
     db.commit()
     return {'message': 'Đã đặt lại mật khẩu và đăng xuất mọi thiết bị. Vui lòng đăng nhập bằng mật khẩu mới.'}
+
+
+# Telegram: link the customer's Telegram chat to this account (see app/services/telegram_link.py).
+@router.get('/telegram')
+def telegram_link_status(response: Response, session=Depends(require_verified_account), db: Session = Depends(get_db)):
+    response.headers['Cache-Control'] = 'no-store'
+    account = db.get(CustomerAccount, session.account_id)
+    linked = db.query(TelegramPeer.id).filter(TelegramPeer.customer_id == account.customer_id).first() is not None
+    return {'available': bot_username() is not None, 'linked': linked}
+
+
+@router.post('/telegram-link', status_code=201)
+def telegram_link(request: Request, response: Response, session=Depends(require_verified_account), db: Session = Depends(get_db)):
+    rate_limit(request, 'telegram-link', 5)
+    username = bot_username()
+    if username is None:
+        raise HTTPException(503, 'Telegram chưa được kết nối trên máy chủ. Vui lòng thử lại sau.')
+    code, expires_at = issue_link_code(db, db.get(CustomerAccount, session.account_id))
+    db.commit()
+    response.headers['Cache-Control'] = 'no-store'
+    return {'url': f'https://t.me/{username}?start=link_{code}', 'expires_at': expires_at}
+
+
+@router.delete('/telegram')
+def telegram_unlink(session=Depends(require_verified_account), db: Session = Depends(get_db)):
+    account = db.get(CustomerAccount, session.account_id)
+    peer = db.query(TelegramPeer).filter(TelegramPeer.customer_id == account.customer_id).first()
+    if peer is not None:
+        detach(db, peer)
+        db.commit()
+    return {'linked': False}
