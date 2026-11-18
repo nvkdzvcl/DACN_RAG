@@ -1,0 +1,251 @@
+/* Redesign step 5 (docs/design/redesign 05–07): sign-in, order lookup, FAQ, history and account pages.
+   Older files (auth.css, portal.css) carry ":root[data-theme=dark] :is(...)" rules of specificity (0,3,0);
+   every rule here starts with ":root .customerPortal.customerPortal" or ":root .authPage.authPage" so it wins
+   in both themes, and colors come from the --rd-* variables. */
+:root .authPage {
+  --rd-bg: #f6f5f1; --rd-surface: #ffffff; --rd-sunken: #efeee9; --rd-line: #e4e2db; --rd-line-strong: #d3d0c6;
+  --rd-ink: #1b1b18; --rd-ink-2: #3f3e39; --rd-muted: #67665e;
+  --rd-accent: #0e6b61; --rd-accent-soft: #e3f0ed; --rd-accent-strong: #0a524a; --rd-story: #0e6b61;
+}
+:root[data-theme=dark] .authPage {
+  --rd-bg: #191814; --rd-surface: #22211c; --rd-sunken: #2b2a24; --rd-line: #37352e; --rd-line-strong: #4a4840;
+  --rd-ink: #ecebe6; --rd-ink-2: #d2d0c8; --rd-muted: #a9a69c;
+  --rd-accent: #3fb3a5; --rd-accent-soft: #1d3a36; --rd-accent-strong: #7fd3c8; --rd-story: #12403a;
+}
+:root .customerPortal { --rd-danger: #b42318; --rd-danger-soft: #fdebe9; }
+:root[data-theme=dark] .customerPortal { --rd-danger: #ffb4a8; --rd-danger-soft: #43282d; }
+
+/* ---------- Sign-in: teal story panel with one message and a real sourced answer ---------- */
+:root .authPage.authPage { grid-template-columns: minmax(0, 58%) minmax(0, 42%); background: var(--rd-surface); color: var(--rd-ink); font-size: 14px; }
+:root .authPage.authPage .authStory { display: flex; flex-direction: column; padding: 40px clamp(32px, 4vw, 64px); background: var(--rd-story); color: #fff; }
+:root .authPage.authPage .authStory::after { display: none; }
+:root .authPage.authPage .authStory .authBrand > span { width: 36px; height: 36px; border-radius: 9px; background: #fff; color: #0e6b61; }
+:root .authPage.authPage .authStory .authBrand b { font-size: 15px; letter-spacing: 0; color: #fff; }
+:root .authPage.authPage .authStory .authBrand small { font-size: 12px; color: #d4ebe7; margin-top: 2px; }
+:root .authPage.authPage .authStoryBody { min-height: 0; margin: auto 0; padding: 40px 0; max-width: 600px; }
+:root .authPage.authPage .authStoryBody h2 { margin: 0 0 16px; font-size: clamp(30px, 3vw, 42px); line-height: 1.15; letter-spacing: -.03em; color: #fff; }
+:root .authPage.authPage .authStoryBody > p { margin: 0; max-width: 480px; font-size: 15px; line-height: 1.65; color: #d4ebe7; }
+:root .authPage.authPage .authSample { margin: 32px 0 0; max-width: 470px; padding: 16px; border: 1px solid #ffffff33; border-radius: 14px; background: #00000014; }
+:root .authPage.authPage .authSampleQ { width: fit-content; max-width: 80%; margin: 0 0 12px auto; padding: 8px 12px; border-radius: 12px 12px 4px 12px; background: #fff; color: #1b1b18; font-size: 14px; }
+:root .authPage.authPage .authSample blockquote { margin: 0; padding: 10px 14px; border-left: 3px solid #fff; border-radius: 0 8px 8px 0; background: #0000001f; color: #fff; font-size: 14px; line-height: 1.6; }
+:root .authPage.authPage .authSample figcaption { display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: 999px; background: #00000029; color: #fff; font-size: 12.5px; }
+:root .authPage.authPage .authFacts { display: flex; flex-wrap: wrap; gap: 16px 32px; margin: 32px 0 0; }
+:root .authPage.authPage .authFacts dt { font-weight: 650; color: #fff; }
+:root .authPage.authPage .authFacts dd { margin: 4px 0 0; font-size: 13px; color: #d4ebe7; }
+
+:root .authPage.authPage .authPanel { background: var(--rd-surface); color: var(--rd-ink); padding: 32px clamp(28px, 4vw, 64px) 24px; }
+:root .authPage.authPage .authTop, :root .authPage.authPage .authFooter { color: var(--rd-muted); font-size: 12.5px; align-items: center; }
+:root .authPage.authPage .authFooter a { color: var(--rd-accent); font-weight: 600; }
+:root .authPage.authPage .authContent { max-width: 400px; padding: 48px 0; }
+:root .authPage.authPage .authContent h1 { font-size: 28px; letter-spacing: -.02em; color: var(--rd-ink); margin-bottom: 8px; }
+:root .authPage.authPage .authLead { margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: var(--rd-muted); }
+:root .authPage.authPage .authTabs { margin: 0 0 24px; padding: 4px; border-radius: 10px; background: var(--rd-sunken); }
+:root .authPage.authPage .authTabs button { min-height: 38px; font-size: 14px; color: var(--rd-muted); border-radius: 7px; }
+:root .authPage.authPage .authTabs button[aria-pressed=true] { background: var(--rd-surface); color: var(--rd-ink); font-weight: 600; box-shadow: 0 1px 3px #1b1b1820; }
+:root .authPage.authPage .authContent form { margin: 0; }
+:root .authPage.authPage .authContent fieldset { gap: 16px; }
+:root .authPage.authPage .authField > label { margin-bottom: 6px; font-size: 13px; color: var(--rd-ink); }
+:root .authPage.authPage .authInput { min-height: 46px; border: 1px solid var(--rd-line-strong); border-radius: 10px; background: var(--rd-surface); color: var(--rd-muted); }
+:root .authPage.authPage .authInput:focus-within { border-color: var(--rd-accent); box-shadow: 0 0 0 3px #0e6b6126; }
+:root .authPage.authPage .authInput input { font-size: 14px; color: var(--rd-ink); }
+:root .authPage.authPage .authInput input::placeholder { color: var(--rd-muted); }
+:root .authPage.authPage .authReveal { color: var(--rd-muted); }
+:root .authPage.authPage .authSubmit { min-height: 46px; border-radius: 10px; background: var(--rd-accent); color: #fff; font-size: 14px !important; box-shadow: none; }
+:root[data-theme=dark] .authPage.authPage .authSubmit { background: #0e6b61; }
+:root .authPage.authPage .authSubmit:hover { background: var(--rd-accent-strong); filter: none; }
+:root[data-theme=dark] .authPage.authPage .authSubmit:hover { background: #0a524a; }
+:root .authPage.authPage .authRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 0; }
+:root .authPage.authPage .authRemember { margin: 0; font-size: 13px; color: var(--rd-muted); }
+:root .authPage.authPage .authBack { padding: 6px 0; font-size: 13px; font-weight: 600; color: var(--rd-accent); }
+:root .authPage.authPage .authDivider { margin: 18px 0; font-size: 12.5px; color: var(--rd-muted); }
+:root .authPage.authPage .authDivider::before, :root .authPage.authPage .authDivider::after { background: var(--rd-line); }
+:root .authPage.authPage .authGoogle { min-height: 44px; padding: 10px 16px; border: 1px solid var(--rd-line-strong); border-radius: 10px; background: var(--rd-surface); color: var(--rd-ink); font-size: 14px; }
+:root .authPage.authPage .authGoogle:hover { background: var(--rd-sunken); }
+:root .authPage.authPage .authFeedback { background: var(--rd-accent-soft); color: var(--rd-ink); }
+:root .authPage.authPage .authFeedback[role=alert] { background: #fdebe9; color: #b42318; }
+:root[data-theme=dark] .authPage.authPage .authFeedback[role=alert] { background: #43282d; color: #ffb4a8; }
+:root .authPage.authPage .authContent small, :root .authPage.authPage .authHelp { font-size: 12.5px; color: var(--rd-muted); }
+:root .authPage.authPage .authHelp summary { color: var(--rd-accent); font-weight: 600; }
+:root .authPage.authPage .authNote { margin-top: 20px; padding: 14px 16px; border-radius: 10px; background: var(--rd-bg); color: var(--rd-ink-2); font-size: 13px; }
+:root .authPage.authPage .authNote > svg { color: var(--rd-accent); }
+:root .authPage.authPage .themeToggle { background: var(--rd-surface); border-color: var(--rd-line-strong); color: var(--rd-ink-2); }
+/* The story panel shows the brand on wide screens; the form keeps its own brand only when the story is hidden. */
+@media (min-width: 961px) { :root .authPage.authPage .authFormBrand { display: none; } }
+:root .authPage.authPage .authFormBrand > span { width: 40px; height: 40px; border-radius: 10px; background: var(--rd-accent); color: #fff; }
+:root .authPage.authPage .authFormBrand b { font-size: 18px; color: var(--rd-ink); }
+:root .authPage.authPage .authFormBrand small { color: var(--rd-muted); }
+:root .authPage.authPage .authFormBrand { margin-bottom: 28px; }
+
+/* ---------- Shared page frame ---------- */
+:root .customerPortal.customerPortal .portalPage { padding: 32px clamp(20px, 3.4vw, 48px); background: var(--rd-surface); color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalPageHead { padding: 0; border: 0; align-items: flex-start; }
+:root .customerPortal.customerPortal .portalPageIcon { display: none; }
+:root .customerPortal.customerPortal .portalPageHead h1 { margin: 0; font-size: 28px; letter-spacing: -.02em; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalPageHead p { margin: 6px 0 0; font-size: 14px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalPage h2 { color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalPage .widgetError { color: var(--rd-danger); background: var(--rd-danger-soft); border: 0; border-radius: 10px; padding: 10px 14px; margin: 0 0 12px; }
+:root .customerPortal.customerPortal .portalEmpty { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; max-width: 900px; margin-top: 28px; padding: 18px 20px; border: 0; border-radius: 12px; background: var(--rd-bg); box-shadow: none; color: var(--rd-ink-2); }
+:root .customerPortal.customerPortal .portalEmpty p { margin: 0; color: var(--rd-ink-2); }
+:root .customerPortal.customerPortal .portalEmpty button { min-height: 40px; border-radius: 10px; background: var(--rd-accent); color: #fff; }
+:root[data-theme=dark] .customerPortal.customerPortal .portalEmpty button { background: #0e6b61; }
+
+/* ---------- Order lookup: form on the left, result with status steps on the right ---------- */
+:root .customerPortal.customerPortal .orderLayout { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 24px; align-items: start; max-width: 1080px; margin-top: 24px; }
+:root .customerPortal.customerPortal .portalOrderForm:not(.profilePassword) { gap: 16px; max-width: none; margin: 0; padding: 22px; border: 0; border-radius: 14px; background: var(--rd-bg); box-shadow: none; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalOrderForm label { gap: 6px; font-size: 13px; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalOrderForm label small { font-weight: 400; font-size: 12.5px; line-height: 1.5; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalOrderForm input { min-height: 44px; padding: 10px 12px; border: 1px solid var(--rd-line-strong); border-radius: 8px; background: var(--rd-surface); color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalOrderForm input:focus-visible { outline: none; border-color: var(--rd-accent); box-shadow: 0 0 0 3px #0e6b6126; }
+:root .customerPortal.customerPortal .portalOrderForm button { justify-content: center; justify-self: stretch; min-height: 44px; border-radius: 10px; background: var(--rd-accent); color: #fff; }
+:root[data-theme=dark] .customerPortal.customerPortal .portalOrderForm button { background: #0e6b61; }
+:root .customerPortal.customerPortal .orderNote { display: flex; gap: 10px; margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--rd-surface); color: var(--rd-ink-2); font-size: 12.5px; line-height: 1.55; }
+:root .customerPortal.customerPortal .orderNote svg { flex: none; margin-top: 2px; color: var(--rd-accent); }
+:root .customerPortal.customerPortal .portalAccess { margin: 24px 0 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+:root .customerPortal.customerPortal .portalAccess h2 { margin: 0; padding-bottom: 8px; border-bottom: 1px solid var(--rd-line); font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalAccess button { display: flex; justify-content: flex-start; gap: 10px; min-height: 44px; padding: 8px 2px; border-bottom: 1px solid var(--rd-line); color: var(--rd-ink); font-size: 14px; }
+:root .customerPortal.customerPortal .portalAccess button svg { color: var(--rd-accent); }
+:root .customerPortal.customerPortal .portalAccess button small { margin-left: auto; font-size: 12.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalAccess button:hover b { color: var(--rd-accent); }
+:root .customerPortal.customerPortal .portalOrderResult, :root .customerPortal.customerPortal .portalOrderHelp { display: block; max-width: none; margin: 0; padding: 24px; border: 1px solid var(--rd-line); border-radius: 14px; background: var(--rd-surface); box-shadow: none; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalOrderHelp h2 { margin: 0 0 12px; font-size: 16px; }
+:root .customerPortal.customerPortal .portalOrderHelp ol { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8; color: var(--rd-ink-2); }
+:root .customerPortal.customerPortal .portalOrderHelp li { color: var(--rd-ink-2); }
+:root .customerPortal.customerPortal .portalOrderResult > header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+:root .customerPortal.customerPortal .portalOrderResult h2 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+:root .customerPortal.customerPortal .orderTiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0; padding: 0; border: 0; }
+:root .customerPortal.customerPortal .orderTiles > div { padding: 12px 14px; border-radius: 10px; background: var(--rd-bg); }
+:root .customerPortal.customerPortal .orderTiles dt { font-size: 12.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .orderTiles dd { margin: 4px 0 0; font-size: 15px; font-weight: 650; color: var(--rd-ink); overflow-wrap: anywhere; }
+:root .customerPortal.customerPortal .orderSteps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 4px 0 22px; list-style: none; border-bottom: 1px solid var(--rd-line); }
+:root .customerPortal.customerPortal .orderSteps li { position: relative; display: grid; justify-items: center; gap: 8px; font-size: 13px; text-align: center; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .orderSteps li > span { position: relative; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; box-sizing: border-box; border: 2px solid var(--rd-line-strong); border-radius: 50%; background: var(--rd-surface); color: #fff; }
+:root .customerPortal.customerPortal .orderSteps li::before { content: ''; position: absolute; top: 11px; right: 50%; left: -50%; height: 2px; background: var(--rd-line-strong); }
+:root .customerPortal.customerPortal .orderSteps li:first-child::before { display: none; }
+:root .customerPortal.customerPortal .orderSteps li.done > span { border-color: var(--rd-accent); background: var(--rd-accent); }
+:root[data-theme=dark] .customerPortal.customerPortal .orderSteps li.done > span { color: #191814; }
+:root .customerPortal.customerPortal .orderSteps li:is(.done, .current)::before { background: var(--rd-accent); }
+:root .customerPortal.customerPortal .orderSteps li.current > span { border-color: var(--rd-accent); box-shadow: 0 0 0 4px var(--rd-accent-soft); }
+:root .customerPortal.customerPortal .orderSteps li:is(.done, .current) { color: var(--rd-ink); }
+:root .customerPortal.customerPortal .orderSteps li.current { font-weight: 650; }
+:root .customerPortal.customerPortal .orderCancelled { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--rd-danger-soft); color: var(--rd-danger); }
+:root .customerPortal.customerPortal .portalOrderResult > footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 18px; }
+:root .customerPortal.customerPortal .portalOrderResult > footer span { flex: 1; min-width: 160px; font-size: 14px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalOrderResult > footer button { min-height: 36px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 8px; background: var(--rd-surface); color: var(--rd-ink); font-size: 13px; font-weight: 550; }
+:root .customerPortal.customerPortal .portalOrderResult > footer button:hover { background: var(--rd-sunken); }
+.statusPill.order-processing { background: #fcefd6; color: #8a4305; }
+.statusPill:is(.order-shipping, .order-shipped) { background: #e5eafb; color: #2747b8; }
+.statusPill.order-delivered { background: #e1f2e7; color: #17703c; }
+.statusPill.order-cancelled { background: #fdebe9; color: #b42318; }
+[data-theme=dark] .statusPill.order-processing { background: #3d2c12; color: #f2c47c; }
+[data-theme=dark] .statusPill:is(.order-shipping, .order-shipped) { background: #1f2a4d; color: #a9bbf5; }
+[data-theme=dark] .statusPill.order-delivered { background: #183524; color: #8fdcaa; }
+[data-theme=dark] .statusPill.order-cancelled { background: #43282d; color: #ffb4a8; }
+
+/* ---------- FAQ ---------- */
+:root .customerPortal.customerPortal .portalSearch { max-width: 900px; min-height: 54px; margin-top: 24px; padding: 6px 6px 6px 16px; border: 1px solid var(--rd-line-strong); border-radius: 14px; background: var(--rd-surface); color: var(--rd-muted); box-shadow: 0 1px 2px #1b1b1810; }
+:root .customerPortal.customerPortal .portalSearch:focus-within { border-color: var(--rd-accent); box-shadow: 0 0 0 3px #0e6b6126; }
+:root .customerPortal.customerPortal .portalSearch input { font-size: 15px; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalSearch input::placeholder { color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalSearch button { min-height: 42px; padding: 0 16px; border-radius: 10px; background: var(--rd-accent); color: #fff; font-size: 14px; }
+:root[data-theme=dark] .customerPortal.customerPortal .portalSearch button { background: #0e6b61; }
+:root .customerPortal.customerPortal .portalPolicyGrid { gap: 12px; margin-top: 16px; }
+:root .customerPortal.customerPortal .portalPolicyGrid button { min-height: 84px; padding: 16px; border: 1px solid var(--rd-line); border-radius: 12px; background: var(--rd-surface); box-shadow: none; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalPolicyGrid button:hover { border-color: var(--rd-accent); background: var(--rd-accent-soft); }
+:root .customerPortal.customerPortal .portalPolicyGrid strong { font-size: 14.5px; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalPolicyGrid small { font-size: 12.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalQuestions { max-width: 900px; margin-top: 32px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+:root .customerPortal.customerPortal .portalQuestions h2 { margin: 0; padding-bottom: 8px; border-bottom: 1px solid var(--rd-line); font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .portalQuestions button { min-height: 52px; padding: 12px 2px; border-bottom: 1px solid var(--rd-line); color: var(--rd-ink-2); font-size: 14.5px; }
+:root .customerPortal.customerPortal .portalQuestions button svg { flex: none; color: var(--rd-accent); }
+:root .customerPortal.customerPortal .portalQuestions button:hover { color: var(--rd-accent); }
+
+/* ---------- History: list column, read-only conversation on the right ---------- */
+:root .customerPortal.customerPortal .historyPage { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); padding: 0; overflow: hidden; }
+:root .customerPortal.customerPortal .historyPane { display: flex; flex-direction: column; gap: 14px; min-height: 0; padding: 28px 20px 20px; overflow: auto; border-right: 1px solid var(--rd-line); }
+:root .customerPortal.customerPortal .historyPane .portalPageHead { padding: 0 4px; }
+:root .customerPortal.customerPortal .historySearch { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 10px; background: var(--rd-surface); color: var(--rd-muted); }
+:root .customerPortal.customerPortal .historySearch:focus-within { border-color: var(--rd-accent); box-shadow: 0 0 0 3px #0e6b6126; }
+:root .customerPortal.customerPortal .historySearch input { flex: 1; min-width: 0; padding: 8px 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .historySearch input::placeholder { color: var(--rd-muted); }
+:root .customerPortal.customerPortal .historyChips { display: flex; flex-wrap: wrap; gap: 6px; }
+:root .customerPortal.customerPortal .historyChips button { min-height: 30px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 999px; background: var(--rd-surface); color: var(--rd-ink-2); font-size: 13px; }
+:root .customerPortal.customerPortal .historyChips button:hover { background: var(--rd-sunken); }
+:root .customerPortal.customerPortal .historyChips button[aria-pressed=true] { border-color: var(--rd-ink); background: var(--rd-ink); color: var(--rd-surface); }
+:root .customerPortal.customerPortal .accountHistoryList { display: block; margin: 0; }
+:root .customerPortal.customerPortal .historyGroup h2 { margin: 14px 4px 6px; font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .accountHistoryList button { display: grid; gap: 6px; width: 100%; padding: 12px; border: 0; border-radius: 10px; background: transparent; box-shadow: none; color: var(--rd-ink); text-align: left; transform: none; }
+:root .customerPortal.customerPortal .accountHistoryList button:hover { background: var(--rd-sunken); }
+:root .customerPortal.customerPortal .accountHistoryList button[aria-pressed=true] { background: var(--rd-accent-soft); }
+:root .customerPortal.customerPortal .accountHistoryList b { font-size: 14px; font-weight: 600; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .accountHistoryList button > span { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .historyState { margin: 8px 4px; font-size: 13.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .accountPager { margin: 0; font-size: 13px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .accountPager button { min-height: 32px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 8px; background: var(--rd-surface); color: var(--rd-ink); }
+:root .customerPortal.customerPortal .historyDetail { display: flex; flex-direction: column; min-height: 0; background: var(--rd-bg); }
+:root .customerPortal.customerPortal .historyDetail > .accountPager { padding: 10px 24px; border-bottom: 1px solid var(--rd-line); background: var(--rd-surface); }
+:root .customerPortal.customerPortal .historyDetailHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 24px; border-bottom: 1px solid var(--rd-line); background: var(--rd-surface); }
+:root .customerPortal.customerPortal .historyDetailHead > div { min-width: 0; }
+:root .customerPortal.customerPortal .historyDetailHead h2 { margin: 0; overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+:root .customerPortal.customerPortal .historyDetailHead p { margin: 4px 0 0; font-size: 12.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .accountMessages { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 18px; padding: 24px; overflow: auto; }
+:root .customerPortal.customerPortal .historyFoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; padding: 10px 24px; border-top: 1px solid var(--rd-line); background: var(--rd-surface); font-size: 13.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .historyFoot button { min-height: 32px; padding: 0 6px; border: 0; background: transparent; color: var(--rd-accent); font-weight: 650; }
+:root .customerPortal.customerPortal .historyFoot button:hover { text-decoration: underline; }
+/* Messages read like the live chat: teal own bubbles, AI as quoted policy text, staff in blue, events as centered chips. */
+:root .customerPortal.customerPortal .accountMessages .widgetMessage { max-width: 88%; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage > b { display: block; margin-bottom: 6px; font-size: 12.5px; font-weight: 600; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage > b time { font-weight: 400; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage > p { margin: 0; padding: 10px 14px; border-left: 3px solid var(--rd-accent); border-radius: 0 8px 8px 0; background: var(--rd-surface); color: var(--rd-ink-2); line-height: 1.6; }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.from-agent > p { border-left-color: #2747b8; background: #eef1fc; }
+:root[data-theme=dark] .customerPortal.customerPortal .accountMessages .widgetMessage.from-agent > p { border-left-color: #8ea6f2; background: #1f2a4d; }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.from-system { align-self: center; }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.from-system > b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.from-system > p { padding: 4px 12px; border: 0; border-radius: 999px; background: var(--rd-sunken); color: var(--rd-muted); font-size: 12.5px; }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.widgetOwn { align-self: flex-end; max-width: 72%; }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.widgetOwn > b { text-align: right; }
+:root .customerPortal.customerPortal .accountMessages .widgetMessage.widgetOwn > p { border: 0; border-radius: 16px 16px 4px 16px; background: #0e6b61; color: #fff; }
+:root .customerPortal.customerPortal .accountMessages details { display: inline-block; margin: 8px 8px 0 0; font-size: 12.5px; vertical-align: top; }
+:root .customerPortal.customerPortal .accountMessages details[open] { display: block; }
+:root .customerPortal.customerPortal .accountMessages summary { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border: 1px solid var(--rd-line); border-radius: 999px; background: var(--rd-surface); color: var(--rd-ink-2); list-style: none; cursor: pointer; }
+:root .customerPortal.customerPortal .accountMessages summary::-webkit-details-marker { display: none; }
+:root .customerPortal.customerPortal .accountMessages blockquote { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--rd-line-strong); border-radius: 0 8px 8px 0; background: var(--rd-surface); color: var(--rd-ink-2); }
+
+/* ---------- Account ---------- */
+:root .customerPortal.customerPortal .profileCard, :root .customerPortal.customerPortal .profilePassword { border: 1px solid var(--rd-line); border-radius: 14px; background: var(--rd-surface); box-shadow: none; color: var(--rd-ink); }
+:root .customerPortal.customerPortal .profilePassword { gap: 16px; padding: 22px; }
+:root .customerPortal.customerPortal .profilePassword p { font-size: 12.5px; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .profileAvatar { background: var(--rd-accent-soft); color: var(--rd-accent); }
+:root .customerPortal.customerPortal .profileCard h2 { color: var(--rd-ink); }
+:root .customerPortal.customerPortal .profileCard p { color: var(--rd-muted); }
+:root .customerPortal.customerPortal .profileStatus { padding: 3px 10px; border-radius: 999px; background: #fcefd6; color: #8a4305; font-size: 12px; font-weight: 550; }
+:root .customerPortal.customerPortal .profileStatus.verified { background: #e1f2e7; color: #17703c; }
+:root[data-theme=dark] .customerPortal.customerPortal .profileStatus { background: #3d2c12; color: #f2c47c; }
+:root[data-theme=dark] .customerPortal.customerPortal .profileStatus.verified { background: #183524; color: #8fdcaa; }
+:root .customerPortal.customerPortal .portalEmailCard { border-radius: 14px; background: var(--rd-accent-soft); color: var(--rd-ink); }
+:root .customerPortal.customerPortal .portalEmailCard > svg { color: var(--rd-accent); }
+:root .customerPortal.customerPortal .portalEmailCard p { color: var(--rd-ink-2); }
+:root .customerPortal.customerPortal .portalEmailCard button { min-height: 36px; border: 1px solid var(--rd-line-strong); border-radius: 8px; background: var(--rd-surface); color: var(--rd-ink); }
+:root .customerPortal.customerPortal .profileLogout { border-color: var(--rd-line-strong); background: var(--rd-surface); color: var(--rd-danger); }
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 960px) {
+  :root .customerPortal.customerPortal .orderLayout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  :root .customerPortal.customerPortal .historyPage { display: block; overflow: auto; }
+  :root .customerPortal.customerPortal .historyPane { overflow: visible; border-right: 0; border-bottom: 1px solid var(--rd-line); }
+  :root .customerPortal.customerPortal .historyDetail { min-height: 480px; }
+  :root .customerPortal.customerPortal .accountMessages { overflow: visible; }
+}
+@media (max-width: 700px) {
+  :root .customerPortal.customerPortal .portalPage { padding: 20px 16px; }
+  :root .customerPortal.customerPortal .historyPage { padding: 0; }
+  :root .customerPortal.customerPortal .historyPane { padding: 20px 12px 16px; }
+  :root .customerPortal.customerPortal .portalPageHead h1 { font-size: 22px; }
+  :root .customerPortal.customerPortal .historyDetailHead, :root .customerPortal.customerPortal .accountMessages { padding-left: 14px; padding-right: 14px; }
+  :root .customerPortal.customerPortal .orderSteps li { font-size: 12px; }
+  :root .customerPortal.customerPortal .orderTiles { grid-template-columns: minmax(0, 1fr); }
+}
+:root .customerPortal.customerPortal .accountHistoryList .statusPill { font-size: 12px; font-style: normal; }
+/* The selected row is teal-soft, the same as the "AI đang hỗ trợ" pill; lift that pill onto the surface color. */
+:root .customerPortal.customerPortal .accountHistoryList button[aria-pressed=true] .statusPill.status-open { background: var(--rd-surface); }
