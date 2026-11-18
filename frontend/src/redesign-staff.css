@@ -187,11 +187,18 @@
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6Z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6Z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / contain no-repeat; }
 /* Record pages: search and status chips on one line, flush with the heading and the table. */
-.shell .management .recordFilters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 16px; padding: 0; }
-.shell .management .recordFilters > label.search { flex: 0 1 380px; margin: 0; }
+.shell :is(.management, .knowledge) .recordFilters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 16px; padding: 0; }
+.shell :is(.management, .knowledge) .recordFilters > label.search { flex: 0 1 380px; margin: 0; }
 .shell .recordChips { display: flex; flex-wrap: wrap; gap: 6px; }
 .shell .recordChips button { min-height: 32px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 999px; background: var(--rd-surface); color: var(--rd-ink-2); font: inherit; font-size: 13px; cursor: pointer; }
 .shell .recordChips button:hover { background: var(--rd-sunken); }
 .shell .recordChips button[aria-pressed=true] { border-color: var(--rd-ink); background: var(--rd-ink); color: var(--rd-surface); }
 /* One page label style on every staff page: "NHÓM · TRANG". */
 .shell :is(.management, .knowledge, .overview2) .eyebrow { margin: 0 0 6px; font-size: 11px; font-weight: 650; letter-spacing: .12em; color: var(--rd-muted); }
+/* Ticket summary in the contact panel: one labelled turn per line, three lines each until expanded. */
+.shell .ticketSummary { display: grid; gap: 8px; margin: 8px 0; }
+.shell .profile .ticketSummary p { display: grid; gap: 2px; margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--rd-ink-2); white-space: normal; }
+.shell .ticketSummary b { font-size: 11px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--rd-muted); }
+.shell .ticketSummary span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; }
+.shell .ticketSummary.full span { display: block; }
+.shell .ticketMore { justify-self: start; min-height: 24px; padding: 0; border: 0; background: none; color: var(--rd-accent); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
