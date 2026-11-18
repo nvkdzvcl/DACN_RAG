@@ -181,3 +181,17 @@
 .ovPills b { font-variant-numeric: tabular-nums; }
 .analytics2 .ovGrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 @media (max-width: 1100px) { .ovStats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .analytics2 .ovGrid { grid-template-columns: minmax(0, 1fr); } }
+/* Citation chips carry the same document icon as on the customer side. */
+.shell .bubble .citations summary { gap: 6px; }
+.shell .bubble .citations summary::before { content: ''; width: 13px; height: 13px; flex: none; background: var(--rd-accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6Z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h9l4 4v14H6Z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / contain no-repeat; }
+/* Record pages: search and status chips on one line, flush with the heading and the table. */
+.shell .management .recordFilters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 16px; padding: 0; }
+.shell .management .recordFilters > label.search { flex: 0 1 380px; margin: 0; }
+.shell .recordChips { display: flex; flex-wrap: wrap; gap: 6px; }
+.shell .recordChips button { min-height: 32px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 999px; background: var(--rd-surface); color: var(--rd-ink-2); font: inherit; font-size: 13px; cursor: pointer; }
+.shell .recordChips button:hover { background: var(--rd-sunken); }
+.shell .recordChips button[aria-pressed=true] { border-color: var(--rd-ink); background: var(--rd-ink); color: var(--rd-surface); }
+/* One page label style on every staff page: "NHÓM · TRANG". */
+.shell :is(.management, .knowledge, .overview2) .eyebrow { margin: 0 0 6px; font-size: 11px; font-weight: 650; letter-spacing: .12em; color: var(--rd-muted); }

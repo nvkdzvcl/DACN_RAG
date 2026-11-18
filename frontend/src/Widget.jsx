@@ -11,7 +11,7 @@ import AuthLayout, { AuthInput } from './AuthLayout';
 import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
 import PasswordRules from './PasswordRules';
-import { conversationStatuses, formatDateTime } from './shared';
+import { citationLabel, conversationStatuses, formatDateTime } from './shared';
 import './redesign.css';
 import './redesign-pages.css';
 
@@ -355,7 +355,7 @@ export default function Widget() {
         {(messageBefore || session.messages.length > 0) && <p className="widgetIntro">Chào {session.display_name}. Bạn có thể hỏi về chính sách hoặc chọn Gặp nhân viên.</p>}
         {session.messages.map(message => <article key={message.id} className={`widgetMessage from-${message.sender_type} ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`}>
           <b>{senders[message.sender_type] || 'Hỗ trợ'}</b><p><RichText text={message.content} /></p>
-          {message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citation.source.replace(/\.(md|txt|markdown|pdf|docx)$/i, '')}{citation.location && ` · ${citation.location.toLowerCase()}`}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
+          {message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citationLabel(citation)}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}
         </article>)}
         {busy && pending && !session.messages.some(m => m.client_message_id === pending.client_message_id) && <article className="widgetMessage widgetOwn"><b>Bạn · Đang gửi</b><p>{pending.content}</p></article>}
         {busy && <p className="widgetIntro" role="status">Đang xử lý...</p>}
