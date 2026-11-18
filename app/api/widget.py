@@ -193,15 +193,40 @@ def redeem_order_access(payload: RedeemOrderAccess, request: Request,
     return snapshot(db, session)
 
 
+def own_customer_id(db, session):
+    """The customer of this chat. Staff attach an order to that customer when they create it, which is the
+    ownership check; chat lookups (order_service.lookup_order) use the same rule."""
+    conversation = db.get(Conversation, session.conversation_id)
+    if conversation is None or conversation.status == 'closed':
+        return None
+    return conversation.customer_id
+
+
+def order_view(order):
+    return {'order_id': order.id, 'status': order.status, 'tracking_code': order.tracking_code}
+
+
+@router.get('/orders')
+def own_orders(request: Request, response: Response,
+               session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
+    """Orders that belong to the customer of this chat: no access code needed (signed-in accounts keep one customer)."""
+    rate_limit(request, 'order-read', 30)
+    response.headers['Cache-Control'] = 'no-store'
+    customer_id = own_customer_id(db, session)
+    orders = db.query(Order).filter(Order.customer_id == customer_id).order_by(Order.id.desc()).limit(20).all() if customer_id else []
+    return {'orders': [order_view(order) for order in orders]}
+
+
 @router.get('/orders/{order_id}')
-def get_authorized_order(order_id: str, request: Request,
+def get_authorized_order(order_id: str, request: Request, response: Response,
                          session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
     rate_limit(request, 'order-read', 30)
-    if len(order_id) > 64 or not active_order_access(db, session.conversation_id).filter(
-            OrderAccess.order_id == order_id).first():
+    response.headers['Cache-Control'] = 'no-store'
+    order = db.get(Order, order_id) if len(order_id) <= 64 else None
+    owned = order is not None and order.customer_id == own_customer_id(db, session)
+    if order is None or not (owned or active_order_access(db, session.conversation_id).filter(OrderAccess.order_id == order_id).first()):
         raise HTTPException(404, 'Không tìm thấy đơn hoặc quyền truy cập đã hết hạn.')
-    order = db.get(Order, order_id)
-    return {'order_id': order.id, 'status': order.status, 'tracking_code': order.tracking_code}
+    return order_view(order)
 
 @router.post('/messages')
 def send_message(payload: WidgetMessage, request: Request, session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
