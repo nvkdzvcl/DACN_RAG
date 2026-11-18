@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { RichText, plainText } from './RichText';
-import { UserRound } from 'lucide-react';
+import { LockKeyhole, Search as SearchIcon, UserRound } from 'lucide-react';
 import { EmailVerification } from './CustomerEmail';
 import PasswordRules from './PasswordRules';
 import { conversationStatuses, formatDateTime } from './shared';
@@ -8,8 +8,13 @@ import { conversationStatuses, formatDateTime } from './shared';
 const labels = conversationStatuses;
 const senderLabels = { customer: 'Bạn', ai: 'Trợ lý AI', agent: 'Nhân viên', system: 'Thông báo' };
 const date = formatDateTime;
+const vnDay = value => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(value));
+function dayGroup(value) {
+  const days = Math.round((Date.parse(vnDay(Date.now())) - Date.parse(vnDay(value))) / 86400000);
+  return days <= 0 ? 'Hôm nay' : days < 7 ? '7 ngày qua' : 'Trước đó';
+}
 
-export function CustomerHistory({ request, onExpired, currentId }) {
+export function CustomerHistory({ request, onExpired, currentId, onOpenChat }) {
   const [offset, setOffset] = useState(0), [list, setList] = useState(null), [selected, setSelected] = useState(null);
   const [cursors, setCursors] = useState([]), [detail, setDetail] = useState(null), [error, setError] = useState('');
   const [loading, setLoading] = useState(false), [refresh, setRefresh] = useState(0);
@@ -40,17 +45,35 @@ export function CustomerHistory({ request, onExpired, currentId }) {
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [selected, before, refresh]);
-  return <section className="portalPage customerHistory"><div className="portalPageHead"><div><h1>Lịch sử trò chuyện</h1><p>Lịch sử được lưu theo tài khoản và xem được trên mọi thiết bị.</p></div></div>
-    {error && <p role="alert" className="widgetError">{error} <button onClick={() => setRefresh(n => n + 1)}>Thử lại</button></p>}
-    {!list && !error && <p role="status">Đang tải lịch sử...</p>}
-    <div className="historyFilters"><label>Tìm trong lịch sử<input type="search" value={search} maxLength={100} onChange={event => setSearch(event.target.value)} placeholder="Nhập từ khóa trong tin nhắn..." /></label>
-      <label>Trạng thái<select value={status} onChange={event => setStatus(event.target.value)}><option value="">Tất cả</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
-    {list && <><div className="accountHistoryList">{list.items.map(item => <button key={item.id} aria-pressed={selected === item.id} onClick={() => { setSelected(item.id); setCursors([]); }}><b>{item.preview ? plainText(item.preview) : 'Chưa có tin nhắn'}</b><span>{date(item.created_at)} · {labels[item.status] || item.status}{item.id === currentId ? ' · Phiên hiện tại' : ''}</span><small>#{item.id.slice(0, 8)}</small></button>)}</div>
-      <div className="accountPager"><button disabled={!offset} onClick={() => setOffset(n => Math.max(0, n - 20))}>Trang trước</button><span>{list.total} hội thoại</span><button disabled={!list.has_more} onClick={() => setOffset(n => n + 20)}>Trang sau</button></div>
-      {!list.items.length && <p>{status || query ? 'Không có hội thoại khớp bộ lọc. Thử từ khóa khác hoặc chọn Tất cả.' : 'Chưa có hội thoại.'}</p>}</>}
-    {loading && <p role="status">Đang tải tin nhắn...</p>}
-    {detail && <div className="accountHistoryDetail"><h2>Nội dung hội thoại</h2><p>Chế độ xem lịch sử. Vào Tin nhắn để tiếp tục phiên hiện tại.</p><div className="accountPager"><button disabled={loading || !detail.message_page.has_more} onClick={() => setCursors(values => [...values, detail.message_page.next_before])}>Tin cũ hơn</button><button disabled={loading || !cursors.length} onClick={() => setCursors(values => values.slice(0, -1))}>Tin mới hơn</button></div>
-      <div className="accountMessages">{detail.messages.map(message => <article className={'widgetMessage ' + (message.sender_type === 'customer' ? 'widgetOwn' : '')} key={message.id}><b>{senderLabels[message.sender_type] || 'Hỗ trợ'}</b><p><RichText text={message.content} /></p>{message.citations?.map((citation, index) => <details key={index}><summary>Nguồn: {citation.source}{citation.location && ' · ' + citation.location}</summary><blockquote>{citation.quote}</blockquote></details>)}</article>)}{!detail.messages.length && <p>Hội thoại chưa có tin nhắn.</p>}</div></div>}
+  const groups = [];
+  for (const item of list?.items || []) {
+    const name = dayGroup(item.created_at), last = groups.at(-1);
+    if (last?.name === name) last.items.push(item); else groups.push({ name, items: [item] });
+  }
+  const current = list?.items.find(item => item.id === selected);
+  return <section className="portalPage historyPage">
+    <div className="historyPane">
+      <div className="portalPageHead"><div><h1>Lịch sử trò chuyện</h1><p>Lưu theo tài khoản, xem được trên mọi thiết bị.</p></div></div>
+      <label className="historySearch"><span className="srOnly">Tìm trong lịch sử</span><SearchIcon size={16} aria-hidden="true" /><input type="search" value={search} maxLength={100} onChange={event => setSearch(event.target.value)} placeholder="Tìm trong tin nhắn..." /></label>
+      <div className="historyChips" role="group" aria-label="Trạng thái">{[['', 'Tất cả'], ...Object.entries(labels)].map(([value, label]) => <button type="button" key={value} aria-pressed={status === value} onClick={() => setStatus(value)}>{label}</button>)}</div>
+      {error && <p role="alert" className="widgetError">{error} <button onClick={() => setRefresh(n => n + 1)}>Thử lại</button></p>}
+      {!list && !error && <p className="historyState" role="status">Đang tải lịch sử...</p>}
+      {list && <div className="accountHistoryList">{groups.map(group => <div className="historyGroup" key={group.name} role="group" aria-label={group.name}><h2>{group.name}</h2>
+        {group.items.map(item => <button key={item.id} aria-pressed={selected === item.id} onClick={() => { setSelected(item.id); setCursors([]); }}><b>{item.preview ? plainText(item.preview) : 'Chưa có tin nhắn'}</b><span><em className={`statusPill status-${item.status}`}>{labels[item.status] || item.status}</em>{date(item.created_at)}{item.id === currentId ? ' · phiên hiện tại' : ''}</span></button>)}</div>)}
+        {!list.items.length && <p className="historyState">{status || query ? 'Không có hội thoại khớp bộ lọc. Thử từ khóa khác hoặc chọn Tất cả.' : 'Chưa có hội thoại.'}</p>}</div>}
+      {list && (offset > 0 || list.has_more) && <div className="accountPager"><button disabled={!offset} onClick={() => setOffset(n => Math.max(0, n - 20))}>Trang trước</button><span>{list.total} hội thoại</span><button disabled={!list.has_more} onClick={() => setOffset(n => n + 20)}>Trang sau</button></div>}
+    </div>
+    <div className="historyDetail" aria-busy={loading}>
+      {current && <header className="historyDetailHead"><div><h2>{current.preview ? plainText(current.preview) : 'Hội thoại chưa có tin nhắn'}</h2><p>{date(current.created_at)} · Website{detail && !detail.message_page.has_more && !before ? ` · ${detail.messages.length} tin nhắn` : ''}</p></div><span className={`statusPill status-${current.status}`}>{labels[current.status] || current.status}</span></header>}
+      {detail && (detail.message_page.has_more || cursors.length > 0) && <div className="accountPager"><button disabled={loading || !detail.message_page.has_more} onClick={() => setCursors(values => [...values, detail.message_page.next_before])}>Tin cũ hơn</button><button disabled={loading || !cursors.length} onClick={() => setCursors(values => values.slice(0, -1))}>Tin mới hơn</button></div>}
+      <div className="accountMessages" role="log" aria-label="Nội dung hội thoại" tabIndex={0}>
+        {loading && <p className="historyState" role="status">Đang tải tin nhắn...</p>}
+        {detail?.messages.map(message => <article className={`widgetMessage from-${message.sender_type} ${message.sender_type === 'customer' ? 'widgetOwn' : ''}`} key={message.id}><b>{senderLabels[message.sender_type] || 'Hỗ trợ'} · <time dateTime={message.created_at}>{date(message.created_at)}</time></b><p><RichText text={message.content} /></p>{message.citations?.map((citation, index) => <details key={index}><summary><span className="srOnly">Nguồn: </span>{citation.source.replace(/\.(md|txt|markdown|pdf|docx)$/i, '')}{citation.location && ' · ' + citation.location.toLowerCase()}</summary><blockquote><RichText text={citation.quote} /></blockquote></details>)}</article>)}
+        {detail && !detail.messages.length && <p className="historyState">Hội thoại chưa có tin nhắn.</p>}
+        {list && !list.items.length && <p className="historyState">Chọn một hội thoại để xem lại.</p>}
+      </div>
+      {current && <footer className="historyFoot"><LockKeyhole size={15} aria-hidden="true" /><span>{current.id === currentId ? 'Đây là cuộc trò chuyện hiện tại.' : 'Chỉ xem lại. Cần hỗ trợ tiếp?'}</span>{onOpenChat && <button type="button" onClick={onOpenChat}>{current.id === currentId ? 'Tiếp tục trò chuyện' : 'Vào trò chuyện'}</button>}</footer>}
+    </div>
   </section>;
 }
 
