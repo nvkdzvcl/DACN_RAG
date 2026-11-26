@@ -12,6 +12,7 @@ from sqlalchemy import delete, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core.auth import check_csrf, token_hash
+from app.core.proxy import client_address
 from app.db.session import get_db
 from app.models.support import (Conversation, ConversationEvent, Customer, CustomerAccount, CustomerSession, Message, Order,
                                 OrderAccess, Ticket, WidgetSession)
@@ -76,7 +77,7 @@ class WidgetMessage(WidgetAction):
 def rate_limit(request, bucket, limit):
     # ponytail: one API worker; use shared limits before multi-worker/public hosting.
     now = time.monotonic()
-    address = request.client.host if request.client else 'unknown'
+    address = client_address(request)
     with _attempt_lock:
         for key in list(_attempts):
             if _attempts[key][-1] <= now - 60:

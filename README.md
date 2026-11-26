@@ -181,3 +181,5 @@ Mở `/chat`, chọn **Đăng ký**, nhập tên hiển thị, email và mật k
 ## Chuẩn bị triển khai HTTPS
 
 Bộ cấu hình Windows một máy tại `deploy/production.env.example`, `deploy/Caddyfile` và `scripts/start-production.ps1`. Dữ liệu production tách riêng; frontend/API cùng origin, Ollama nội bộ, một worker. Xem [DEPLOYMENT.md](docs/DEPLOYMENT.md) để chuẩn bị tên miền, khởi động, kiểm tra và sao lưu. Đã kiểm chứng HTTPS local; chưa public Internet hoặc đăng ký dịch vụ tự chạy.
+
+Deploy lên Internet bằng Vercel (giao diện) và Railway (API, dữ liệu, Ollama): làm theo [DEPLOY_VERCEL_RAILWAY.md](docs/DEPLOY_VERCEL_RAILWAY.md). Cấu hình đi kèm: `frontend/vercel.json` (chuyển tiếp `/api/*` kèm `ORIGIN_SECRET`) và `deploy/railway-ollama/` (service Ollama).
