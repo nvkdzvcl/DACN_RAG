@@ -22,6 +22,8 @@ from app.services.order_service import active_order_access
 COOKIE = 'rag_widget_session'
 COOKIE_PATH = '/api/v1/widget'
 SESSION_SECONDS = 24 * 60 * 60
+# "Ghi nhớ đăng nhập" on the customer login keeps the account signed in for 30 days.
+REMEMBER_SECONDS = 30 * 24 * 60 * 60
 _attempts = {}
 _attempt_lock = Lock()
 _answer_slot = BoundedSemaphore(1)

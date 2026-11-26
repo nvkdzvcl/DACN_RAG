@@ -54,6 +54,24 @@ class CustomerAuthTests(unittest.TestCase):
                 db.commit()
         return response.json()
 
+    def test_remember_me_sets_a_30_day_session_otherwise_a_browser_session(self):
+        self.register(verified=True)
+        self.assertEqual(self.client.post(ACCOUNT + '/logout').status_code, 200)
+        plain = self.client.post(ACCOUNT + '/login', json={'email': 'customer@example.com', 'password': PASSWORD})
+        self.assertEqual(plain.status_code, 200, plain.text)
+        self.assertNotIn('max-age', plain.headers['set-cookie'].lower())
+        self.assertAlmostEqual(plain.json()['expires_at'] - time.time(), 24 * 3600, delta=60)
+        kept = self.other.post(ACCOUNT + '/login', json={'email': 'customer@example.com', 'password': PASSWORD, 'remember': True})
+        self.assertEqual(kept.status_code, 200, kept.text)
+        self.assertIn('max-age=2592000', kept.headers['set-cookie'].lower())
+        self.assertAlmostEqual(kept.json()['expires_at'] - time.time(), 30 * 24 * 3600, delta=60)
+        self.assertEqual(self.other.get(COOKIE_PATH + '/session').status_code, 200)
+        # A password change still ends every session, remembered or not.
+        changed = self.client.post(ACCOUNT + '/password', json={'current_password': PASSWORD, 'new_password': PASSWORD + 'x'})
+        self.assertEqual(changed.status_code, 200, changed.text)
+        self.assertEqual(self.other.get(COOKIE_PATH + '/session').status_code, 401)
+        self.assertEqual(self.client.post(ACCOUNT + '/login', json={'email': 'customer@example.com', 'password': PASSWORD + 'x', 'remember': 'yes'}).status_code, 422)
+
     def test_unverified_account_cannot_chat_until_code_is_entered(self):
         self.register(verified=False)
         blocked = [

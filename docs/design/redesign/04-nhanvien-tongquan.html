@@ -1,0 +1,69 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+.app { display: grid; grid-template-columns: 64px 1fr; height: 100vh; }
+.rail { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 0; background: var(--ink); }
+.rail .mark { margin-bottom: 14px; }
+.ri { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: #a8a69c; }
+.ri.on { background: #ffffff1a; color: #fff; }
+main { padding: 28px 36px; overflow: hidden; }
+.top { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 22px; }
+.top h1 { margin: 0; font-size: 24px; letter-spacing: -.4px; } .top p { margin: 4px 0 0; color: var(--muted); }
+.top .sp { flex: 1; }
+.seg { display: flex; padding: 3px; border-radius: 9px; background: var(--sunken); font-size: 12.5px; font-weight: 550; }
+.seg span { padding: 6px 12px; border-radius: 7px; color: var(--muted); } .seg .on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px #0000001a; }
+.queue { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+.q { display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.q .n { font-size: 30px; font-weight: 700; letter-spacing: -1px; min-width: 44px; }
+.q b { display: block; } .q span { font-size: 12.5px; color: var(--muted); }
+.q .go { margin-left: auto; color: var(--muted); }
+.q.warn { box-shadow: inset 0 0 0 1px #f0c48f, var(--shadow); } .q.warn .n { color: var(--amber); }
+.q.bad { box-shadow: inset 0 0 0 1px #f2b8b1, var(--shadow); } .q.bad .n { color: var(--red); }
+.grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+.panel { padding: 20px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.panel h2 { margin: 0 0 4px; font-size: 15px; } .panel > p { margin: 0 0 18px; color: var(--muted); font-size: 12.5px; }
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 14px; height: 190px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.bar { border-radius: 6px 6px 2px 2px; background: var(--accent-soft); position: relative; }
+.bar.today { background: var(--accent); }
+.bar i { position: absolute; top: -20px; left: 0; right: 0; text-align: center; font-style: normal; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); text-align: center; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.kpi { padding: 14px; border-radius: var(--r-sm); background: var(--bg); } .kpi b { display: block; font-size: 24px; letter-spacing: -.6px; } .kpi span { font-size: 12px; color: var(--muted); }
+.row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; } .row .sp { flex: 1; } .row b { font-variant-numeric: tabular-nums; }
+.meter { width: 90px; height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; } .meter i { display: block; height: 100%; background: var(--accent); }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; } .table td { padding: 10px 0; border-top: 1px solid var(--line); } .table td:last-child { text-align: right; color: var(--muted); white-space: nowrap; }
+.grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-top: 14px; }
+.doc { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; } .doc .icon { color: var(--accent); } .doc span { flex: 1; } .doc b { font-variant-numeric: tabular-nums; }
+</style></head><body><div class="app">
+<nav class="rail"><span class="mark">R</span>
+  <span class="ri on"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6Z"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"/><path d="M8 7h6M8 11h6"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span></nav>
+<main>
+  <div class="top"><div><h1>Chào buổi sáng, Khanh</h1><p>Thứ Ba, 17/11/2026 · cập nhật lúc 09:42</p></div><span class="sp"></span><div class="seg"><span class="on">7 ngày</span><span>30 ngày</span><span>90 ngày</span></div></div>
+  <div class="queue">
+    <div class="q warn"><span class="n">2</span><div><b>Chờ nhân viên</b><span>Cần tiếp nhận ngay</span></div><svg class="icon go" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="q bad"><span class="n">1</span><div><b>Quá hạn phản hồi</b><span>Lê Minh Cường · trễ 4 phút</span></div><svg class="icon go" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+    <div class="q"><span class="n">0</span><div><b>Bạn đang phụ trách</b><span>Không có việc dở</span></div><svg class="icon go" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+  </div>
+  <div class="grid">
+    <section class="panel"><h2>Hội thoại mới mỗi ngày</h2><p>Tính theo giờ Việt Nam</p>
+      <div class="bars"><div class="bar" style="height:30%"><i>3</i></div><div class="bar" style="height:52%"><i>5</i></div><div class="bar" style="height:20%"><i>2</i></div><div class="bar" style="height:62%"><i>6</i></div><div class="bar" style="height:41%"><i>4</i></div><div class="bar" style="height:72%"><i>7</i></div><div class="bar today" style="height:62%"><i>6</i></div></div>
+      <div class="days"><span>11/11</span><span>12/11</span><span>13/11</span><span>14/11</span><span>15/11</span><span>16/11</span><span>Hôm nay</span></div></section>
+    <section class="panel"><h2>Chất lượng phục vụ</h2><p>Ticket tạo trong 7 ngày</p>
+      <div class="kpis"><div class="kpi"><b>92%</b><span>Phản hồi đúng hạn</span></div><div class="kpi"><b>3 phút</b><span>Thời gian phản hồi trung bình</span></div></div>
+      <div class="row"><span class="pill ai">AI tự trả lời</span><span class="sp"></span><div class="meter"><i style="width:71%"></i></div><b>71%</b></div>
+      <div class="row"><span class="pill staff">Chuyển nhân viên</span><span class="sp"></span><div class="meter"><i style="width:22%;background:var(--blue)"></i></div><b>22%</b></div>
+      <div class="row"><span class="pill closed">AI từ chối, hướng dẫn gặp nhân viên</span><span class="sp"></span><div class="meter"><i style="width:7%;background:var(--muted)"></i></div><b>7%</b></div></section>
+  </div>
+  <div class="grid2">
+    <section class="panel"><h2>Câu hỏi AI chưa trả lời được</h2><p>Gợi ý bổ sung Kho tri thức · 7 ngày</p>
+      <table class="table"><tr><td>Shop có bán xe máy không?</td><td>3 lần</td></tr><tr><td>Thủ tục xuất hóa đơn công ty như thế nào?</td><td>2 lần</td></tr><tr><td>Còn laptop thì sao?</td><td>1 lần · câu nối tiếp</td></tr><tr><td>Đổi máy ở cửa hàng khác tỉnh được không?</td><td>1 lần</td></tr></table></section>
+    <section class="panel"><h2>Tài liệu được trích nhiều nhất</h2><p>Số câu trả lời có nguồn · 7 ngày</p>
+      <div class="doc"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5"/></svg><span>Chính sách đổi trả</span><b>18</b></div>
+      <div class="doc"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5"/></svg><span>Thanh toán và hoàn tiền</span><b>11</b></div>
+      <div class="doc"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5"/></svg><span>Giao hàng và lắp đặt</span><b>7</b></div>
+      <div class="doc"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5"/></svg><span>Trả góp</span><b>4</b></div></section>
+  </div>
+</main></div></body></html>

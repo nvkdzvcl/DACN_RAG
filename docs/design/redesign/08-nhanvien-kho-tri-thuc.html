@@ -1,0 +1,56 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+.app { display: grid; grid-template-columns: 64px 1fr 420px; height: 100vh; }
+.rail { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 0; background: var(--ink); }
+.rail .mark { margin-bottom: 14px; }
+.ri { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: #a8a69c; } .ri.on { background: #ffffff1a; color: #fff; }
+main { padding: 28px 32px; overflow: hidden; }
+.top { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 18px; } .top h1 { margin: 0; font-size: 24px; letter-spacing: -.4px; } .top p { margin: 4px 0 0; color: var(--muted); } .top .sp { flex: 1; }
+.status { display: flex; align-items: center; gap: 8px; padding: 10px 14px; margin-bottom: 16px; border-radius: var(--r-sm); background: var(--green-soft); color: var(--green); font-size: 13px; font-weight: 500; }
+.tools { display: flex; gap: 10px; margin-bottom: 12px; } .search { flex: 1; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--muted); }
+.seg { display: flex; padding: 3px; border-radius: 9px; background: var(--sunken); font-size: 12.5px; font-weight: 550; } .seg span { padding: 6px 12px; border-radius: 7px; color: var(--muted); } .seg .on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px #0000001a; }
+.table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; font-size: 13px; }
+.table th { text-align: left; font-size: 11.5px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); padding: 10px 16px; background: var(--bg); }
+.table td { padding: 12px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
+.table tr.on td { background: var(--accent-soft); }
+.doc b { display: block; } .doc span { font-size: 12px; color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.act { color: var(--muted); text-align: right; white-space: nowrap; }
+.preview { border-left: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; overflow: hidden; }
+.ph { padding: 22px 22px 14px; border-bottom: 1px solid var(--line); } .ph b { display: block; font-size: 15px; line-height: 1.35; } .ph .muted { font-size: 12.5px; margin-top: 4px; }
+.ph .acts { display: flex; gap: 8px; margin-top: 14px; } .btn.danger { color: var(--red); border-color: #f2b8b1; }
+.chunks { padding: 6px 22px; overflow: hidden; }
+.chunk { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink-2); } .chunk .label { margin-bottom: 4px; } .chunk b { color: var(--ink); }
+.chunk.hit { margin: 0 -10px; padding: 12px 10px; border-radius: var(--r-sm); background: var(--amber-soft); border-bottom-color: transparent; }
+</style></head><body><div class="app">
+<nav class="rail"><span class="mark">R</span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6Z"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg></span>
+  <span class="ri on"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"/><path d="M8 7h6M8 11h6"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span></nav>
+<main>
+  <div class="top"><div><h1>Kho tri thức</h1><p>12 tài liệu · 201 đoạn đã lập chỉ mục</p></div><span class="sp"></span><button class="btn">Thử hỏi AI</button><button class="btn primary"><svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>Tải tài liệu</button></div>
+  <div class="status"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Trợ lý AI sẵn sàng · mô hình đã tải đủ</div>
+  <div class="tools"><div class="search"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Tìm theo tiêu đề hoặc nội dung…</div><div class="seg"><span class="on">Tất cả</span><span>Lỗi</span><span>Đang xử lý</span></div></div>
+  <table class="table"><tr><th>Tài liệu</th><th>Đoạn</th><th>Được trích (7 ngày)</th><th>Cập nhật</th><th></th></tr>
+    <tr class="on"><td class="doc"><b>Chính sách đổi trả</b><span>doi-tra.md</span></td><td class="num">35</td><td class="num">18</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Thanh toán, hoàn tiền và giá</b><span>thanh-toan.md</span></td><td class="num">15</td><td class="num">11</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Giao hàng và lắp đặt</b><span>giao-hang.md</span></td><td class="num">26</td><td class="num">7</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Chính sách bảo hành</b><span>bao-hanh.md</span></td><td class="num">20</td><td class="num">5</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Trả góp</b><span>tra-gop.md</span></td><td class="num">17</td><td class="num">4</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Kiểm hàng và khui hộp</b><span>kiem-hang.md</span></td><td class="num">12</td><td class="num">3</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Khách hàng thân thiết</b><span>khach-hang-than-thiet.md</span></td><td class="num">18</td><td class="num">2</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+    <tr><td class="doc"><b>Thu cũ đổi mới</b><span>thu-cu-doi-moi.md</span></td><td class="num">11</td><td class="num">0</td><td class="num">15/11/2026</td><td class="act">⋯</td></tr>
+  </table>
+</main>
+<aside class="preview">
+  <div class="ph"><b>Chính sách đổi trả FPT Shop (bản diễn đạt lại cho đồ án)</b><div class="muted">doi-tra.md · 35 đoạn · đã lập chỉ mục 15/11/2026</div>
+    <div class="acts"><button class="btn sm">Lập chỉ mục lại</button><button class="btn sm danger">Xóa</button></div></div>
+  <div class="chunks">
+    <div class="chunk"><div class="label">Dòng 9</div><b>Đổi trả – điện thoại mới bị lỗi trong 30 ngày đầu:</b> khách được đổi 1-1 sang máy cùng model, cùng màu, cùng dung lượng…</div>
+    <div class="chunk hit"><div class="label">Dòng 10 · được trích 6 lần</div><b>Từ ngày 31 đến ngày 365:</b> máy được gửi đi bảo hành theo quy định của hãng…</div>
+    <div class="chunk"><div class="label">Dòng 11</div><b>Khi khách đổi ý (không lỗi):</b> trong 365 ngày, khách có thể đổi sang sản phẩm khác hoặc trả máy…</div>
+    <div class="chunk"><div class="label">Dòng 13</div><b>Phí trầy xước:</b> xước nhẹ ở vị trí khuất không tính phí; xước dài hơn 0,5 cm…</div>
+  </div>
+</aside></div></body></html>

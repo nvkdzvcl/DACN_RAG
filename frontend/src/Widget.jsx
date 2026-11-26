@@ -73,6 +73,8 @@ export default function Widget() {
   const [notice, setNotice] = useState('');
   const [successModal, setSuccessModal] = useState(false);
   const [passwordDraft, setPasswordDraft] = useState('');
+  // Ghi nhớ đăng nhập: 30-day session; unticked, the session ends with the browser (24 hours at most).
+  const [remember, setRemember] = useState(false);
   const [toast, setToast] = useState('');
   const [retry, setRetry] = useState(0);
   const [view, setView] = useState('messages');
@@ -239,7 +241,8 @@ export default function Widget() {
     try {
       const data = await request('/account/' + authMode, { method: 'POST', body: JSON.stringify({
         email: fields.get('email').trim(), password: fields.get('password'),
-        ...(authMode === 'register' && { display_name: fields.get('display_name').trim() })
+        ...(authMode === 'register' && { display_name: fields.get('display_name').trim() }),
+        ...(authMode === 'login' && { remember })
       }) });
       // Registration and login of an unverified account both continue to the email code; chat stays locked until then.
       const unverified = Boolean(data.account && !data.account.email_verified);
@@ -348,7 +351,7 @@ export default function Widget() {
         {authMode === 'register' && <><label>Nhập lại mật khẩu<input name="confirm" type="password" required minLength={8} maxLength={128} pattern={PASSWORD_RULE} title={PASSWORD_HINT} autoComplete="new-password" /></label><small>Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</small></>}
         <button>{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
       </fieldset></form>
-      {authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}{authMode !== 'guest' && <small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small>}
+      {authMode === 'login' && <><label className="authRemember"><input type="checkbox" name="remember" checked={remember} onChange={event => setRemember(event.target.checked)} /> Ghi nhớ đăng nhập</label><button type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></>}{authMode !== 'guest' && <small>Tài khoản lưu lịch sử trò chuyện. Tra cứu đơn hàng vẫn cần mã truy cập do cửa hàng cấp.</small>}
       {notice && <p role="status">{notice}</p>}{error && <div className="widgetError" role="alert"><p>{error}</p>{authMode === 'guest' && <button onClick={() => { setError(''); setRetry(n => n + 1); }} disabled={busy}>Thử kết nối lại</button>}</div>}
     </section> : <>
       {(session.message_page.has_more || messageCursors.length > 0 || historyLoading) && <nav className="widgetHistory" aria-label="Phân trang tin nhắn" aria-busy={historyLoading}>
@@ -406,7 +409,7 @@ export default function Widget() {
       <button className="authSubmit"><ArrowRight size={18} />{busy ? 'Đang xử lý...' : authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}</button>
     </fieldset></form>
     {notice && <p className="authFeedback" role="status">{notice}</p>}{error && <p className="authFeedback" role="alert">{error}</p>}
-    {authMode === 'login' && <div className="authRow"><label className="authRemember"><input type="checkbox" name="remember" /> Ghi nhớ đăng nhập</label><button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></div>}
+    {authMode === 'login' && <div className="authRow"><label className="authRemember"><input type="checkbox" name="remember" checked={remember} onChange={event => setRemember(event.target.checked)} /> Ghi nhớ đăng nhập</label><button className="authBack" type="button" onClick={() => setEmailAction({ mode: 'forgot' })}>Quên mật khẩu?</button></div>}
     {authMode === 'register' && <p className="authHelp">Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</p>}
     {toast && <div className="successToast" role="status"><span aria-hidden="true">✓</span>{toast}</div>}
   </AuthLayout>;

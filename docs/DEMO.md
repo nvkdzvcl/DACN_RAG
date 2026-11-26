@@ -147,6 +147,6 @@ Bằng chứng và giới hạn: docs/WORKSPACE.md. Khởi động lại backend
 
 Theo [ORDER_ACCESS.md](ORDER_ACCESS.md), dùng một đơn thử và phiên khách riêng: cấp mã bằng admin, nhập trong biểu mẫu widget rồi hỏi trạng thái có mã đơn. Kiểm tra chỉ đúng đơn được tra, thu hồi ngăn lượt tra tiếp theo và chuyển nhân viên. Mã không được gửi trong nội dung chat; dùng dữ liệu giả lập khi demo. Mã hết hạn sau 15 phút kể từ lúc cấp. Không coi quy trình này là OTP tự động hoặc xác minh toàn bộ tài khoản khách.
 
-## Telegram (chờ cấu hình bot thật)
+## Telegram (bot thật: chat, kết nối tài khoản và /orders đã thử; còn chờ kịch bản đầy đủ)
 
 Theo [TELEGRAM.md](TELEGRAM.md): bật bot thử riêng, /start, hỏi chính sách, /human, tiếp nhận và trả lời trong Inbox, kiểm tra tin trên Telegram rồi đóng/nhắn lại. Hai người cùng tên phải có hồ sơ riêng. Kết nối tài khoản: trên web mở Tài khoản → Kết nối Telegram, mở link trên điện thoại, rồi gửi /orders để thấy đơn của tài khoản; /unlink để gỡ. Chỉ ghi demo đa kênh đạt sau khi quan sát gửi/nhận thật; test mock và trạng thái connected không thay bằng chứng này.

@@ -8,12 +8,12 @@ from typing import Annotated
 from uuid import uuid4
 
 from fastapi import BackgroundTasks, APIRouter, Depends, HTTPException, Query, Request, Response
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, StrictBool, field_validator
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.widget import (COOKIE, COOKIE_PATH, SESSION_SECONDS, check_csrf, find_session, require_chat_session,
+from app.api.widget import (COOKIE, COOKIE_PATH, REMEMBER_SECONDS, SESSION_SECONDS, check_csrf, find_session, require_chat_session,
                             no_cache, rate_limit, require_session, snapshot)
 from app.core.auth import hash_password, token_hash, verify_password
 from app.db.session import get_db
@@ -43,6 +43,7 @@ class EmailAddress(BaseModel):
 
 class Credentials(EmailAddress):
     password: SecretStr
+    remember: StrictBool = False
 
 class Register(Credentials):
     display_name: str = Field(min_length=1, max_length=80)
@@ -86,7 +87,8 @@ def require_account(session=Depends(require_session)):
 def require_verified_account(session=Depends(require_chat_session)):
     return require_account(session)
 
-def issue_session(db, request, response, account):
+def issue_session(db, request, response, account, remember=False):
+    """remember: 30-day session and persistent cookie; otherwise 24 hours and a cookie that ends with the browser."""
     previous = find_session(request, db)
     if previous:
         db.delete(previous)
@@ -101,10 +103,10 @@ def issue_session(db, request, response, account):
         db.flush()
     token = secrets.token_urlsafe(32)
     session = CustomerSession(token_hash=token_hash(token), account_id=account.id,
-                              conversation_id=conversation.id, expires_at=now + SESSION_SECONDS)
+                              conversation_id=conversation.id, expires_at=now + (REMEMBER_SECONDS if remember else SESSION_SECONDS))
     db.add(session)
     db.commit()
-    response.set_cookie(COOKIE, token, max_age=SESSION_SECONDS, httponly=True, samesite='strict',
+    response.set_cookie(COOKIE, token, max_age=REMEMBER_SECONDS if remember else None, httponly=True, samesite='strict',
                         secure=os.getenv('APP_ENV', 'development').lower() != 'development', path=COOKIE_PATH)
     return snapshot(db, session)
 
@@ -142,7 +144,7 @@ def login(payload: Credentials, request: Request, response: Response, db: Sessio
     if current.rowcount != 1:
         db.rollback()
         raise HTTPException(401, 'Email hoặc mật khẩu không đúng.')
-    return issue_session(db, request, response, account)
+    return issue_session(db, request, response, account, remember=payload.remember)
 
 @router.post('/logout')
 def logout(response: Response, session=Depends(require_account), db: Session = Depends(get_db)):
