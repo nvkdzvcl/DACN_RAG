@@ -1,0 +1,42 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+body { background: #fff; }
+.shop { height: 100vh; overflow: hidden; }
+.sh { display: flex; align-items: center; gap: 28px; height: 64px; padding: 0 48px; border-bottom: 1px solid #ececec; font-size: 14px; color: #444; } .sh b { font-size: 18px; color: #111; margin-right: 20px; }
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 48px; }
+.ph { height: 380px; border-radius: 16px; background: linear-gradient(135deg, #e9eef3, #f5f7f9); display: grid; place-items: center; color: #9aa4ae; font-size: 14px; }
+.info h1 { margin: 0 0 10px; font-size: 30px; letter-spacing: -.6px; color: #111; } .info .price { font-size: 26px; font-weight: 700; color: #c2410c; margin-bottom: 18px; }
+.info .line { height: 12px; border-radius: 6px; background: #f0f0f0; margin-bottom: 10px; } .info .buy { margin-top: 24px; width: 220px; height: 48px; border-radius: 10px; background: #111; color: #fff; display: grid; place-items: center; font-weight: 600; }
+.widget { position: fixed; right: 24px; bottom: 92px; width: 380px; height: 580px; display: flex; flex-direction: column; border-radius: 18px; background: var(--surface); box-shadow: 0 24px 60px #1b1b1830, 0 2px 6px #1b1b1814; overflow: hidden; }
+.wh { display: flex; align-items: center; gap: 10px; padding: 14px 14px 14px 16px; border-bottom: 1px solid var(--line); }
+.wh .t { flex: 1; } .wh b { display: block; font-size: 14.5px; } .wh .pill { font-size: 11px; padding: 1px 8px; margin-top: 2px; }
+.ib { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; border: 0; background: transparent; color: var(--ink-2); }
+.log { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; background: var(--bg); overflow: hidden; }
+.hello { padding: 14px; border-radius: var(--r); background: var(--surface); } .hello b { display: block; margin-bottom: 4px; } .hello p { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.sug { display: grid; gap: 6px; } .sug span { padding: 8px 10px; border-radius: var(--r-sm); background: var(--bg); font-size: 13px; color: var(--ink-2); }
+.me { align-self: flex-end; max-width: 80%; padding: 9px 13px; border-radius: 14px 14px 4px 14px; background: var(--accent); color: #fff; font-size: 13.5px; }
+.quote { margin: 0; padding: 9px 12px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--r-sm) var(--r-sm) 0; font-size: 13px; color: var(--ink-2); } .quote b { color: var(--ink); }
+.src { margin-top: 6px; } .src .chip { height: 24px; font-size: 11.5px; }
+.wf { padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+.comp { display: flex; align-items: center; gap: 8px; padding: 5px 5px 5px 12px; border: 1px solid var(--line-strong); border-radius: 12px; } .comp span { flex: 1; color: var(--muted); font-size: 13.5px; }
+.send { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; border: 0; background: var(--accent); color: #fff; }
+.wf small { display: block; margin-top: 6px; text-align: center; font-size: 11px; color: var(--muted); }
+.launcher { position: fixed; right: 24px; bottom: 24px; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff; box-shadow: 0 10px 24px #0e6b6155; }
+.launcher .icon { width: 24px; height: 24px; }
+</style></head><body><div class="shop">
+<div class="sh"><b>Cửa hàng mẫu</b><span>Điện thoại</span><span>Laptop</span><span>Phụ kiện</span><span>Khuyến mãi</span></div>
+<div class="hero"><div class="ph">Ảnh sản phẩm</div><div class="info"><h1>Điện thoại X 256 GB</h1><div class="price">18.990.000 ₫</div><div class="line" style="width:90%"></div><div class="line" style="width:75%"></div><div class="line" style="width:82%"></div><div class="buy">Mua ngay</div></div></div>
+</div>
+<section class="widget">
+  <div class="wh"><span class="mark" style="width:30px;height:30px;font-size:13px">R</span><div class="t"><b>Hỗ trợ khách hàng</b><span class="pill ai">Trợ lý AI đang trả lời</span></div>
+    <button class="ib" title="Gặp nhân viên"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+    <button class="ib" title="Thu nhỏ"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>
+  <div class="log">
+    <div class="hello"><b>Xin chào An 👋</b><p>Hỏi về đổi trả, bảo hành, giao hàng… hoặc gặp nhân viên bất cứ lúc nào.</p>
+      <div class="sug"><span>Điện thoại lỗi trong 30 ngày có được đổi?</span><span>Phí giao hàng bao nhiêu?</span><span>Tra cứu đơn hàng của tôi</span></div></div>
+    <div class="me">Máy này trả góp được không?</div>
+    <div><blockquote class="quote"><b>Trả góp qua thẻ tín dụng:</b> hạn mức còn lại của thẻ phải lớn hơn hoặc bằng tổng giá trị trả góp.</blockquote><div class="src"><span class="chip">Trả góp · dòng 5</span></div></div>
+  </div>
+  <div class="wf"><div class="comp"><span>Nhập câu hỏi…</span><button class="send"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div><small>Không gửi mật khẩu, OTP hoặc số thẻ.</small></div>
+</section>
+<span class="launcher"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+</body></html>

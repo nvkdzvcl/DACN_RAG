@@ -1,0 +1,49 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><link rel="stylesheet" href="customer.css"><style>
+.wrap { display: grid; grid-template-columns: 380px 1fr; gap: 28px; max-width: 1040px; }
+.form { display: flex; flex-direction: column; gap: 16px; padding: 22px; border-radius: var(--r); background: var(--bg); }
+.form .btn { justify-content: center; height: 42px; }
+.note { display: flex; gap: 10px; padding: 12px; border-radius: var(--r-sm); background: var(--surface); font-size: 12.5px; color: var(--ink-2); }
+.note .icon { color: var(--accent); margin-top: 2px; }
+.result { padding: 24px; border-radius: var(--r); border: 1px solid var(--line); }
+.rh { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; } .rh h2 { margin: 0; font-size: 20px; letter-spacing: -.3px; }
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0 22px; }
+.fact { padding: 12px 14px; border-radius: var(--r-sm); background: var(--bg); } .fact span { display: block; font-size: 12px; color: var(--muted); } .fact b { font-size: 14px; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
+.steps::before { content: ''; position: absolute; top: 11px; left: 12.5%; right: 12.5%; height: 2px; background: var(--line); }
+.steps::after { content: ''; position: absolute; top: 11px; left: 12.5%; width: 50%; height: 2px; background: var(--accent); }
+.step { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-size: 12.5px; color: var(--muted); }
+.step i { width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line-strong); display: grid; place-items: center; }
+.step.done i { background: var(--accent); border-color: var(--accent); } .step.done i::after { content: '✓'; color: #fff; font-size: 12px; font-style: normal; font-weight: 700; }
+.step.now i { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); } .step.now { color: var(--ink); font-weight: 600; }
+.foot2 { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); } .foot2 .sp { flex: 1; }
+.granted { margin-top: 20px; } .granted .row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 13px; } .granted .row .sp { flex: 1; }
+</style></head><body><div class="app">
+<aside class="rail">
+  <div class="brand"><span class="mark">R</span><div>RAG Support<small>Hỗ trợ khách hàng</small></div></div>
+  <a class="nav"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.5A8 8 0 1 1 21 12Z"/></svg>Trò chuyện</a>
+  <a class="nav on"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Đơn hàng</a>
+  <a class="nav"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"/><path d="M8 7h6M8 11h6"/></svg>Chính sách</a>
+  <a class="nav"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Lịch sử</a>
+  <div class="foot"><span class="avatar">NA</span><div><b>Nguyễn Văn An</b><span>Tài khoản</span></div></div>
+</aside>
+<main class="page">
+  <h1>Đơn hàng</h1><p class="lead">Xem trạng thái đơn bằng mã truy cập cửa hàng cấp cho bạn.</p>
+  <div class="wrap">
+    <div>
+      <div class="form">
+        <div><label class="l">Mã đơn</label><div class="field filled">ORD-DEMO01</div></div>
+        <div><label class="l">Mã truy cập</label><div class="field filled">••••••••••••••••</div><p class="hint" style="margin:6px 0 0">Nhân viên gửi mã này sau khi xác minh bạn là chủ đơn.</p></div>
+        <button class="btn primary">Xem đơn hàng</button>
+        <div class="note"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><span>Quyền xem đơn có hiệu lực 15 phút và chỉ trong cuộc trò chuyện hiện tại. Không gửi mã truy cập vào ô chat.</span></div>
+      </div>
+      <div class="granted"><div class="label">Đơn đã mở trong phiên này</div>
+        <div class="row"><svg class="icon" viewBox="0 0 24 24" style="color:var(--accent)"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/></svg><b>ORD-DEMO01</b><span class="sp"></span><span class="muted">còn 12 phút</span></div></div>
+    </div>
+    <section class="result">
+      <div class="rh"><h2>ORD-DEMO01</h2><span class="pill staff">Đang giao</span></div>
+            <div class="facts"><div class="fact"><span>Mã vận đơn</span><b>VN123456</b></div><div class="fact"><span>Trạng thái</span><b>Đang giao</b></div></div>
+      <div class="steps"><div class="step done"><i></i>Đã đặt</div><div class="step done"><i></i>Đã thanh toán</div><div class="step now"><i></i>Đang giao</div><div class="step"><i></i>Đã giao</div></div>
+      <div class="foot2"><span>Có vấn đề với đơn này?</span><span class="sp"></span><button class="btn sm">Hỏi trợ lý về đổi trả</button><button class="btn sm">Gặp nhân viên</button></div>
+    </section>
+  </div>
+</main></div></body></html>

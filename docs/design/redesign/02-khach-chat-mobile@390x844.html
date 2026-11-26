@@ -1,0 +1,46 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+body { background: var(--surface); }
+.app { display: flex; flex-direction: column; height: 100vh; }
+header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+header .t { flex: 1; min-width: 0; } header b { display: block; font-size: 15px; } header .pill { margin-top: 3px; font-size: 11.5px; padding: 2px 8px; }
+.iconbtn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
+.log { flex: 1; overflow: hidden; padding: 18px 14px 6px; display: flex; flex-direction: column; gap: 18px; }
+.day { align-self: center; font-size: 12px; color: var(--muted); }
+.me { align-self: flex-end; max-width: 82%; padding: 10px 14px; border-radius: 16px 16px 4px 16px; background: var(--accent); color: #fff; }
+.who { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; } .who .mark { width: 24px; height: 24px; font-size: 11px; border-radius: 7px; }
+.quote { margin: 0 0 8px; padding: 10px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--r-sm) var(--r-sm) 0; color: var(--ink-2); }
+.quote b { color: var(--ink); }
+.sources { display: flex; flex-wrap: wrap; gap: 6px; }
+.bottom { padding: 8px 12px 14px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.suggest { display: flex; gap: 8px; overflow: hidden; }
+.suggest .chip { height: 32px; background: var(--bg); border-color: transparent; white-space: nowrap; }
+.composer { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 14px; border: 1px solid var(--line-strong); border-radius: 14px; }
+.composer .ph { flex: 1; color: var(--muted); }
+.send { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); padding: 6px 4px 10px; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); padding: 4px 0; }
+.tab.on { color: var(--accent); font-weight: 600; }
+</style></head><body><div class="app">
+<header><span class="mark">R</span><div class="t"><b>Hỗ trợ khách hàng</b><span class="pill ai">Trợ lý AI đang trả lời</span></div>
+  <button class="iconbtn" aria-label="Gặp nhân viên"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+  <button class="iconbtn" aria-label="Cuộc trò chuyện mới"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></header>
+<div class="log">
+  <span class="day">Hôm nay, 09:41</span>
+  <div class="me">Hoàn tiền về thẻ đã thanh toán mất mấy ngày?</div>
+  <div><div class="who"><span class="mark">R</span>Trợ lý AI</div>
+    <blockquote class="quote"><b>Hoàn tiền – về nguồn thanh toán ban đầu:</b> Nếu chọn hoàn về đúng nguồn đã thanh toán (thẻ, ví), tiền được hoàn trong 5 đến 7 ngày, không tính thứ Bảy, Chủ nhật và ngày lễ, Tết.</blockquote>
+    <div class="sources"><span class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5"/></svg>Thanh toán · dòng 13</span></div></div>
+  <div class="me">Còn chuyển khoản thì sao?</div>
+  <div><div class="who"><span class="mark">R</span>Trợ lý AI</div>
+    <blockquote class="quote"><b>Hoàn tiền – qua chuyển khoản:</b> tiền được hoàn trong 2 đến 3 ngày sau khi khách gửi thông tin tài khoản.</blockquote></div>
+</div>
+<div class="bottom">
+  <div class="suggest"><span class="chip">Tra cứu đơn hàng</span><span class="chip">Đổi trả trong 30 ngày</span><span class="chip">Bảo hành</span></div>
+  <div class="composer"><span class="ph">Nhập câu hỏi…</span><button class="send"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+</div>
+<nav class="tabs">
+  <span class="tab on"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.5A8 8 0 1 1 21 12Z"/></svg>Trò chuyện</span>
+  <span class="tab"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Đơn hàng</span>
+  <span class="tab"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"/><path d="M8 7h6M8 11h6"/></svg>Chính sách</span>
+  <span class="tab"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Tài khoản</span>
+</nav></div></body></html>

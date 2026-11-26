@@ -1,0 +1,82 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+.app { display: grid; grid-template-columns: 64px 340px 1fr 300px; height: 100vh; }
+.rail { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 0; background: var(--ink); }
+.rail .mark { margin-bottom: 14px; }
+.ri { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: #a8a69c; position: relative; }
+.ri.on { background: #ffffff1a; color: #fff; }
+.ri .n { position: absolute; top: 4px; right: 3px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #e0892b; color: #1b1b18; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+.rail .me { margin-top: auto; }
+.list { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--surface); min-width: 0; }
+.lh { padding: 18px 16px 12px; }
+.lh h2 { margin: 0 0 12px; font-size: 17px; display: flex; align-items: center; gap: 8px; } .lh h2 span { font-size: 12px; color: var(--muted); font-weight: 500; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); padding: 3px; border-radius: 9px; background: var(--sunken); font-size: 12.5px; font-weight: 550; text-align: center; }
+.seg span { padding: 6px 0; border-radius: 7px; color: var(--muted); } .seg .on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px #0000001a; }
+.search { display: flex; align-items: center; gap: 8px; height: 36px; margin-top: 10px; padding: 0 10px; border-radius: 9px; background: var(--bg); color: var(--muted); font-size: 13px; }
+.item { display: grid; grid-template-columns: 36px minmax(0,1fr) auto; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--line); position: relative; }
+.item.on { background: var(--accent-soft); } .item.on::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.item b { font-size: 13.5px; } .item p { margin: 2px 0 6px; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item time { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.item .tags { display: flex; gap: 6px; flex-wrap: wrap; } .item .pill { font-size: 11px; padding: 1px 8px; }
+.sla { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--red); }
+.conv { display: flex; flex-direction: column; min-width: 0; background: var(--bg); }
+.ch { display: flex; align-items: center; gap: 12px; height: 68px; padding: 0 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.ch .t { flex: 1; } .ch b { font-size: 15px; } .ch .muted { font-size: 12.5px; }
+.banner { display: flex; align-items: center; gap: 10px; padding: 10px 22px; background: var(--amber-soft); color: var(--amber); font-size: 13px; font-weight: 500; }
+.banner strong { margin-left: auto; }
+.msgs { flex: 1; overflow: hidden; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.m { max-width: 70%; } .m .meta { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.m .body { padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+.m.ai { align-self: flex-end; } .m.ai .body { background: var(--accent-soft); border-color: transparent; } .m.ai .meta { text-align: right; }
+.src { display: flex; gap: 6px; margin-top: 8px; justify-content: flex-end; }
+.cust .body { border-color: #f3c9c4; }
+.flag { display: inline-flex; gap: 6px; margin-top: 6px; font-size: 12px; color: var(--red); font-weight: 550; }
+.comp { margin: 0 22px 18px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+.ctabs { display: flex; gap: 16px; padding: 10px 14px 0; font-size: 12.5px; font-weight: 600; color: var(--muted); } .ctabs .on { color: var(--ink); border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+.cbody { padding: 12px 14px; color: var(--muted); min-height: 54px; border-top: 1px solid var(--line); }
+.cfoot { display: flex; align-items: center; gap: 8px; padding: 8px 10px 10px 14px; } .cfoot .sp { flex: 1; } .cfoot small { color: var(--muted); }
+.side { border-left: 1px solid var(--line); background: var(--surface); padding: 20px; display: flex; flex-direction: column; gap: 18px; overflow: hidden; }
+.who { display: flex; align-items: center; gap: 12px; } .who .avatar { width: 44px; height: 44px; } .who b { display: block; } .who span { font-size: 12.5px; color: var(--muted); }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; margin: 0; font-size: 13px; } dt { color: var(--muted); } dd { margin: 0; text-align: right; font-weight: 500; }
+.card { padding: 14px; border-radius: var(--r); background: var(--bg); font-size: 13px; }
+.card h3 { margin: 0 0 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.card p { margin: 0 0 6px; color: var(--ink-2); } .card p b { color: var(--ink); font-weight: 600; }
+.timeline { display: grid; gap: 10px; font-size: 12.5px; } .timeline div { display: grid; grid-template-columns: 10px 1fr auto; gap: 10px; align-items: baseline; }
+.timeline i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); } .timeline time { color: var(--muted); }
+</style></head><body><div class="app">
+<nav class="rail"><span class="mark">R</span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+  <span class="ri on"><svg class="icon" viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6Z"/></svg><span class="n">2</span></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z"/><path d="M8 7h6M8 11h6"/></svg></span>
+  <span class="ri"><svg class="icon" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
+  <span class="ri me"><span class="avatar" style="width:32px;height:32px;font-size:11px;background:#ffffff26;color:#fff">KT</span></span></nav>
+<section class="list">
+  <div class="lh"><h2>Hộp thư <span>6 hội thoại</span></h2>
+    <div class="seg"><span class="on">Đang chờ · 2</span><span>Của tôi</span><span>Tất cả</span></div>
+    <div class="search"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Tìm khách, nội dung, mã đơn…</div></div>
+  <div class="item on"><span class="avatar">MC</span><div><b>Lê Minh Cường</b><p>Sản phẩm bị lỗi lần hai, tôi rất bức xúc…</p><div class="tags"><span class="pill wait">Chờ nhân viên</span><span class="sla">Quá hạn 4 phút</span></div></div><time>09:12</time></div>
+  <div class="item"><span class="avatar">TB</span><div><b>Trần Thị Bình</b><p>Tôi cần gặp nhân viên để đổi địa chỉ giao hàng</p><div class="tags"><span class="pill wait">Chờ nhân viên</span><span class="sla" style="color:var(--amber)">Còn 6 phút</span></div></div><time>09:20</time></div>
+  <div class="item"><span class="avatar">VA</span><div><b>Nguyễn Văn An</b><p>Hoàn tiền về thẻ đã thanh toán mất mấy ngày?</p><div class="tags"><span class="pill ai">AI đang hỗ trợ</span></div></div><time>09:41</time></div>
+  <div class="item"><span class="avatar">TD</span><div><b>Phạm Thu Dung</b><p>Khi nhận hàng cần kiểm tra những gì?</p><div class="tags"><span class="pill ai">AI đang hỗ trợ</span></div></div><time>Hôm qua</time></div>
+  <div class="item"><span class="avatar">VA</span><div><b>Nguyễn Văn An</b><p>Khiếu nại giao chậm đơn ORD-DEMO01</p><div class="tags"><span class="pill done">Đã giải quyết</span></div></div><time>16/11</time></div>
+</section>
+<section class="conv">
+  <div class="ch"><span class="avatar">MC</span><div class="t"><b>Lê Minh Cường</b><div class="muted">Website · le.cuong@example.test</div></div>
+    <button class="btn ghost sm">Xem đơn hàng</button><button class="btn primary"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Tiếp nhận</button></div>
+  <div class="banner"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>AI đã dừng. Khách đang chờ nhân viên tiếp nhận.<strong>Quá hạn phản hồi 4 phút</strong></div>
+  <div class="msgs">
+    <div class="m"><div class="meta">Khách · 09:05</div><div class="body">Trả góp qua thẻ tín dụng cần điều kiện gì?</div></div>
+    <div class="m ai"><div class="meta">Trợ lý AI · 09:05</div><div class="body"><b>Trả góp qua thẻ tín dụng – hạn mức:</b> hạn mức còn lại của thẻ phải lớn hơn hoặc bằng tổng giá trị trả góp.</div><div class="src"><span class="chip">Trả góp · dòng 5</span><span class="chip">Trả góp · dòng 8</span></div></div>
+    <div class="m cust"><div class="meta">Khách · 09:12</div><div class="body">Sản phẩm bị lỗi lần hai, tôi rất bức xúc vì cửa hàng xử lý chậm!</div><span class="flag"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>Tự chuyển nhân viên: từ ngữ bức xúc</span></div>
+  </div>
+  <div class="comp"><div class="ctabs"><span class="on">Trả lời khách</span><span>Ghi chú nội bộ</span></div><div class="cbody">Tiếp nhận hội thoại để trả lời…</div>
+    <div class="cfoot"><small>Enter để gửi · Shift+Enter xuống dòng</small><span class="sp"></span><button class="btn primary sm" style="opacity:.5">Gửi</button></div></div>
+</section>
+<aside class="side">
+  <div class="who"><span class="avatar">MC</span><div><b>Lê Minh Cường</b><span>Khách từ 16/11/2026 · 1 hội thoại</span></div></div>
+  <dl><dt>Ưu tiên</dt><dd><span class="pill plain" style="background:var(--red-soft);color:var(--red)">Cao</span></dd><dt>Phụ trách</dt><dd>Chưa có</dd><dt>Kênh</dt><dd>Website</dd><dt>Mã khách</dt><dd>408d8b7e</dd></dl>
+  <div class="card"><h3>Ticket <span class="pill wait">Chờ tiếp nhận</span></h3><p><b>Khách:</b> Trả góp qua thẻ tín dụng cần điều kiện gì?</p><p><b>AI:</b> Hạn mức còn lại phải lớn hơn tổng giá trị trả góp…</p><p><b>Khách:</b> Sản phẩm bị lỗi lần hai, tôi rất bức xúc…</p></div>
+  <div><div class="label" style="margin-bottom:10px">Diễn biến</div><div class="timeline">
+    <div><i></i>Mở hội thoại<time>09:05</time></div><div><i></i>AI trả lời có nguồn<time>09:05</time></div><div><i style="background:var(--amber)"></i>Chuyển nhân viên<time>09:12</time></div><div><i style="background:var(--red)"></i>Quá hạn SLA 15 phút<time>09:27</time></div></div></div>
+</aside></div></body></html>

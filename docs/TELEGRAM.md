@@ -51,6 +51,8 @@ SLA phản hồi đầu của Telegram tính lúc Telegram xác nhận gửi th�
 
 ## Kiểm chứng và giới hạn
 
+Ngày 26/11/2026 thử với bot thật trên dữ liệu thật: tài khoản web tạo link Kết nối Telegram, mở trên Telegram và bấm Start; bot trả lời đã kết nối, `/orders` liệt kê đơn của tài khoản. CSDL ghi một link được cấp và đã dùng, một `/link ok` và một `/orders`, một chat gắn với tài khoản. Chưa diễn tập `/unlink`, kết nối lại từ chat thứ hai hoặc link hết hạn trên bot thật (đã có test tự động).
+
 Ngày 01/10/2026 sửa worker dừng hẳn khi mất mạng ở bước khởi động. Hai test mới tái hiện trước sửa; 23 test Telegram đạt sau sửa, gồm lỗi mạng rồi 503 rồi kết nối thành công, chưa chạm DB trước xác minh, dừng khi đang chờ và không tự retry lỗi cấu hình. Model/transport giả lập; chưa phải nghiệm thu bot thật. Cơ chế thử lại chỉ áp dụng probe đọc, không áp dụng sendMessage có kết quả chưa rõ.
 
 Ngày 01/10/2026 bổ sung xử lý lỗi giao thức HTTP (`IncompleteRead`, `BadStatusLine`): nếu đang gửi thì ghi `uncertain` ngay, không để kẹt `sending` đến khi khởi động lại. Không lưu lỗi transport thô/token; không tự gửi lại, khách khác vẫn tiếp tục gửi theo hàng chờ riêng. Lỗi nhận được chuyển thành TelegramError để dùng nhánh phục hồi polling hiện có. Test tái hiện trước sửa; 21 test Telegram đạt sau sửa với transport/model giả lập, chưa kiểm chứng bot thật.

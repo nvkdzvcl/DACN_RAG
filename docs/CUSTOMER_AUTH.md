@@ -42,7 +42,7 @@ Mỗi IP: yêu cầu xác minh 3/phút, quên mật khẩu 5/phút, xác minh/đ
 
 Gửi thư bằng tác vụ nền trong tiến trình API, chưa có hàng gửi bền hoặc retry tự động. Nếu API dừng hoặc SMTP gián đoạn, khách chờ rồi yêu cầu lại. Cần outbox/worker bền trước khi cam kết giao thư hoặc chạy nhiều worker. Giới hạn theo IP còn ở bộ nhớ, phù hợp một API worker.
 
-Mật khẩu PBKDF2-SHA256 600.000 vòng, salt riêng. Cookie HttpOnly, SameSite Strict, hạn 24 giờ, Secure ngoài development. POST yêu cầu CSRF. Schema v9 thêm cờ email_verified (tài khoản cũ mặc định false) và customer_email_tokens; giữ dữ liệu cũ. Schema v10 bổ sung trạng thái đọc Inbox riêng nhân viên. Sao lưu nhận v7/v8/v9/v10, khôi phục thu hồi cả phiên và token email. Không hạ mã nguồn về bản chỉ hỗ trợ schema cũ sau nâng cấp.
+Mật khẩu PBKDF2-SHA256 600.000 vòng, salt riêng. Cookie HttpOnly, SameSite Strict, Secure ngoài development. Đăng nhập không chọn **Ghi nhớ đăng nhập**: phiên 24 giờ, cookie hết khi đóng trình duyệt; có chọn (`remember: true`): phiên và cookie 30 ngày. Đổi hoặc đặt lại mật khẩu vẫn thu hồi mọi phiên. Đăng ký mới dùng phiên 24 giờ như không ghi nhớ. POST yêu cầu CSRF. Schema v9 thêm cờ email_verified (tài khoản cũ mặc định false) và customer_email_tokens; giữ dữ liệu cũ. Schema v10 bổ sung trạng thái đọc Inbox riêng nhân viên. Sao lưu nhận v7/v8/v9/v10, khôi phục thu hồi cả phiên và token email. Không hạ mã nguồn về bản chỉ hỗ trợ schema cũ sau nâng cấp.
 
 ## Kiểm chứng ngày 07/10/2026
 
