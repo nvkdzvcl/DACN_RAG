@@ -133,6 +133,39 @@ function SessionGate() {
   </AuthLayout>;
 }
 
+// "Diễn biến": what happened to the conversation, oldest first, with staff-only notes in amber.
+function timelineLabel(event) {
+  switch (event.kind) {
+    case 'created': return `Bắt đầu hội thoại · ${channelNames[event.channel] || event.channel}`;
+    case 'handoff_requested': return 'Khách yêu cầu gặp nhân viên';
+    case 'accepted': return `${event.actor || 'Nhân viên'} tiếp nhận`;
+    case 'first_response': return 'Nhân viên phản hồi đầu tiên';
+    case 'handoff_cancelled': return 'Khách hủy yêu cầu, AI hỗ trợ tiếp';
+    case 'resolved': return `${event.actor || 'Nhân viên'} đánh dấu đã giải quyết`;
+    case 'closed': return event.actor ? `${event.actor} đóng hội thoại` : 'Khách kết thúc hội thoại';
+    case 'note': return `${event.actor || 'Nhân viên'} ghi chú`;
+    default: return event.kind;
+  }
+}
+function ConversationTimeline({ id, request, onExpired, version }) {
+  const [events, setEvents] = useState(null), [error, setError] = useState('');
+  useEffect(() => {
+    if (!id) return;
+    const controller = new AbortController();
+    request(`/inbox/conversations/${encodeURIComponent(id)}/timeline`, { signal: controller.signal })
+      .then(data => { if (!controller.signal.aborted) { setEvents(data.events); setError(''); } })
+      .catch(e => { if (!controller.signal.aborted) { if (e.status === 401) onExpired(); else setError(e.message); } });
+    return () => controller.abort();
+  }, [id, version]);
+  return <section className="timeline" aria-label="Diễn biến hội thoại"><h3>Diễn biến</h3>
+    {error && <p className="state" role="alert">{error}</p>}
+    {events && <ol>{events.map((event, index) => <li key={event.id || `${event.kind}-${index}`} className={`tl-${event.kind}`}>
+      <span className="tlDot" aria-hidden="true" /><div><b>{timelineLabel(event)}</b><time dateTime={event.at}>{formatDateTime(event.at)}</time>
+        {event.kind === 'note' && <p className="tlNote">{event.content}</p>}
+        {['resolved', 'closed'].includes(event.kind) && event.note && <p>{event.note}</p>}</div></li>)}</ol>}
+  </section>;
+}
+
 // The handoff summary is "Khách: ..." / "AI: ..." lines; show each as a labelled, clamped turn.
 function TicketSummary({ text }) {
   const [full, setFull] = useState(false);
@@ -176,6 +209,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
   const [detailError, setDetailError] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [detailRetry, setDetailRetry] = useState(0);
+  const [composeMode, setComposeMode] = useState('reply'), [noteDrafts, setNoteDrafts] = useState({}), [noteVersion, setNoteVersion] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   const [savedDrafts, saveDrafts, draftError] = useDrafts(`staff:${user.id}`);
@@ -326,6 +360,12 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
     finally { setActionLoading(false); }
   }
   async function acceptConversation() { await postAction('/accept', undefined); }
+  async function saveNote(event) {
+    event.preventDefault();
+    const content = (noteDrafts[activeId] || '').trim();
+    if (!content || !activeId || actionLoading) return;
+    if (await postAction('/notes', { content })) { setNoteDrafts(previous => ({ ...previous, [activeId]: '' })); setNoteVersion(n => n + 1); }
+  }
   async function markUnread() {
     if (actionLoading || !current?.last_customer_message_id) return;
     const targetId = activeId, messageId = current.last_customer_message_id;
@@ -440,7 +480,10 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
             </>}
           </div>
           {!atLatest && !messageBefore && <button className="jumpLatest" onClick={() => { if (messageLog.current) messageLog.current.scrollTop = messageLog.current.scrollHeight; }}>Về tin mới nhất</button>}
-          {draftError && <p className="readNotice" role="alert">Không lưu hoặc khôi phục được nháp. Giữ tab mở và sao chép nội dung trước khi tải lại.</p>}{canReply && !actionLoading && pendingReply && <div className="readNotice pendingNotice"><p role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pendingReply.content}</p></details><button onClick={event => sendReply(event, true)}>Gửi lại tin chưa xác nhận</button></div>}{current && <><form className="composer" onSubmit={sendReply}><MessageInput aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading || pendingBlocksSend}><Send size={16} aria-hidden="true" />Gửi</button></form><div className="composerHint"><span>Enter để gửi · Shift+Enter xuống dòng</span><span>Phản hồi công khai</span></div></>}
+          {draftError && <p className="readNotice" role="alert">Không lưu hoặc khôi phục được nháp. Giữ tab mở và sao chép nội dung trước khi tải lại.</p>}{canReply && !actionLoading && pendingReply && <div className="readNotice pendingNotice"><p role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pendingReply.content}</p></details><button onClick={event => sendReply(event, true)}>Gửi lại tin chưa xác nhận</button></div>}{current && <><div className="composeTabs" role="tablist" aria-label="Loại nội dung">{[['reply', 'Trả lời khách'], ['note', 'Ghi chú nội bộ']].map(([mode, label]) => <button key={mode} type="button" role="tab" aria-selected={composeMode === mode} onClick={() => setComposeMode(mode)}>{label}</button>)}</div>
+          {composeMode === 'reply' ? <form className="composer" onSubmit={sendReply}><MessageInput aria-label="Tin nhắn nhân viên" value={draft} onChange={e => setDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={!canReply || actionLoading} placeholder={canReply ? 'Nhập phản hồi cho khách hàng...' : 'Chỉ nhân viên phụ trách được trả lời'} maxLength={4000} /><button type="submit" disabled={!canReply || !draft.trim() || actionLoading || pendingBlocksSend}><Send size={16} aria-hidden="true" />Gửi</button></form>
+            : <form className="composer noteComposer" onSubmit={saveNote}><MessageInput aria-label="Ghi chú nội bộ" value={noteDrafts[activeId] || ''} onChange={e => setNoteDrafts(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={actionLoading} placeholder="Ghi chú cho đội hỗ trợ; khách không thấy nội dung này" maxLength={2000} /><button type="submit" disabled={!(noteDrafts[activeId] || '').trim() || actionLoading}>Lưu ghi chú</button></form>}
+          <div className="composerHint"><span>Enter để gửi · Shift+Enter xuống dòng</span><span>{composeMode === 'reply' ? 'Phản hồi công khai' : 'Chỉ nhân viên thấy · hiện trong Diễn biến'}</span></div></>}
           {canReply && activeTicket && <details className="finishPanel" key={activeId}><summary><CheckCheck size={15} aria-hidden="true" />Hoàn tất hội thoại</summary><form className="completionForm" onSubmit={finishConversation}>
             <label htmlFor="completionNote">Ghi chú hoàn tất (nội bộ)</label>
             <textarea id="completionNote" rows={2} maxLength={2000} required value={completionNote} onChange={e => setCompletionNotes(previous => ({ ...previous, [activeId]: e.target.value }))} disabled={actionLoading} />
@@ -450,7 +493,7 @@ function App({ user, onExpired, onLogout, logoutBusy, sessionError }) {
           {actionError?.id === activeId && <p className="state" role="alert">{actionError.message}</p>}
         </div>
         {profileOpen && <ProfilePanel ref={profilePanel} onCancel={() => setProfileOpen(false)} id="customerInfo" className="profile" aria-label="Thông tin khách hàng" onKeyDown={event => { if (event.key === 'Escape') { setProfileOpen(false); profileToggle.current?.focus(); } }}><div className="profileHeading"><h2>Thông tin liên hệ</h2><button className="iconButton" aria-label="Đóng thông tin khách hàng" onClick={() => { setProfileOpen(false); profileToggle.current?.focus(); }}><X size={17} /></button></div>{current ? <><div className="profileUser"><div className="avatar big">{initials(nameOf(current))}</div><h3>{nameOf(current)}</h3><p>{current.customer_email || 'Chưa có email'}</p><button className="profileLink" onClick={() => openOrders(current.customer_id)}><Package size={14} aria-hidden="true" />Xem đơn hàng<ArrowUpRight size={13} aria-hidden="true" /></button></div><dl className="conversationFacts"><dt>Kênh hỗ trợ</dt><dd>{channelName(current.channel)}</dd><dt>Trạng thái</dt><dd>{statuses[current.status] || current.status}</dd><dt>Người phụ trách</dt><dd>{current.assigned_agent_id === user.id ? `${user.display_name} (bạn)` : current.assigned_agent_id ? 'Nhân viên khác' : 'Chưa phân công'}</dd><dt>Ưu tiên</dt><dd>{priorities[current.priority] || current.priority}</dd><dt>Mã khách hàng</dt><dd className="customerIdentifier" title={current.customer_id}>{shortId(current.customer_id)}</dd></dl><details className="profileTickets" open><summary><Clock3 size={15} aria-hidden="true" />Ticket hỗ trợ<span>{current.tickets.length}</span></summary>
-              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{ticketStatuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><TicketSummary text={t.summary} /><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section></details><div className="profileFootnote"><ShieldCheck size={15} aria-hidden="true" /><p>Thông tin nội bộ dành cho đội hỗ trợ.</p></div></> : <p className="state">Chọn hội thoại để xem thông tin khách hàng.</p>}</ProfilePanel>}
+              <section className="tickets" aria-label="Ticket hỗ trợ"><h3>Ticket hỗ trợ ({current.tickets.length})</h3>{!current.tickets.length ? <p>Chưa có ticket hỗ trợ.</p> : current.tickets.map(t => <article key={t.id} className="ticket"><b>{ticketStatuses[t.status] || t.status} · {priorities[t.priority] || t.priority}</b><TicketSummary text={t.summary} /><SlaBadge value={t.sla} />{t.sla && <p>Hạn: {timeOf(t.sla.due_at)}{t.sla.responded_at && <><br />Phản hồi đầu: {timeOf(t.sla.responded_at)}</>}</p>}{t.completed_at && <p>Hoàn tất: {timeOf(t.completed_at)} · {t.completed_by_name || 'Khách hàng'}</p>}{t.completion_note && <p className="completionNote"><b>Ghi chú nội bộ:</b> {t.completion_note}</p>}<small>#{t.id} · {timeOf(t.created_at)}</small></article>)}</section></details><ConversationTimeline id={activeId} request={request} onExpired={onExpired} version={`${refresh}-${detailRetry}-${noteVersion}`} /><div className="profileFootnote"><ShieldCheck size={15} aria-hidden="true" /><p>Thông tin nội bộ dành cho đội hỗ trợ.</p></div></> : <p className="state">Chọn hội thoại để xem thông tin khách hàng.</p>}</ProfilePanel>}
 
       </section>
       </>}

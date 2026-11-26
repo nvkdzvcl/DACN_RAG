@@ -137,3 +137,9 @@
 .customerWidget .widgetHeader .widgetClose { width: 40px; height: 40px; background: var(--rd-surface); color: var(--rd-ink-2); border: 1px solid var(--rd-line-strong); }
 .customerWidget .widgetHeader .widgetClose:hover { background: var(--rd-sunken); }
 .customerWidget .widgetHeader .widgetEnd { white-space: nowrap; flex: none; }
+/* Waiting for staff: how long, the reply deadline and "Hủy yêu cầu, hỏi trợ lý AI" while nobody has accepted. */
+.customerWidget.customerWidget .widgetWaiting { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; border-radius: 10px; background: #fcefd6; color: #6b3a07; text-align: left; }
+.customerWidget.customerWidget .widgetWaiting p { flex: 1 1 260px; margin: 0; font-size: 13px; line-height: 1.5; }
+.customerWidget.customerWidget .widgetWaiting button { min-height: 34px; padding: 0 12px; border: 1px solid #e2b877; border-radius: 8px; background: #fff; color: #6b3a07; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+[data-theme=dark] .customerWidget.customerWidget .widgetWaiting { background: #3d2c12; color: #f2d3a4; }
+[data-theme=dark] .customerWidget.customerWidget .widgetWaiting button { background: #2b2a24; color: #f2d3a4; border-color: #7a5a2a; }

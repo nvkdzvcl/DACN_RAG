@@ -150,6 +150,24 @@ erDiagram
     telegram_peers ||--o{ telegram_updates : receives
     conversations o|--o{ telegram_updates : processes
     messages ||--o| telegram_deliveries : delivers
+    conversations ||--o{ conversation_notes : annotates
+    users ||--o{ conversation_notes : writes
+    conversations ||--o{ conversation_events : logs
+    users o|--o{ conversation_events : acts
+    conversation_notes {
+        string id PK
+        string conversation_id FK
+        string author_id FK
+        text content
+        datetime created_at
+    }
+    conversation_events {
+        string id PK
+        string conversation_id FK
+        string kind
+        string actor_id FK
+        datetime created_at
+    }
     telegram_cursors {
         string bot_id PK
         bigint next_update_id
@@ -268,7 +286,7 @@ erDiagram
     }
 ```
 
-ERD phản ánh đầy đủ mô hình quan hệ thực thể khai báo trong SQLAlchemy và hệ thống migration v1–v11. Cơ sở dữ liệu cưỡng chế toàn vẹn toàn bộ mối quan hệ khóa ngoại (kích hoạt `PRAGMA foreign_keys=ON` trên mọi kết nối), bao gồm ràng buộc từ `conversations.last_customer_message_id` tới `messages.id`. Miền giá trị cho các trường trạng thái và độ ưu tiên (`status`, `state`, `priority`) được bảo đảm bằng `CheckConstraint` và Trigger CSDL.
+ERD phản ánh đầy đủ mô hình quan hệ thực thể khai báo trong SQLAlchemy và hệ thống migration v1–v12 (v12: `conversation_notes` cho ghi chú nội bộ chỉ nhân viên thấy, `conversation_events` ghi bước tiếp nhận và khách hủy yêu cầu cho Diễn biến). Cơ sở dữ liệu cưỡng chế toàn vẹn toàn bộ mối quan hệ khóa ngoại (kích hoạt `PRAGMA foreign_keys=ON` trên mọi kết nối), bao gồm ràng buộc từ `conversations.last_customer_message_id` tới `messages.id`. Miền giá trị cho các trường trạng thái và độ ưu tiên (`status`, `state`, `priority`) được bảo đảm bằng `CheckConstraint` và Trigger CSDL.
 
 Khả năng chống trùng lặp tin nhắn ngoài (`external_message_id`) dựa trên khóa ghi hội thoại và truy vấn tra cứu UUID theo phiên làm việc. Mối liên kết giữa dữ liệu quan hệ (SQLite) và dữ liệu mảng vector (Qdrant) thực hiện qua cơ chế tham chiếu metadata tầng ứng dụng (`document_id`, `chunk_id`, `index_version`), không tồn tại khóa ngoại liên kho.
 

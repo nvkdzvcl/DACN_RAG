@@ -226,6 +226,14 @@ export default function Widget() {
     catch (error) { fail(error, version); }
     finally { setHandoffBusy(false); }
   }
+  async function cancelHandoff() {
+    if (handoffBusy || historyLoading) return;
+    const version = ++sequence.current;
+    setHandoffBusy(true); setError(''); setNotice('');
+    try { apply(await request('/handoff/cancel', { method: 'POST' }), version); }
+    catch (error) { fail(error, version); }
+    finally { setHandoffBusy(false); }
+  }
   function clearIdentity(message = '') {
     ++sequence.current; setSession(null); setMessageCursors([]); setView('messages');
     setOrderResult(null); setOrderId(''); setOrderError(''); setMyOrders(null); setConnectionError(''); setNotice(message);
@@ -383,7 +391,9 @@ export default function Widget() {
             <label>Mã truy cập<input name="code" type="password" required minLength={43} maxLength={43} autoComplete="off" spellCheck={false} /></label>
             <button type="submit">Xác nhận quyền tra đơn</button></fieldset></form>
         </details>}
-        {session.status !== 'open' && <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
+        {session.status === 'handoff_requested' && session.handoff ? <div className="widgetStatus widgetWaiting" role="status"><p><b>Đang chờ nhân viên</b> · đã chờ {Math.max(1, Math.round((Date.now() - Date.parse(session.handoff.requested_at + (/[zZ]|[+-]\d\d:?\d\d$/.test(session.handoff.requested_at) ? '' : 'Z'))) / 60000))} phút{session.handoff.due_at && <> · nhân viên phản hồi trước {formatDateTime(session.handoff.due_at).slice(-5)}</>}. Bạn có thể để lại thêm thông tin; AI tạm dừng trả lời.</p>
+          {session.handoff.can_cancel && <button type="button" onClick={cancelHandoff} disabled={handoffBusy || historyLoading}>{handoffBusy ? 'Đang hủy...' : 'Hủy yêu cầu, hỏi trợ lý AI'}</button>}</div>
+        : session.status !== 'open' && <p className="widgetStatus" role="status">{closed ? 'Hội thoại đã đóng. Chọn Kết thúc để bắt đầu phiên mới.' : session.status === 'resolved' ? 'Yêu cầu đã giải quyết. Nhắn tiếp nếu cần hỗ trợ thêm; yêu cầu mới sẽ chuyển vào hàng chờ nhân viên.' : session.status === 'assigned' ? 'Nhân viên đã nhận hội thoại. Bạn có thể nhắn tiếp.' : 'Đã chuyển yêu cầu. Bạn có thể để lại thêm thông tin.'} AI đã dừng trả lời.</p>}
         {notice && <p className="widgetStatus" role="status">{notice}</p>}{error && <p className="widgetError" role="alert">{error}</p>}
         {connectionError && <p className="widgetError" role="status">{connectionError}</p>}
         {!busy && pending && <div className="pendingNotice"><p className="widgetIntro" role="status">Tin trước chưa xác nhận. Gửi lại tin trước để xác nhận rồi gửi tin mới; nháp mới vẫn giữ.</p><details><summary>Xem tin chưa xác nhận</summary><p>{pending.content}</p></details><button type="button" onClick={event => send(event, true)} disabled={closed || historyLoading}>Gửi lại tin chưa xác nhận</button></div>}

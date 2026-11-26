@@ -7,9 +7,10 @@ from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session, joinedload
 from app.core.auth import require_staff
 from app.db.session import get_db
-from app.models.support import Conversation, ConversationRead, CustomerAccount, Message, TelegramDelivery, Ticket, User, now_utc
+from app.models.support import (Conversation, ConversationEvent, ConversationNote, ConversationRead, CustomerAccount, Message,
+                                TelegramDelivery, Ticket, User, now_utc)
 from app.services.sla_service import conversation_sla, ticket_slas, utc
-from app.services.ticket_service import complete_tickets
+from app.services.ticket_service import CANCELLED_BY_CUSTOMER, complete_tickets
 
 router = APIRouter(prefix="/api/v1/inbox", tags=["inbox"])
 
@@ -37,6 +38,18 @@ class FinishConversation(BaseModel):
     def nonblank_note(cls, value):
         if not value.strip():
             raise ValueError('Completion note cannot be blank')
+        return value.strip()
+
+
+class NoteCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    content: str = Field(min_length=1, max_length=2000)
+
+    @field_validator('content')
+    @classmethod
+    def nonblank(cls, value):
+        if not value.strip():
+            raise ValueError('Note cannot be blank')
         return value.strip()
 
 
@@ -249,6 +262,7 @@ def accept_conversation(conversation_id: str, db: Session = Depends(get_db), use
     tickets = db.query(Ticket).filter_by(conversation_id=conversation_id, status="open").all()
     for ticket in tickets:
         ticket.status = "assigned"
+    db.add(ConversationEvent(id=str(uuid4()), conversation_id=conversation_id, kind='accepted', actor_id=user.id))
     db.commit()
     return {"conversation_id": conversation_id, "status": "assigned", "ticket_ids": [ticket.id for ticket in tickets], "agent_id": user.id}
 
@@ -273,3 +287,43 @@ def add_agent_message(conversation_id: str, payload: AgentMessageCreate, db: Ses
     db.add(message)
     db.commit()
     return {"message_id": message.id, "conversation_id": conversation_id, "sender_type": message.sender_type, "content": message.content, "status": conversation.status}
+
+
+@router.post("/conversations/{conversation_id}/notes", status_code=201)
+def add_note(conversation_id: str, payload: NoteCreate, db: Session = Depends(get_db), user: User = Depends(require_staff)):
+    """Internal note: any staff member, any status. Never sent to the customer or any channel."""
+    if db.get(Conversation, conversation_id) is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    note = ConversationNote(id=str(uuid4()), conversation_id=conversation_id, author_id=user.id, content=payload.content)
+    db.add(note)
+    db.commit()
+    return {'id': note.id, 'kind': 'note', 'at': note.created_at, 'actor': user.display_name, 'content': note.content}
+
+
+@router.get("/conversations/{conversation_id}/timeline")
+def conversation_timeline(conversation_id: str, db: Session = Depends(get_db)):
+    """What happened, oldest first: created, handoff, accepted, first reply, cancelled, resolved/closed, notes.
+    Ticket steps come from the tickets themselves; accepted/cancelled are logged events (from schema v12)."""
+    iso = lambda value: value if isinstance(value, str) else utc(value).isoformat()
+    conversation = db.get(Conversation, conversation_id)
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    tickets = db.query(Ticket).filter_by(conversation_id=conversation_id).all()
+    slas = ticket_slas(db, [conversation_id])
+    events = db.query(ConversationEvent).filter_by(conversation_id=conversation_id).all()
+    notes = db.query(ConversationNote).filter_by(conversation_id=conversation_id).all()
+    user_ids = {t.completed_by_id for t in tickets} | {e.actor_id for e in events} | {n.author_id for n in notes}
+    names = {u.id: u.display_name for u in db.query(User).filter(User.id.in_([i for i in user_ids if i]))}
+    items = [{'kind': 'created', 'at': iso(conversation.created_at), 'channel': conversation.channel}]
+    for t in tickets:
+        items.append({'kind': 'handoff_requested', 'at': iso(t.created_at)})
+        responded = t.first_response_at or (slas.get(t.id) or {}).get('responded_at')
+        if responded:
+            items.append({'kind': 'first_response', 'at': iso(responded)})
+        # A cancelled handoff closes its ticket; the 'handoff_cancelled' event already tells that step.
+        if t.completed_at and t.completion_note != CANCELLED_BY_CUSTOMER:
+            items.append({'kind': t.status, 'at': iso(t.completed_at), 'actor': names.get(t.completed_by_id), 'note': t.completion_note})
+    items += [{'kind': e.kind, 'at': iso(e.created_at), 'actor': names.get(e.actor_id)} for e in events]
+    items += [{'kind': 'note', 'id': n.id, 'at': iso(n.created_at), 'actor': names.get(n.author_id), 'content': n.content} for n in notes]
+    items.sort(key=lambda item: item['at'])
+    return {'conversation_id': conversation_id, 'events': items}
