@@ -8,7 +8,7 @@ import httpx
 CHAT_THINK = False
 CHAT_OPTIONS = {"temperature": 0, "num_ctx": 8192, "num_predict": 700}
 # ponytail: retain models for five idle minutes; let Ollama evict them if GPU memory is needed.
-KEEP_ALIVE = '5m'
+KEEP_ALIVE = os.getenv('LLM_KEEP_ALIVE', '5m')  # hosted CPU: a longer value avoids slow reloads, costs RAM
 
 
 class ProviderError(RuntimeError):

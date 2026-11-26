@@ -25,6 +25,7 @@ from app.db.migrations import migrate
 from app.rag.ollama import ProviderError
 from app.rag.vector_store import vector_store
 from app.telegram import start_telegram
+from app.core.proxy import allowed
 
 @asynccontextmanager
 async def lifespan(app):
@@ -49,6 +50,14 @@ for staff_router in (router, document_router, chunks_router, search_router, answ
     app.include_router(staff_router, dependencies=[Depends(require_staff)])
 for admin_router in (seed_router,):
     app.include_router(admin_router, dependencies=[Depends(require_admin)])
+
+
+@app.middleware('http')
+async def proxy_only(request: Request, call_next):
+    # With ORIGIN_SECRET set, only the frontend proxy (and the platform health check) may call the API.
+    if not allowed(request):
+        return JSONResponse(status_code=403, content={'detail': 'Forbidden'})
+    return await call_next(request)
 
 
 @app.exception_handler(ProviderError)

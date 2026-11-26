@@ -12,6 +12,7 @@ from sqlalchemy import delete, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.core.auth import COOKIE_NAME, SESSION_SECONDS, check_csrf, hash_password, public_user, require_admin, require_staff, token_hash, verify_password
+from app.core.proxy import client_address
 from app.db.session import get_db
 from app.models.support import AuthSession, User
 
@@ -61,7 +62,7 @@ def create_user(db: Session, payload: UserCreate) -> User:
 def login(payload: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     now = time.time()
     # ponytail: one local API worker; use shared rate limits before multi-worker hosting.
-    address = request.client.host if request.client else "unknown"
+    address = client_address(request)
     with _attempt_lock:
         for key in list(_attempts):
             if _attempts[key][-1] <= now - 60:
