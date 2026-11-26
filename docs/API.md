@@ -30,6 +30,7 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 | Phiên Website     | DELETE | `/api/v1/widget/session`  | Kết thúc phiên hội thoại Website                 | Phiên khách Website  | UC03        |
 | Hội thoại Website | POST   | `/api/v1/widget/messages` | Gửi tin nhắn trong hội thoại Website             | Phiên khách Website  | UC03        |
 | Hỗ trợ trực tiếp  | POST   | `/api/v1/widget/handoff`  | Yêu cầu chuyển hội thoại cho nhân viên           | Phiên khách Website  | UC06        |
+| Hỗ trợ trực tiếp  | POST   | `/api/v1/widget/handoff/cancel` | Khách hủy yêu cầu đang chờ (chưa ai tiếp nhận); AI trả lời lại, ticket đóng; đã tiếp nhận trả 409 | Phiên khách Website + CSRF | UC06        |
 
 ## 3. Nhóm tra cứu đơn hàng của khách
 
@@ -109,6 +110,8 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 | Theo dõi Inbox/SLA | POST   | `/api/v1/inbox/conversations/{conversation_id}/read`     | Đánh dấu hội thoại đã đọc                             | Nhân viên + CSRF    | UC11        |
 | Theo dõi Inbox/SLA | POST   | `/api/v1/inbox/conversations/{conversation_id}/unread`   | Đánh dấu hội thoại chưa đọc                           | Nhân viên + CSRF    | UC11        |
 | Tiếp nhận hỗ trợ   | POST   | `/api/v1/inbox/conversations/{conversation_id}/accept`   | Tiếp nhận hội thoại đang chờ hỗ trợ                   | Nhân viên           | UC07        |
+| Ghi chú nội bộ     | POST   | `/api/v1/inbox/conversations/{conversation_id}/notes`    | Ghi chú chỉ nhân viên thấy (1–2000 ký tự), không gửi khách/kênh | Nhân viên + CSRF | UC08 |
+| Diễn biến          | GET    | `/api/v1/inbox/conversations/{conversation_id}/timeline` | Các bước của hội thoại theo thời gian: bắt đầu, chuyển nhân viên, tiếp nhận, phản hồi đầu, khách hủy, giải quyết/đóng, ghi chú | Nhân viên | UC08 |
 | Phản hồi khách     | POST   | `/api/v1/inbox/conversations/{conversation_id}/messages` | Gửi phản hồi cho khách trong hội thoại đang phụ trách | Nhân viên phụ trách | UC08        |
 | Hoàn tất hỗ trợ    | POST   | `/api/v1/inbox/conversations/{conversation_id}/finish`   | Hoàn tất lượt hỗ trợ và cập nhật ticket               | Nhân viên phụ trách | UC09        |
 | Giao lại tin nhắn  | POST   | `/api/v1/inbox/messages/{message_id}/retry-delivery`     | Gửi lại tin Telegram bị lỗi                           | Nhân viên           | UC14        |
@@ -539,7 +542,7 @@ Luồng tra cứu đơn hàng bảo mật gồm 2 bước: Nhập mã truy cập
 
 ### 6. Luồng yêu cầu chuyển nhân viên (Handoff)
 
-- **API:** `POST /api/v1/widget/handoff`
+- **API:** `POST /api/v1/widget/handoff` (hủy khi chưa ai tiếp nhận: `POST /api/v1/widget/handoff/cancel`; snapshot có `handoff` gồm `requested_at`, `due_at`, `can_cancel` khi đang chờ)
 - **Mã Use Case:** UC06
 - **Quyền truy cập:** Phiên khách hàng (rag_widget_session)
 

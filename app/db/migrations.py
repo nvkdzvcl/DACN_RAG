@@ -145,3 +145,6 @@ def migrate(engine):
                 BEGIN SELECT RAISE(ABORT, 'invalid conversations.last_customer_message_id'); END
             """))
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (11)"))
+        # v12: conversation_notes and conversation_events (created by create_all above; additive).
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 12")).first():
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (12)"))

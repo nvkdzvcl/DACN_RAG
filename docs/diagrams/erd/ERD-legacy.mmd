@@ -18,6 +18,24 @@ erDiagram
     telegram_peers ||--o{ telegram_updates : receives
     conversations o|--o{ telegram_updates : processes
     messages ||--o| telegram_deliveries : delivers
+    conversations ||--o{ conversation_notes : annotates
+    users ||--o{ conversation_notes : writes
+    conversations ||--o{ conversation_events : logs
+    users o|--o{ conversation_events : acts
+    conversation_notes {
+        string id PK
+        string conversation_id FK
+        string author_id FK
+        text content
+        datetime created_at
+    }
+    conversation_events {
+        string id PK
+        string conversation_id FK
+        string kind
+        string actor_id FK
+        datetime created_at
+    }
     telegram_cursors {
         string bot_id PK
         bigint next_update_id

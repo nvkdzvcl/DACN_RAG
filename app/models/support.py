@@ -137,6 +137,29 @@ class OrderAccess(Base):
     expires_at: Mapped[int]
     conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id"), nullable=True)
 
+class ConversationNote(Base):
+    """Staff-only note on a conversation. Kept out of `messages` so customer views and channels never see it."""
+    __tablename__ = "conversation_notes"
+    __table_args__ = (Index('ix_conversation_notes_conversation_created', 'conversation_id', 'created_at'),)
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"))
+    author_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    content: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+class ConversationEvent(Base):
+    """Steps the timeline cannot derive from tickets: staff accepted, customer cancelled a handoff."""
+    __tablename__ = "conversation_events"
+    __table_args__ = (
+        Index('ix_conversation_events_conversation_created', 'conversation_id', 'created_at'),
+        CheckConstraint("kind IN ('accepted', 'handoff_cancelled')", name="ck_conversation_events_kind"),
+    )
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"))
+    kind: Mapped[str] = mapped_column(String(32))
+    actor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
 class TelegramCursor(Base):
     __tablename__ = "telegram_cursors"
     bot_id: Mapped[str] = mapped_column(String(32), primary_key=True)

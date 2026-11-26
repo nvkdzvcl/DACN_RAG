@@ -4,6 +4,10 @@ from app.models.support import Ticket
 from app.services.sla_service import ticket_slas
 
 
+# Completion note of tickets the customer closed by cancelling a waiting handoff (see widget.cancel_handoff).
+CANCELLED_BY_CUSTOMER = 'Khách hủy yêu cầu gặp nhân viên.'
+
+
 def complete_tickets(db, conversation_id, status, user_id=None, note=None):
     # Caller holds the conversation write lock; freeze SLA in the same transaction.
     slas = ticket_slas(db, [conversation_id])

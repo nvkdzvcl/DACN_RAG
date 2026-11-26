@@ -13,10 +13,12 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import check_csrf, token_hash
 from app.db.session import get_db
-from app.models.support import Conversation, Customer, CustomerAccount, CustomerSession, Message, Order, OrderAccess, WidgetSession
+from app.models.support import (Conversation, ConversationEvent, Customer, CustomerAccount, CustomerSession, Message, Order,
+                                OrderAccess, Ticket, WidgetSession)
+from app.services.sla_service import ticket_slas
 from app.services.handoff_service import classify_message
 from app.services.message_service import process_message, simple_reply
-from app.services.ticket_service import complete_tickets
+from app.services.ticket_service import CANCELLED_BY_CUSTOMER, complete_tickets
 from app.services.order_service import active_order_access
 
 COOKIE = 'rag_widget_session'
@@ -111,6 +113,17 @@ def require_chat_session(request: Request, db: Session = Depends(get_db)):
     return session
 
 
+def waiting(db, conversation):
+    """While a handoff waits for staff: when it was requested and the first-response deadline (SLA)."""
+    if conversation.status != 'handoff_requested':
+        return None
+    ticket = db.query(Ticket).filter(Ticket.conversation_id == conversation.id, Ticket.status == 'open').order_by(Ticket.created_at.desc()).first()
+    if ticket is None:
+        return None
+    sla = ticket_slas(db, [conversation.id]).get(ticket.id) or {}
+    return {'requested_at': ticket.created_at, 'due_at': sla.get('due_at'), 'can_cancel': conversation.assigned_agent_id is None}
+
+
 def snapshot(db, session, before=None, limit=50):
     conversation = db.get(Conversation, session.conversation_id)
     if conversation is None:
@@ -131,6 +144,7 @@ def snapshot(db, session, before=None, limit=50):
             'status': conversation.status, 'expires_at': session.expires_at, 'history_truncated': has_more,
             'message_page': {'limit': limit, 'before': before, 'has_more': has_more,
                              'next_before': messages[0].id if has_more else None},
+            'handoff': waiting(db, conversation),
             'order_access': [{'order_id': access.order_id, 'expires_at': min(access.expires_at, session.expires_at)}
                              for access in active_order_access(db, conversation.id)] if conversation.status != 'closed' else [],
             'messages': [{'id': m.id, 'sender_type': m.sender_type, 'content': m.content, 'created_at': m.created_at,
@@ -255,6 +269,23 @@ def request_handoff(payload: WidgetAction, request: Request, session: WidgetSess
     process_message(db, db.get(Conversation, session.conversation_id), 'Tôi cần gặp nhân viên.', str(payload.client_message_id))
     db.expunge_all()
     return snapshot(db, require_session(request, db))
+
+
+@router.post('/handoff/cancel')
+def cancel_handoff(request: Request, session: WidgetSession = Depends(require_chat_session), db: Session = Depends(get_db)):
+    """The customer withdraws a handoff nobody has accepted yet; the AI answers again. Once staff accept, it stays with them."""
+    rate_limit(request, 'handoff', 6)
+    reopened = db.execute(update(Conversation).where(Conversation.id == session.conversation_id,
+        Conversation.status == 'handoff_requested', Conversation.assigned_agent_id.is_(None)).values(status='open', priority='normal'))
+    if reopened.rowcount != 1:
+        db.rollback()
+        raise HTTPException(409, 'Nhân viên đã tiếp nhận hoặc yêu cầu không còn chờ. Bạn có thể nhắn tiếp cho nhân viên.')
+    complete_tickets(db, session.conversation_id, 'closed', note=CANCELLED_BY_CUSTOMER)
+    db.add(ConversationEvent(id=str(uuid4()), conversation_id=session.conversation_id, kind='handoff_cancelled'))
+    db.add(Message(id=str(uuid4()), conversation_id=session.conversation_id, sender_type='system',
+                   content='Bạn đã hủy yêu cầu gặp nhân viên. Trợ lý AI tiếp tục hỗ trợ; chọn Gặp nhân viên nếu cần lại.'))
+    db.commit()
+    return snapshot(db, session)
 
 
 @router.delete('/session')

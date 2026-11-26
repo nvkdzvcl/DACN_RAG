@@ -260,3 +260,32 @@
 .shell .pickerResults { display: flex; flex-direction: column; }
 .shell .management .pickerResults > * { flex: none; }
 .shell .management .pickerResults button { height: auto; line-height: 1.35; }
+
+/* Composer tabs: reply to the customer, or an internal note (amber, never sent). */
+.shell .composeTabs { display: flex; gap: 4px; padding: 8px 16px 0; background: var(--rd-surface); }
+.shell .composeTabs button { min-height: 30px; padding: 0 12px; border: 0; border-radius: 8px 8px 0 0; background: transparent; color: var(--rd-muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.shell .composeTabs button[aria-selected=true] { background: var(--rd-sunken); color: var(--rd-ink); }
+.shell .composeTabs button:nth-child(2)[aria-selected=true] { background: #fcefd6; color: #6b3a07; }
+.shell[data-theme=dark] .composeTabs button:nth-child(2)[aria-selected=true] { background: #3d2c12; color: #f2d3a4; }
+.shell .composer.noteComposer { background: #fdf6e8; }
+.shell[data-theme=dark] .composer.noteComposer { background: #2a2416; }
+.shell .composer.noteComposer button { background: #9a4b06; }
+
+/* Diễn biến: a vertical timeline in the contact panel. */
+.shell .timeline { padding: 14px 18px; border-top: 1px solid var(--rd-line); }
+.shell .timeline h3 { margin: 0 0 10px; font-size: 12px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--rd-muted); }
+.shell .timeline ol { margin: 0; padding: 0; list-style: none; }
+.shell .timeline li { position: relative; display: flex; gap: 10px; padding: 0 0 12px; }
+.shell .timeline li:not(:last-child)::before { content: ''; position: absolute; left: 4px; top: 12px; bottom: 0; width: 2px; background: var(--rd-line); }
+.shell .timeline .tlDot { flex: none; width: 10px; height: 10px; margin-top: 4px; border-radius: 50%; background: var(--rd-line-strong); }
+.shell .timeline .tl-handoff_requested .tlDot { background: #d48a1c; }
+.shell .timeline :is(.tl-accepted, .tl-first_response) .tlDot { background: #2747b8; }
+.shell .timeline .tl-resolved .tlDot { background: #17703c; }
+.shell .timeline :is(.tl-handoff_cancelled, .tl-created) .tlDot { background: var(--rd-accent); }
+.shell .timeline .tl-note .tlDot { background: #e2b877; }
+.shell .timeline li > div { min-width: 0; }
+.shell .timeline b { display: block; font-size: 12.5px; font-weight: 600; color: var(--rd-ink); }
+.shell .timeline time { font-size: 11.5px; color: var(--rd-muted); }
+.shell .timeline li p { margin: 4px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--rd-ink-2); overflow-wrap: anywhere; white-space: pre-wrap; }
+.shell .timeline .tlNote { padding: 6px 10px; border-left: 3px solid #e2b877; border-radius: 0 6px 6px 0; background: #fdf6e8; }
+.shell[data-theme=dark] .timeline .tlNote { background: #2a2416; border-left-color: #7a5a2a; }
