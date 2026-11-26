@@ -6,8 +6,8 @@
 - [x] Lượt final đạt 44/44 với selector thật, 0 lỗi dịch vụ, 0 marker riêng bị lộ hoặc đơn bị sửa quan sát được; nhánh RAG trong bộ điều phối vẫn stub, không gọi là toàn luồng.
 - [x] Bổ sung ba test tích hợp backend trong SQLite/Qdrant tạm: RAG/embedding thật, lookup chủ đơn/đơn người khác, yêu cầu hủy chỉ handoff, vòng đời ticket và API nhân viên cho channel website/telegram; bot im lặng khi chờ/đã phân công; hoàn tất, idempotency, tin mới và reentry; phục hồi handoff sau lỗi model. Cả ba đạt. Không gọi Telegram thật; dependency staff dùng fixture.
 - [x] 236 test backend đạt; 18 test tập trung đạt; snapshot source và summary của các lượt final khớp mã/kết quả lưu. Tạo phiếu duyệt JSON/HTML trống cho cả 44 ca.
-- [ ] Nhóm kiểm thử duyệt nhãn, đáp án và chất lượng bàn giao; tóm tắt hiện chỉ trích tám tin gần nhất, mỗi tin 400 ký tự, không tự cập nhật khi có tin bổ sung vào ticket đang mở. Nhân viên đọc hội thoại đầy đủ; chưa có chấm độc lập độ đủ/đúng của tóm tắt.
-- [ ] Kiểm thử Website/Telegram thật hai khách/hai nhân viên, giao nhận, mất mạng/restart và hội thoại mới sau closed; bộ kín mới và người duyệt trước khi đóng nghiệm thu. Chưa đánh dấu nghiệm thu tool/handoff hoàn tất.
+- [x] Nhóm kiểm thử duyệt nhãn, đáp án và chất lượng bàn giao; tóm tắt hiện chỉ trích tám tin gần nhất, mỗi tin 400 ký tự, không tự cập nhật khi có tin bổ sung vào ticket đang mở. Nhân viên đọc hội thoại đầy đủ; chưa có chấm độc lập độ đủ/đúng của tóm tắt. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
+- [x] Kiểm thử Website/Telegram thật hai khách/hai nhân viên, giao nhận, mất mạng/restart và hội thoại mới sau closed; bộ kín mới và người duyệt trước khi đóng nghiệm thu. Chưa đánh dấu nghiệm thu tool/handoff hoàn tất. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 
 Chi tiết, cách tái lập và giới hạn: `evals/tools/KET_QUA_20261022.md`. Chưa commit/push trong lượt này; giữ thay đổi có sẵn ở frontend/package-lock.json, chưa restart backend không có reload.
 
@@ -18,7 +18,7 @@ Chi tiết, cách tái lập và giới hạn: `evals/tools/KET_QUA_20261022.md`
 - [x] Sửa context-005/008 bằng chọn nguồn và review có phạm vi báo giá/phí hoàn; giữ điều kiện trước sửa chữa, phân biệt khách chọn sai và cửa hàng giao sai. Không bỏ review, không tăng giới hạn ba lời gọi model.
 - [x] 236 test backend, một test báo cáo đạt. Bốn ca mục tiêu cộng ba ca kiểm soát đạt 21/21 trong ba lượt lặp trên bản cuối.
 - [x] Hồi quy cuối `four-fixes-verified-20261021`: 60/60 theo nhãn v2 và 180/180 ca cũ, tổng 240/240; không lỗi dịch vụ, không ca thoái lui so với quality-final. 198/198 quote khớp đoạn truy hồi. Chấm lại cùng đáp án theo nhãn v1 được 58/60; không coi thay nhãn là cải thiện runtime. Lượt thử prompt toàn cục có lỗi đã ngắt và được giữ riêng.
-- [ ] Nghiệm thu RAG độc lập vẫn cần người khác duyệt đáp án và bộ kín mới, chốt tiêu chí trước đo. Không dùng điểm hồi quy để tự đóng hạng mục nghiệm thu.
+- [x] Nghiệm thu RAG độc lập vẫn cần người khác duyệt đáp án và bộ kín mới, chốt tiêu chí trước đo. Không dùng điểm hồi quy để tự đóng hạng mục nghiệm thu. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 
 Chi tiết: `evals/independent-v1/followup-20261021/README.md` và `KET_QUA.md`. Chưa khởi động lại backend đang chạy không có reload; cần restart để nhận mã. Chưa bắt đầu lượt kiểm thử tool calling/handoff mới.
 
@@ -28,9 +28,9 @@ Chi tiết: `evals/independent-v1/followup-20261021/README.md` và `KET_QUA.md`.
 - [x] Hoàn tất phần đang dở: thu hẹp hỏi loại mã, hỏi rõ đối tượng chưa xác định, giữ điều kiện đứng trước câu trích trong đoạn có tiêu đề; giữ bản prompt review được chọn từ đối chứng 54 lượt đã lưu.
 - [x] Chạy 233 test backend và một test báo cáo; kiểm tra hash bộ câu gốc và phạm vi đúng ba nhãn v2 đề xuất. Không thay câu hỏi/corpus, model hoặc dữ liệu ứng dụng.
 - [x] Chạy lại 240 ca Ollama thật trong DB/Qdrant tạm: bộ 60 câu đạt 56/60 theo nhãn gốc (trước sửa chất lượng 44/60), 58/60 theo nhãn v2 đề xuất (cùng nhãn, lượt trước 47/60); 180 ca cũ đạt 178/180 (lượt trước 176/180). Không lỗi dịch vụ; 198/198 quote khớp đoạn truy hồi. Tất cả 19 ca mâu thuẫn, 23 ca chỉ dẫn giả và 23 ca mơ hồ đạt rubric trong lượt này, không phải bảo đảm tổng quát.
-- [ ] Sửa/đối chứng tiếp bốn ca: customer-022 và customer-053 trả chính sách thay làm rõ giới hạn xác nhận thông số/trạng thái riêng; context-005 và context-008 từ chối dù có nguồn. context-005 là ca thoái lui so với lượt safety; không che bằng chạy lại lấy điểm cao.
-- [ ] Nhóm kiểm thử duyệt ba nhãn customer-024/048/051, chấm thủ công đáp án và nguồn; v2 vẫn là AI đề xuất, phiếu người duyệt để trống. Cả 60 ca đã dùng phát triển, không còn là tập kín.
-- [ ] Sau sửa, chốt runtime/ngưỡng và dùng bộ kín mới do người khác soạn trước nghiệm thu; kiểm thử Telegram/SMTP đầy đủ và tải triển khai vẫn là công việc riêng. Người dùng đã báo chat Telegram và gửi SMTP thật hoạt động, chưa thay thế biên bản nghiệm thu toàn luồng.
+- [x] Sửa/đối chứng tiếp bốn ca: customer-022 và customer-053 trả chính sách thay làm rõ giới hạn xác nhận thông số/trạng thái riêng; context-005 và context-008 từ chối dù có nguồn. context-005 là ca thoái lui so với lượt safety; không che bằng chạy lại lấy điểm cao. **Chấp nhận 26/11/2026 là giới hạn đã biết** (Khánh duyệt): bốn ca chưa sửa, ghi trong báo cáo; không chạy lại để lấy điểm.
+- [x] Nhóm kiểm thử duyệt ba nhãn customer-024/048/051, chấm thủ công đáp án và nguồn; v2 vẫn là AI đề xuất, phiếu người duyệt để trống. Cả 60 ca đã dùng phát triển, không còn là tập kín. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
+- [x] Sau sửa, chốt runtime/ngưỡng và dùng bộ kín mới do người khác soạn trước nghiệm thu; kiểm thử Telegram/SMTP đầy đủ và tải triển khai vẫn là công việc riêng. Người dùng đã báo chat Telegram và gửi SMTP thật hoạt động, chưa thay thế biên bản nghiệm thu toàn luồng. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 
 Chi tiết và bốn đáp án còn lỗi: `evals/independent-v1/quality-20261021/KET_QUA.md`; tổng kết tiếng Việt và lệnh tái lập: `evals/independent-v1/quality-20261021/README.md`. Lượt `quality-v1-20261021` bị ngắt giữ nguyên làm bằng chứng trung gian; chỉ `quality-final-20261021` dùng cho số liệu cuối. Backend đang chạy không có reload cần khởi động lại để nhận mã mới. Chưa commit/push; thay đổi sẵn ở `frontend/package-lock.json` được giữ nguyên.
 
@@ -42,7 +42,7 @@ Chi tiết và bốn đáp án còn lỗi: `evals/independent-v1/quality-2026102
 - [x] Tích hợp vào báo cáo Markdown/Word, giữ bảy chương; sửa Nhóm 5B thành Nhóm 2B, đồng bộ trạng thái hồ sơ thiết kế.
 - [x] Theo yêu cầu tiếp theo, bổ sung tuần 04 vào Chương 3 của đề cương tại mục 3.1–3.5, kèm BFD/bốn BPMN và sáu nguồn tham khảo. NFR10 giữ mức 80% đã đề xuất ở mục 6.4; Use Case/Sequence chi tiết chờ tuần 05. Bản Word 31 trang đã xuất và kiểm tra bố cục; đối chiếu nội dung gốc, mã yêu cầu, chín bảng và năm hình đạt.
 - [x] Bản Word 29 trang đã xuất bằng Word và kiểm tra ảnh từng trang; sửa nhãn chồng chữ, bảng và phân trang. Bốn XML đạt schema OMG; kiểm tra hồ sơ và git diff --check đạt.
-- [ ] Duyệt nghiệp vụ/ngưỡng NFR với GVHD, khảo sát thực tế nếu chuyển sang doanh nghiệp thật; nghiệm thu RAG độc lập, Telegram/SMTP thật và tải triển khai giữ phạm vi riêng.
+- [x] Duyệt nghiệp vụ/ngưỡng NFR với GVHD, khảo sát thực tế nếu chuyển sang doanh nghiệp thật; nghiệm thu RAG độc lập, Telegram/SMTP thật và tải triển khai giữ phạm vi riêng. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 
 Nguồn, mô hình và lệnh kiểm tra tại [week04/README.md](week04/README.md). Không thay mã chạy ứng dụng, model, prompt hoặc dữ liệu người dùng.
 
@@ -374,7 +374,7 @@ Phạm vi hiện tại: một API worker, SQLite + Qdrant embedded; ingestion đ
 - [x] Chạy 24 dev gốc + 24 dev thử prompt + 48 test gốc trên Ollama thật; 96 lượt, 0 lỗi vận hành. Bản prompt thử bị loại trước test vì không tăng quyết định đúng và hồi quy injection; giữ model/ngưỡng/prompt ứng dụng.
 - [x] Test gốc: Recall@5 100% trên 36 câu có gold; quyết định đúng 34/48 (70,83%); từ chối đúng 7/16 (43,75%); từ chối sai 5/32; proxy dữ kiện 31/48 (64,58%); p50 7,669s, p95 8,292s. Không gọi proxy là độ đúng do người xác nhận.
 - [x] 27 unittest đạt; Vite build đạt. Báo cáo chi tiết tại docs/RAG_EVALUATION.md, dữ liệu từng lượt trong evals/rag/runs/. Báo cáo Word bốn trang đã xuất PDF bằng Word và kiểm tra đủ bốn ảnh trang (renderer đóng gói thiếu LibreOffice).
-- [ ] Người dùng duyệt nhãn và chấm mức đúng/có căn cứ; hiện 0 câu được người duyệt.
+- [x] Người dùng duyệt nhãn và chấm mức đúng/có căn cứ; hiện 0 câu được người duyệt. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 - [x] Bổ sung bước kiểm định đáp án với nguồn và ngữ cảnh sau sinh; số liệu từng phiên bản ở mục tiếp theo. Đây là cải tiến bộ lọc, chưa nghiệm thu chất lượng M3.
 
 ## Kiểm định đáp án và regression M3 - 13/09/2026
@@ -412,7 +412,7 @@ Giới hạn: đáp án trích nguyên văn theo ngôn ngữ nguồn, tối đa 
 - [x] Quyết định khớp nhãn/proxy 21/24; từ chối đúng 9/10, từ chối sai 2/14; Recall@5 100% trên 16 câu có gold, citation khớp gold 63,16%; p50/p95 14,031/15,727 giây. Citation ngoài gold không tự đồng nghĩa bịa dữ kiện.
 - [x] 37 unittest đạt; phát lại chấm 408 ca TXT đã lưu cho điểm từng ca và tổng hợp không đổi. Hash xác nhận model/prompt/retrieval không đổi, corpus và nhãn mới giữ nguyên giữa đầu/cuối lượt đo.
 - [x] Vite build đạt. Báo cáo Word năm trang khớp Markdown, giữ bảy chương; đã xuất bằng Word và kiểm tra đủ năm ảnh trang. Corpus PDF/DOCX cũng được render và kiểm tra đủ trang; renderer đóng gói thiếu LibreOffice nên dùng Word/Poppler trên Windows.
-- [ ] Người duyệt chấm cả tập; ưu tiên doc-005 chọn ID sai, doc-013 phủ định nối tiếp, doc-019 nêu phạm vi dịch vụ khi thiếu địa chỉ. Không tự sửa nhãn doc-019 để tăng điểm.
+- [x] Người duyệt chấm cả tập; ưu tiên doc-005 chọn ID sai, doc-013 phủ định nối tiếp, doc-019 nêu phạm vi dịch vụ khi thiếu địa chỉ. Không tự sửa nhãn doc-019 để tăng điểm. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 
 Task tiếp theo: xác nhận quy tắc trả lời nêu điều kiện so với hỏi làm rõ, có người duyệt nhãn/đáp án; sau đó xử lý ID câu không hợp lệ và kiểm định phủ định bằng dev riêng. PDF/DOCX mới vẫn giả lập, chưa gồm OCR/bảng PDF/nhiều cột/ô gộp; cần nguồn và câu hỏi do người khác cung cấp trước nghiệm thu M3. Widget/phiên khách và realtime vẫn là mốc sau.
 
@@ -530,7 +530,7 @@ Giới hạn: admin xác minh và giao mã qua kênh tin cậy ngoài hệ thố
 - [x] RAG/handoff dùng chung; chặn AI lỗi thời, chuyển nhân viên khi gửi lỗi, giữ thứ tự theo người nhận.
 - [x] Nhật ký pending/sending/sent/failed/uncertain/skipped; quyền retry/skip trong Inbox, UUID tin nhân viên, SLA theo xác nhận Telegram.
 - [x] 16 test Telegram; tổng 89 unittest đạt trong 32,999 giây, frontend build đạt. Model/transport được mock trong nhóm Telegram.
-- [ ] Bot thật: hai người dùng, RAG, /human, phản hồi nhân viên, đóng/nhắn lại và phục hồi gián đoạn.
+- [x] Bot thật: hai người dùng, RAG, /human, phản hồi nhân viên, đóng/nhắn lại và phục hồi gián đoạn. **Đã nghiệm thu 26/11/2026:** Khánh (trưởng nhóm) xác nhận đã duyệt; repo không lưu phiếu chấm/điểm chi tiết của lượt duyệt này.
 - [ ] Nghiệm thu M6, tải đồng thời, worker có lease/queue và triển khai thực tế.
 
 Cấu hình, demo và giới hạn: docs/TELEGRAM.md. Người dùng vẫn phụ trách kiến trúc/tích hợp chính; bộ phận kiểm thử có thể chuẩn bị kịch bản và lưu bằng chứng bot thật. Không thay người duyệt nhãn/đáp án M3.
