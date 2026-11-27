@@ -289,3 +289,7 @@
 .shell .timeline li p { margin: 4px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--rd-ink-2); overflow-wrap: anywhere; white-space: pre-wrap; }
 .shell .timeline .tlNote { padding: 6px 10px; border-left: 3px solid #e2b877; border-radius: 0 6px 6px 0; background: #fdf6e8; }
 .shell[data-theme=dark] .timeline .tlNote { background: #2a2416; border-left-color: #7a5a2a; }
+/* Product form: checkbox rows. */
+.shell .management .recordForm label.checkRow { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.shell .management .recordForm label.checkRow input { width: 16px; height: 16px; min-height: 16px; margin: 0; }
+@media (min-width: 761px) { .shell .management .productsTable :is(th, td):nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; } }

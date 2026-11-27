@@ -86,7 +86,7 @@ class TelegramLinkTests(unittest.TestCase):
         return self.db.get(TelegramPeer, f'42:{chat_id}')
 
     def test_link_then_orders_and_chat_lookup(self):
-        self.assertIn('/orders', self.send('/start'))
+        self.assertIn('Chào bạn', self.send('/start'))
         self.assertIn('chưa kết nối', self.send('/orders'))
         url = self.link_url()
         self.assertRegex(url, r'^https://t\.me/shop_support_bot\?start=link_[A-Za-z0-9_-]{32}$')

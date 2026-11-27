@@ -330,6 +330,7 @@ class TelegramTests(unittest.TestCase):
             calls.append(method)
             if method == 'getMe': return {'id':42,'is_bot':True}
             if method == 'getWebhookInfo': return {'url':''}
+            if method == 'setMyCommands': return True
             if method == 'sendMessage': return {'message_id':77}
             if payload['offset'] == 0: return [incoming(content='/start')]
             with Session(self.engine) as db:
@@ -338,7 +339,7 @@ class TelegramTests(unittest.TestCase):
             return []
         with patch('app.telegram.SessionLocal',side_effect=lambda:Session(self.engine)), patch('app.telegram.telegram_call',side_effect=call):
             run_telegram(stop,'test-token')
-        self.assertEqual(calls, ['getMe','getWebhookInfo','getUpdates','sendMessage','getUpdates'])
+        self.assertEqual(calls, ['getMe','getWebhookInfo','setMyCommands','getUpdates','sendMessage','getUpdates'])
         self.assertEqual(self.db.query(TelegramDelivery).one().state,'sent')
         with patch('app.telegram.telegram_call', side_effect=[{'id':42,'is_bot':True},{'url':'https://existing.example/webhook'}]) as call:
             run_telegram(Event(),'test-token')
@@ -355,6 +356,7 @@ class TelegramTests(unittest.TestCase):
         def call(token, method, payload):
             if method == 'getMe': return {'id': 42, 'is_bot': True}
             if method == 'getWebhookInfo': return {'url': ''}
+            if method == 'setMyCommands': return True
             if method == 'sendMessage':
                 sends.append(payload)
                 return {'message_id': len(sends) + 100}
@@ -400,6 +402,8 @@ class TelegramTests(unittest.TestCase):
             if method == 'getUpdates':
                 stop.set()
                 return []
+            if method == 'setMyCommands':
+                return True
             reply = next(replies)
             if isinstance(reply, Exception):
                 raise reply
@@ -412,7 +416,7 @@ class TelegramTests(unittest.TestCase):
                 patch('app.telegram.telegram_call', side_effect=call), patch.object(stop, 'wait', side_effect=wait), \
                 patch('app.telegram.recover_sends', side_effect=lambda db, bot_id: recovered.append(bot_id)):
             run_telegram(stop, 'test-token')
-        self.assertEqual(calls, ['getMe', 'getMe', 'getWebhookInfo', 'getMe', 'getWebhookInfo', 'getUpdates'])
+        self.assertEqual(calls, ['getMe', 'getMe', 'getWebhookInfo', 'getMe', 'getWebhookInfo', 'setMyCommands', 'getUpdates'])
         self.assertEqual(recovered, ['42'])
         self.assertEqual([entry[0] for entry in waits], [5, 5])
         self.assertEqual([entry[1]['status'] for entry in waits], ['error', 'error'])
@@ -495,7 +499,7 @@ class TelegramTests(unittest.TestCase):
         migrate(self.engine)
         self.assertEqual(self.db.query(TelegramUpdate).count(),1)
         self.assertEqual(self.db.query(TelegramDelivery).count(),1)
-        self.assertEqual(self.db.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(),12)
+        self.assertEqual(self.db.execute(text('SELECT COUNT(*) FROM schema_migrations')).scalar(),13)
 
 
 class OutgoingTextTests(unittest.TestCase):

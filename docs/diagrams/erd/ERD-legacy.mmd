@@ -19,6 +19,16 @@ erDiagram
     conversations o|--o{ telegram_updates : processes
     messages ||--o| telegram_deliveries : delivers
     conversations ||--o{ conversation_notes : annotates
+    products {
+        string id PK
+        string name
+        string category
+        int price
+        bool in_stock
+        bool active
+        string url
+        string description
+    }
     users ||--o{ conversation_notes : writes
     conversations ||--o{ conversation_events : logs
     users o|--o{ conversation_events : acts

@@ -21,6 +21,17 @@ Khởi động lại API sau khi đổi cấu hình. Tắt bằng `TELEGRAM_ENAB
 - Thông báo chuyển nhân viên được lưu cùng transaction với trạng thái và ticket, kể cả handoff do lỗi gửi/phục hồi. Worker dừng sau commit không làm mất thông báo; rollback hủy cả ba, nhận lại update hoặc khách nhắn thêm khi đang chờ không tạo thông báo trùng. Yêu cầu mới sau giải quyết tạo thông báo lượt mới. Tin này vẫn tuân thủ hàng chờ gửi; lỗi trước đó cần người phụ trách xử lý trước. Không tự bù thông báo đã thiếu trong dữ liệu cũ.
 - Chỉ gửi nội dung trả lời và tối đa ba nhãn nguồn/vị trí; không gửi `tool_trace`, ghi chú nội bộ hoặc bản ghi ticket. Nội dung dài lấy tối đa 4000 ký tự, thêm nguồn nếu tổng không quá 4096. Khi bật bot, nội dung này được truyền tới Telegram.
 
+## Menu lệnh và nút bấm (27/11/2026)
+
+Khi worker kết nối, bot đăng ký menu `/` bằng `setMyCommands`: `/start`, `/products`, `/orders`, `/policies`, `/human`, `/cancel`, `/status`, `/new`, `/contact`, `/help` (`/link`, `/unlink` vẫn dùng được nhưng không hiện). Các lệnh trả lời từ CSDL, không gọi model; lệnh lạ trả hướng dẫn.
+
+- `/start` và `/new` hiện menu nút bấm (Sản phẩm, Chính sách, Đơn hàng, Trạng thái, Gặp nhân viên, Liên hệ). `/new` đóng hội thoại hiện tại (ticket còn mở được đóng) và mở hội thoại mới.
+- `/products`: nút theo nhóm có sản phẩm đang hiện (kèm số lượng); chọn nhóm thì liệt kê tối đa 10 sản phẩm với giá VND, còn/hết hàng và link. Danh mục do nhân viên quản lý ở trang **Sản phẩm**; sản phẩm ẩn không hiện.
+- `/policies`: nút 6 chủ đề; bấm thì câu hỏi mẫu của chủ đề được gửi cho trợ lý AI như tin khách gõ, trả lời kèm nguồn.
+- `/status`: AI đang hỗ trợ, đang chờ nhân viên (đã chờ bao lâu, hạn phản hồi đầu), nhân viên đang hỗ trợ hoặc đã giải quyết. `/cancel`: hủy yêu cầu gặp nhân viên khi chưa ai tiếp nhận, cùng quy tắc với nút trên web.
+- `/contact`: tổng đài 1800 6601 (nhánh 1 mua hàng, nhánh 2 kỹ thuật), 1800 6616 góp ý, khiếu nại (8–22 giờ), theo tài liệu chính sách.
+- Nút bấm là `callback_query`; worker nhận cả `message` và `callback_query`, chỉ chấp nhận dữ liệu nút do bot tạo trong chat riêng và trả `answerCallbackQuery`. Nút gắn vào tin trả lời qua cột `messages.buttons` (schema v13), web bỏ qua cột này.
+
 ## Kết nối tài khoản web và lệnh /orders (18/11/2026)
 
 Mặc định mỗi người nhắn bot có một Customer riêng, tách khỏi tài khoản web. Khách có thể gắn Telegram vào tài khoản web để xem cùng đơn hàng:
