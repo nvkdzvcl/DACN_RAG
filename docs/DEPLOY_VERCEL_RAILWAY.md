@@ -129,10 +129,16 @@ Railway → service `api` → **Variables** → đặt `CUSTOMER_PUBLIC_URL=http
    railway ssh
    ```
 
-4. Tạo admin (nhập mật khẩu 12–128 ký tự khi được hỏi), rồi `exit`:
+4. Tạo admin (nhập mật khẩu 12–128 ký tự khi được hỏi):
 
    ```bash
    python -m app.create_user admin --role admin --name "Quản trị viên"
+   ```
+
+   Nhập danh mục sản phẩm minh họa (24 sản phẩm, giá tham khảo) cho `/products` và trang Sản phẩm, rồi `exit`. Chạy lại không tạo trùng; sửa hoặc ẩn sau ở trang **Sản phẩm**:
+
+   ```bash
+   python -m app.import_products
    ```
 
 5. Mở `https://<domain vercel>/`, đăng nhập admin → **Kho tri thức** → **Tải tài liệu**: tải lần lượt 12 file trong `knowledge/fptshop/`. Mỗi file được lập chỉ mục bằng Ollama trên Railway.
