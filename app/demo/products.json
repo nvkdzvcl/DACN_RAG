@@ -1,29 +1,149 @@
 {
   "note": "Danh mục minh họa cho bản demo đồ án. Tên là các mẫu phổ biến; giá là giá tham khảo do nhóm đặt, không phải giá niêm yết của FPT Shop.",
   "products": [
-    {"name": "iPhone 16 128GB", "category": "phone", "price": 19990000, "in_stock": true},
-    {"name": "iPhone 16 Pro 256GB", "category": "phone", "price": 28990000, "in_stock": true},
-    {"name": "iPhone 15 128GB", "category": "phone", "price": 15990000, "in_stock": true},
-    {"name": "Samsung Galaxy S25 256GB", "category": "phone", "price": 21990000, "in_stock": true},
-    {"name": "Samsung Galaxy A56 5G 8GB/128GB", "category": "phone", "price": 9490000, "in_stock": true},
-    {"name": "OPPO Reno13 F 8GB/256GB", "category": "phone", "price": 8990000, "in_stock": true},
-    {"name": "Xiaomi Redmi Note 14 8GB/128GB", "category": "phone", "price": 4990000, "in_stock": false},
-    {"name": "MacBook Air M3 13 inch 16GB/256GB", "category": "laptop", "price": 26490000, "in_stock": true},
-    {"name": "ASUS Vivobook 15 Core i5", "category": "laptop", "price": 14990000, "in_stock": true},
-    {"name": "Lenovo IdeaPad Slim 3 Ryzen 5", "category": "laptop", "price": 13490000, "in_stock": true},
-    {"name": "Acer Nitro V 15 Core i5 RTX 4050", "category": "laptop", "price": 22990000, "in_stock": false},
-    {"name": "HP Pavilion 14 Core i5", "category": "laptop", "price": 16490000, "in_stock": true},
-    {"name": "iPad Air M2 11 inch WiFi 128GB", "category": "tablet", "price": 16990000, "in_stock": true},
-    {"name": "iPad 10 WiFi 64GB", "category": "tablet", "price": 8990000, "in_stock": true},
-    {"name": "Samsung Galaxy Tab S9 FE WiFi", "category": "tablet", "price": 8490000, "in_stock": true},
-    {"name": "Apple Watch SE 2 40mm", "category": "watch", "price": 5990000, "in_stock": true},
-    {"name": "Apple Watch Series 10 42mm", "category": "watch", "price": 10990000, "in_stock": true},
-    {"name": "Samsung Galaxy Watch7 40mm", "category": "watch", "price": 6490000, "in_stock": true},
-    {"name": "Xiaomi Redmi Watch 5 Active", "category": "watch", "price": 990000, "in_stock": true},
-    {"name": "Tai nghe AirPods 4", "category": "accessory", "price": 3490000, "in_stock": true},
-    {"name": "Tai nghe Samsung Galaxy Buds3", "category": "accessory", "price": 3290000, "in_stock": true},
-    {"name": "Củ sạc nhanh Apple 20W USB-C", "category": "accessory", "price": 490000, "in_stock": true},
-    {"name": "Pin dự phòng Xiaomi 10000mAh 22.5W", "category": "accessory", "price": 390000, "in_stock": true},
-    {"name": "Ốp lưng iPhone 16 trong suốt", "category": "accessory", "price": 190000, "in_stock": true}
+    {
+      "name": "iPhone 16 128GB",
+      "category": "phone",
+      "price": 19990000,
+      "stock": 12
+    },
+    {
+      "name": "iPhone 16 Pro 256GB",
+      "category": "phone",
+      "price": 28990000,
+      "stock": 6
+    },
+    {
+      "name": "iPhone 15 128GB",
+      "category": "phone",
+      "price": 15990000,
+      "stock": 9
+    },
+    {
+      "name": "Samsung Galaxy S25 256GB",
+      "category": "phone",
+      "price": 21990000,
+      "stock": 15
+    },
+    {
+      "name": "Samsung Galaxy A56 5G 8GB/128GB",
+      "category": "phone",
+      "price": 9490000,
+      "stock": 20
+    },
+    {
+      "name": "OPPO Reno13 F 8GB/256GB",
+      "category": "phone",
+      "price": 8990000,
+      "stock": 11
+    },
+    {
+      "name": "Xiaomi Redmi Note 14 8GB/128GB",
+      "category": "phone",
+      "price": 4990000,
+      "stock": 0
+    },
+    {
+      "name": "MacBook Air M3 13 inch 16GB/256GB",
+      "category": "laptop",
+      "price": 26490000,
+      "stock": 8
+    },
+    {
+      "name": "ASUS Vivobook 15 Core i5",
+      "category": "laptop",
+      "price": 14990000,
+      "stock": 14
+    },
+    {
+      "name": "Lenovo IdeaPad Slim 3 Ryzen 5",
+      "category": "laptop",
+      "price": 13490000,
+      "stock": 10
+    },
+    {
+      "name": "Acer Nitro V 15 Core i5 RTX 4050",
+      "category": "laptop",
+      "price": 22990000,
+      "stock": 0
+    },
+    {
+      "name": "HP Pavilion 14 Core i5",
+      "category": "laptop",
+      "price": 16490000,
+      "stock": 7
+    },
+    {
+      "name": "iPad Air M2 11 inch WiFi 128GB",
+      "category": "tablet",
+      "price": 16990000,
+      "stock": 9
+    },
+    {
+      "name": "iPad 10 WiFi 64GB",
+      "category": "tablet",
+      "price": 8990000,
+      "stock": 18
+    },
+    {
+      "name": "Samsung Galaxy Tab S9 FE WiFi",
+      "category": "tablet",
+      "price": 8490000,
+      "stock": 6
+    },
+    {
+      "name": "Apple Watch SE 2 40mm",
+      "category": "watch",
+      "price": 5990000,
+      "stock": 25
+    },
+    {
+      "name": "Apple Watch Series 10 42mm",
+      "category": "watch",
+      "price": 10990000,
+      "stock": 5
+    },
+    {
+      "name": "Samsung Galaxy Watch7 40mm",
+      "category": "watch",
+      "price": 6490000,
+      "stock": 13
+    },
+    {
+      "name": "Xiaomi Redmi Watch 5 Active",
+      "category": "watch",
+      "price": 990000,
+      "stock": 40
+    },
+    {
+      "name": "Tai nghe AirPods 4",
+      "category": "accessory",
+      "price": 3490000,
+      "stock": 30
+    },
+    {
+      "name": "Tai nghe Samsung Galaxy Buds3",
+      "category": "accessory",
+      "price": 3290000,
+      "stock": 22
+    },
+    {
+      "name": "Củ sạc nhanh Apple 20W USB-C",
+      "category": "accessory",
+      "price": 490000,
+      "stock": 60
+    },
+    {
+      "name": "Pin dự phòng Xiaomi 10000mAh 22.5W",
+      "category": "accessory",
+      "price": 390000,
+      "stock": 45
+    },
+    {
+      "name": "Ốp lưng iPhone 16 trong suốt",
+      "category": "accessory",
+      "price": 190000,
+      "stock": 80
+    }
   ]
 }

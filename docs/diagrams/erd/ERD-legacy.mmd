@@ -19,11 +19,13 @@ erDiagram
     conversations o|--o{ telegram_updates : processes
     messages ||--o| telegram_deliveries : delivers
     conversations ||--o{ conversation_notes : annotates
+    products ||--o{ orders : sold_as
     products {
         string id PK
         string name
         string category
         int price
+        int stock
         bool in_stock
         bool active
         string url

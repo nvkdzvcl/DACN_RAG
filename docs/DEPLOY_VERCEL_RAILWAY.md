@@ -142,7 +142,8 @@ Railway → service `api` → **Variables** → đặt `CUSTOMER_PUBLIC_URL=http
    ```
 
 5. Mở `https://<domain vercel>/`, đăng nhập admin → **Kho tri thức** → **Tải tài liệu**: tải lần lượt 12 file trong `knowledge/fptshop/`. Mỗi file được lập chỉ mục bằng Ollama trên Railway.
-6. (Tuỳ chọn) Tạo tài khoản nhân viên khác trong **Cài đặt**, tạo vài đơn hàng thử trong **Đơn hàng**.
+6. **Cài đặt → Thanh toán chuyển khoản (VietQR)**: chọn ngân hàng, nhập số tài khoản và tên chủ tài khoản, giữ "Chia giá khi demo" = 1000 nếu chỉ thử. Khi đó mua qua bot Telegram sẽ nhận mã QR có số tiền.
+7. (Tuỳ chọn) Tạo tài khoản nhân viên khác trong **Cài đặt**, tạo vài đơn hàng thử trong **Đơn hàng**.
 
 **Kiểm tra:** Kho tri thức hiện 12 tài liệu "Đã lập chỉ mục". Tab **Thử hỏi AI** trả lời có nguồn. Ghi lại thời gian trả lời để biết còn cách giới hạn 120 giây bao xa.
 

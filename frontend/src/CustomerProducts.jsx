@@ -27,7 +27,7 @@ export default function CustomerProducts({ request, onAsk }) {
       <div className="productGrid">{items.map(product => <article key={product.id} className="productCard">
         <h2>{product.name}</h2>
         <p className="productPrice">{vnd(product.price)}</p>
-        <span className={`statusPill ${product.in_stock ? 'order-delivered' : 'order-cancelled'}`}>{product.in_stock ? 'Còn hàng' : 'Hết hàng'}</span>
+        <span className={`statusPill ${product.stock > 0 ? 'order-delivered' : 'order-cancelled'}`}>{product.stock > 0 ? `Còn ${product.stock}` : 'Hết hàng'}</span>
         {product.description && <p className="productDescription">{product.description}</p>}
         <div className="productActions">
           <button type="button" onClick={() => onAsk(`Mua ${product.name} thì được bảo hành và trả góp thế nào?`)}><MessageSquare size={15} aria-hidden="true" />Hỏi trợ lý</button>

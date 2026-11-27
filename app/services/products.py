@@ -12,7 +12,7 @@ def price_text(price):
 
 def product_data(product):
     return {'id': product.id, 'name': product.name, 'category': product.category, 'price': product.price,
-            'in_stock': product.in_stock, 'active': product.active, 'url': product.url,
+            'in_stock': product.stock > 0, 'stock': product.stock, 'active': product.active, 'url': product.url,
             'description': product.description, 'updated_at': product.updated_at}
 
 

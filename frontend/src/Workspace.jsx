@@ -137,6 +137,7 @@ function Records({ kind, request, onExpired, user, openInbox, openOrders, openCu
         {customer ? <><div className="panelTitle"><h2>Hồ sơ khách hàng</h2><button aria-label="Đóng chi tiết" onClick={() => setSelected(null)}><X size={18} /></button></div><CustomerDetail key={selected} id={selected} request={request} onExpired={onExpired} user={user} onSaved={saved} openInbox={openInbox} openOrders={openOrders} /></>
           : record ? <><div className="panelTitle"><div><p className="panelEyebrow">Đơn hàng</p><h2>{record.id}</h2></div><button aria-label="Đóng chi tiết" onClick={() => setSelected(null)}><X size={18} /></button></div>
             <div className="orderHead"><Badge value={record.status} /><span>{record.tracking_code ? <>Vận đơn <b>{record.tracking_code}</b></> : 'Chưa có mã vận đơn'}</span></div>
+            {record.product_id && <div className="orderLine"><b>{record.product_name || 'Sản phẩm'} × {record.quantity}</b><span>{(record.amount ?? 0).toLocaleString('vi-VN')}₫{record.pay_amount !== record.amount && <> · khách chuyển {(record.pay_amount ?? 0).toLocaleString('vi-VN')}₫ (demo)</>}</span><small>Đặt qua bot Telegram · nội dung chuyển khoản: {record.id}</small></div>}
             <button type="button" className="orderCustomer" onClick={() => openCustomer?.(record.customer_id)} title={record.customer_id}><span><b>{record.customer_name}</b><small>Mã khách {shortId(record.customer_id)} · mở hồ sơ</small></span><ArrowUpRight size={16} aria-hidden="true" /></button>
             {user.role === 'admin' && <><h3 className="panelSection">Cập nhật đơn</h3><RecordForm key={JSON.stringify(record)} kind={kind} record={record} request={request} onExpired={onExpired} onSaved={saved} /><OrderAccessControls key={record.id} orderId={record.id} request={request} onExpired={onExpired} /></>}</>
           : <><div className="panelTitle"><h2>Thông tin đơn hàng</h2><button aria-label="Đóng chi tiết" onClick={() => setSelected(null)}><X size={18} /></button></div><p>Đang tải hoặc đơn không còn trong bộ lọc.</p></>}
@@ -175,9 +176,42 @@ function StaffAccounts({ request, onExpired }) {
   return <article className="workspaceCard"><h2>Tài khoản nhân viên</h2><p>Admin cấp tài khoản riêng cho từng người.</p><form className="recordForm" onSubmit={create}><fieldset disabled={busy}><div className="formGrid"><label>Tên đăng nhập<input name="username" required maxLength={64} pattern="[a-zA-Z0-9_.\-]+" autoComplete="off" /></label><label>Tên hiển thị<input name="display_name" required maxLength={160} /></label><label>Mật khẩu ban đầu<input name="password" type="password" required minLength={12} maxLength={128} autoComplete="new-password" /></label><label>Vai trò<select name="role" defaultValue="agent"><option value="agent">Nhân viên</option><option value="admin">Quản trị viên</option></select></label></div>{error && <p className="workspaceError" role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<button className="primary">{busy ? 'Đang tạo...' : 'Tạo tài khoản'}</button></fieldset></form><LoadState state={state} />{state.data && <><div className="tableScroll"><table><caption className="visuallyHidden">Tài khoản nhân viên</caption><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Vai trò</th><th>Trạng thái</th></tr></thead><tbody>{state.data.items.map(u => <tr key={u.id}><td>{u.username}</td><td>{u.display_name}</td><td>{u.role === 'admin' ? 'Quản trị viên' : 'Nhân viên'}</td><td>{u.active ? 'Hoạt động' : 'Đã khóa'}</td></tr>)}</tbody></table></div><Pager total={state.data.total} offset={offset} setOffset={setOffset} /></>}</article>;
 }
 
+// Bank account for Telegram shop orders: the bot sends a VietQR image with the order amount.
+function PaymentSettings({ user, request, onExpired }) {
+  const state = useData('/workspace/payment', request, onExpired);
+  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState(''), [saves, setSaves] = useState(0);
+  const data = state.data, admin = user.role === 'admin';
+  async function save(event) {
+    event.preventDefault();
+    const fields = fieldsOf(event);
+    setBusy(true); setError(''); setNotice('');
+    try {
+      await request('/workspace/payment', { method: 'PUT', body: JSON.stringify({ enabled: fields.enabled === 'on', bank_bin: fields.bank_bin,
+        account_no: fields.account_no.trim(), account_name: fields.account_name, divisor: Number(fields.divisor) || 1 }) });
+      setNotice('Đã lưu thông tin thanh toán.'); setSaves(n => n + 1); state.reload();
+    } catch (e) { setError(e.message); if (e.status === 401) onExpired(); }
+    finally { setBusy(false); }
+  }
+  return <article className="workspaceCard paymentCard"><h2>Thanh toán chuyển khoản (VietQR)</h2>
+    <p className="syncNote">Khi khách mua qua bot Telegram, bot gửi mã QR có sẵn số tiền và nội dung là mã đơn. Nhân viên xác nhận bằng cách đổi đơn sang "Đã thanh toán"; hệ thống chưa tự đối soát ngân hàng.</p>
+    <LoadState state={state} />
+    {data && (admin ? <form className="recordForm" key={`${saves}-${JSON.stringify(data)}`} onSubmit={save}><fieldset disabled={busy}>
+      <label className="checkRow"><input type="checkbox" name="enabled" defaultChecked={data.enabled} /> Bật thanh toán VietQR trong bot</label>
+      <label>Ngân hàng<select name="bank_bin" defaultValue={data.bank_bin}><option value="">Chọn ngân hàng</option>{Object.entries(data.banks).map(([bin, name]) => <option key={bin} value={bin}>{name}</option>)}</select></label>
+      <label>Số tài khoản<input name="account_no" maxLength={19} pattern="[A-Za-z0-9]*" defaultValue={data.account_no} autoComplete="off" /></label>
+      <label>Tên chủ tài khoản<input name="account_name" maxLength={50} defaultValue={data.account_name} placeholder="VD: NGUYEN VAN A" autoComplete="off" /><small>Tự viết hoa, bỏ dấu như trên ứng dụng ngân hàng.</small></label>
+      <label>Chia giá khi demo<input name="divisor" type="number" min={1} max={1000000} defaultValue={data.divisor} /><small>1 = chuyển đúng giá; 1000 = chỉ chuyển 1/1000 giá (bản demo).</small></label>
+      {error && <p role="alert" className="workspaceError">{error}</p>}{notice && <p role="status" className="workspaceNotice">{notice}</p>}
+      <button className="primary wide" type="submit">{busy ? 'Đang lưu...' : 'Lưu thông tin thanh toán'}</button>
+    </fieldset></form>
+      : <div className="summaryLine"><span>Trạng thái</span><strong>{data.ready ? `${data.banks[data.bank_bin]} · ${data.account_no}` : 'Chưa cấu hình'}</strong></div>)}
+    {data?.sample_qr_url && <figure className="qrSample"><img src={data.sample_qr_url} alt="Mã QR mẫu cho đơn 100.000₫" width={180} height={180} /><figcaption>Mẫu: đơn 100.000₫ → chuyển {Math.max(1, Math.floor(100000 / data.divisor)).toLocaleString('vi-VN')}₫</figcaption></figure>}
+  </article>;
+}
+
 function SettingsPage({ user, request, onExpired }) {
   const state = useData('/workspace/settings', request, onExpired);
-  return <section className="management"><header><div><p className="eyebrow">HỆ THỐNG · CÀI ĐẶT</p><h1>Cài đặt</h1><p>Tài khoản, bảo mật và thông tin vận hành.</p></div></header><LoadState state={state} /><div className="reportGrid"><article className="workspaceCard"><h2>Tài khoản của bạn</h2><div className="summaryLine"><span>Tên hiển thị</span><strong>{user.display_name}</strong></div><div className="summaryLine"><span>Đăng nhập</span><strong>{user.username}</strong></div><div className="summaryLine"><span>Vai trò</span><strong>{user.role === 'admin' ? 'Quản trị viên' : 'Nhân viên'}</strong></div><h3>Đổi mật khẩu</h3><PasswordForm request={request} onExpired={onExpired} /></article><article className="workspaceCard"><h2>Kênh hỗ trợ</h2>{state.data?.channels.map(channel => <div className="summaryLine" key={channel.name}><span>{channel.name}<small className="syncNote">{channel.detail}</small></span><Badge value={channel.status} labels={{ available: 'Sẵn sàng', connected: 'Đã kết nối', connecting: 'Đang kết nối', error: 'Lỗi kết nối', not_connected: 'Chưa kết nối' }} /></div>)}<h3>Chính sách SLA hiện tại</h3><p>Phản hồi đầu tiên, tính 24/7.</p>{Object.entries(state.data?.sla_minutes || {}).map(([key, minutes]) => <div className="summaryLine" key={key}><span>{{ urgent: 'Khẩn cấp', high: 'Cao', normal: 'Bình thường', low: 'Thấp' }[key]}</span><strong>{minutes} phút</strong></div>)}<p className="syncNote">Chính sách cố định cho bản đồ án; chưa hỗ trợ chỉnh lịch làm việc và hạn SLA.</p></article></div>{user.role === 'admin' && <StaffAccounts request={request} onExpired={onExpired} />}</section>;
+  return <section className="management"><header><div><p className="eyebrow">HỆ THỐNG · CÀI ĐẶT</p><h1>Cài đặt</h1><p>Tài khoản, bảo mật và thông tin vận hành.</p></div></header><LoadState state={state} /><div className="reportGrid"><article className="workspaceCard"><h2>Tài khoản của bạn</h2><div className="summaryLine"><span>Tên hiển thị</span><strong>{user.display_name}</strong></div><div className="summaryLine"><span>Đăng nhập</span><strong>{user.username}</strong></div><div className="summaryLine"><span>Vai trò</span><strong>{user.role === 'admin' ? 'Quản trị viên' : 'Nhân viên'}</strong></div><h3>Đổi mật khẩu</h3><PasswordForm request={request} onExpired={onExpired} /></article><article className="workspaceCard"><h2>Kênh hỗ trợ</h2>{state.data?.channels.map(channel => <div className="summaryLine" key={channel.name}><span>{channel.name}<small className="syncNote">{channel.detail}</small></span><Badge value={channel.status} labels={{ available: 'Sẵn sàng', connected: 'Đã kết nối', connecting: 'Đang kết nối', error: 'Lỗi kết nối', not_connected: 'Chưa kết nối' }} /></div>)}<h3>Chính sách SLA hiện tại</h3><p>Phản hồi đầu tiên, tính 24/7.</p>{Object.entries(state.data?.sla_minutes || {}).map(([key, minutes]) => <div className="summaryLine" key={key}><span>{{ urgent: 'Khẩn cấp', high: 'Cao', normal: 'Bình thường', low: 'Thấp' }[key]}</span><strong>{minutes} phút</strong></div>)}<p className="syncNote">Chính sách cố định cho bản đồ án; chưa hỗ trợ chỉnh lịch làm việc và hạn SLA.</p></article></div><PaymentSettings user={user} request={request} onExpired={onExpired} />{user.role === 'admin' && <StaffAccounts request={request} onExpired={onExpired} />}</section>;
 }
 
 
@@ -191,7 +225,7 @@ function ProductForm({ product, request, onExpired, onSaved }) {
     event.preventDefault();
     const fields = fieldsOf(event);
     const body = { name: fields.name, category: fields.category, price: fields.price === '' ? null : Number(fields.price),
-      in_stock: fields.in_stock === 'on', active: fields.active === 'on', url: fields.url || null, description: fields.description || null };
+      stock: Number(fields.stock) || 0, active: fields.active === 'on', url: fields.url || null, description: fields.description || null };
     setBusy(true); setError('');
     try { onSaved(await request(`/workspace/products${product ? `/${encodeURIComponent(product.id)}` : ''}`, { method: product ? 'PATCH' : 'POST', body: JSON.stringify(body) })); }
     catch (e) { setError(e.message); if (e.status === 401) onExpired(); }
@@ -203,7 +237,7 @@ function ProductForm({ product, request, onExpired, onSaved }) {
     <label>Giá (VND)<input name="price" type="number" min={0} max={10000000000} step={1000} defaultValue={product?.price ?? ''} placeholder="Để trống: hiện “Liên hệ”" /></label>
     <label>Link sản phẩm<input name="url" type="url" maxLength={500} pattern="https://.+" defaultValue={product?.url || ''} placeholder="https://… (không bắt buộc)" /></label>
     <label>Mô tả ngắn<input name="description" maxLength={500} defaultValue={product?.description || ''} placeholder="Không bắt buộc" /></label>
-    <label className="checkRow"><input type="checkbox" name="in_stock" defaultChecked={product ? product.in_stock : true} /> Còn hàng</label>
+    <label>Tồn kho<input name="stock" type="number" min={0} max={1000000} required defaultValue={product?.stock ?? 0} /><small>Bot trừ kho khi khách đặt; hủy đơn thì hoàn lại.</small></label>
     <label className="checkRow"><input type="checkbox" name="active" defaultChecked={product ? product.active : true} /> Hiện cho khách (Telegram /products)</label>
     {error && <p role="alert" className="workspaceError">{error}</p>}
     <button className="primary wide" type="submit">{busy ? 'Đang lưu...' : product ? 'Lưu thay đổi' : 'Lưu sản phẩm mới'}</button>
@@ -222,16 +256,16 @@ function Products({ request, onExpired, user }) {
       <div className="recordChips" role="group" aria-label="Nhóm sản phẩm">{[['', 'Tất cả'], ...Object.entries(productCategories)].map(([value, label]) => <button type="button" key={value} aria-pressed={category === value} onClick={() => { setCategory(value); setOffset(0); }}>{label}</button>)}</div></div>
     {notice && <p role="status" className="workspaceNotice">{notice}</p>}<LoadState state={state} />
     <div className={`recordsLayout ${selected ? 'withDetail' : ''}`}><div className="workspaceCard tableCard">{state.data && <><div className="tableScroll"><table className="recordTable productsTable" role="table"><caption className="visuallyHidden">Danh sách sản phẩm</caption>
-      <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Sản phẩm</th><th role="columnheader" scope="col">Nhóm</th><th role="columnheader" scope="col">Giá</th><th role="columnheader" scope="col">Tình trạng</th></tr></thead>
+      <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Sản phẩm</th><th role="columnheader" scope="col">Nhóm</th><th role="columnheader" scope="col">Giá</th><th role="columnheader" scope="col">Tồn kho</th></tr></thead>
       <tbody role="rowgroup">{state.data.items.map(item => <tr role="row" key={item.id} className={selected === item.id ? 'selectedRecord' : ''}>
         <td role="cell" data-label="Sản phẩm"><button className="recordLink" onClick={() => setSelected(item.id)}>{item.name}</button>{!item.active && <small className="recordId">Đang ẩn</small>}</td>
         <td role="cell" data-label="Nhóm">{productCategories[item.category] || item.category}</td>
         <td role="cell" data-label="Giá">{vnd(item.price)}</td>
-        <td role="cell" data-label="Tình trạng"><span className={`statusPill ${item.in_stock ? 'order-delivered' : 'order-cancelled'}`}>{item.in_stock ? 'Còn hàng' : 'Hết hàng'}</span></td></tr>)}</tbody></table></div>
+        <td role="cell" data-label="Tồn kho"><span className={`statusPill ${item.stock > 0 ? 'order-delivered' : 'order-cancelled'}`}>{item.stock > 0 ? `Còn ${item.stock}` : 'Hết hàng'}</span></td></tr>)}</tbody></table></div>
       {!state.data.items.length && <p className="state">{q || category ? 'Không có sản phẩm phù hợp.' : 'Chưa có sản phẩm nào.'}</p>}<Pager total={state.data.total} offset={offset} setOffset={setOffset} /></>}</div>
       {selected && <section className="workspaceCard detailCard" aria-label="Thông tin sản phẩm"><div className="panelTitle"><div><p className="panelEyebrow">Sản phẩm</p><h2>{product?.name || '…'}</h2></div><button aria-label="Đóng chi tiết" onClick={() => setSelected(null)}><X size={18} /></button></div>
         {product ? admin ? <ProductForm key={JSON.stringify(product)} product={product} request={request} onExpired={onExpired} onSaved={saved} />
-          : <><p>{productCategories[product.category]} · {vnd(product.price)} · {product.in_stock ? 'Còn hàng' : 'Hết hàng'}{product.active ? '' : ' · Đang ẩn'}</p>{product.description && <p>{product.description}</p>}{product.url && <p><a href={product.url} target="_blank" rel="noopener noreferrer">{product.url}</a></p>}</>
+          : <><p>{productCategories[product.category]} · {vnd(product.price)} · {product.stock > 0 ? `Còn ${product.stock}` : 'Hết hàng'}{product.active ? '' : ' · Đang ẩn'}</p>{product.description && <p>{product.description}</p>}{product.url && <p><a href={product.url} target="_blank" rel="noopener noreferrer">{product.url}</a></p>}</>
           : <p>Sản phẩm không còn trong bộ lọc.</p>}
       </section>}
     </div>

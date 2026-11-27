@@ -73,9 +73,9 @@ class TelegramMenuTests(unittest.TestCase):
         return [m for m in messages if m.sender_type == 'system'][-1]
 
     def add_products(self):
-        self.db.add_all([Product(id='p1', name='iPhone 16 128GB', category='phone', price=19_990_000, in_stock=True),
-                         Product(id='p2', name='Galaxy S25', category='phone', price=None, in_stock=False, url='https://example.com/s25'),
-                         Product(id='p3', name='MacBook Air M3', category='laptop', price=26_490_000),
+        self.db.add_all([Product(id='p1', name='iPhone 16 128GB', category='phone', price=19_990_000, stock=12),
+                         Product(id='p2', name='Galaxy S25', category='phone', price=None, stock=0, url='https://example.com/s25'),
+                         Product(id='p3', name='MacBook Air M3', category='laptop', price=26_490_000, stock=3),
                          Product(id='p4', name='Máy ẩn', category='tablet', price=1, active=False)])
         self.db.commit()
 
@@ -99,11 +99,14 @@ class TelegramMenuTests(unittest.TestCase):
         self.assertIn('📱 Điện thoại (2)', labels)
         self.assertIn('💻 Laptop (1)', labels)
         self.assertFalse(any('bảng' in label for label in labels), labels)
-        phones = self.reply(self.press('p:phone')).content
-        self.assertIn('• iPhone 16 128GB — 19.990.000₫ · Còn hàng', phones)
-        self.assertIn('• Galaxy S25 — Liên hệ · Hết hàng', phones)
-        self.assertIn('https://example.com/s25', phones)
+        listing = self.reply(self.press('p:phone'))
+        phones = listing.content
+        self.assertIn('DANH MỤC: ĐIỆN THOẠI', phones)
+        self.assertIn('1. Galaxy S25\nLiên hệ · Hết hàng', phones)
+        self.assertIn('2. iPhone 16 128GB\n19.990.000₫ · Còn 12', phones)
         self.assertNotIn('MacBook', phones)
+        self.assertEqual(listing.buttons[0], [{'text': '1', 'data': 'prod:p2'}, {'text': '2', 'data': 'prod:p1'}])
+        self.assertEqual(listing.buttons[-1], [{'text': '⬅️ Quay lại danh mục', 'data': 'cmd:/products'}])
         self.assertNotIn('Máy ẩn', self.reply(self.say('/products tablet')).content)
         self.answer.assert_not_called()
 
@@ -162,7 +165,7 @@ class TelegramMenuTests(unittest.TestCase):
         for client, uid in ((admin, 'admin'), (agent, 'agent')):
             client.cookies.set(COOKIE_NAME, uid, path='/api')
             self.addCleanup(client.close)
-        body = {'name': ' iPad Air M2 ', 'category': 'tablet', 'price': 16990000, 'in_stock': True, 'url': 'https://fptshop.com.vn/ipad', 'description': ''}
+        body = {'name': ' iPad Air M2 ', 'category': 'tablet', 'price': 16990000, 'stock': 5, 'url': 'https://fptshop.com.vn/ipad', 'description': ''}
         self.assertEqual(agent.post('/api/v1/workspace/products', json=body).status_code, 403)
         created = admin.post('/api/v1/workspace/products', json=body)
         self.assertEqual(created.status_code, 201, created.text)
@@ -170,7 +173,7 @@ class TelegramMenuTests(unittest.TestCase):
         self.assertEqual((product['name'], product['description'], product['active']), ('iPad Air M2', None, True))
         for bad in ({'category': 'car'}, {'price': -1}, {'url': 'http://insecure.example'}, {'name': ''}):
             self.assertEqual(admin.post('/api/v1/workspace/products', json=body | bad).status_code, 422, bad)
-        hidden = admin.patch(f"/api/v1/workspace/products/{product['id']}", json=body | {'active': False, 'in_stock': False})
+        hidden = admin.patch(f"/api/v1/workspace/products/{product['id']}", json=body | {'active': False, 'stock': 0})
         self.assertEqual((hidden.json()['active'], hidden.json()['in_stock']), (False, False))
         self.assertEqual(admin.patch('/api/v1/workspace/products/missing', json=body).status_code, 404)
         listing = agent.get('/api/v1/workspace/products', params={'category': 'tablet', 'q': 'iPad'}).json()

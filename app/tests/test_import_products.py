@@ -56,7 +56,7 @@ class ImportProductsTests(unittest.TestCase):
 
     def test_own_file_updates_by_name_and_rejects_invalid_rows(self):
         self.run_cli(self.write([{'name': 'Máy A', 'category': 'phone', 'price': 100}]))
-        changed = self.run_cli(self.write([{'name': 'máy a', 'category': 'phone', 'price': 200, 'in_stock': False},
+        changed = self.run_cli(self.write([{'name': 'máy a', 'category': 'phone', 'price': 200, 'stock': 0},
                                            {'name': 'Máy B', 'category': 'other'}]))
         self.assertIn('1 new, 1 updated, 0 unchanged', changed.stdout, changed.stderr)
         catalogue = self.products()

@@ -71,9 +71,11 @@ Admin quản lý tài khoản/tài liệu và tạo/sửa khách/đơn nội b�
 | Đơn bán lẻ        | GET    | `/api/v1/workspace/orders`                        | Danh sách, tìm kiếm và lọc đơn hàng            | Nhân viên      | UC16/UC20   |
 | Đơn bán lẻ        | POST   | `/api/v1/workspace/orders`                        | Tạo đơn hàng                                   | Admin          | UC16/UC20   |
 | Đơn bán lẻ        | PATCH  | `/api/v1/workspace/orders/{order_id}`             | Cập nhật trạng thái/thông tin đơn hàng         | Admin          | UC16/UC20   |
-| Sản phẩm          | GET    | `/api/v1/workspace/products`                      | Danh mục: q, category (phone/laptop/tablet/watch/accessory/other), phân trang | Nhân viên      | UC16        |
+| Sản phẩm          | GET    | `/api/v1/workspace/products`                      | Danh mục: q, category (phone/laptop/tablet/watch/accessory/other), phân trang; mỗi sản phẩm có `stock` (tồn kho) | Nhân viên      | UC16        |
 | Sản phẩm          | POST   | `/api/v1/workspace/products`                      | Thêm sản phẩm: tên, nhóm, giá VND (trống = Liên hệ), còn hàng, hiện cho khách, link https, mô tả | Admin          | UC16        |
 | Sản phẩm          | PATCH  | `/api/v1/workspace/products/{product_id}`         | Sửa hoặc ẩn sản phẩm (active=false không hiện trong /products) | Admin          | UC16        |
+| Thanh toán        | GET    | `/api/v1/workspace/payment`                       | Cấu hình VietQR (ngân hàng BIN, số tài khoản, tên, chia giá demo), danh sách ngân hàng, `ready`, ảnh QR mẫu | Nhân viên      | UC16        |
+| Thanh toán        | PUT    | `/api/v1/workspace/payment`                       | Lưu cấu hình; tên chủ tài khoản tự viết hoa bỏ dấu; bật cần đủ ngân hàng, số tài khoản, tên | Admin          | UC16        |
 | Quyền tra cứu đơn | POST   | `/api/v1/workspace/orders/{order_id}/access-code` | Cấp hoặc xoay vòng mã quyền tra cứu đơn        | Admin          | UC19        |
 | Quyền tra cứu đơn | DELETE | `/api/v1/workspace/orders/{order_id}/access-code` | Thu hồi mã quyền tra cứu đơn                   | Admin          | UC19        |
 

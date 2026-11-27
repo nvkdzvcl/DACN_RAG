@@ -43,7 +43,7 @@ def check_database(path):
         if db.execute('PRAGMA integrity_check').fetchall() != [('ok',)]:
             raise ValueError('SQLite integrity check failed')
         versions = [row[0] for row in db.execute('SELECT version FROM schema_migrations ORDER BY version')]
-        if not versions or versions[0] != 1 or versions != list(range(1, versions[-1] + 1)) or versions[-1] > 13:
+        if not versions or versions[0] != 1 or versions != list(range(1, versions[-1] + 1)) or versions[-1] > 14:
             raise ValueError('Backup requires a supported schema version; use a matching application version')
     return versions
 

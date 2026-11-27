@@ -4,9 +4,11 @@ Commands answer from the database and never call the model. Buttons send callbac
 telegram.parse_update turns back into a command line (or, for policy topics, into a question that
 the AI answers with sources as usual).
 """
+import re
 from datetime import datetime, timedelta, timezone
 
-from app.models.support import PRODUCT_CATEGORIES, Conversation, Order
+from app.models.support import PRODUCT_CATEGORIES, Conversation, Order, Product
+from app.services import payment
 from app.services.handoff_service import waiting_info
 from app.services.order_service import ORDER_STATUS_LABELS
 from app.services.products import CATEGORY_LABELS, category_counts, price_text, visible
@@ -57,10 +59,17 @@ def keyboard(rows):
     return [[{'text': text, 'data': data} for text, data in row] for row in rows]
 
 
+PRODUCT_ID = re.compile(r'[A-Za-z0-9-]{1,60}')
+
+
 def callback_content(data):
     """Callback data from our own buttons → the text the bot processes; anything else is ignored."""
     if not isinstance(data, str):
         return None
+    if data.startswith('prod:') and PRODUCT_ID.fullmatch(data[5:]):
+        return '/product ' + data[5:]
+    if data.startswith('buy:') and PRODUCT_ID.fullmatch(data[4:]):
+        return '/buy ' + data[4:]
     if data.startswith('cmd:') and data[4:] in KNOWN | {'/human'}:
         return data[4:]
     if data.startswith('p:') and data[2:] in PRODUCT_CATEGORIES:
@@ -77,16 +86,81 @@ def products_reply(db, category):
     pick = [[(f'{CATEGORY_LABELS[c]} ({n})', f'p:{c}') for c, n in counts[i:i + 2]] for i in range(0, len(counts), 2)]
     if category not in PRODUCT_CATEGORIES or category not in dict(counts):
         return '🛒 Chọn nhóm sản phẩm:', keyboard(pick + [BACK])
-    items = visible(db, category)
-    lines = [f'{CATEGORY_LABELS[category]} ({len(items)} sản phẩm)']
-    for product in items[:10]:
-        lines.append(f'• {product.name} — {price_text(product.price)} · {"Còn hàng" if product.in_stock else "Hết hàng"}')
-        if product.url:
-            lines.append(f'  {product.url}')
-    if len(items) > 10:
-        lines.append(f'… và {len(items) - 10} sản phẩm khác trên website.')
-    lines.append('Giá tham khảo, có thể thay đổi. Hỏi trợ lý về bảo hành, trả góp hoặc gửi /human để được tư vấn.')
-    return '\n'.join(lines), keyboard(pick + [BACK])
+    items = visible(db, category)[:30]
+    label = CATEGORY_LABELS[category].split(' ', 1)[1].upper()
+    lines = [f'{CATEGORY_LABELS[category].split(" ", 1)[0]} DANH MỤC: {label}', 'Chọn sản phẩm bạn quan tâm theo số bên dưới:', '']
+    for number, product in enumerate(items, 1):
+        lines += [f'{number}. {product.name}', f'{price_text(product.price)} · {stock_text(product)}', '']
+    lines.append('Bấm số tương ứng để xem và mua sản phẩm.')
+    numbers = [(str(n), f'prod:{p.id}') for n, p in enumerate(items, 1)]
+    return '\n'.join(lines), keyboard([numbers[i:i + 3] for i in range(0, len(numbers), 3)] + [[('⬅️ Quay lại danh mục', 'cmd:/products')]])
+
+
+def stock_text(product):
+    return f'Còn {product.stock}' if product.stock > 0 else 'Hết hàng'
+
+
+def product_reply(db, product_id):
+    product = db.get(Product, product_id)
+    if product is None or not product.active:
+        return 'Sản phẩm này không còn bán.', keyboard([[('⬅️ Quay lại danh mục', 'cmd:/products')]])
+    lines = [f'📦 {product.name}', '', f'💰 Giá: {price_text(product.price)}', f'🎁 Tồn kho: {stock_text(product)}']
+    if product.description:
+        lines.append(f'📝 {product.description}')
+    if product.url:
+        lines.append(f'🔗 {product.url}')
+    rows = [[('🛒 Mua ngay', f'buy:{product.id}')]] if product.stock > 0 and product.price is not None else []
+    if product.price is None:
+        lines.append('Sản phẩm cần liên hệ để báo giá: gửi /human để gặp nhân viên.')
+    return '\n'.join(lines), keyboard(rows + [[('⬅️ Quay lại danh sách', f'p:{product.category}')]])
+
+
+def buy_reply(db, outcome, product_id):
+    product = db.get(Product, product_id)
+    if outcome != 'ok' or product is None:
+        return 'Sản phẩm đã hết hàng hoặc không còn bán.', keyboard([[('⬅️ Quay lại danh mục', 'cmd:/products')]])
+    return (f'📥 TẠO ĐƠN HÀNG: {product.name}\n\n'
+            f'💰 Đơn giá: {price_text(product.price)} / 1\n'
+            f'🎁 (Tồn kho hiện tại: {product.stock} sản phẩm sẵn sàng)\n\n'
+            f'👉 Vui lòng nhập và gửi số lượng sản phẩm bạn muốn mua (1–{product.stock}) dưới đây:'), \
+        keyboard([[('⬅️ Quay lại', f'prod:{product.id}')]])
+
+
+def order_reply(db, peer, outcome, ref):
+    """(text, buttons, image) after the customer sent a quantity."""
+    if outcome == 'zero':
+        return 'Số lượng phải từ 1 trở lên. Nhập lại số lượng bạn muốn mua.', None, None
+    if outcome == 'over':
+        product = db.get(Product, ref)
+        left = product.stock if product else 0
+        return (f'Chỉ còn {left} sản phẩm. Nhập số lượng từ 1 đến {left}.' if left else 'Sản phẩm vừa hết hàng.'), \
+            keyboard([[('⬅️ Quay lại', f'prod:{ref}')]]), None
+    if outcome != 'ok':
+        return 'Sản phẩm không còn bán. Chọn sản phẩm khác trong /products.', keyboard([[('⬅️ Danh mục', 'cmd:/products')]]), None
+    order = db.get(Order, ref)
+    if order is None or order.customer_id != peer.customer_id:
+        return 'Không tìm thấy đơn hàng.', None, None
+    product = db.get(Product, order.product_id)
+    config = payment.settings(db)
+    lines = [f'✅ ĐÃ TẠO ĐƠN HÀNG {order.id}', '', f'📦 Sản phẩm: {product.name if product else ""}',
+             f'🔢 Số lượng: {order.quantity}', f'💰 Thành tiền: {price_text(order.amount)}']
+    if order.pay_amount != order.amount:
+        lines.append(f'🧪 Bản demo: chỉ chuyển {price_text(order.pay_amount)} (giá ÷ {config["divisor"]})')
+    image = None
+    if payment.ready(config):
+        image = payment.qr_url(config, order.pay_amount, order.id)
+        lines += ['', f'🏦 {payment.BANKS[config["bank_bin"]]} · {config["account_no"]} · {config["account_name"]}',
+                  f'💵 Số tiền chuyển: {price_text(order.pay_amount)}', f'📝 Nội dung: {order.id}', '',
+                  'Quét mã QR bằng ứng dụng ngân hàng. Nhân viên xác nhận khi nhận được tiền; gửi /orders để xem trạng thái.']
+    else:
+        lines += ['', 'Cửa hàng chưa cấu hình tài khoản nhận tiền. Nhân viên sẽ liên hệ hướng dẫn thanh toán; gửi /human nếu cần ngay.']
+    return '\n'.join(lines), keyboard([[('📦 Đơn hàng của tôi', 'cmd:/orders'), ('🛒 Mua tiếp', 'cmd:/products')]]), image
+
+
+def order_line(order, names):
+    status = 'Chờ thanh toán' if order.status == 'processing' and order.pay_amount else ORDER_STATUS_LABELS.get(order.status, order.status)
+    item = f' · {names[order.product_id]} × {order.quantity} · {price_text(order.amount)}' if order.product_id in names else ''
+    return f'• {order.id}{item} · {status}' + (f' · Vận đơn {order.tracking_code}' if order.tracking_code else '')
 
 
 def status_reply(db, peer):
@@ -119,18 +193,25 @@ def command_reply(db, peer, content):
                 'hoặc chọn một mục bên dưới.'), keyboard(MENU)
     if command == '/products':
         return products_reply(db, arg)
+    if command == '/product':
+        return product_reply(db, arg)
+    if command == '/buy':
+        return buy_reply(db, arg, words[2] if len(words) > 2 else '')
+    if command == '/order':
+        return order_reply(db, peer, arg, words[2] if len(words) > 2 else '')
     if command == '/policies':
         rows = [[(label, f'ask:{i}') for i, (label, _) in enumerate(POLICY_TOPICS)][j:j + 2] for j in range(0, len(POLICY_TOPICS), 2)]
         return '📋 Chọn chủ đề, trợ lý sẽ trả lời kèm nguồn chính sách:', keyboard(rows + [BACK])
     if command == '/orders':
-        if account is None:
-            return ('Telegram này chưa kết nối với tài khoản web. Đăng nhập trang hỗ trợ, mở Tài khoản và bấm '
-                    '"Kết nối Telegram", rồi mở link trên điện thoại.'), None
+        # Orders of this chat's customer: ones bought here, plus the web account's once linked.
         orders = db.query(Order).filter(Order.customer_id == peer.customer_id).order_by(Order.id.desc()).limit(10).all()
         if not orders:
+            if account is None:
+                return ('Bạn chưa có đơn hàng nào. Mua trong /products, hoặc kết nối tài khoản web (trang Tài khoản → '
+                        '"Kết nối Telegram") để xem đơn đặt trên website.'), None
             return 'Tài khoản của bạn chưa có đơn hàng nào được gắn. Nếu bạn đã đặt hàng, gửi /human để nhân viên kiểm tra.', None
-        lines = [f'• {o.id} · {ORDER_STATUS_LABELS.get(o.status, o.status)}' + (f' · Vận đơn {o.tracking_code}' if o.tracking_code else '')
-                 for o in orders]
+        names = {p.id: p.name for p in db.query(Product).filter(Product.id.in_([o.product_id for o in orders if o.product_id]))}
+        lines = [order_line(o, names) for o in orders]
         return 'Đơn hàng của bạn:\n' + '\n'.join(lines) + '\n\nGửi mã đơn kèm câu hỏi để hỏi chi tiết, ví dụ: "' + orders[0].id + ' bao giờ giao?"', None
     if command == '/status':
         return status_reply(db, peer)

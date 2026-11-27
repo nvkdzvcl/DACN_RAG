@@ -153,3 +153,20 @@ def migrate(engine):
             connection.execute(text("ALTER TABLE messages ADD COLUMN buttons JSON"))
         if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 13")).first():
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (13)"))
+        # v14: Telegram shop - product stock, order line and transfer amount, pending purchase,
+        # reply photo, app_settings (create_all). Existing in-stock products start with 10 units.
+        additions = {
+            "products": {"stock": "INTEGER NOT NULL DEFAULT 0"},
+            "orders": {"product_id": "VARCHAR(64) REFERENCES products(id)", "quantity": "INTEGER", "unit_price": "INTEGER",
+                       "amount": "BIGINT", "pay_amount": "BIGINT", "created_at": "DATETIME"},
+            "telegram_peers": {"pending_product_id": "VARCHAR(64)", "pending_at": "INTEGER"},
+            "messages": {"image_url": "VARCHAR(500)"},
+        }
+        for table, columns in additions.items():
+            existing = {column["name"] for column in inspect(connection).get_columns(table)}
+            for name, definition in columns.items():
+                if name not in existing:
+                    connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {definition}"))
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 14")).first():
+            connection.execute(text("UPDATE products SET stock = 10 WHERE in_stock = 1 AND stock = 0"))
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (14)"))

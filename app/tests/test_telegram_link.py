@@ -87,7 +87,7 @@ class TelegramLinkTests(unittest.TestCase):
 
     def test_link_then_orders_and_chat_lookup(self):
         self.assertIn('Chào bạn', self.send('/start'))
-        self.assertIn('chưa kết nối', self.send('/orders'))
+        self.assertIn('Kết nối Telegram', self.send('/orders'))
         url = self.link_url()
         self.assertRegex(url, r'^https://t\.me/shop_support_bot\?start=link_[A-Za-z0-9_-]{32}$')
         code = url.split('start=')[1]
@@ -136,9 +136,9 @@ class TelegramLinkTests(unittest.TestCase):
         self.assertIn('Đã kết nối', self.send('/start ' + self.link_url().split('start=')[1], chat_id=200))
         self.assertEqual(self.peer(200).customer_id, self.customer_id)
         self.assertNotEqual(self.peer(100).customer_id, self.customer_id)
-        self.assertIn('chưa kết nối', self.send('/orders', chat_id=100))
+        self.assertIn('Kết nối Telegram', self.send('/orders', chat_id=100))
         self.assertIn('Đã gỡ kết nối', self.send('/unlink', chat_id=200))
-        self.assertIn('chưa kết nối', self.send('/orders', chat_id=200))
+        self.assertIn('Kết nối Telegram', self.send('/orders', chat_id=200))
         self.assertIn('chưa kết nối với tài khoản web nào', self.send('/unlink', chat_id=200))
         self.assertFalse(self.web.get(ACCOUNT + '/telegram').json()['linked'])
         self.send('/start ' + self.link_url().split('start=')[1], chat_id=200)
