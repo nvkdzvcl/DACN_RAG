@@ -94,7 +94,7 @@ class ProductFields(BaseModel):
     name: str = Field(min_length=1, max_length=160)
     category: ProductCategory
     price: int | None = Field(default=None, ge=0, le=10_000_000_000)
-    in_stock: bool = True
+    stock: int = Field(default=0, ge=0, le=1_000_000)
     active: bool = True
     url: str | None = Field(default=None, max_length=500, pattern=r'^https://[^\s]+$')
     description: str | None = Field(default=None, max_length=500)
@@ -116,9 +116,11 @@ def customer_data(customer, account_email=None):
             'email': account_email or customer.email}
 
 
-def order_data(order, name):
+def order_data(order, name, product_name=None):
     return {'id': order.id, 'customer_id': order.customer_id, 'customer_name': name,
-            'status': order.status, 'tracking_code': order.tracking_code}
+            'status': order.status, 'tracking_code': order.tracking_code, 'product_id': order.product_id,
+            'product_name': product_name, 'quantity': order.quantity, 'unit_price': order.unit_price,
+            'amount': order.amount, 'pay_amount': order.pay_amount, 'created_at': order.created_at}
 
 
 @router.get('/customers')
@@ -189,7 +191,7 @@ def products(q: str = Query('', max_length=160), category: str | None = Query(No
 
 @router.post('/products', status_code=201, dependencies=[Depends(require_admin)])
 def add_product(payload: ProductFields, db: Session = Depends(get_db)):
-    product = Product(id=str(uuid4()), **payload.model_dump())
+    product = Product(id=str(uuid4()), **payload.model_dump(), in_stock=payload.stock > 0)
     db.add(product)
     db.commit()
     return product_data(product)
@@ -202,9 +204,51 @@ def edit_product(product_id: str, payload: ProductFields, db: Session = Depends(
         raise HTTPException(404, 'Không tìm thấy sản phẩm.')
     for key, value in payload.model_dump().items():
         setattr(product, key, value)
+    product.in_stock = product.stock > 0
     product.updated_at = now_utc()
     db.commit()
     return product_data(product)
+
+
+class PaymentSettings(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    enabled: bool = False
+    bank_bin: str = Field(default='', max_length=6)
+    account_no: str = Field(default='', max_length=19, pattern=r'^[A-Za-z0-9]*$')
+    account_name: str = Field(default='', max_length=50)
+    divisor: int = Field(default=1000, ge=1, le=1_000_000)
+
+    @field_validator('account_name')
+    @classmethod
+    def plain_upper(cls, value):
+        # Bank apps show the holder without diacritics in capitals, e.g. NGUYEN VAN KHANH.
+        import unicodedata
+        value = unicodedata.normalize('NFD', value.replace('đ', 'd').replace('Đ', 'D'))
+        value = ''.join(ch for ch in value if unicodedata.category(ch) != 'Mn').upper()
+        if any(not (ch.isalpha() and ch.isascii() or ch == ' ') for ch in value):
+            raise ValueError('Tên chủ tài khoản chỉ gồm chữ và khoảng trắng')
+        return ' '.join(value.split())
+
+
+@router.get('/payment')
+def payment_settings(db: Session = Depends(get_db)):
+    from app.services import payment
+    config = payment.settings(db)
+    sample = payment.qr_url(config, payment.pay_amount(100_000, config), 'DEMO') if payment.ready(config) else None
+    return {**config, 'ready': payment.ready(config), 'banks': payment.BANKS, 'sample_qr_url': sample}
+
+
+@router.put('/payment', dependencies=[Depends(require_admin)])
+def save_payment_settings(payload: PaymentSettings, db: Session = Depends(get_db)):
+    from app.services import payment
+    value = payload.model_dump()
+    if value['enabled'] and (value['bank_bin'] not in payment.BANKS or not value['account_no'] or not value['account_name']):
+        raise HTTPException(422, 'Bật thanh toán cần chọn ngân hàng, nhập số tài khoản và tên chủ tài khoản.')
+    if value['bank_bin'] and value['bank_bin'] not in payment.BANKS:
+        raise HTTPException(422, 'Ngân hàng không hợp lệ.')
+    payment.save(db, value)
+    db.commit()
+    return payment_settings(db)
 
 
 @router.get('/orders')
@@ -219,7 +263,9 @@ def orders(q: str = Query('', max_length=160), status: OrderStatus | None = None
         query = query.filter(Order.status == status)
     if customer_id:
         query = query.filter(Order.customer_id == customer_id)
-    return {'total': query.count(), 'items': [order_data(o, name) for o, name in query.order_by(Order.id).offset(offset).limit(limit)]}
+    page = query.order_by(Order.id).offset(offset).limit(limit).all()
+    names = {p.id: p.name for p in db.query(Product).filter(Product.id.in_([o.product_id for o, _ in page if o.product_id]))}
+    return {'total': query.count(), 'items': [order_data(o, name, names.get(o.product_id)) for o, name in page]}
 
 
 @router.post('/orders', status_code=201, dependencies=[Depends(require_admin)])
@@ -241,14 +287,21 @@ def add_order(payload: OrderCreate, db: Session = Depends(get_db)):
 
 @router.patch('/orders/{order_id}', dependencies=[Depends(require_admin)])
 def edit_order(order_id: str, payload: OrderEdit, db: Session = Depends(get_db)):
+    # Cancelling a Telegram shop order puts its units back in stock (once, in the same transaction).
+    before = db.get(Order, order_id)
+    restock = (before is not None and before.product_id and before.quantity and payload.status == 'cancelled'
+               and payload.expected.status != 'cancelled')
     result = db.execute(update(Order).where(Order.id == order_id, Order.status == payload.expected.status,
         Order.tracking_code == payload.expected.tracking_code).values(**payload.model_dump(exclude={'expected'})))
     if result.rowcount != 1:
         db.rollback()
         raise HTTPException(409, 'Đơn hàng đã thay đổi hoặc không còn tồn tại. Tải lại trước khi sửa.')
+    if restock:
+        db.execute(update(Product).where(Product.id == before.product_id).values(stock=Product.stock + before.quantity, in_stock=True))
     db.commit()
     order = db.get(Order, order_id)
-    return order_data(order, db.get(Customer, order.customer_id).display_name)
+    product = db.get(Product, order.product_id) if order.product_id else None
+    return order_data(order, db.get(Customer, order.customer_id).display_name, product.name if product else None)
 
 
 @router.post('/orders/{order_id}/access-code', status_code=201)

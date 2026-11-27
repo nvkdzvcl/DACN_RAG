@@ -151,11 +151,13 @@ erDiagram
     conversations o|--o{ telegram_updates : processes
     messages ||--o| telegram_deliveries : delivers
     conversations ||--o{ conversation_notes : annotates
+    products ||--o{ orders : sold_as
     products {
         string id PK
         string name
         string category
         int price
+        int stock
         bool in_stock
         bool active
         string url
@@ -296,7 +298,7 @@ erDiagram
     }
 ```
 
-ERD phản ánh đầy đủ mô hình quan hệ thực thể khai báo trong SQLAlchemy và hệ thống migration v1–v13 (v13: bảng `products` cho danh mục sản phẩm và cột `messages.buttons` lưu nút bấm Telegram; v12: `conversation_notes` cho ghi chú nội bộ chỉ nhân viên thấy, `conversation_events` ghi bước tiếp nhận và khách hủy yêu cầu cho Diễn biến). Cơ sở dữ liệu cưỡng chế toàn vẹn toàn bộ mối quan hệ khóa ngoại (kích hoạt `PRAGMA foreign_keys=ON` trên mọi kết nối), bao gồm ràng buộc từ `conversations.last_customer_message_id` tới `messages.id`. Miền giá trị cho các trường trạng thái và độ ưu tiên (`status`, `state`, `priority`) được bảo đảm bằng `CheckConstraint` và Trigger CSDL.
+ERD phản ánh đầy đủ mô hình quan hệ thực thể khai báo trong SQLAlchemy và hệ thống migration v1–v14 (v14: `products.stock`; `orders` thêm dòng hàng `product_id`, `quantity`, `unit_price`, `amount`, `pay_amount`, `created_at`; `telegram_peers.pending_product_id`/`pending_at` cho lượt Mua ngay; `messages.image_url` cho ảnh QR; bảng `app_settings` lưu cấu hình thanh toán. v13: bảng `products` cho danh mục sản phẩm và cột `messages.buttons` lưu nút bấm Telegram; v12: `conversation_notes` cho ghi chú nội bộ chỉ nhân viên thấy, `conversation_events` ghi bước tiếp nhận và khách hủy yêu cầu cho Diễn biến). Cơ sở dữ liệu cưỡng chế toàn vẹn toàn bộ mối quan hệ khóa ngoại (kích hoạt `PRAGMA foreign_keys=ON` trên mọi kết nối), bao gồm ràng buộc từ `conversations.last_customer_message_id` tới `messages.id`. Miền giá trị cho các trường trạng thái và độ ưu tiên (`status`, `state`, `priority`) được bảo đảm bằng `CheckConstraint` và Trigger CSDL.
 
 Khả năng chống trùng lặp tin nhắn ngoài (`external_message_id`) dựa trên khóa ghi hội thoại và truy vấn tra cứu UUID theo phiên làm việc. Mối liên kết giữa dữ liệu quan hệ (SQLite) và dữ liệu mảng vector (Qdrant) thực hiện qua cơ chế tham chiếu metadata tầng ứng dụng (`document_id`, `chunk_id`, `index_version`), không tồn tại khóa ngoại liên kho.
 

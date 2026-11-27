@@ -32,6 +32,15 @@ Khi worker kết nối, bot đăng ký menu `/` bằng `setMyCommands`: `/start`
 - `/contact`: tổng đài 1800 6601 (nhánh 1 mua hàng, nhánh 2 kỹ thuật), 1800 6616 góp ý, khiếu nại (8–22 giờ), theo tài liệu chính sách.
 - Nút bấm là `callback_query`; worker nhận cả `message` và `callback_query`, chỉ chấp nhận dữ liệu nút do bot tạo trong chat riêng và trả `answerCallbackQuery`. Nút gắn vào tin trả lời qua cột `messages.buttons` (schema v13), web bỏ qua cột này.
 
+## Mua hàng và thanh toán VietQR (27/11/2026)
+
+- `/products` → chọn nhóm → danh sách đánh số kèm giá và tồn kho (`Còn N`/`Hết hàng`), nút `1`, `2`, `3`… và **Quay lại danh mục**. Bấm số: chi tiết sản phẩm với **Mua ngay** (khi còn hàng và có giá) và **Quay lại danh sách**.
+- **Mua ngay**: bot gửi "TẠO ĐƠN HÀNG" (đơn giá, tồn kho) và chờ khách gõ số lượng trong 15 phút. Số hợp lệ (1 đến tồn kho) tạo đơn `DH…` trạng thái Đang xử lý (bot ghi "Chờ thanh toán"), trừ kho bằng một UPDATE có điều kiện (hai người không lấy cùng hàng cuối), rồi gửi **ảnh mã VietQR** có số tiền và nội dung là mã đơn. Gõ chữ khác hoặc lệnh khác thì hủy lượt mua; `0` hoặc vượt tồn kho thì hỏi lại.
+- Số tiền chuyển = thành tiền ÷ "Chia giá khi demo" (mặc định 1000; đặt 1 để chuyển đúng giá). Tài khoản nhận tiền do admin nhập ở **Cài đặt → Thanh toán chuyển khoản (VietQR)**; chưa cấu hình thì bot báo nhân viên sẽ liên hệ.
+- Ảnh QR lấy từ `qr.sepay.vn/img` (PNG, không cần khóa; `img.vietqr.io` hiện chỉ trả SVG mà Telegram không gửi được). Tin có ảnh được gửi bằng `sendPhoto`, chữ thành chú thích.
+- Nhân viên xác nhận bằng cách đổi đơn sang **Đã thanh toán** ở trang Đơn hàng; hủy đơn thì hoàn tồn kho. Hệ thống chưa tự đối soát ngân hàng (cần webhook như SePay/Casso).
+- `/orders` liệt kê đơn của chat (mua qua bot và, khi đã kết nối, đơn của tài khoản web) kèm sản phẩm, số lượng, thành tiền.
+
 ## Kết nối tài khoản web và lệnh /orders (18/11/2026)
 
 Mặc định mỗi người nhắn bot có một Customer riêng, tách khỏi tài khoản web. Khách có thể gắn Telegram vào tài khoản web để xem cùng đơn hàng:

@@ -293,3 +293,12 @@
 .shell .management .recordForm label.checkRow { display: flex; align-items: center; gap: 8px; font-weight: 500; }
 .shell .management .recordForm label.checkRow input { width: 16px; height: 16px; min-height: 16px; margin: 0; }
 @media (min-width: 761px) { .shell .management .productsTable :is(th, td):nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; } }
+/* Order panel: product line of Telegram shop orders. Settings: VietQR payment card. */
+.shell .orderLine { display: grid; gap: 2px; margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; background: var(--rd-accent-soft); }
+.shell .orderLine b { font-size: 14px; color: var(--rd-ink); }
+.shell .orderLine span { font-size: 13px; color: var(--rd-ink-2); font-variant-numeric: tabular-nums; }
+.shell .orderLine small { font-size: 12px; color: var(--rd-muted); }
+.shell .paymentCard .recordForm { margin-top: 12px; }
+.shell .qrSample { display: grid; justify-items: start; gap: 6px; margin: 14px 0 0; }
+.shell .qrSample img { border: 1px solid var(--rd-line); border-radius: 10px; background: #fff; }
+.shell .qrSample figcaption { font-size: 12.5px; color: var(--rd-muted); }

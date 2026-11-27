@@ -16,6 +16,7 @@ from app.models.support import (Conversation, Customer, Message, TelegramCursor,
                                 TelegramDelivery, TelegramPeer, TelegramUpdate, now_utc)
 from app.services.handoff_service import queue_handoff
 from app.services.message_service import process_message
+from app.services import shop
 from app.services.handoff_service import cancel_waiting
 from app.services.telegram_commands import BOT_COMMANDS, callback_content, command_reply
 from app.services.telegram_link import link_peer, unlink_peer
@@ -153,7 +154,21 @@ def process_next(db, bot_id):
     peer = db.get(TelegramPeer, incoming.peer_id)
     if incoming.conversation_id is None and incoming.state == 'pending':
         words = incoming.content.split()
-        if words[0].lower() == '/start' and len(words) > 1 and words[1].startswith('link_'):
+        waiting_for = shop.pending(peer)
+        if words[0].lower() == '/buy' and len(words) > 1:
+            incoming.content = f'/buy {shop.start(db, peer, words[1])} {words[1]}'
+            words = []
+        elif waiting_for and re.fullmatch(r'\d{1,6}', incoming.content.strip()):
+            outcome, order = shop.place(db, peer, int(incoming.content.strip()))
+            incoming.content = f'/order {outcome} {order.id if order else waiting_for} {incoming.content.strip()}'
+            words = []
+        elif words[0].lower() == '/order':
+            incoming.content, words = '/help', []  # only the bot writes /order lines; a typed one is not trusted
+        elif peer.pending_product_id:
+            peer.pending_product_id, peer.pending_at = None, None  # anything else ends the purchase
+        if not words:
+            pass
+        elif words[0].lower() == '/start' and len(words) > 1 and words[1].startswith('link_'):
             # The link code is single-use: store only the outcome, never the code.
             incoming.content = '/link ' + link_peer(db, peer, words[1][5:])
         elif words[0].lower() == '/unlink':
@@ -194,14 +209,17 @@ def process_next(db, bot_id):
             db.commit()
             return True
         if not db.query(Message).filter_by(conversation_id=conversation_id, external_message_id=update_key).first():
-            shown = '/start (kết nối tài khoản web)' if content.startswith('/link') else ' '.join(content.split()[:2]) if content.startswith('/products') else content.split()[0]
+            shown = ('/start (kết nối tài khoản web)' if content.startswith('/link')
+                     else f'Số lượng: {content.split()[-1]}' if content.startswith('/order')
+                     else ' '.join(content.split()[:2]) if content.startswith(('/products', '/product', '/buy')) else content.split()[0])
             message = Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='customer',
                               content=shown, external_message_id=update_key)
             db.add(message)
             db.flush()
             conversation.last_customer_message_id = message.id
-            reply, buttons = command_reply(db, db.get(TelegramPeer, peer.id), content)
-            db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system', content=reply, buttons=buttons))
+            reply, buttons, image = (*command_reply(db, db.get(TelegramPeer, peer.id), content), None)[:3]
+            db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system', content=reply,
+                           buttons=buttons, image_url=image))
         result = {}
     else:
         result = process_message(db, conversation, content, update_key)
@@ -268,14 +286,16 @@ def send_outgoing(db, bot_id, token):
             delivery.state, delivery.error = 'skipped', 'stale_ai'
             db.commit()
             continue
-        body, buttons = outgoing_text(message), message.buttons
+        body, buttons, image = outgoing_text(message), message.buttons, message.image_url
         db.commit()
         # No SQL transaction during network I/O; a timed-out send may have reached Telegram.
         try:
-            payload = {'chat_id': chat_id, 'text': body, 'link_preview_options': {'is_disabled': True}}
+            # A reply with an image (the VietQR code) goes out as a photo with the text as its caption.
+            payload = ({'chat_id': chat_id, 'photo': image, 'caption': body[:1024]} if image
+                       else {'chat_id': chat_id, 'text': body, 'link_preview_options': {'is_disabled': True}})
             if buttons:
                 payload['reply_markup'] = {'inline_keyboard': [[{'text': b['text'], 'callback_data': b['data']} for b in row] for row in buttons]}
-            result = telegram_call(token, 'sendMessage', payload)
+            result = telegram_call(token, 'sendPhoto' if image else 'sendMessage', payload)
             if not isinstance(result, dict) or not identifier(result.get('message_id')):
                 raise TelegramError('telegram_invalid_send_result', True)
             state, error, external_id, sent_at = 'sent', None, str(result['message_id']), now_utc()

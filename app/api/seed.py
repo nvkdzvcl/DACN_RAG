@@ -30,7 +30,7 @@ def seed_demo(db: Session = Depends(get_db)):
     if db.query(Product).count() == 0:
         for name, category, price, in_stock in demo_products:
             db.add(Product(id=str(uuid4()), name=name, category=category, price=price, in_stock=in_stock,
-                           description='Giá minh họa cho bản demo đồ án.'))
+                           stock=15 if in_stock else 0, description='Giá minh họa cho bản demo đồ án.'))
             added_products += 1
     db.commit()
     return {"customer_id": customer_id, "created_orders": created, "order_ids": [o.id for o in orders],

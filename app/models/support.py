@@ -98,6 +98,8 @@ class Message(Base):
     reply_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     # Telegram inline keyboard for bot replies: [[{"text": ..., "data": ...}], ...]; ignored on the website.
     buttons: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    # Telegram photo sent with the reply (e.g. the VietQR payment image); the text becomes its caption.
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     conversation: Mapped[Conversation] = relationship(
         back_populates="messages", foreign_keys=[conversation_id])
@@ -129,6 +131,13 @@ class Order(Base):
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"))
     status: Mapped[str] = mapped_column(String(32), default="processing")
     tracking_code: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # Orders placed in the Telegram shop (v14): one product line and the bank transfer amount.
+    product_id: Mapped[str | None] = mapped_column(ForeignKey("products.id"), nullable=True)
+    quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    unit_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    amount: Mapped[int | None] = mapped_column(BigInteger, nullable=True)  # VND, unit_price × quantity
+    pay_amount: Mapped[int | None] = mapped_column(BigInteger, nullable=True)  # VND to transfer (amount / demo divisor)
+    created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=now_utc)
 
 class OrderAccess(Base):
     __tablename__ = "order_access"
@@ -175,7 +184,8 @@ class Product(Base):
     name: Mapped[str] = mapped_column(String(160))
     category: Mapped[str] = mapped_column(String(16))
     price: Mapped[int | None] = mapped_column(Integer, nullable=True)  # VND; None = liên hệ
-    in_stock: Mapped[bool] = mapped_column(Boolean, default=True)
+    in_stock: Mapped[bool] = mapped_column(Boolean, default=True)  # kept equal to stock > 0
+    stock: Mapped[int] = mapped_column(Integer, default=0)  # units available; the Telegram shop decrements it
     active: Mapped[bool] = mapped_column(Boolean, default=True)  # hidden from customers when False
     url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
@@ -194,6 +204,15 @@ class TelegramPeer(Base):
     chat_id: Mapped[str] = mapped_column(String(32))
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), unique=True)
     conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id"), nullable=True)
+    # "Mua ngay" pressed: the next number the customer sends is the quantity (expires after 15 minutes).
+    pending_product_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    pending_at: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+class AppSetting(Base):
+    """Small admin-edited settings stored as JSON, e.g. key 'payment' for the VietQR bank account."""
+    __tablename__ = "app_settings"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[dict] = mapped_column(JSON)
 
 class TelegramUpdate(Base):
     __tablename__ = "telegram_updates"

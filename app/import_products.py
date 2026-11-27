@@ -57,11 +57,12 @@ def main(argv=None):
         for row in rows:
             product = existing.get(row['name'].casefold())
             if product is None:
-                db.add(Product(id=str(uuid4()), **row))
+                db.add(Product(id=str(uuid4()), **row, in_stock=row['stock'] > 0))
                 created += 1
             elif any(getattr(product, key) != value for key, value in row.items()):
                 for key, value in row.items():
                     setattr(product, key, value)
+                product.in_stock = product.stock > 0
                 product.updated_at = now_utc()
                 updated += 1
             else:
