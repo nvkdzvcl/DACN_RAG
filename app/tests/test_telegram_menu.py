@@ -146,6 +146,17 @@ class TelegramMenuTests(unittest.TestCase):
         self.assertIn('chưa hiểu lệnh', unknown.content)
         self.answer.assert_not_called()
 
+    def test_customer_catalogue_is_public_and_shows_active_products_only(self):
+        self.add_products()
+        guest = TestClient(app); self.addCleanup(guest.close)
+        response = guest.get('/api/v1/widget/products')
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.headers['cache-control'], 'no-store')
+        data = response.json()
+        self.assertEqual(data['categories'], [{'id': 'phone', 'label': 'Điện thoại', 'count': 2}, {'id': 'laptop', 'label': 'Laptop', 'count': 1}])
+        self.assertEqual(sorted(p['name'] for p in data['products']), ['Galaxy S25', 'MacBook Air M3', 'iPhone 16 128GB'])
+        self.assertTrue(all('active' not in p and 'updated_at' not in p for p in data['products']))
+
     def test_product_api_staff_read_admin_write(self):
         admin, agent = [TestClient(app, headers={'X-CSRF-Protection': '1'}) for _ in range(2)]
         for client, uid in ((admin, 'admin'), (agent, 'agent')):

@@ -19,6 +19,7 @@ from app.services.handoff_service import cancel_waiting, classify_message, waiti
 from app.services.message_service import process_message, simple_reply
 from app.services.ticket_service import complete_tickets
 from app.services.order_service import active_order_access
+from app.services.products import CATEGORY_LABELS, category_counts, product_data, visible
 
 COOKIE = 'rag_widget_session'
 COOKIE_PATH = '/api/v1/widget'
@@ -208,6 +209,16 @@ def own_customer_id(db, session):
 
 def order_view(order):
     return {'order_id': order.id, 'status': order.status, 'tracking_code': order.tracking_code}
+
+
+@router.get('/products')
+def catalogue(request: Request, response: Response, db: Session = Depends(get_db)):
+    """Public catalogue for the customer portal: active products only, same data as Telegram /products."""
+    rate_limit(request, 'catalogue', 30)
+    response.headers['Cache-Control'] = 'no-store'
+    items = visible(db)
+    return {'categories': [{'id': c, 'label': CATEGORY_LABELS[c].split(' ', 1)[1], 'count': n} for c, n in category_counts(db)],
+            'products': [{key: value for key, value in product_data(p).items() if key not in ('active', 'updated_at')} for p in items]}
 
 
 @router.get('/orders')

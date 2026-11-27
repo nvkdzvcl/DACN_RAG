@@ -26,7 +26,7 @@ Khởi động lại API sau khi đổi cấu hình. Tắt bằng `TELEGRAM_ENAB
 Khi worker kết nối, bot đăng ký menu `/` bằng `setMyCommands`: `/start`, `/products`, `/orders`, `/policies`, `/human`, `/cancel`, `/status`, `/new`, `/contact`, `/help` (`/link`, `/unlink` vẫn dùng được nhưng không hiện). Các lệnh trả lời từ CSDL, không gọi model; lệnh lạ trả hướng dẫn.
 
 - `/start` và `/new` hiện menu nút bấm (Sản phẩm, Chính sách, Đơn hàng, Trạng thái, Gặp nhân viên, Liên hệ). `/new` đóng hội thoại hiện tại (ticket còn mở được đóng) và mở hội thoại mới.
-- `/products`: nút theo nhóm có sản phẩm đang hiện (kèm số lượng); chọn nhóm thì liệt kê tối đa 10 sản phẩm với giá VND, còn/hết hàng và link. Danh mục do nhân viên quản lý ở trang **Sản phẩm**; sản phẩm ẩn không hiện.
+- `/products`: nút theo nhóm có sản phẩm đang hiện (kèm số lượng); chọn nhóm thì liệt kê tối đa 10 sản phẩm với giá VND, còn/hết hàng và link. Danh mục do nhân viên quản lý ở trang **Sản phẩm**; sản phẩm ẩn không hiện. Khách trên web xem cùng danh mục ở trang **Sản phẩm** của `/chat` (lọc theo nhóm, nút Hỏi trợ lý điền sẵn câu hỏi bảo hành/trả góp).
 - `/policies`: nút 6 chủ đề; bấm thì câu hỏi mẫu của chủ đề được gửi cho trợ lý AI như tin khách gõ, trả lời kèm nguồn.
 - `/status`: AI đang hỗ trợ, đang chờ nhân viên (đã chờ bao lâu, hạn phản hồi đầu), nhân viên đang hỗ trợ hoặc đã giải quyết. `/cancel`: hủy yêu cầu gặp nhân viên khi chưa ai tiếp nhận, cùng quy tắc với nút trên web.
 - `/contact`: tổng đài 1800 6601 (nhánh 1 mua hàng, nhánh 2 kỹ thuật), 1800 6616 góp ý, khiếu nại (8–22 giờ), theo tài liệu chính sách.

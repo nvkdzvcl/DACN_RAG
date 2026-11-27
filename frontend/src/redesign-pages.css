@@ -295,3 +295,17 @@
 :root .customerPortal.customerPortal .codeToggle:hover { text-decoration: underline; }
 :root .customerPortal.customerPortal .codeToggle svg { flex: none; transition: transform .15s; }
 :root .customerPortal.customerPortal .codeToggle[aria-expanded=true] svg { transform: rotate(180deg); }
+
+/* Customer Sản phẩm page: category chips and product cards. */
+:root .customerPortal.customerPortal .productChips { margin: 24px 0 16px; }
+:root .customerPortal.customerPortal .productGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; max-width: 1080px; }
+:root .customerPortal.customerPortal .productCard { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 18px; border: 1px solid var(--rd-line); border-radius: 14px; background: var(--rd-surface); }
+:root .customerPortal.customerPortal .productCard h2 { margin: 0; font-size: 15px; line-height: 1.4; }
+:root .customerPortal.customerPortal .productPrice { margin: 0; font-size: 18px; font-weight: 700; color: var(--rd-ink); font-variant-numeric: tabular-nums; }
+:root .customerPortal.customerPortal .productDescription { margin: 0; font-size: 13px; line-height: 1.5; color: var(--rd-muted); }
+:root .customerPortal.customerPortal .productActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 6px; }
+:root .customerPortal.customerPortal .productActions :is(button, a) { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 1px solid var(--rd-line-strong); border-radius: 8px; background: var(--rd-surface); color: var(--rd-ink); font: inherit; font-size: 13px; font-weight: 550; text-decoration: none; cursor: pointer; }
+:root .customerPortal.customerPortal .productActions button { border-color: var(--rd-accent); color: var(--rd-accent); }
+:root .customerPortal.customerPortal .productActions :is(button, a):hover { background: var(--rd-sunken); }
+/* Six items on the phone tab bar: keep each label on one line. */
+@media (max-width: 700px) { :root .customerPortal.customerPortal .portalMobileNav button { white-space: nowrap; font-size: 10.5px; padding-left: 2px; padding-right: 2px; } }
