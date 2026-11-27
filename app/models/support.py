@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, JSON, String, Text
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
@@ -96,6 +96,8 @@ class Message(Base):
     citations: Mapped[list | None] = mapped_column(JSON, nullable=True)
     tool_trace: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     reply_to_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Telegram inline keyboard for bot replies: [[{"text": ..., "data": ...}], ...]; ignored on the website.
+    buttons: Mapped[list | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     conversation: Mapped[Conversation] = relationship(
         back_populates="messages", foreign_keys=[conversation_id])
@@ -159,6 +161,26 @@ class ConversationEvent(Base):
     kind: Mapped[str] = mapped_column(String(32))
     actor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+
+PRODUCT_CATEGORIES = ('phone', 'laptop', 'tablet', 'watch', 'accessory', 'other')
+
+class Product(Base):
+    """Store catalogue managed by staff; the Telegram /products command lists active ones."""
+    __tablename__ = "products"
+    __table_args__ = (
+        Index('ix_products_category_name', 'category', 'name'),
+        CheckConstraint("category IN ('phone', 'laptop', 'tablet', 'watch', 'accessory', 'other')", name="ck_products_category"),
+    )
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(160))
+    category: Mapped[str] = mapped_column(String(16))
+    price: Mapped[int | None] = mapped_column(Integer, nullable=True)  # VND; None = liên hệ
+    in_stock: Mapped[bool] = mapped_column(Boolean, default=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)  # hidden from customers when False
+    url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
 
 class TelegramCursor(Base):
     __tablename__ = "telegram_cursors"

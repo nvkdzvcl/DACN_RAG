@@ -13,7 +13,7 @@ import AuthLayout, { AuthInput } from './AuthLayout';
 import { ThemeProvider, ThemeToggle, useTheme } from './Theme';
 import { useNavigation } from './navigation';
 import { clearDrafts, useDrafts } from './drafts';
-import { Mail } from 'lucide-react';
+import { Mail, ShoppingBag } from 'lucide-react';
 import './redesign-staff.css';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
@@ -22,7 +22,7 @@ const statuses = conversationStatuses;
 const priorities = { normal: 'Bình thường', high: 'Cao', urgent: 'Khẩn cấp', low: 'Thấp' };
 const slaStatuses = { on_track: 'Trong hạn', overdue: 'Quá hạn chờ phản hồi', met: 'Đã phản hồi đúng hạn', breached: 'Đã phản hồi trễ', cancelled: 'Kết thúc trước phản hồi', none: 'Chưa có SLA' };
 const senders = { customer: 'Khách hàng', ai: 'Trợ lý AI', assistant: 'Trợ lý AI', agent: 'Nhân viên', system: 'Hệ thống' };
-const pages = [[LayoutDashboard, 'Tổng quan', 'overview'], [Inbox, 'Hội thoại', 'inbox'], [UserRound, 'Khách hàng', 'customers'], [Package, 'Đơn hàng', 'orders'], [BookOpen, 'Kho tri thức', 'knowledge'], [BarChart3, 'Phân tích', 'analytics'], [Settings, 'Cài đặt', 'settings']];
+const pages = [[LayoutDashboard, 'Tổng quan', 'overview'], [Inbox, 'Hội thoại', 'inbox'], [UserRound, 'Khách hàng', 'customers'], [Package, 'Đơn hàng', 'orders'], [ShoppingBag, 'Sản phẩm', 'products'], [BookOpen, 'Kho tri thức', 'knowledge'], [BarChart3, 'Phân tích', 'analytics'], [Settings, 'Cài đặt', 'settings']];
 const channelName = channel => channelNames[channel] || channel;
 const nameOf = c => c.customer_name || c.customer_id;
 const initials = name => name.trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();

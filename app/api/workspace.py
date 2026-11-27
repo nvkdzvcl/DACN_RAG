@@ -14,7 +14,9 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import hash_password, public_user, require_admin, require_staff, token_hash, verify_password
 from app.db.session import get_db
-from app.models.support import AuthSession, Conversation, Customer, CustomerAccount, KnowledgeDocument, Message, Order, OrderAccess, Ticket, User
+from app.models.support import (PRODUCT_CATEGORIES, AuthSession, Conversation, Customer, CustomerAccount, KnowledgeDocument, Message,
+                                Order, OrderAccess, Product, Ticket, User, now_utc)
+from app.services.products import product_data
 from app.services.sla_service import RESPONSE_MINUTES, ticket_slas, utc
 from app.services import insights
 from app.telegram import telegram_status
@@ -84,6 +86,25 @@ def new_order_id(db):
     raise HTTPException(503, 'Không tạo được mã đơn mới. Vui lòng thử lại.')
 
 
+ProductCategory = Literal[PRODUCT_CATEGORIES]
+
+
+class ProductFields(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    name: str = Field(min_length=1, max_length=160)
+    category: ProductCategory
+    price: int | None = Field(default=None, ge=0, le=10_000_000_000)
+    in_stock: bool = True
+    active: bool = True
+    url: str | None = Field(default=None, max_length=500, pattern=r'^https://[^\s]+$')
+    description: str | None = Field(default=None, max_length=500)
+
+    @field_validator('url', 'description', mode='before')
+    @classmethod
+    def empty_text(cls, value):
+        return None if isinstance(value, str) and not value.strip() else value
+
+
 class PasswordChange(BaseModel):
     model_config = ConfigDict(extra='forbid')
     current_password: str = Field(min_length=1, max_length=128)
@@ -150,6 +171,40 @@ def edit_customer(customer_id: str, payload: CustomerEdit, db: Session = Depends
         raise HTTPException(409, 'Khách hàng đã thay đổi hoặc không còn tồn tại. Tải lại trước khi sửa.')
     db.commit()
     return customer_data(db.get(Customer, customer_id))
+
+
+@router.get('/products')
+def products(q: str = Query('', max_length=160), category: str | None = Query(None, max_length=16),
+             offset: int = Query(0, ge=0), limit: int = Query(25, ge=1, le=100), db: Session = Depends(get_db)):
+    query = db.query(Product)
+    if q.strip():
+        query = query.filter(Product.name.contains(q.strip(), autoescape=True))
+    if category:
+        if category not in PRODUCT_CATEGORIES:
+            raise HTTPException(422, 'Nhóm sản phẩm không hợp lệ.')
+        query = query.filter(Product.category == category)
+    return {'total': query.count(), 'categories': list(PRODUCT_CATEGORIES),
+            'items': [product_data(p) for p in query.order_by(Product.category, Product.name).offset(offset).limit(limit)]}
+
+
+@router.post('/products', status_code=201, dependencies=[Depends(require_admin)])
+def add_product(payload: ProductFields, db: Session = Depends(get_db)):
+    product = Product(id=str(uuid4()), **payload.model_dump())
+    db.add(product)
+    db.commit()
+    return product_data(product)
+
+
+@router.patch('/products/{product_id}', dependencies=[Depends(require_admin)])
+def edit_product(product_id: str, payload: ProductFields, db: Session = Depends(get_db)):
+    product = db.get(Product, product_id)
+    if product is None:
+        raise HTTPException(404, 'Không tìm thấy sản phẩm.')
+    for key, value in payload.model_dump().items():
+        setattr(product, key, value)
+    product.updated_at = now_utc()
+    db.commit()
+    return product_data(product)
 
 
 @router.get('/orders')

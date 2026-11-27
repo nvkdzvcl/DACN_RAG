@@ -77,3 +77,32 @@ def queue_handoff(db, conversation):
     if notify:
         db.add(Message(id=str(uuid4()), conversation_id=conversation.id, sender_type='system',
                        content='Đã chuyển yêu cầu cho nhân viên. Bạn có thể để lại thêm thông tin.'))
+
+
+def waiting_info(db, conversation):
+    """While a handoff waits for staff: when it was requested and the first-response deadline (SLA)."""
+    from app.models.support import Ticket
+    from app.services.sla_service import ticket_slas
+    if conversation is None or conversation.status != 'handoff_requested':
+        return None
+    ticket = db.query(Ticket).filter(Ticket.conversation_id == conversation.id, Ticket.status == 'open').order_by(Ticket.created_at.desc()).first()
+    if ticket is None:
+        return None
+    sla = ticket_slas(db, [conversation.id]).get(ticket.id) or {}
+    return {'requested_at': ticket.created_at, 'due_at': sla.get('due_at'), 'can_cancel': conversation.assigned_agent_id is None}
+
+
+def cancel_waiting(db, conversation_id):
+    """Withdraw a handoff nobody has accepted: ticket closed (ended before a reply), AI answers again.
+    Returns False when staff already accepted or nothing is waiting. Caller commits."""
+    from uuid import uuid4
+    from sqlalchemy import update
+    from app.models.support import Conversation, ConversationEvent
+    from app.services.ticket_service import CANCELLED_BY_CUSTOMER, complete_tickets
+    reopened = db.execute(update(Conversation).where(Conversation.id == conversation_id,
+        Conversation.status == 'handoff_requested', Conversation.assigned_agent_id.is_(None)).values(status='open', priority='normal'))
+    if reopened.rowcount != 1:
+        return False
+    complete_tickets(db, conversation_id, 'closed', note=CANCELLED_BY_CUSTOMER)
+    db.add(ConversationEvent(id=str(uuid4()), conversation_id=conversation_id, kind='handoff_cancelled'))
+    return True

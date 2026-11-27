@@ -17,7 +17,7 @@ router = APIRouter(prefix='/api/v1', tags=['operations'])
 
 
 def schema_ready(versions):
-    return bool(versions) and versions[0] == 1 and versions == list(range(1, versions[-1] + 1)) and versions[-1] <= 12
+    return bool(versions) and versions[0] == 1 and versions == list(range(1, versions[-1] + 1)) and versions[-1] <= 13
 
 
 @router.get('/ready')

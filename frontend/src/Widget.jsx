@@ -1,12 +1,13 @@
 import { ThemeToggle } from './Theme';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RichText } from './RichText';
-import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, History, Search as SearchIcon, X, Headphones, Headset, ArrowDown, Info, Package, Check, ChevronDown } from 'lucide-react';
+import { Bot, Send, UserRound, MessageSquare, PackageSearch, BookOpen, ArrowRight, History, Search as SearchIcon, X, Headphones, Headset, ArrowDown, Info, Package, Check, ChevronDown, ShoppingBag } from 'lucide-react';
 
 import './widget.css';
 import MessageInput from './MessageInput';
 import './portal.css';
 import { CustomerHistory, CustomerProfile } from './CustomerAccount';
+import CustomerProducts from './CustomerProducts';
 import AuthLayout, { AuthInput } from './AuthLayout';
 import CustomerEmail, { takeEmailLink } from './CustomerEmail';
 import { clearDrafts, useDrafts } from './drafts';
@@ -423,7 +424,7 @@ export default function Widget() {
     {authMode === 'register' && <p className="authHelp">Sau khi tạo tài khoản, nhập mã 6 số gửi về email để hoàn tất đăng ký.</p>}
     {toast && <div className="successToast" role="status"><span aria-hidden="true">✓</span>{toast}</div>}
   </AuthLayout>;
-  const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
+  const pages = [[MessageSquare, 'Tin nhắn', 'messages'], [PackageSearch, 'Tra đơn', 'orders'], [ShoppingBag, 'Sản phẩm', 'products'], [BookOpen, 'Hỏi đáp', 'faq'], ...(session?.account ? [[History, 'Lịch sử', 'history'], [UserRound, 'Tài khoản', 'account']] : [])];
   const activeAccess = session?.order_access?.filter(access => access.expires_at > Date.now() / 1000) || [];
   return <div className={`customerPortal ${view === 'account' ? 'accountLayout' : ''}`}>
     <div className="portalSide"><div className="portalBrand"><span><Headphones size={19} aria-hidden="true" /></span><div><b>RAG Support</b><small>Hỗ trợ khách hàng</small></div></div>
@@ -431,7 +432,7 @@ export default function Widget() {
       {session?.account && <div className="portalSideFoot"><button type="button" className="portalSideAccount" onClick={() => setView('account')} aria-label={`Tài khoản: ${session.display_name || session.account.email}`}><span className="portalAvatar" aria-hidden="true">{initials(session.display_name || session.account.email)}</span><span><b>{session.display_name || session.account.email}</b><small>{session.account.email}</small></span></button><button className="portalLogout" onClick={logout} disabled={busy || handoffBusy || historyLoading}>Đăng xuất</button></div>}
     </div>
     <div className="portalMain" role="main"><nav className="portalMobileNav" aria-label="Dịch vụ khách hàng">{pages.map(([Icon, label, key]) => <button key={key} aria-current={view === key ? 'page' : undefined} onClick={() => setView(key)}><Icon size={16} />{label}</button>)}</nav>
-      {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onOpenChat={() => setView('messages')} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} displayName={session.display_name} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => { clearIdentity(''); setToast('Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.'); }} onLogout={logout} logoutDisabled={busy || handoffBusy || historyLoading} /> : view === 'orders' ? <section className="portalPage ordersPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><div><h1>Tra cứu đơn hàng</h1><p>{session?.account ? 'Đơn gắn với tài khoản của bạn hiện sẵn bên dưới. Đơn khác cần mã truy cập cửa hàng cấp.' : 'Xem trạng thái và mã vận đơn bằng mã truy cập cửa hàng cấp cho bạn.'}</p></div></div>
+      {view === 'messages' ? chat : view === 'history' && session?.account ? <CustomerHistory key={session.account.email} request={request} currentId={session.conversation_id} onOpenChat={() => setView('messages')} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} /> : view === 'account' && session?.account ? <CustomerProfile account={session.account} displayName={session.display_name} request={request} onExpired={() => clearIdentity('Phiên đăng nhập đã hết hạn.')} onPasswordChanged={() => { clearIdentity(''); setToast('Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.'); }} onLogout={logout} logoutDisabled={busy || handoffBusy || historyLoading} /> : view === 'products' ? <CustomerProducts request={request} onAsk={askSuggestion} /> : view === 'orders' ? <section className="portalPage ordersPage" aria-label="Tra cứu đơn hàng"><div className="portalPageHead"><div><h1>Tra cứu đơn hàng</h1><p>{session?.account ? 'Đơn gắn với tài khoản của bạn hiện sẵn bên dưới. Đơn khác cần mã truy cập cửa hàng cấp.' : 'Xem trạng thái và mã vận đơn bằng mã truy cập cửa hàng cấp cho bạn.'}</p></div></div>
         {!session ? <div className="portalEmpty"><p>Bắt đầu phiên trò chuyện để tra cứu đơn.</p><button onClick={() => setView('messages')}>Bắt đầu trò chuyện <ArrowRight size={16} /></button></div> : <div className="orderLayout"><div className="orderSide">
           {myOrders?.length > 0 && <div className="portalAccess myOrders"><h2>Đơn của bạn</h2>{myOrders.map(order => <button key={order.order_id} aria-pressed={orderResult?.order_id === order.order_id} onClick={() => { setOrderId(order.order_id); inspectOrder(order.order_id, ''); }}><Package size={16} aria-hidden="true" /><b>{order.order_id}</b><span className={`statusPill order-${order.status}`}>{orderStatuses[order.status] || order.status}</span></button>)}</div>}
           {myOrders?.length > 0 && <button type="button" className="codeToggle" aria-expanded={codeOpen} aria-controls="orderCodeForm" onClick={() => setCodeOpen(open => !open)}>{codeOpen ? 'Thu gọn tra đơn bằng mã' : 'Đơn không có trong danh sách? Tra bằng mã truy cập'}<ChevronDown size={16} aria-hidden="true" /></button>}

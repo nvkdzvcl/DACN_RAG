@@ -16,11 +16,13 @@ from app.models.support import (Conversation, Customer, Message, TelegramCursor,
                                 TelegramDelivery, TelegramPeer, TelegramUpdate, now_utc)
 from app.services.handoff_service import queue_handoff
 from app.services.message_service import process_message
-from app.services.telegram_link import command_reply, link_peer, unlink_peer
+from app.services.handoff_service import cancel_waiting
+from app.services.telegram_commands import BOT_COMMANDS, callback_content, command_reply
+from app.services.telegram_link import link_peer, unlink_peer
+from app.services.ticket_service import complete_tickets
 
 _status = {'name': 'Telegram', 'status': 'not_connected', 'detail': 'Chưa bật kết nối.'}
 _bot = {'username': None}
-COMMANDS = {'/start', '/link', '/unlink', '/orders'}
 
 
 class TelegramError(Exception):
@@ -64,6 +66,9 @@ def identifier(value):
 
 
 def private_message(item):
+    callback = item.get('callback_query')
+    if isinstance(callback, dict):
+        return button_press(callback)
     message = item.get('message')
     if not isinstance(message, dict) or not identifier(message.get('message_id')):
         return None
@@ -78,12 +83,33 @@ def private_message(item):
         content = 'Khách gửi nội dung không phải văn bản. Tôi cần gặp nhân viên.'
     elif len(content) > 4000:
         content = content[:3800] + '\n[Nội dung dài đã rút gọn. Tôi cần gặp nhân viên.]'
-    content = content.strip()
-    if content.split()[0].lower() == '/human':
-        content = 'Tôi cần gặp nhân viên.'
+    return str(chat['id']), sender_name(sender), normalized(content.strip())
+
+
+def normalized(content):
+    # "/human" and "/human@bot" both mean a handoff request; "/cmd@bot" is the same command.
+    first = content.split()[0].lower()
+    if '@' in first and first.startswith('/'):
+        content = first.split('@')[0] + content[len(first):]
+    return 'Tôi cần gặp nhân viên.' if content.split()[0].lower() == '/human' else content
+
+
+def sender_name(sender):
     name = sender.get('first_name')
-    name = name.strip()[:80] if isinstance(name, str) and name.strip() else 'Khách Telegram'
-    return str(chat['id']), name, content
+    return name.strip()[:80] if isinstance(name, str) and name.strip() else 'Khách Telegram'
+
+
+def button_press(callback):
+    """An inline button in a private chat: only our own callback data is accepted."""
+    message, sender = callback.get('message'), callback.get('from')
+    if not isinstance(message, dict) or not isinstance(sender, dict) or not isinstance(message.get('chat'), dict):
+        return None
+    chat = message['chat']
+    if (chat.get('type') != 'private' or not identifier(chat.get('id')) or chat['id'] != sender.get('id')
+            or sender.get('is_bot') is not False):
+        return None
+    content = callback_content(callback.get('data'))
+    return (str(chat['id']), sender_name(sender), normalized(content)) if content else None
 
 
 def persist_updates(db, bot_id, items):
@@ -132,6 +158,17 @@ def process_next(db, bot_id):
             incoming.content = '/link ' + link_peer(db, peer, words[1][5:])
         elif words[0].lower() == '/unlink':
             incoming.content = '/unlink ' + unlink_peer(db, peer)
+        elif words[0].lower() == '/new':
+            current = db.get(Conversation, peer.conversation_id) if peer.conversation_id else None
+            if current is not None and current.status != 'closed':
+                db.execute(update(Conversation).where(Conversation.id == current.id).values(status='closed'))
+                complete_tickets(db, current.id, 'closed')
+            peer.conversation_id = None
+            incoming.content = '/new ok'
+        elif words[0].lower() == '/cancel':
+            current = db.get(Conversation, peer.conversation_id) if peer.conversation_id else None
+            outcome = 'ok' if current and cancel_waiting(db, current.id) else 'assigned' if current and current.status == 'assigned' else 'none'
+            incoming.content = '/cancel ' + outcome
     conversation = db.get(Conversation, incoming.conversation_id or peer.conversation_id) if incoming.conversation_id or peer.conversation_id else None
     if incoming.conversation_id and conversation.status == 'closed':
         if db.query(Message).filter_by(conversation_id=conversation.id, external_message_id=incoming.id).first():
@@ -149,7 +186,7 @@ def process_next(db, bot_id):
     incoming.state = 'processing'
     update_key, content, conversation_id = incoming.id, incoming.content, conversation.id
     db.commit()
-    if content.split()[0].lower() in COMMANDS:
+    if content.split()[0].startswith('/'):
         db.execute(update(Conversation).where(Conversation.id == conversation_id).values(status=Conversation.status))
         db.refresh(conversation)
         if conversation.status == 'closed':
@@ -157,14 +194,14 @@ def process_next(db, bot_id):
             db.commit()
             return True
         if not db.query(Message).filter_by(conversation_id=conversation_id, external_message_id=update_key).first():
-            shown = '/start (kết nối tài khoản web)' if content.startswith('/link') else content.split()[0]
+            shown = '/start (kết nối tài khoản web)' if content.startswith('/link') else ' '.join(content.split()[:2]) if content.startswith('/products') else content.split()[0]
             message = Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='customer',
                               content=shown, external_message_id=update_key)
             db.add(message)
             db.flush()
             conversation.last_customer_message_id = message.id
-            db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system',
-                content=command_reply(db, db.get(TelegramPeer, peer.id), content)))
+            reply, buttons = command_reply(db, db.get(TelegramPeer, peer.id), content)
+            db.add(Message(id=str(uuid4()), conversation_id=conversation_id, sender_type='system', content=reply, buttons=buttons))
         result = {}
     else:
         result = process_message(db, conversation, content, update_key)
@@ -231,12 +268,14 @@ def send_outgoing(db, bot_id, token):
             delivery.state, delivery.error = 'skipped', 'stale_ai'
             db.commit()
             continue
-        body = outgoing_text(message)
+        body, buttons = outgoing_text(message), message.buttons
         db.commit()
         # No SQL transaction during network I/O; a timed-out send may have reached Telegram.
         try:
-            result = telegram_call(token, 'sendMessage', {'chat_id': chat_id, 'text': body,
-                'link_preview_options': {'is_disabled': True}})
+            payload = {'chat_id': chat_id, 'text': body, 'link_preview_options': {'is_disabled': True}}
+            if buttons:
+                payload['reply_markup'] = {'inline_keyboard': [[{'text': b['text'], 'callback_data': b['data']} for b in row] for row in buttons]}
+            result = telegram_call(token, 'sendMessage', payload)
             if not isinstance(result, dict) or not identifier(result.get('message_id')):
                 raise TelegramError('telegram_invalid_send_result', True)
             state, error, external_id, sent_at = 'sent', None, str(result['message_id']), now_utc()
@@ -264,6 +303,24 @@ def recover_sends(db, bot_id):
     db.commit()
 
 
+def register_commands(token):
+    """The "/" menu customers see in Telegram; best effort, the bot works without it."""
+    try:
+        telegram_call(token, 'setMyCommands', {'commands': [{'command': c, 'description': d} for c, d in BOT_COMMANDS]})
+    except TelegramError as exc:
+        logging.getLogger(__name__).warning('Telegram setMyCommands: %s', exc)
+
+
+def acknowledge_buttons(token, items):
+    for item in items if isinstance(items, list) else []:
+        callback = item.get('callback_query') if isinstance(item, dict) else None
+        if isinstance(callback, dict) and isinstance(callback.get('id'), str):
+            try:
+                telegram_call(token, 'answerCallbackQuery', {'callback_query_id': callback['id']})
+            except TelegramError:
+                pass  # only the button spinner; the press itself is already stored
+
+
 def run_telegram(stop, token):
     try:
         while not stop.is_set():
@@ -289,6 +346,7 @@ def run_telegram(stop, token):
             return
         if stop.is_set():
             return
+        register_commands(token)
         with SessionLocal() as db:
             recover_sends(db, bot_id)
         while not stop.is_set():
@@ -300,8 +358,10 @@ def run_telegram(stop, token):
                     db.rollback()
                     poll_error = None
                     try:
-                        items = telegram_call(token, 'getUpdates', {'offset': offset, 'timeout': 2, 'limit': 100, 'allowed_updates': ['message']})
+                        items = telegram_call(token, 'getUpdates', {'offset': offset, 'timeout': 2, 'limit': 100,
+                                                                    'allowed_updates': ['message', 'callback_query']})
                         persist_updates(db, bot_id, items)
+                        acknowledge_buttons(token, items)
                     except TelegramError as exc:
                         db.rollback()
                         poll_error = exc

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 const defaults = { page: 'inbox', selectedId: null, customerFilter: '', assignment: 'all', status: '',
   priority: '', sla: '', search: '', offset: 0, unreadOnly: false, mobileConversation: false,
   recordSearch: '', recordStatus: '', recordOffset: 0, recordId: null };
-const choices = { page: ['inbox', 'overview', 'customers', 'orders', 'knowledge', 'analytics', 'settings'],
+const choices = { page: ['inbox', 'overview', 'customers', 'orders', 'products', 'knowledge', 'analytics', 'settings'],
   assignment: ['all', 'mine', 'unassigned'], status: ['', 'open', 'handoff_requested', 'assigned', 'resolved', 'closed'],
   priority: ['', 'normal', 'high', 'urgent', 'low'], sla: ['', 'on_track', 'overdue', 'met', 'breached', 'cancelled', 'none'],
   recordStatus: ['', 'processing', 'paid', 'shipping', 'shipped', 'delivered', 'cancelled'] };

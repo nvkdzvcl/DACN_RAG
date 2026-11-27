@@ -148,3 +148,8 @@ def migrate(engine):
         # v12: conversation_notes and conversation_events (created by create_all above; additive).
         if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 12")).first():
             connection.execute(text("INSERT INTO schema_migrations (version) VALUES (12)"))
+        # v13: products (create_all) and messages.buttons for Telegram inline keyboards (additive).
+        if "buttons" not in {column["name"] for column in inspect(connection).get_columns("messages")}:
+            connection.execute(text("ALTER TABLE messages ADD COLUMN buttons JSON"))
+        if not connection.execute(text("SELECT version FROM schema_migrations WHERE version = 13")).first():
+            connection.execute(text("INSERT INTO schema_migrations (version) VALUES (13)"))

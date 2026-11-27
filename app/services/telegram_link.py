@@ -11,18 +11,11 @@ import time
 from uuid import uuid4
 
 from app.core.auth import token_hash
-from app.models.support import Customer, CustomerAccount, CustomerEmailToken, Order, TelegramPeer
-from app.services.order_service import ORDER_STATUS_LABELS
+from app.models.support import Customer, CustomerAccount, CustomerEmailToken, TelegramPeer
 
 LINK_PURPOSE = 'telegram_link'
 LINK_SECONDS = 600
 CODE = re.compile(r'[A-Za-z0-9_-]{20,58}')
-HELP = ('Bạn có thể hỏi chính sách cửa hàng bằng văn bản.\n'
-        '/orders – xem đơn hàng của bạn (cần kết nối tài khoản web)\n'
-        '/human – gặp nhân viên\n'
-        '/unlink – gỡ kết nối tài khoản web\n'
-        'Không gửi mật khẩu hoặc mã truy cập đơn vào chat.')
-
 
 def issue_link_code(db, account):
     """A new code replaces any unused one for this account."""
@@ -82,30 +75,3 @@ def unlink_peer(db, peer):
 def masked(email):
     name, _, domain = email.partition('@')
     return (name[:2] + '***@' + domain) if domain else '***'
-
-
-def command_reply(db, peer, content):
-    """The bot's answer to a stored command line (see telegram.process_next)."""
-    words = content.split()
-    command, result = words[0].lower(), (words[1] if len(words) > 1 else '')
-    account = linked_account(db, peer)
-    if command == '/link':
-        if result == 'ok' and account:
-            return f'Đã kết nối Telegram với tài khoản {masked(account.email)}. Gửi /orders để xem đơn của bạn.'
-        if result == 'unverified':
-            return 'Tài khoản web chưa xác minh email nên chưa kết nối được. Hãy xác minh email rồi lấy link mới ở trang Tài khoản.'
-        return 'Link kết nối không hợp lệ hoặc đã hết hạn. Mở trang Tài khoản trên web, bấm "Kết nối Telegram" để lấy link mới.'
-    if command == '/unlink':
-        return ('Đã gỡ kết nối với tài khoản web. Đơn hàng của tài khoản không còn xem được ở đây.' if result == 'ok'
-                else 'Telegram này chưa kết nối với tài khoản web nào.')
-    if command == '/orders':
-        if account is None:
-            return ('Telegram này chưa kết nối với tài khoản web. Đăng nhập trang hỗ trợ, mở Tài khoản và bấm '
-                    '"Kết nối Telegram", rồi mở link trên điện thoại.')
-        orders = db.query(Order).filter(Order.customer_id == peer.customer_id).order_by(Order.id.desc()).limit(10).all()
-        if not orders:
-            return 'Tài khoản của bạn chưa có đơn hàng nào được gắn. Nếu bạn đã đặt hàng, gửi /human để nhân viên kiểm tra.'
-        lines = [f'• {o.id} · {ORDER_STATUS_LABELS.get(o.status, o.status)}' + (f' · Vận đơn {o.tracking_code}' if o.tracking_code else '')
-                 for o in orders]
-        return 'Đơn hàng của bạn:\n' + '\n'.join(lines) + '\n\nGửi mã đơn kèm câu hỏi để hỏi chi tiết, ví dụ: "' + orders[0].id + ' bao giờ giao?"'
-    return HELP
